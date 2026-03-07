@@ -112,6 +112,7 @@ model User {
   createdWorkspace Workspace[]
   customerPayment  CustomerPayment?
   domains          Domain[]
+  activities       Activity[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -145,6 +146,7 @@ model Workspace {
   pipelines Pipeline[]
   deals Deal[]
   conversations Conversation[]
+  activities    Activity[]
 
   @@unique([workspaceCode, inviteCode])
   @@map("workspaces")
@@ -165,6 +167,7 @@ model Contact {
   workspace     Workspace      @relation(fields: [workspaceId], references: [id])
   company       Company?       @relation(fields: [companyId], references: [id])
   deals         Deal[]
+  activities    Activity[]
   conversations Conversation[]
 
   @@map("contacts")
@@ -235,6 +238,7 @@ model Deal {
   contact   Contact?  @relation(fields: [contactId], references: [id])
   company   Company?  @relation(fields: [companyId], references: [id])
   stage     Stage     @relation(fields: [stageId], references: [id])
+  activities Activity[]
 
   @@map("deals")
 }
@@ -289,4 +293,25 @@ enum SubscriptionType {
 enum TeamRole {
   MEMBER
   OWNER
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  workspaceId String
+  contactId   String?
+  dealId      String?
+  userId      String?
+  type        String    @default("SYSTEM") // NOTE, CALL, TASK, SYSTEM, EMAIL, MEETING
+  title       String
+  content     String?   @db.Text
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  contact   Contact?  @relation(fields: [contactId], references: [id])
+  deal      Deal?     @relation(fields: [dealId], references: [id])
+  user      User?     @relation(fields: [userId], references: [id])
+
+  @@map("activities")
 }

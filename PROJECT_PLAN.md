@@ -18,14 +18,14 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 
 ## �️ Estrutura de Módulos e Funcionalidades
 
-### 1. Dashboard 🚧
+### 1. Dashboard ✅
 *Visão centralizada de métricas e performance.*
-- [ ] **Sales Dashboard:**
+- [x] **Sales Dashboard:**
     - Leads totais, Negócios abertos.
     - Taxa de conversão, Receita do pipeline.
     - Vendas mensais.
     - Gráficos visuais de vendas e funil.
-- [ ] **Activity Feed:** Resumo de atividades recentes.
+- [x] **Activity Feed:** Resumo de atividades recentes.
 
 ### 2. CRM (Contacts, Companies, Deals, Pipeline) ✅
 *Núcleo de gestão de relacionamento.*

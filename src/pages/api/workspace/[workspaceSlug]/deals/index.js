@@ -1,6 +1,7 @@
 import { validateSession } from '@/config/api-validation';
 import { createDeal, getDeals, updateDeal } from '@/prisma/services/deal';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { createActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -28,7 +29,7 @@ const handler = async (req, res) => {
     case 'POST':
       try {
         const { name, stageId, amount, closeDate, priority, contactId, companyId } = req.body;
-        
+
         if (!name || !stageId) {
           return res.status(400).json({ error: { msg: 'Name and Stage are required' } });
         }
@@ -42,7 +43,13 @@ const handler = async (req, res) => {
           contactId,
           companyId
         });
-        
+
+        await createActivity(workspace.id, session.user.userId, {
+          type: 'DEAL_CREATED',
+          title: `Deal "${name}" created`,
+          dealId: deal.id,
+        });
+
         res.status(201).json({ data: { deal } });
       } catch (error) {
         console.error(error);
@@ -51,14 +58,21 @@ const handler = async (req, res) => {
       break;
 
     case 'PUT':
-        try {
-            const { id, ...data } = req.body;
-            const updatedDeal = await updateDeal(id, data);
-            res.status(200).json({ data: { deal: updatedDeal } });
-        } catch (error) {
-            res.status(500).json({ error: { msg: 'Unable to update deal' } });
-        }
-        break;
+      try {
+        const { id, ...data } = req.body;
+        const updatedDeal = await updateDeal(id, data);
+
+        await createActivity(workspace.id, session.user.userId, {
+          type: 'DEAL_UPDATED',
+          title: `Deal updated`,
+          dealId: id,
+        });
+
+        res.status(200).json({ data: { deal: updatedDeal } });
+      } catch (error) {
+        res.status(500).json({ error: { msg: 'Unable to update deal' } });
+      }
+      break;
 
     default:
       res.status(405).json({ error: { msg: `${method} method unsupported` } });

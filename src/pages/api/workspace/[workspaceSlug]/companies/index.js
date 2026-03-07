@@ -28,7 +28,7 @@ const handler = async (req, res) => {
     case 'POST':
       try {
         const { name, website, industry } = req.body;
-        
+
         // Basic validation
         if (!name) {
           return res.status(400).json({ error: { msg: 'Name is required' } });
@@ -39,6 +39,12 @@ const handler = async (req, res) => {
           website,
           industry,
         });
+
+        await createActivity(workspace.id, session.user.userId, {
+          type: 'COMPANY_CREATED',
+          title: `Company "${name}" created`,
+        });
+
         res.status(201).json({ data: { company } });
       } catch (error) {
         console.error(error);

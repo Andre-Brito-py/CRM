@@ -28,7 +28,7 @@ const handler = async (req, res) => {
     case 'POST':
       try {
         const { name, email, phone, jobTitle, companyId } = req.body;
-        
+
         // Basic validation
         if (!name) {
           return res.status(400).json({ error: { msg: 'Name is required' } });
@@ -41,6 +41,13 @@ const handler = async (req, res) => {
           jobTitle,
           companyId,
         });
+
+        await createActivity(workspace.id, session.user.userId, {
+          type: 'CONTACT_CREATED',
+          title: `Contact "${name}" created`,
+          contactId: contact.id,
+        });
+
         res.status(201).json({ data: { contact } });
       } catch (error) {
         console.error(error);
