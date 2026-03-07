@@ -24,7 +24,7 @@ const Settings = ({ user }) => {
   const [verifyEmail, setVerifyEmail] = useState('');
   const validName = name.length > 0 && name.length <= 32;
   const validEmail = isEmail(email);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const verifiedEmail = verifyEmail === email;
 
   const copyToClipboard = () => toast.success('Copied to clipboard!');
@@ -176,6 +176,25 @@ const Settings = ({ user }) => {
                 <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-blue-600" />
               </CopyToClipboard>
             </div>
+          </Card.Body>
+        </Card>
+        <Card>
+          <Card.Body
+            title={t("settings.language.label")}
+            subtitle={t("settings.language.description")}
+          >
+            <select
+              className="px-3 py-2 border rounded md:w-1/2"
+              onChange={(e) => {
+                const lang = e.target.value;
+                i18n.changeLanguage(lang);
+                localStorage.setItem('language', lang);
+              }}
+              value={i18n.language}
+            >
+              <option value="en">English</option>
+              <option value="pt">Português</option>
+            </select>
           </Card.Body>
         </Card>
         <Card danger>

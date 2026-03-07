@@ -13,18 +13,23 @@ import swrConfig from '@/config/swr/index';
 import WorkspaceProvider from '@/providers/workspace';
 
 import '@/styles/globals.css';
-let rawdata = require('../messages/en.json');
+let enData = require('../messages/en.json');
+let ptData = require('../messages/pt.json');
 
-let langCode = "en"
-let langObject = {}
-langObject[langCode] = {}
+const resources = {
+  en: {
+    translation: enData
+  },
+  pt: {
+    translation: ptData
+  }
+};
 
-langObject[langCode].translation = rawdata
 i18n
   .use(initReactI18next)
   .init({
-    resources: langObject,
-    lng: "en",
+    resources,
+    lng: "en", // Default language
     fallbackLng: "en",
     interpolation: {
       escapeValue: false
@@ -58,6 +63,14 @@ const App = ({ Component, pageProps }) => {
       router.events.off('routeChangeComplete', handleRouteChange);
     };
   }, [router.events]);
+
+  // Load saved language preference
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language');
+    if (savedLanguage) {
+      i18n.changeLanguage(savedLanguage);
+    }
+  }, []);
 
   return (
     <SessionProvider session={pageProps.session}>

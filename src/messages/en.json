@@ -91,5 +91,8 @@
     "settings.account.deactive.message": "This action is not reversible, so please continue with caution",
     "settings.account.action.deactive.label": "Deactivate Personal Account",
     "setting.account.action.deactivate.message": "Your account will be deleted, along with all of its Workspace contents.",
-    "settings.profile.name.validation.message": "Please use 32 characters at maximum"
+    "settings.profile.name.validation.message": "Please use 32 characters at maximum",
+    "settings.language.label": "Language",
+    "settings.language.description": "Select your preferred language",
+    "settings.language.select": "Select language"
 }

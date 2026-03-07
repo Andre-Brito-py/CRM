@@ -166,6 +166,17 @@ const Billing = ({ invoices, products }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
+  
+  // Se não tiver chave do Stripe configurada, retornar props vazias para evitar erro
+  if (!process.env.PAYMENTS_SECRET_KEY) {
+    return {
+      props: {
+        invoices: [],
+        products: [],
+      },
+    };
+  }
+
   const customerPayment = await getPayment(session.user?.email);
   const [invoices, products] = await Promise.all([
     getInvoices(customerPayment?.paymentId),

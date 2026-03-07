@@ -9,7 +9,12 @@ const api = async (url, options) => {
     },
     ...opts,
   });
-  const result = await response.json();
+  let result;
+  try {
+    result = await response.json();
+  } catch (e) {
+    result = { error: { msg: 'Invalid JSON response from server', debug: e.message } };
+  }
   return { status: response.status, ...result, url };
 };
 

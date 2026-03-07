@@ -140,9 +140,138 @@ model Workspace {
   creator User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
   members Member[]
   domains Domain[]
+  contacts Contact[]
+  companies Company[]
+  pipelines Pipeline[]
+  deals Deal[]
+  conversations Conversation[]
 
   @@unique([workspaceCode, inviteCode])
   @@map("workspaces")
+}
+
+model Contact {
+  id          String    @id @default(cuid())
+  workspaceId String
+  companyId   String?
+  name        String
+  email       String?
+  phone       String?
+  jobTitle    String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id])
+  company       Company?       @relation(fields: [companyId], references: [id])
+  deals         Deal[]
+  conversations Conversation[]
+
+  @@map("contacts")
+}
+
+model Company {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  website     String?
+  industry    String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  contacts  Contact[]
+  deals     Deal[]
+
+  @@map("companies")
+}
+
+model Pipeline {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  stages    Stage[]
+
+  @@map("pipelines")
+}
+
+model Stage {
+  id         String    @id @default(cuid())
+  pipelineId String
+  name       String
+  order      Int
+  color      String?
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+  deletedAt  DateTime?
+
+  pipeline Pipeline @relation(fields: [pipelineId], references: [id])
+  deals    Deal[]
+
+  @@map("stages")
+}
+
+model Deal {
+  id          String    @id @default(cuid())
+  workspaceId String
+  contactId   String?
+  companyId   String?
+  stageId     String
+  name        String
+  amount      Decimal?  @db.Decimal(10, 2)
+  closeDate   DateTime?
+  priority    String?   @default("MEDIUM")
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  contact   Contact?  @relation(fields: [contactId], references: [id])
+  company   Company?  @relation(fields: [companyId], references: [id])
+  stage     Stage     @relation(fields: [stageId], references: [id])
+
+  @@map("deals")
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  workspaceId String
+  contactId   String?
+  platform    String    @default("WHATSAPP") // WHATSAPP, INSTAGRAM, etc
+  externalId  String?   // ID da conversa no provedor (ex: WaId)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  contact   Contact?  @relation(fields: [contactId], references: [id])
+  messages  Message[]
+
+  @@map("conversations")
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  direction      String // INBOUND, OUTBOUND
+  type           String // TEXT, IMAGE, DOCUMENT, TEMPLATE
+  content        String?   @db.Text
+  mediaUrl       String?
+  status         String    @default("SENT") // SENT, DELIVERED, READ, FAILED
+  externalId     String?   // ID da mensagem no provedor
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
+  deletedAt      DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+
+  @@map("messages")
 }
 
 enum InvitationStatus {

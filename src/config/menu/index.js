@@ -7,6 +7,22 @@ const menu = (workspaceId) => [
         path: `/account/${workspaceId}`,
       },
       {
+        name: 'Inbox',
+        path: `/account/${workspaceId}/inbox`,
+      },
+      {
+        name: 'Pipeline',
+        path: `/account/${workspaceId}/pipeline`,
+      },
+      {
+        name: 'Contacts',
+        path: `/account/${workspaceId}/contacts`,
+      },
+      {
+        name: 'Companies',
+        path: `/account/${workspaceId}/companies`,
+      },
+      {
         name: 'common.label.integrations',
         path: `/account/${workspaceId}/integrations`,
       },

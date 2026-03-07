@@ -1,7 +1,8 @@
 import fetcher from '@/lib/client/fetcher';
 
 const handleOnError = (error) => {
-  throw new Error(`Error: ${error}`);
+  console.error('SWR Error:', error);
+  // Do not throw here, let useSWR handle the error state
 };
 
 const swrConfig = () => ({
