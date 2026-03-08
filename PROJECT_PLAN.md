@@ -46,11 +46,11 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 ### 3. Inbox & WhatsApp (Omnichannel) 🚧
 *Gerenciamento centralizado de conversas.*
 - **Inbox Unificado:**
-    - [ ] Interface estilo Helpdesk.
-    - [ ] Visualização de conversas por contato.
+    - [x] Interface estilo Helpdesk.
+    - [x] Visualização de conversas por contato.
     - [ ] Atribuição de conversas para membros da equipe.
-    - [ ] Status de conversa (Aberta, Resolvida, Pendente).
-    - [ ] Histórico completo de mensagens.
+    - [x] Status de conversa (Aberta, Resolvida, Pendente).
+    - [x] Histórico completo de mensagens.
 - **Integração WhatsApp:**
     - [ ] Integração com API (Meta/Twilio).
     - [ ] Envio e recebimento de mensagens diretamente no CRM.
