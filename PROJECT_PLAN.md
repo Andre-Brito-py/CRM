@@ -35,7 +35,7 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
     - ✅ Formulários de Criação (Modais).
     - [ ] **Histórico de Atividades:** Timeline com mensagens, notas, chamadas e tarefas para cada contato.
     - [ ] **Tags:** Sistema de tags para segmentação.
-    - [ ] **Campos Personalizados:** Custom fields para adaptar o CRM.
+    - [ ] **Campos Personalizados:** Custom fields dinâmicos (Texto, Data, Select) armazenados via JSONB para flexibilidade No-Code.
     - [ ] **Importação:** Importação de contatos via CSV.
 - **Pipeline de Vendas:**
     - ✅ Modelagem (Pipeline, Stage, Deal).
