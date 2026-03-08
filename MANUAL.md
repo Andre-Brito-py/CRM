@@ -42,10 +42,17 @@ Gerencie as pessoas com quem você faz negócios.
 - **Listagem**: Visualize todos os seus contatos cadastrados.
 - **Adicionar Contato**: Registre nome, email e outros detalhes de novos clientes.
 
-### 3. Empresas
-Gerencie as organizações dos seus clientes.
-- **Listagem**: Visualize as empresas parceiras ou clientes.
-- **Adicionar Empresa**: Registre dados corporativos para associar a negócios e contatos.
+### 4. Dashboard (Painel de Controle)
+Uma visão geral completa do seu workspace.
+- **Stat Cards**: Métricas chave como Total de Contatos, Negócios Abertos/Fechados e Receita total.
+- **Activity Feed**: Um registro cronológico de todas as ações importantes realizadas no sistema (ex: criação de negócios, contatos, atualizações).
+- **Sales Performance**: Gráfico visual mostrando o volume de vendas (negócios ganhos) nos últimos 6 meses.
+
+### 5. Inbox (Central de Mensagens)
+Gerencie todas as suas conversas em um único lugar.
+- **Lista de Conversas**: Visualize chats ativos com contatos, com indicadores de novas mensagens e tempo desde a última interação.
+- **Janela de Chat**: Troque mensagens de texto em tempo real.
+- **Integração Futura**: Esta interface será conectada ao WhatsApp Business API para comunicação externa.
 
 ---
 
@@ -80,4 +87,4 @@ Acesse o menu de configurações para personalizar sua experiência.
 
 ---
 
-*Este manual reflete a versão atual do sistema. Novas funcionalidades como Inbox e Chat estão em desenvolvimento.*
+*Este manual reflete a versão atual do sistema, incluindo o Dashboard e Inbox (UI).*

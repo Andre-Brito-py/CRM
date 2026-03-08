@@ -12,10 +12,17 @@
 - **Configurações Personalizadas**: Domínios customizados e branding.
 
 ### 📊 CRM Completo
+- **Dashboard**: Visão geral com métricas de vendas, receitas e feed de atividades em tempo real.
 - **Gestão de Contatos**: Base centralizada de clientes e leads.
 - **Gestão de Empresas**: Organização de contas corporativas (B2B).
 - **Pipeline de Vendas Visual**: Quadro Kanban com drag-and-drop para gerenciar oportunidades.
-- **Histórico de Atividades**: Timeline detalhada de interações.
+- **Histórico de Atividades**: Timeline detalhada de interações e auditoria.
+
+### 💬 Inbox Omnichannel
+- **Central Unificada**: Gerencie conversas de diferentes canais em um só lugar.
+- **Chat em Tempo Real**: Interface ágil para troca de mensagens.
+- **Histórico Completo**: Acesso a todas as mensagens trocadas com o cliente.
+- **Integração WhatsApp**: (Em breve) Conecte seu número Business para enviar e receber mensagens.
 
 ### 🌍 Internacionalização
 - **Suporte Multi-idioma**: Interface traduzida para Português e Inglês.
@@ -69,15 +76,16 @@ O sistema estará acessível em `http://localhost:3000`.
 ---
 
 ## 🗺️ Roadmap de Desenvolvimento
-
-O projeto segue um plano de desenvolvimento estruturado:
-
-- [x] **Core CRM**: Modelagem de dados (Contatos, Empresas, Deals).
-- [x] **Pipeline Visual**: Kanban com drag-and-drop.
-- [x] **Internacionalização**: Suporte PT-BR/EN.
-- [ ] **Inbox Omnichannel**: Central de atendimento unificada.
-- [ ] **Integração WhatsApp**: Envio e recebimento de mensagens.
-- [ ] **Automação & Workflows**: Regras automáticas de vendas.
+ 
+ O projeto segue um plano de desenvolvimento estruturado:
+ 
+ - [x] **Core CRM**: Modelagem de dados (Contatos, Empresas, Deals).
+ - [x] **Pipeline Visual**: Kanban com drag-and-drop.
+ - [x] **Internacionalização**: Suporte PT-BR/EN.
+ - [x] **Dashboard**: Métricas e Feed de Atividades.
+ - [x] **Inbox Omnichannel**: Central de atendimento unificada (UI).
+ - [ ] **Integração WhatsApp**: Envio e recebimento de mensagens.
+ - [ ] **Automação & Workflows**: Regras automáticas de vendas.
 - [ ] **Inteligência Artificial**: Assistente de resposta e insights.
 - [ ] **Mobile App**: Versão PWA otimizada.
 
