@@ -111,6 +111,13 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 - [ ] Otimizar interface para uso em celular.
 - [ ] Notificações push para mensagens e tarefas.
 
+### 9. Super Admin (Platform Owner) 🚧
+*Gestão global da plataforma SaaS.*
+- [ ] **Dashboard Admin:** Visão geral de todos os workspaces e usuários.
+- [ ] **Gestão de Planos:** Criar e editar planos de assinatura.
+- [ ] **User Masquerade:** Acessar workspaces como se fosse o usuário (para suporte).
+- [ ] **System Health:** Monitoramento de logs e status da API.
+
 ---
 
 ## 📅 Histórico de Implementação (Roadmap Original)
