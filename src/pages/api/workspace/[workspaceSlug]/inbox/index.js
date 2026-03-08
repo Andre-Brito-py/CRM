@@ -18,7 +18,13 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET':
       try {
-        const conversations = await getConversations(workspace.id);
+        const { assigneeId, status, search } = req.query;
+        const filters = {};
+        if (assigneeId) filters.assigneeId = assigneeId;
+        if (status) filters.status = status;
+        if (search) filters.search = search;
+
+        const conversations = await getConversations(workspace.id, filters);
         res.status(200).json({ data: { conversations } });
       } catch (error) {
         console.error(error);

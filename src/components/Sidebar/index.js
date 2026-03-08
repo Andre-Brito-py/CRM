@@ -17,21 +17,32 @@ const Sidebar = ({ menu }) => {
 
   const renderMenu = () => {
     return (
-      workspace &&
-      menu.map((item, index) => (
-        <Menu
-          key={index}
-          data={item}
-          isLoading={isLoading}
-          showMenu={data?.workspaces.length > 0 || isLoading}
-        />
-      ))
+      menu.map((item, index) => {
+        const isAdmin = item.name === 'Admin';
+
+        if (!workspace && !isAdmin) return null;
+
+        return (
+          <Menu
+            key={index}
+            data={item}
+            isLoading={isLoading}
+            showMenu={data?.workspaces.length > 0 || isLoading || isAdmin}
+            closeMenu={() => setMenuVisibility(false)}
+          />
+        );
+      })
     );
   };
 
   const renderStaticMenu = () => {
     return staticMenu.map((item, index) => (
-      <Menu key={index} data={item} showMenu={true} />
+      <Menu
+        key={index}
+        data={item}
+        showMenu={true}
+        closeMenu={() => setMenuVisibility(false)}
+      />
     ));
   };
 

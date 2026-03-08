@@ -9,7 +9,7 @@ const handler = async (req, res) => {
 
   if (!session) return;
 
-  const workspace = await getWorkspace(null, session.user.email, workspaceSlug);
+  const workspace = await getWorkspace(undefined, session.user.email, workspaceSlug);
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });

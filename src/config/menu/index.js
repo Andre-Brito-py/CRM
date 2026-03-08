@@ -23,8 +23,20 @@ const menu = (workspaceId) => [
         path: `/account/${workspaceId}/companies`,
       },
       {
+        name: 'Tasks',
+        path: `/account/${workspaceId}/tasks`,
+      },
+      {
         name: 'common.label.integrations',
         path: `/account/${workspaceId}/integrations`,
+      },
+      {
+        name: 'Automations',
+        path: `/account/${workspaceId}/automations`,
+      },
+      {
+        name: 'Analytics',
+        path: `/account/${workspaceId}/analytics`,
       },
     ],
   },
@@ -42,6 +54,14 @@ const menu = (workspaceId) => [
       {
         name: 'settings.team.management',
         path: `/account/${workspaceId}/settings/team`,
+      },
+      {
+        name: 'Custom Fields',
+        path: `/account/${workspaceId}/settings/custom-fields`,
+      },
+      {
+        name: 'Message Templates',
+        path: `/account/${workspaceId}/settings/templates`,
       },
       {
         name: 'settings.advanced',

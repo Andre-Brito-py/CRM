@@ -1,65 +1,53 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
+import useSWR from 'swr';
+import toast from 'react-hot-toast';
 import AccountLayout from '@/layouts/AccountLayout';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import ConversationList from '@/sections/inbox/ConversationList';
 import ChatWindow from '@/sections/inbox/ChatWindow';
-
-// Mock data for development
-const mockConversations = [
-  {
-    id: '1',
-    platform: 'WHATSAPP',
-    externalId: '5511999999999',
-    contact: {
-      name: 'John Doe',
-      phone: '+5511999999999',
-    },
-    updatedAt: new Date().toISOString(),
-    lastMessage: 'Hello, I am interested in your product.',
-    messages: [
-      {
-        id: '1',
-        content: 'Hello, I am interested in your product.',
-        direction: 'INBOUND',
-        createdAt: new Date(Date.now() - 3600000).toISOString(),
-      },
-      {
-        id: '2',
-        content: 'Hi John! Thanks for reaching out. How can I help you?',
-        direction: 'OUTBOUND',
-        createdAt: new Date(Date.now() - 3500000).toISOString(),
-      },
-    ],
-  },
-  {
-    id: '2',
-    platform: 'WHATSAPP',
-    externalId: '5511888888888',
-    contact: {
-      name: 'Jane Smith',
-      phone: '+5511888888888',
-    },
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-    lastMessage: 'Can you send me the price list?',
-    messages: [
-      {
-        id: '3',
-        content: 'Can you send me the price list?',
-        direction: 'INBOUND',
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-      }
-    ]
-  },
-];
+import api from '@/lib/common/api';
 
 const Inbox = () => {
-  const [conversations, setConversations] = useState(mockConversations);
+  const router = useRouter();
+  const { data: session } = useSession();
+  const { workspaceSlug } = router.query;
   const [selectedId, setSelectedId] = useState(null);
   const [selectedConversation, setSelectedConversation] = useState(null);
+  const [filterAssignee, setFilterAssignee] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [searchText, setSearchText] = useState('');
+  const [messageText, setMessageText] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+
+  // Fetch conversations
+  const { data: conversationsData, mutate: mutateConversations } = useSWR(
+    workspaceSlug
+      ? `/api/workspace/${workspaceSlug}/inbox?assigneeId=${filterAssignee}&status=${filterStatus}&search=${searchText}`
+      : null,
+    api
+  );
+
+  // Fetch members for assignment
+  const { data: membersData } = useSWR(
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/members` : null,
+    api
+  );
+
+  // Fetch templates
+  const { data: templatesData, mutate: mutateTemplates } = useSWR(
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox/templates` : null,
+    api
+  );
+
+  const conversations = conversationsData?.data?.conversations || [];
+  const members = membersData?.data?.members || [];
+  const templates = templatesData?.data?.templates || [];
 
   useEffect(() => {
-    if (selectedId) {
+    if (selectedId && conversations.length > 0) {
       const conv = conversations.find((c) => c.id === selectedId);
       setSelectedConversation(conv);
     } else {
@@ -67,51 +55,130 @@ const Inbox = () => {
     }
   }, [selectedId, conversations]);
 
-  const handleSendMessage = (content) => {
+  const handleGenerateResponse = async () => {
     if (!selectedConversation) return;
 
+    setIsGeneratingAI(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/suggest-reply`, {
+        method: 'POST',
+      });
+
+      if (response.data?.suggestion) {
+        setMessageText(response.data.suggestion);
+        toast.success('Response generated!');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to generate response');
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
+  const handleSendMessage = async (content) => {
+    if (!selectedConversation) return;
+
+    const previousConversations = [...conversations];
+
+    // Optimistic update
     const newMessage = {
       id: Date.now().toString(),
       content,
       direction: 'OUTBOUND',
       createdAt: new Date().toISOString(),
+      status: 'SENDING',
     };
 
     const updatedConversation = {
       ...selectedConversation,
-      messages: [...selectedConversation.messages, newMessage],
+      messages: [...(selectedConversation.messages || []), newMessage],
       lastMessage: content,
       updatedAt: new Date().toISOString(),
     };
 
-    setConversations((prev) =>
-      prev.map((c) => (c.id === selectedId ? updatedConversation : c))
-    );
+    // Update local state immediately
+    mutateConversations({
+      data: {
+        conversations: conversations.map((c) =>
+          c.id === selectedId ? updatedConversation : c
+        )
+      }
+    }, false);
+
+    try {
+      await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          direction: 'OUTBOUND',
+          type: 'TEXT',
+        }),
+      });
+      // Revalidate to get the real message ID and status
+      mutateConversations();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to send message');
+      // Rollback
+      mutateConversations({ data: { conversations: previousConversations } }, false);
+    }
+  };
+
+  const handleAssign = async (assigneeId) => {
+    if (!selectedConversation) return;
+
+    try {
+      await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
+        method: 'PUT',
+        body: { assigneeId },
+      });
+      toast.success('Conversation assigned');
+      mutateConversations();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to assign conversation');
+    }
   };
 
   return (
     <AccountLayout>
-      <Meta title="Nextacular - Inbox" />
-      <Content.Title
-        title="Inbox"
-        subtitle="Manage all your customer conversations in one place"
-      />
-      <Content.Divider />
-      <div className="flex flex-col h-[calc(100vh-220px)] overflow-hidden bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="flex flex-1 overflow-hidden">
-          <ConversationList
-            conversations={conversations}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-          <div className="flex-1 flex flex-col border-l border-gray-200 overflow-hidden">
+      <Meta title="Inbox" />
+      <Content>
+        <div className="flex h-[calc(100vh-200px)] overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200">
+          <div className={`${selectedId ? 'hidden md:block h-full md:flex-shrink-0' : 'block w-full h-full'}`}>
+            <ConversationList
+              conversations={conversations}
+              selectedConversationId={selectedId}
+              onSelect={(conv) => setSelectedId(conv.id)}
+              filterAssignee={filterAssignee}
+              setFilterAssignee={setFilterAssignee}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              searchText={searchText}
+              setSearchText={setSearchText}
+              members={members}
+              user={session?.user}
+            />
+          </div>
+          <div className={`${selectedId ? 'block w-full md:w-auto' : 'hidden md:block'} flex-1 h-full`}>
             <ChatWindow
               conversation={selectedConversation}
+              messages={selectedConversation?.messages || []}
               onSendMessage={handleSendMessage}
+              members={members}
+              onAssign={handleAssign}
+              templates={templates}
+              messageText={messageText}
+              onMessageChange={setMessageText}
+              onGenerateResponse={handleGenerateResponse}
+              isGeneratingAI={isGeneratingAI}
+              onBack={() => setSelectedId(null)}
             />
           </div>
         </div>
-      </div>
+      </Content>
     </AccountLayout>
   );
 };

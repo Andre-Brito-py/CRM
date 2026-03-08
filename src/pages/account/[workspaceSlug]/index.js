@@ -86,6 +86,52 @@ const ActivityFeed = ({ activities }) => {
   );
 };
 
+const UpcomingTasks = ({ tasks }) => {
+  if (!tasks || tasks.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-4">
+        No upcoming tasks.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flow-root">
+      <ul role="list" className="-mb-8">
+        {tasks.map((task, idx) => (
+          <li key={task.id}>
+            <div className="relative pb-8">
+              {idx !== tasks.length - 1 ? (
+                <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
+              ) : null}
+              <div className="relative flex space-x-3">
+                <div>
+                  <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${task.priority === 'HIGH' ? 'bg-red-500' :
+                    task.priority === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}>
+                    <span className="text-white text-xs font-bold">T</span>
+                  </span>
+                </div>
+                <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{task.title}</p>
+                    <p className="text-xs text-gray-500">
+                      {task.contact ? `Contact: ${task.contact.name}` : task.deal ? `Deal: ${task.deal.name}` : ''}
+                    </p>
+                  </div>
+                  <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                    {new Date(task.dueDate).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 const Workspace = () => {
   const { workspace } = useWorkspace();
   const { data: dashboardData, error } = useSWR(
@@ -139,42 +185,49 @@ const Workspace = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Upcoming Tasks
+              </h3>
+              <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
+            </div>
+
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Recent Activity
               </h3>
               <ActivityFeed activities={dashboardData?.recentActivities} />
             </div>
-            
+
             <div className="bg-white shadow rounded-lg p-6">
-               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Sales Performance (Last 6 Months)
               </h3>
-               {/* Simple Bar Chart Placeholder */}
-               {dashboardData?.salesData?.length > 0 ? (
-                 <div className="mt-4">
-                   {dashboardData.salesData.map((data) => (
-                     <div key={data.name} className="flex items-center mb-2">
-                       <span className="w-12 text-sm text-gray-600">{data.name}</span>
-                       <div className="flex-1 ml-2 bg-gray-100 rounded-full h-4">
-                         <div
-                           className="bg-blue-500 h-4 rounded-full"
-                           style={{ width: `${Math.min((data.value / (Math.max(...dashboardData.salesData.map(d => d.value)) || 1)) * 100, 100)}%` }}
-                         ></div>
-                       </div>
-                       <span className="ml-2 text-sm text-gray-600">
-                         {new Intl.NumberFormat('pt-BR', {
-                           style: 'currency',
-                           currency: 'BRL',
-                         }).format(data.value)}
-                       </span>
-                     </div>
-                   ))}
-                 </div>
-               ) : (
-                 <p className="text-gray-500">No sales data available yet.</p>
-               )}
+              {/* Simple Bar Chart Placeholder */}
+              {dashboardData?.salesData?.length > 0 ? (
+                <div className="mt-4">
+                  {dashboardData.salesData.map((data) => (
+                    <div key={data.name} className="flex items-center mb-2">
+                      <span className="w-12 text-sm text-gray-600">{data.name}</span>
+                      <div className="flex-1 ml-2 bg-gray-100 rounded-full h-4">
+                        <div
+                          className="bg-blue-500 h-4 rounded-full"
+                          style={{ width: `${Math.min((data.value / (Math.max(...dashboardData.salesData.map(d => d.value)) || 1)) * 100, 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="ml-2 text-sm text-gray-600">
+                        {new Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(data.value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No sales data available yet.</p>
+              )}
             </div>
           </div>
         </Content.Container>

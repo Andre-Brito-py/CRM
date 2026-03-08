@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useSWRConfig } from 'swr';
 import api from '@/lib/common/api';
 
 const BoardColumn = ({ stage, deals, workspaceSlug }) => {
+  const router = useRouter();
+
   return (
     <div className="flex flex-col flex-shrink-0 w-72 bg-gray-100 rounded-lg p-2 mr-4">
       <div className="flex items-center justify-between mb-2 p-1">
@@ -28,7 +31,8 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`bg-white p-3 mb-2 rounded shadow-sm border border-gray-200 hover:shadow-md transition-all ${snapshot.isDragging ? 'rotate-2 ring-2 ring-blue-400 z-50' : ''
+                    onClick={() => router.push(`/account/${workspaceSlug}/deals/${deal.id}`)}
+                    className={`bg-white p-3 mb-2 rounded shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer ${snapshot.isDragging ? 'rotate-2 ring-2 ring-blue-400 z-50' : ''
                       }`}
                     style={provided.draggableProps.style}
                   >
@@ -39,16 +43,29 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
                       </span>
                       {deal.priority && (
                         <span className={`text-xs px-1.5 py-0.5 rounded ${deal.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                            deal.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-green-100 text-green-700'
+                          deal.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-green-100 text-green-700'
                           }`}>
                           {deal.priority}
                         </span>
                       )}
                     </div>
-                    {deal.company && (
-                      <div className="mt-2 pt-2 border-t border-gray-100 flex items-center text-xs text-gray-500">
-                        <span className="truncate max-w-full">🏢 {deal.company.name}</span>
+                    {(deal.company || deal.user) && (
+                      <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                        <span className="truncate max-w-[70%]">
+                          {deal.company && `🏢 ${deal.company.name}`}
+                        </span>
+                        {deal.user && (
+                          <div className="flex items-center" title={deal.user.name}>
+                            {deal.user.image ? (
+                              <img src={deal.user.image} alt={deal.user.name} className="w-5 h-5 rounded-full object-cover" />
+                            ) : (
+                              <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">
+                                {deal.user.name?.charAt(0) || '?'}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -78,6 +78,58 @@ Acesse o menu de configurações para personalizar sua experiência.
 
 ---
 
+## 🛡️ Painel de Super Admin
+
+O Nextacular possui um painel administrativo exclusivo para gestão da plataforma, acessível apenas para usuários com função de **Super Admin**.
+
+### Acesso
+O painel é acessado através de uma conta com privilégios elevados (ex: `admin@nextacular.com`). O login segue o mesmo padrão via **Magic Link**.
+
+### Dashboard Geral
+Ao acessar o painel, o administrador tem uma visão geral da saúde do sistema, incluindo:
+- Lista de usuários recentes cadastrados.
+- Visualização rápida dos planos de assinatura de cada usuário.
+
+### Gestão de Usuários
+Na seção **Users**, o administrador tem controle total sobre a base de usuários:
+- **Listagem Completa**: Visualize todos os usuários, seus e-mails, datas de cadastro e planos (Free, Standard, Premium).
+- **Ações de Gestão**:
+    - **Suspender (Suspend)**: Bloqueia o acesso do usuário à plataforma temporariamente.
+    - **Reativar (Reactivate)**: Restaura o acesso de um usuário suspenso.
+    - **Deletar (Delete)**: Remove o usuário do sistema (soft delete), mantendo integridade histórica mas revogando acesso.
+    - **Impersonate**: Acesse a conta de um usuário como se fosse ele para suporte e diagnóstico.
+    *Nota: Por segurança, não é possível suspender ou deletar outros Super Admins.*
+
+### Pagamentos (Payments)
+A seção **Payments** oferece uma visão financeira centralizada:
+- Histórico de transações recentes.
+- Identificação de clientes e seus planos associados.
+- Detalhes de IDs de pagamento para auditoria.
+
+### Gestão de Workspaces
+Visualize e gerencie todos os workspaces criados na plataforma, independentemente do proprietário.
+
+### Configurações de API (Novo)
+O Super Admin pode gerenciar chaves de API e configurações sensíveis do sistema (como Stripe Keys, OpenAI API Key, Email Server) diretamente pelo painel, sem precisar editar arquivos de ambiente ou reiniciar o servidor.
+
+- **Acesso**: Menu lateral > **API Settings**.
+- **Adicionar Chave**:
+    1. Selecione a categoria (Geral, Pagamento, Email, IA).
+    2. Insira o nome da chave (ex: `STRIPE_SECRET_KEY`).
+    3. Insira o valor da chave.
+    4. Clique em "Add Configuration".
+- **Visualização**: As chaves são armazenadas de forma segura e os valores são ocultados por padrão (exibidos como `••••••••`). Clique no ícone de olho para revelar.
+- **Prioridade**: O sistema prioriza as configurações definidas no painel sobre as variáveis de ambiente (`.env`), permitindo atualizações em tempo real.
+
+### Monitoramento de Sistema
+Visualize o status de saúde da aplicação em tempo real:
+- **Database Status**: Conectividade com o banco de dados.
+- **System Uptime**: Tempo de atividade do servidor.
+- **Memory Usage**: Uso de memória RAM do processo.
+- **Response Time**: Latência média das requisições.
+
+---
+
 ## 🛠 Funcionalidades Técnicas (Para Desenvolvedores)
 
 - **Tech Stack**: Next.js, Prisma, PostgreSQL, Tailwind CSS.

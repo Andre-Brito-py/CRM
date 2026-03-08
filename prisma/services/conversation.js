@@ -1,17 +1,75 @@
 import prisma from '@/prisma/index';
 
-export const getConversations = async (workspaceId) => {
-  return await prisma.conversation.findMany({
-    where: { workspaceId },
+export const getConversations = async (workspaceId, filters = {}) => {
+  const where = { workspaceId };
+
+  if (filters.assigneeId) {
+    if (filters.assigneeId === 'unassigned') {
+      where.assigneeId = null;
+    } else {
+      where.assigneeId = filters.assigneeId;
+    }
+  }
+
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
+  if (filters.search) {
+    where.OR = [
+      {
+        contact: {
+          name: {
+            contains: filters.search,
+            mode: 'insensitive',
+          },
+        },
+      },
+      {
+        messages: {
+          some: {
+            content: {
+              contains: filters.search,
+              mode: 'insensitive',
+            },
+          },
+        },
+      },
+      {
+        externalId: {
+          contains: filters.search,
+          mode: 'insensitive',
+        },
+      }
+    ];
+  }
+
+  const conversations = await prisma.conversation.findMany({
+    where,
     orderBy: { updatedAt: 'desc' },
     include: {
       contact: true,
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        }
+      },
       messages: {
         orderBy: { createdAt: 'desc' },
         take: 1,
       },
     },
   });
+
+  // Flatten last message for easier UI consumption
+  return conversations.map(c => ({
+    ...c,
+    lastMessage: c.messages[0]?.content || '',
+    lastMessageAt: c.messages[0]?.createdAt || c.updatedAt,
+  }));
 };
 
 export const createConversation = async (workspaceId, { contactId, platform, externalId }) => {
@@ -30,10 +88,36 @@ export const getConversation = async (id) => {
     where: { id },
     include: {
       contact: true,
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        }
+      },
       messages: {
         orderBy: { createdAt: 'asc' },
       },
     },
+  });
+};
+
+export const updateConversation = async (id, data) => {
+  return await prisma.conversation.update({
+    where: { id },
+    data,
+    include: {
+      contact: true,
+      assignee: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        }
+      },
+    }
   });
 };
 

@@ -9,13 +9,24 @@ import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   callbacks: {
-    session: async ({ session, user }) => {
+    session: async ({ session, token, user }) => {
       if (session.user) {
-        const customerPayment = await getPayment(user.email);
-        session.user.userId = user.id;
+        // If using JWT, user comes from token. If using Database, user is the User object.
+        // We can fetch fresh data from DB to be sure.
+        const userEmail = session.user.email;
+        const dbUser = await prisma.user.findUnique({
+          where: { email: userEmail },
+          select: { id: true, role: true, email: true }
+        });
 
-        if (customerPayment) {
-          session.user.subscription = customerPayment.subscriptionType;
+        if (dbUser) {
+          session.user.userId = dbUser.id;
+          session.user.role = dbUser.role;
+          
+          const customerPayment = await getPayment(dbUser.email);
+          if (customerPayment) {
+            session.user.subscription = customerPayment.subscriptionType;
+          }
         }
       }
 

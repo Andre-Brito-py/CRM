@@ -94,6 +94,11 @@ model Session {
   @@map("sessions")
 }
 
+enum UserRole {
+  USER
+  SUPERADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   userCode      String    @unique @default(cuid())
@@ -101,9 +106,11 @@ model User {
   email         String?   @unique
   emailVerified DateTime?
   image         String?
+  role          UserRole  @default(USER)
   createdAt     DateTime? @default(now())
   deletedAt     DateTime?
   updatedAt     DateTime? @updatedAt
+  suspended     Boolean   @default(false)
 
   accounts         Account[]
   sessions         Session[]
@@ -113,6 +120,7 @@ model User {
   customerPayment  CustomerPayment?
   domains          Domain[]
   activities       Activity[]
+  assignedTasks    Task[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -146,6 +154,7 @@ model Workspace {
   pipelines Pipeline[]
   deals Deal[]
   conversations Conversation[]
+  tasks         Task[]
   activities    Activity[]
 
   @@unique([workspaceCode, inviteCode])
@@ -169,6 +178,7 @@ model Contact {
   deals         Deal[]
   activities    Activity[]
   conversations Conversation[]
+  tasks         Task[]
 
   @@map("contacts")
 }
@@ -239,6 +249,7 @@ model Deal {
   company   Company?  @relation(fields: [companyId], references: [id])
   stage     Stage     @relation(fields: [stageId], references: [id])
   activities Activity[]
+  tasks Task[]
 
   @@map("deals")
 }
@@ -314,4 +325,37 @@ model Activity {
   user      User?     @relation(fields: [userId], references: [id])
 
   @@map("activities")
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  workspaceId String
+  title       String
+  content     String?
+  dueDate     DateTime?
+  priority    String?
+  assigneeId  String?
+  contactId   String?
+  dealId      String?
+  isCompleted Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  assignee  User?     @relation(fields: [assigneeId], references: [id])
+  contact   Contact?  @relation(fields: [contactId], references: [id])
+  deal      Deal?     @relation(fields: [dealId], references: [id])
+
+  @@map("tasks")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("GENERAL") // PAYMENT, EMAIL, AI, GENERAL
+  updatedAt DateTime @updatedAt
+
+  @@map("system_configs")
 }

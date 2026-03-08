@@ -33,6 +33,13 @@ export const getPipelines = async (workspaceId) => {
             include: {
               company: true,
               contact: true,
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
             },
           },
         },

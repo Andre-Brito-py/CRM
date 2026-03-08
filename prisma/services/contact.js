@@ -20,6 +20,7 @@ export const getContacts = async (workspaceId) => {
     include: {
       company: true,
       deals: true,
+      tags: true,
     },
   });
 };
@@ -32,6 +33,15 @@ export const getContact = async (id) => {
       deals: {
         include: {
           stage: true,
+        },
+      },
+      tags: true,
+      activities: {
+        orderBy: { createdAt: 'desc' },
+        include: {
+          user: {
+            select: { name: true, image: true },
+          },
         },
       },
     },

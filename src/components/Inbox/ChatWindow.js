@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 
-const ChatWindow = ({ conversation, messages, onSendMessage }) => {
+const ChatWindow = ({ conversation, messages, onSendMessage, members = [], onAssign, templates = [] }) => {
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef(null);
 
@@ -18,6 +18,13 @@ const ChatWindow = ({ conversation, messages, onSendMessage }) => {
     if (newMessage.trim()) {
       onSendMessage(newMessage);
       setNewMessage('');
+    }
+  };
+
+  const handleTemplateChange = (e) => {
+    const templateContent = e.target.value;
+    if (templateContent) {
+      setNewMessage(templateContent);
     }
   };
 
@@ -41,6 +48,23 @@ const ChatWindow = ({ conversation, messages, onSendMessage }) => {
             {conversation.platform}
           </span>
         </div>
+        <div className="flex items-center">
+          <span className="text-sm text-gray-500 mr-2">Assign to:</span>
+          <select
+            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            value={conversation.assigneeId || ''}
+            onChange={(e) => onAssign(e.target.value)}
+          >
+            <option value="">Unassigned</option>
+            {members.map((m) => (
+              m.member ? (
+                <option key={m.id} value={m.member.id}>
+                  {m.member.name || m.email}
+                </option>
+              ) : null
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Messages Area */}
@@ -51,13 +75,12 @@ const ChatWindow = ({ conversation, messages, onSendMessage }) => {
             className={`flex ${msg.direction === 'OUTBOUND' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow ${
-                msg.direction === 'OUTBOUND'
+              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg shadow ${msg.direction === 'OUTBOUND'
                   ? 'bg-blue-600 text-white rounded-br-none'
                   : 'bg-white text-gray-900 rounded-bl-none'
-              }`}
+                }`}
             >
-              <p className="text-sm">{msg.content}</p>
+              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
               <span className={`text-xs block mt-1 ${msg.direction === 'OUTBOUND' ? 'text-blue-200' : 'text-gray-400'}`}>
                 {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
@@ -69,13 +92,31 @@ const ChatWindow = ({ conversation, messages, onSendMessage }) => {
 
       {/* Input Area */}
       <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="mb-2">
+          <select
+            className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-gray-500"
+            onChange={handleTemplateChange}
+            value=""
+          >
+            <option value="" disabled>Insert Template...</option>
+            {templates.map(t => (
+              <option key={t.id} value={t.content}>{t.name}</option>
+            ))}
+          </select>
+        </div>
         <form onSubmit={handleSend} className="flex items-center space-x-2">
-          <input
-            type="text"
-            className="flex-1 border border-gray-300 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          <textarea
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
             placeholder="Type a message..."
+            rows="2"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (newMessage.trim()) handleSend(e);
+              }
+            }}
           />
           <button
             type="submit"

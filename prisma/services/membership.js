@@ -14,7 +14,7 @@ export const getMembers = async (slug) =>
       email: true,
       status: true,
       teamRole: true,
-      member: { select: { name: true } },
+      member: { select: { id: true, name: true, image: true } },
     },
     where: {
       deletedAt: null,

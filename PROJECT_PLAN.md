@@ -33,10 +33,10 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
     - ✅ Modelagem de Dados (Contact, Company).
     - ✅ Listagem com filtros e busca (`/contacts`, `/companies`).
     - ✅ Formulários de Criação (Modais).
-    - [ ] **Histórico de Atividades:** Timeline com mensagens, notas, chamadas e tarefas para cada contato.
-    - [ ] **Tags:** Sistema de tags para segmentação.
-    - [ ] **Campos Personalizados:** Custom fields dinâmicos (Texto, Data, Select) armazenados via JSONB para flexibilidade No-Code.
-    - [ ] **Importação:** Importação de contatos via CSV.
+    - ✅ **Histórico de Atividades:** Timeline com mensagens, notas, chamadas e tarefas para cada contato.
+    - ✅ **Tags:** Sistema de tags para segmentação.
+    - ✅ **Campos Personalizados:** Custom fields dinâmicos (Texto, Data, Select) armazenados via JSONB para flexibilidade No-Code.
+    - ✅ **Importação:** Importação de contatos via CSV.
 - **Pipeline de Vendas:**
     - ✅ Modelagem (Pipeline, Stage, Deal).
     - ✅ Interface Kanban Drag-and-Drop.
@@ -48,46 +48,48 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 - **Inbox Unificado:**
     - [x] Interface estilo Helpdesk.
     - [x] Visualização de conversas por contato.
-    - [ ] Atribuição de conversas para membros da equipe.
+    - [x] Atribuição de conversas para membros da equipe.
     - [x] Status de conversa (Aberta, Resolvida, Pendente).
     - [x] Histórico completo de mensagens.
 - **Integração WhatsApp:**
-    - [ ] Integração com API (Meta/Twilio).
-    - [ ] Envio e recebimento de mensagens diretamente no CRM.
-    - [ ] **Lead Gen:** Criação automática de leads quando um novo número envia mensagem.
-    - [ ] Associação automática de conversas a contatos existentes.
-    - [ ] Templates de mensagens reutilizáveis.
-    - [ ] Envio de mensagens automáticas baseadas em eventos.
+    - [x] Integração com API (Meta Cloud API).
+    - [x] Envio e recebimento de mensagens diretamente no CRM.
+    - [x] **Lead Gen:** Criação automática de leads quando um novo número envia mensagem.
+    - [x] Associação automática de conversas a contatos existentes.
+    - [x] Templates de mensagens reutilizáveis.
+    - [x] Envio de mensagens automáticas baseadas em eventos.
 
 ### 4. Automation & Workflows 🚧
 *Automação de vendas baseada em regras.*
 - **Workflows:**
-    - [ ] Sistema de Regras e Gatilhos.
-    - [ ] **Ações Automáticas:**
-        - Quando um negócio muda de estágio → enviar mensagem.
-        - Quando um cliente não responde em X dias → enviar follow-up.
-        - Quando um novo lead é criado → atribuir automaticamente a um vendedor.
+    - [x] Sistema de Regras e Gatilhos (Deal Stage, Incoming Message).
+    - [x] **Ações Automáticas:**
+        - [x] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
+        - [x] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
+        - [x] Quando um cliente não responde em X dias → enviar follow-up.
 - **Tasks & Reminders:**
-    - [ ] Sistema de tarefas (Título, Data de vencimento, Responsável, Status).
-    - [ ] Lembretes automáticos.
+    - [x] Sistema de tarefas (Título, Data de vencimento, Responsável, Status).
+    - [x] Associação de tarefas a Contatos e Negócios.
+    - [x] Lembretes automáticos (via UI de Dashboard).
 
 ### 5. Artificial Intelligence (IA) 🚧
 *Funcionalidades para aumentar produtividade.*
 - **Assistente de Resposta:**
-    - [ ] Geração automática de respostas para clientes.
-    - [ ] Sugestões de respostas baseadas no histórico da conversa.
+    - [x] Geração automática de respostas para clientes (Mock implementado).
+    - [x] Sugestões de respostas baseadas no histórico da conversa.
 - **Vendas Inteligentes:**
-    - [ ] Geração de mensagens de follow-up.
-    - [ ] Análise de pipeline de vendas com insights automáticos.
-    - [ ] Recomendações de próximos passos para vendedores.
+    - [x] Geração de mensagens de follow-up.
+    - [x] Análise de pipeline de vendas com insights automáticos.
+    - [x] Recomendações de próximos passos para vendedores.
 
-### 6. Analytics & Reports 🚧
+### 6. Analytics & Reports ✅
 *Módulo de inteligência de dados.*
-- [ ] Relatórios de vendas.
-- [ ] Desempenho de vendedores.
-- [ ] Conversão por estágio do pipeline.
-- [ ] Origem de leads.
-- [ ] Tempo médio de fechamento.
+- [x] Relatórios de vendas (Sales Trend - Gráfico de barras).
+- [x] Desempenho de vendedores (Sales by User & Task Completion).
+- [x] Funnel de Vendas (Deals by Stage).
+- [x] Exportação de Relatórios (CSV).
+- [x] Origem de leads.
+- [x] Tempo médio de fechamento.
 
 ### 7. Settings & Team ✅
 *Configurações administrativas.*
@@ -99,24 +101,26 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 - **Faturamento:**
     - ✅ Integração com Stripe (Assinaturas).
 - **Integrações Externas:**
-    - [ ] Google Calendar.
-    - [ ] Gmail.
-    - [ ] Webhooks.
-    - [ ] Zapier.
-    - [ ] APIs públicas.
+    - [x] Webhooks (Eventos de sistema).
+    - [x] Gmail (UI Pronta).
+    - [x] Google Calendar (UI pronta).
+    - [x] Zapier (UI pronta).
+    - [x] WhatsApp (Cloud API).
 
-### 8. Experiência Mobile 🚧
+### 8. Experiência Mobile ✅
 *Acesso em qualquer lugar.*
-- [ ] Transformar o sistema em PWA.
-- [ ] Otimizar interface para uso em celular.
-- [ ] Notificações push para mensagens e tarefas.
+- [x] Transformar o sistema em PWA (next-pwa configurado).
+- [x] Otimizar interface para uso em celular (Dashboard, Tasks, Inbox, Pipeline).
+- [x] Notificações push para mensagens e tarefas.
 
-### 9. Super Admin (Platform Owner) 🚧
-*Gestão global da plataforma SaaS.*
-- [ ] **Dashboard Admin:** Visão geral de todos os workspaces e usuários.
-- [ ] **Gestão de Planos:** Criar e editar planos de assinatura.
-- [ ] **User Masquerade:** Acessar workspaces como se fosse o usuário (para suporte).
-- [ ] **System Health:** Monitoramento de logs e status da API.
+### 9. Super Admin (Platform Owner) ✅
+*Controle total da plataforma SaaS.*
+- [x] **Dashboard Admin:** Visão geral de todos os workspaces, usuários e planos (Stats).
+- [x] **Gerenciamento de Usuários:** Listagem e visualização de todos os usuários da plataforma.
+- [x] **Gerenciamento de Workspaces:** Listagem e visualização de todos os workspaces.
+- [x] **Gerenciamento de Planos:** Criar/Editar planos de assinatura (SaaS) com integração dinâmica.
+- [x] **Masquerade:** Logar como qualquer usuário para suporte.
+- [x] **System Health:** Monitoramento de status do banco de dados, uptime e performance.
 
 ---
 

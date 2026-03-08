@@ -12,8 +12,9 @@ import Modal from '@/components/Modal/index';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { redirectToCheckout } from '@/lib/client/stripe';
-import { getInvoices, getProducts } from '@/lib/server/stripe';
+import { getInvoices } from '@/lib/server/stripe';
 import { getPayment } from '@/prisma/services/customer';
+import { getAllPlans } from '@/prisma/services/plan';
 
 const Billing = ({ invoices, products }) => {
   const [isSubmitting, setSubmittingState] = useState(false);
@@ -166,7 +167,7 @@ const Billing = ({ invoices, products }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
-  
+
   // Se não tiver chave do Stripe configurada, retornar props vazias para evitar erro
   if (!process.env.PAYMENTS_SECRET_KEY) {
     return {
@@ -178,14 +179,26 @@ export const getServerSideProps = async (context) => {
   }
 
   const customerPayment = await getPayment(session.user?.email);
-  const [invoices, products] = await Promise.all([
+  const [invoices, plans] = await Promise.all([
     getInvoices(customerPayment?.paymentId),
-    getProducts(),
+    getAllPlans(),
   ]);
+
+  const products = plans.map((plan) => ({
+    name: plan.name,
+    description: plan.description,
+    prices: {
+      id: plan.stripePriceId,
+      unit_amount: Number(plan.price) * 100,
+      currency: plan.currency,
+      interval: plan.interval,
+    },
+  }));
+
   return {
     props: {
-      invoices,
-      products,
+      invoices: invoices || [],
+      products: products || [],
     },
   };
 };

@@ -24,6 +24,13 @@
 - **Histórico Completo**: Acesso a todas as mensagens trocadas com o cliente.
 - **Integração WhatsApp**: (Em breve) Conecte seu número Business para enviar e receber mensagens.
 
+### 🛡️ Painel Administrativo (Super Admin)
+- **Gestão de Usuários**: Suspensão, reativação e exclusão de contas.
+- **Controle Financeiro**: Visualização de pagamentos e planos de assinatura.
+- **Configurações de API**: Gerenciamento centralizado de chaves de API (Stripe, OpenAI, Mailgun, etc.) via interface gráfica, sem necessidade de re-deploy.
+- **Impersonation**: Acesso seguro a contas de usuários para suporte.
+- **Monitoramento**: Dashboard com métricas de crescimento e saúde do sistema.
+
 ### 🌍 Internacionalização
 - **Suporte Multi-idioma**: Interface traduzida para Português e Inglês.
 - **Detecção Automática**: Preferência salva por usuário.

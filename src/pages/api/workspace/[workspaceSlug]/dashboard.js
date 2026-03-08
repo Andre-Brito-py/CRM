@@ -99,6 +99,30 @@ const handler = async (req, res) => {
         },
       });
 
+      // Upcoming Tasks for the current user
+      const upcomingTasks = await prisma.task.findMany({
+        where: {
+          workspaceId: workspace.id,
+          assigneeId: session.user.userId,
+          isCompleted: false,
+          dueDate: {
+            gte: new Date(),
+          },
+        },
+        take: 5,
+        orderBy: {
+          dueDate: 'asc',
+        },
+        include: {
+          contact: {
+            select: { name: true },
+          },
+          deal: {
+            select: { name: true },
+          },
+        },
+      });
+
       // Process deals for chart
       const salesByMonth = {};
       dealsLast6Months.forEach((deal) => {
@@ -110,7 +134,7 @@ const handler = async (req, res) => {
           salesByMonth[month].value += Number(deal.amount) || 0;
         }
       });
-      
+
       const salesData = Object.values(salesByMonth);
 
       res.status(200).json({
@@ -122,6 +146,7 @@ const handler = async (req, res) => {
         },
         recentActivities,
         salesData,
+        upcomingTasks,
       });
     } catch (error) {
       console.error(error);

@@ -6,11 +6,13 @@ import Button from '@/components/Button/index';
 import api from '@/lib/common/api';
 import useContacts from '@/hooks/data/useContacts';
 import useCompanies from '@/hooks/data/useCompanies';
+import useMembers from '@/hooks/data/useMembers';
 
 const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
   const { mutate } = useSWRConfig();
   const { data: contactsData } = useContacts(slug);
   const { data: companiesData } = useCompanies(slug);
+  const { data: membersData } = useMembers(slug);
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [name, setName] = useState('');
@@ -19,6 +21,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
   const [priority, setPriority] = useState('MEDIUM');
   const [contactId, setContactId] = useState('');
   const [companyId, setCompanyId] = useState('');
+  const [userId, setUserId] = useState('');
   const [closeDate, setCloseDate] = useState('');
 
   // Set default stage
@@ -41,6 +44,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           priority,
           contactId: contactId || undefined,
           companyId: companyId || undefined,
+          userId: userId || undefined,
           closeDate: closeDate || undefined
         },
         method: 'POST',
@@ -112,6 +116,23 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           >
             {stages?.map(stage => (
               <option key={stage.id} value={stage.id}>{stage.name}</option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="assignee" className="block text-sm font-medium text-gray-700">
+            Assignee
+          </label>
+          <select
+            id="assignee"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+          >
+            <option value="">Select an assignee...</option>
+            {membersData?.members?.map(member => (
+              <option key={member.member.id} value={member.member.id}>{member.member.name}</option>
             ))}
           </select>
         </div>

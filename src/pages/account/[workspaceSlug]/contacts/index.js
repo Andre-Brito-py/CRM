@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
+import Link from 'next/link';
 import useContacts from '@/hooks/data/useContacts';
 import { useWorkspace } from '@/providers/workspace';
 import AddContactModal from '@/sections/contacts/AddContactModal';
@@ -23,9 +24,17 @@ const Contacts = () => {
       />
       <Content.Divider />
       <Content.Container>
-        <div className="flex justify-end">
+        <div className="flex flex-col space-y-2 sm:flex-row sm:justify-end sm:space-y-0 sm:space-x-2">
+          <Link
+            href={`/account/${workspace?.slug}/contacts/import`}
+            className="flex items-center justify-center px-3 py-2 text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50">
+
+            <ArrowUpTrayIcon className="w-5 h-5 mr-2" />
+            Import CSV
+
+          </Link>
           <button
-            className="flex items-center px-3 py-2 text-white bg-blue-600 rounded hover:bg-blue-500"
+            className="flex items-center justify-center px-3 py-2 text-white bg-blue-600 rounded hover:bg-blue-500"
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -69,9 +78,13 @@ const Contacts = () => {
                 {data.contacts.map((contact) => (
                   <tr key={contact.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
+                      <Link
+                        href={`/account/${workspace.slug}/contacts/${contact.id}`}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-900">
+
                         {contact.name}
-                      </div>
+
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{contact.email}</div>

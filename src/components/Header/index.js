@@ -8,16 +8,22 @@ import {
   MoonIcon,
   SunIcon,
   UserCircleIcon,
+  BellIcon,
+  BellSlashIcon,
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { useTranslation } from "react-i18next";
 import { useTheme } from 'next-themes';
+import { useWorkspace } from '@/providers/workspace';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
 
 const Header = () => {
   const { data } = useSession();
   const { theme, setTheme } = useTheme();
   const { t } = useTranslation();
+  const { workspace } = useWorkspace();
+  const { isSubscribed, subscribe, unsubscribe } = usePushNotifications(workspace?.id);
 
   const logOut = () => {
     const result = confirm('Are you sure you want to logout?');
@@ -41,91 +47,113 @@ const Header = () => {
           )}
         </h5>
       </div>
-      <Menu as="div" className="relative inline-block text-left">
-        <div>
-          <Menu.Button className="flex items-center justify-center px-5 py-2 space-x-3 border rounded hover:bg-gray-100 dark:hover:text-gray-800">
-            <CogIcon aria-hidden="true" className="w-5 h-5" />
-            <span>Settings</span>
-          </Menu.Button>
-        </div>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
+      <div className="flex items-center space-x-3">
+        <button
+          className="flex items-center justify-center p-2 border rounded hover:bg-gray-100 dark:hover:text-gray-800"
+          onClick={isSubscribed ? unsubscribe : subscribe}
+          title={isSubscribed ? "Disable Notifications" : "Enable Notifications"}
         >
-          <Menu.Items className="absolute right-0 w-40 mt-2 origin-top-right bg-white border divide-y divide-gray-100 rounded">
-            <div className="p-2">
-              <Menu.Item>
-                <Link
-                  href="/account/settings"
-                  className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
-                >
-                  <UserCircleIcon aria-hidden="true" className="w-5 h-5" />
-                  <span>{t("common.label.account")}</span>
-                </Link>
-              </Menu.Item>
-              <Menu.Item>
-                <Link
-                  href="/account/billing"
-                  className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
-                >
-                  <CreditCardIcon aria-hidden="true" className="w-5 h-5" />
-                  <span>{t("common.label.billing")}</span>
-                </Link>
-              </Menu.Item>
-            </div>
-            <div className="p-2">
-              <Menu.Item>
-                <Link
-                  href="/"
-                  className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
-                >
-                  <ComputerDesktopIcon aria-hidden="true" className="w-5 h-5" />
-                  <span>{t("common.label.landingpage")}</span>
-                </Link>
-              </Menu.Item>
-              <Menu.Item>
-                <button
-                  className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
-                  onClick={toggleTheme}
-                >
-                  {theme === 'dark' ? (
-                    <>
-                      <SunIcon className="w-5 h-5" />
-                      <span>{t("common.label.light.mode")}</span>
-                    </>
-                  ) : (
-                    <>
-                      <MoonIcon className="w-5 h-5" />
-                      <span>{t("common.label.dark.mode")}</span>
-                    </>
-                  )}
-                </button>
-              </Menu.Item>
-            </div>
-            <div className="p-2">
-              <Menu.Item>
-                <button
-                  className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
-                  onClick={logOut}
-                >
-                  <ArrowRightOnRectangleIcon
-                    aria-hidden="true"
-                    className="w-5 h-5"
-                  />
-                  <span>{t("common.label.logout")}</span>
-                </button>
-              </Menu.Item>
-            </div>
-          </Menu.Items>
-        </Transition>
-      </Menu>
+          {isSubscribed ? <BellIcon className="w-5 h-5 text-blue-500" /> : <BellSlashIcon className="w-5 h-5" />}
+        </button>
+        <Menu as="div" className="relative inline-block text-left">
+          <div>
+            <Menu.Button className="flex items-center justify-center px-5 py-2 space-x-3 border rounded hover:bg-gray-100 dark:hover:text-gray-800">
+              <CogIcon aria-hidden="true" className="w-5 h-5" />
+              <span>Settings</span>
+            </Menu.Button>
+          </div>
+          <Transition
+            as={Fragment}
+            enter="transition ease-out duration-100"
+            enterFrom="transform opacity-0 scale-95"
+            enterTo="transform opacity-100 scale-100"
+            leave="transition ease-in duration-75"
+            leaveFrom="transform opacity-100 scale-100"
+            leaveTo="transform opacity-0 scale-95"
+          >
+            <Menu.Items className="absolute right-0 w-40 mt-2 origin-top-right bg-white border divide-y divide-gray-100 rounded">
+              {data?.user?.role === 'SUPERADMIN' && (
+                <div className="p-2">
+                  <Menu.Item>
+                    <Link
+                      href="/admin"
+                      className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                    >
+                      <ComputerDesktopIcon aria-hidden="true" className="w-5 h-5" />
+                      <span>Admin Dashboard</span>
+                    </Link>
+                  </Menu.Item>
+                </div>
+              )}
+              <div className="p-2">
+                <Menu.Item>
+                  <Link
+                    href="/account/settings"
+                    className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                  >
+                    <UserCircleIcon aria-hidden="true" className="w-5 h-5" />
+                    <span>{t("common.label.account")}</span>
+                  </Link>
+                </Menu.Item>
+                <Menu.Item>
+                  <Link
+                    href="/account/billing"
+                    className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                  >
+                    <CreditCardIcon aria-hidden="true" className="w-5 h-5" />
+                    <span>{t("common.label.billing")}</span>
+                  </Link>
+                </Menu.Item>
+              </div>
+              <div className="p-2">
+                <Menu.Item>
+                  <Link
+                    href="/"
+                    className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                  >
+                    <ComputerDesktopIcon aria-hidden="true" className="w-5 h-5" />
+                    <span>{t("common.label.landingpage")}</span>
+                  </Link>
+                </Menu.Item>
+                <Menu.Item>
+                  <button
+                    className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                    onClick={toggleTheme}
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <SunIcon className="w-5 h-5" />
+                        <span>{t("common.label.light.mode")}</span>
+                      </>
+                    ) : (
+                      <>
+                        <MoonIcon className="w-5 h-5" />
+                        <span>{t("common.label.dark.mode")}</span>
+                      </>
+                    )}
+                  </button>
+                </Menu.Item>
+              </div>
+              <div className="p-2">
+                <Menu.Item>
+                  <button
+                    className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white group"
+                    onClick={logOut}
+                  >
+                    <ArrowRightOnRectangleIcon
+                      aria-hidden="true"
+                      className="w-5 h-5"
+                    />
+                    <span>{t("common.label.logout")}</span>
+                  </button>
+                </Menu.Item>
+              </div>
+            </Menu.Items>
+          </Transition>
+        </Menu>
+      </div>
     </div>
   );
 };
 
-export default Header;
+      export default Header;

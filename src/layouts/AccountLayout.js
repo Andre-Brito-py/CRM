@@ -22,7 +22,7 @@ const AccountLayout = ({ children }) => {
 
   if (status === 'loading') return <></>;
   return (
-    <main className="relative flex flex-col w-screen h-screen space-x-0 text-gray-800 dark:text-gray-200 md:space-x-5 md:flex-row bg-gray-50 dark:bg-gray-800">
+    <main className="relative flex flex-col w-screen h-screen overflow-hidden text-gray-800 dark:text-gray-200 md:flex-row bg-gray-50 dark:bg-gray-800">
       <Sidebar menu={menu(workspace?.slug)} />
       <Content>
         <Toaster position="bottom-left" toastOptions={{ duration: 10000 }} />
