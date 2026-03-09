@@ -1,5 +1,5 @@
 import { validateSession } from '@/config/api-validation';
-import stripe from '@/lib/server/stripe';
+import getStripe from '@/lib/server/stripe';
 import { getPayment } from '@/prisma/services/customer';
 
 const handler = async (req, res) => {
@@ -8,6 +8,7 @@ const handler = async (req, res) => {
   if (method === 'POST') {
     const session = await validateSession(req, res);
     const { priceId } = req.query;
+    const stripe = await getStripe();
     const [customerPayment, price] = await Promise.all([
       getPayment(session.user?.email),
       stripe.prices.retrieve(priceId),

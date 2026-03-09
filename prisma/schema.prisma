@@ -107,6 +107,9 @@ model User {
   emailVerified DateTime?
   image         String?
   role          UserRole  @default(USER)
+  password          String?
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
   createdAt     DateTime? @default(now())
   deletedAt     DateTime?
   updatedAt     DateTime? @updatedAt
@@ -121,6 +124,7 @@ model User {
   domains          Domain[]
   activities       Activity[]
   assignedTasks    Task[]
+  onboardingStatus Json?     @default("{}")
 
   @@unique([userCode, email])
   @@map("users")
@@ -156,9 +160,25 @@ model Workspace {
   conversations Conversation[]
   tasks         Task[]
   activities    Activity[]
+  integrations  Integration[]
 
   @@unique([workspaceCode, inviteCode])
   @@map("workspaces")
+}
+
+model Integration {
+  id          String   @id @default(cuid())
+  workspaceId String
+  provider    String   // WHATSAPP
+  name        String   @default("WhatsApp")
+  enabled     Boolean  @default(true)
+  credentials Json?    
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@map("integrations")
 }
 
 model Contact {
@@ -358,4 +378,21 @@ model SystemConfig {
   updatedAt DateTime @updatedAt
 
   @@map("system_configs")
+}
+
+model Plan {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  description   String?
+  price         Float
+  currency      String    @default("USD")
+  interval      String    @default("month")
+  stripePriceId String?
+  features      Json?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("plans")
 }

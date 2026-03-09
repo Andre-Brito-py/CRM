@@ -1,6 +1,7 @@
 import { buffer } from 'micro';
 
-import stripe from '@/lib/server/stripe';
+import getStripe from '@/lib/server/stripe';
+import { getSystemConfig } from '@/lib/server/config';
 import { updateSubscription } from '@/prisma/services/customer';
 import prisma from '@/prisma/index';
 
@@ -12,10 +13,12 @@ const handler = async (req, res) => {
   let event = null;
 
   try {
+    const stripe = await getStripe();
+    const signingSecret = await getSystemConfig('PAYMENTS_SIGNING_SECRET', process.env.PAYMENTS_SIGNING_SECRET);
     event = stripe.webhooks.constructEvent(
       reqBuffer,
       signature,
-      process.env.PAYMENTS_SIGNING_SECRET
+      signingSecret
     );
   } catch (err) {
     return res.status(400).send(`Webhook Error: ${err.message}`);

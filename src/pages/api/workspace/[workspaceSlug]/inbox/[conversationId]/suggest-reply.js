@@ -30,14 +30,11 @@ const handler = async (req, res) => {
       return res.status(403).json({ error: { msg: 'Access denied' } });
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      // Mock response for development/verification if key is missing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      return res.status(200).json({
-        data: {
-          suggestion: "Here is a suggested reply based on the conversation context. This is a mock response because OPENAI_API_KEY is not configured."
-        }
-      });
+    const { getSystemConfig } = await import('@/lib/server/config');
+    const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
+
+    if (!openAiApiKey) {
+      return res.status(400).json({ error: { msg: 'OpenAI API key is missing. Please configure it in Super Admin settings.' } });
     }
 
     // Format messages for OpenAI
@@ -56,7 +53,7 @@ const handler = async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${openAiApiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',

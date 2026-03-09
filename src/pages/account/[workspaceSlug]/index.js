@@ -13,17 +13,17 @@ import { useWorkspace } from '@/providers/workspace';
 import fetcher from '@/lib/client/fetcher';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className="bg-white overflow-hidden shadow rounded-lg">
-    <div className="p-5">
+  <div className="glass overflow-hidden rounded-2xl">
+    <div className="p-6">
       <div className="flex items-center">
-        <div className="flex-shrink-0">
-          <Icon className={`h-6 w-6 text-${color}-600`} aria-hidden="true" />
+        <div className={`flex-shrink-0 p-3 rounded-xl bg-${color}-50 text-${color}-600`}>
+          <Icon className="h-6 w-6" aria-hidden="true" />
         </div>
         <div className="ml-5 w-0 flex-1">
           <dl>
-            <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
+            <dt className="text-sm font-medium text-gray-500 uppercase tracking-wider truncate">{title}</dt>
             <dd>
-              <div className="text-lg font-medium text-gray-900">{value}</div>
+              <div className="text-2xl font-bold text-gray-900 mt-1">{value}</div>
             </dd>
           </dl>
         </div>
@@ -186,47 +186,51 @@ const Workspace = () => {
           </div>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-brand-50 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
+              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
                 Upcoming Tasks
               </h3>
               <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
             </div>
 
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
+              <div className="absolute bottom-0 right-0 -mb-4 -mr-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
+              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
                 Recent Activity
               </h3>
               <ActivityFeed activities={dashboardData?.recentActivities} />
             </div>
 
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
+              <div className="absolute top-0 left-0 -mt-10 -ml-10 w-40 h-40 bg-green-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
                 Sales Performance (Last 6 Months)
               </h3>
               {/* Simple Bar Chart Placeholder */}
               {dashboardData?.salesData?.length > 0 ? (
-                <div className="mt-4">
+                <div className="mt-4 space-y-3">
                   {dashboardData.salesData.map((data) => (
-                    <div key={data.name} className="flex items-center mb-2">
-                      <span className="w-12 text-sm text-gray-600">{data.name}</span>
-                      <div className="flex-1 ml-2 bg-gray-100 rounded-full h-4">
+                    <div key={data.name} className="flex items-center Group">
+                      <span className="w-12 text-sm font-medium text-gray-600">{data.name}</span>
+                      <div className="flex-1 ml-3 bg-gray-100/50 rounded-full h-3 overflow-hidden">
                         <div
-                          className="bg-blue-500 h-4 rounded-full"
+                          className="bg-gradient-to-r from-brand-400 to-brand-600 h-full rounded-full transition-all duration-500 ease-out"
                           style={{ width: `${Math.min((data.value / (Math.max(...dashboardData.salesData.map(d => d.value)) || 1)) * 100, 100)}%` }}
                         ></div>
                       </div>
-                      <span className="ml-2 text-sm text-gray-600">
+                      <span className="ml-3 text-sm font-semibold text-gray-700 w-20 text-right">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
                           currency: 'BRL',
+                          maximumFractionDigits: 0
                         }).format(data.value)}
                       </span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">No sales data available yet.</p>
+                <p className="text-gray-500 italic">No sales data available yet.</p>
               )}
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
+import { ChevronRightIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 import Button from '@/components/Button/index';
 import Card from '@/components/Card/index';
@@ -66,83 +67,109 @@ const Welcome = () => {
   return (
     <AccountLayout>
       <Meta title="Nextacular - Dashboard" />
-      <Content.Title
-        title={t('workspace.dashboard.header.title')}
-        subtitle={t("workspace.dashboard.header.description")}
-      />
-      <Content.Divider />
-      <Content.Container>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {isFetchingWorkspaces ? (
-            <Card>
-              <Card.Body />
-              <Card.Footer />
-            </Card>
-          ) : workspacesData?.workspaces.length > 0 ? (
-            workspacesData.workspaces.map((workspace, index) => (
-              <Card key={index}>
-                <Card.Body title={workspace.name} />
-                <Card.Footer>
-                  <button
-                    className="text-blue-600"
-                    onClick={() => navigate(workspace)}
-                  >
-                    Select workspace &rarr;
-                  </button>
-                </Card.Footer>
-              </Card>
-            ))
-          ) : (
-            <Card.Empty>{t('workspace.message.createworkspace')}</Card.Empty>
-          )}
-        </div>
-      </Content.Container>
-      <Content.Divider thick />
-      <Content.Title
-        title={t("workspace.dashboard.header.invitations.title")}
-        subtitle={t("workspace.dashboard.header.invitations.description")}
-      />
-      <Content.Divider />
-      <Content.Container>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          {isFetchingInvitations ? (
-            <Card>
-              <Card.Body />
-              <Card.Footer />
-            </Card>
-          ) : invitationsData?.invitations.length > 0 ? (
-            invitationsData.invitations.map((invitation, index) => (
-              <Card key={index}>
-                <Card.Body
-                  title={invitation.workspace.name}
-                  subtitle={`You have been invited by ${invitation.invitedBy.name || invitation.invitedBy.email
-                    }`}
-                />
-                <Card.Footer>
-                  <Button
-                    className="text-white bg-blue-600 hover:bg-blue-500"
-                    disabled={isSubmitting}
-                    onClick={() => accept(invitation.id)}
-                  >
-                    Accept
-                  </Button>
-                  <Button
-                    className="text-red-600 border border-red-600 hover:bg-red-600 hover:text-white"
-                    disabled={isSubmitting}
-                    onClick={() => decline(invitation.id)}
-                  >
-                    Decline
-                  </Button>
-                </Card.Footer>
-              </Card>
-            ))
-          ) : (
-            <Card.Empty>
-              {t("workspace.team.invitations.empty.message")}
-            </Card.Empty>
-          )}
-        </div>
-      </Content.Container>
+      <div className="flex flex-col gap-10">
+        <section>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-zinc-900 font-executive tracking-tight">
+              {t('workspace.dashboard.header.title')}
+            </h1>
+            <p className="mt-2 text-zinc-500">
+              {t("workspace.dashboard.header.description")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {isFetchingWorkspaces ? (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="h-48 bg-white border border-zinc-200 rounded-3xl animate-pulse" />
+              ))
+            ) : workspacesData?.workspaces.length > 0 ? (
+              workspacesData.workspaces.map((workspace, index) => (
+                <div
+                  key={index}
+                  className="group premium-card p-8 flex flex-col justify-between min-h-[200px] border-zinc-200/80 hover:scale-[1.01] transition-all cursor-pointer shadow-premium"
+                  onClick={() => navigate(workspace)}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl font-executive">
+                        {workspace.name.charAt(0)}
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Workspace</span>
+                    </div>
+                    <h3 className="text-xl font-bold text-zinc-900 font-executive">{workspace.name}</h3>
+                  </div>
+
+                  <div className="mt-6 flex items-center text-indigo-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                    {t('workspace.action.label.select') || "Open Workspace"}
+                    <ChevronRightIcon className="w-4 h-4 ml-2" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 bg-white border-2 border-dashed border-zinc-200 rounded-3xl flex flex-col items-center justify-center text-zinc-400">
+                <p className="text-lg font-medium">{t('workspace.message.createworkspace')}</p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <section className="pt-10 border-t border-zinc-200">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-zinc-900 font-executive tracking-tight">
+              {t("workspace.dashboard.header.invitations.title")}
+            </h2>
+            <p className="mt-2 text-zinc-500">
+              {t("workspace.dashboard.header.invitations.description")}
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {isFetchingInvitations ? (
+              <div className="h-48 bg-white border border-zinc-200 rounded-3xl animate-pulse" />
+            ) : invitationsData?.invitations.length > 0 ? (
+              invitationsData.invitations.map((invitation, index) => (
+                <div key={index} className="premium-card p-8 border-zinc-200/80">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                      <PlusIcon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-zinc-900">{invitation.workspace.name}</h3>
+                      <p className="text-xs text-zinc-500">Pending Invitation</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-zinc-600 mb-8 leading-relaxed">
+                    You have been invited by <span className="font-semibold text-zinc-900">{invitation.invitedBy.name || invitation.invitedBy.email}</span>
+                  </p>
+
+                  <div className="flex items-center gap-3">
+                    <Button
+                      className="flex-1 py-3 text-white premium-gradient rounded-xl shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                      disabled={isSubmitting}
+                      onClick={() => accept(invitation.id)}
+                    >
+                      Accept
+                    </Button>
+                    <Button
+                      className="flex-1 py-3 text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+                      disabled={isSubmitting}
+                      onClick={() => decline(invitation.id)}
+                    >
+                      Decline
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 bg-white/50 border border-zinc-200 border-dashed rounded-3xl flex flex-col items-center justify-center text-zinc-400 italic">
+                {t("workspace.team.invitations.empty.message")}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </AccountLayout>
   );
 };

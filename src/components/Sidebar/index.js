@@ -3,10 +3,11 @@ import Link from 'next/link';
 
 import Actions from './actions';
 import Menu from './menu';
+import Logo from '@/components/Logo';
 import sidebarMenu from '@/config/menu/sidebar-static';
 import { useWorkspaces } from '@/hooks/data';
 import { useWorkspace } from '@/providers/workspace';
-import { Bars3Icon } from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const staticMenu = sidebarMenu();
 
@@ -49,28 +50,37 @@ const Sidebar = ({ menu }) => {
   const toggleMenu = () => setMenuVisibility(!showMenu);
 
   return (
-    <aside className="sticky z-40 flex flex-col space-y-5 text-white bg-gray-800 dark:bg-gray-900 md:overflow-y-auto md:w-1/4 md:h-screen overscroll-contain">
-      <div className="relative flex items-center justify-center p-5 text-center border-b border-b-gray-900">
-        <Link href="/" className="flex-grow text-2xl font-bold">
-          Nextacular
-        </Link>
-        <button className="absolute right-0 p-5 md:hidden" onClick={toggleMenu}>
-          <Bars3Icon className="w-6 h-6" />
+    <aside id="sidebar-nav" className="sticky z-40 flex flex-col text-zinc-400 bg-zinc-900 border-r border-white/5 md:overflow-y-auto md:w-1/4 md:min-w-[280px] md:h-screen overscroll-contain transition-all duration-300">
+      <div className="relative flex items-center justify-between px-6 py-8 border-b border-white/5">
+        <Logo variant="full" forceLight={true} className="scale-105" />
+        <button className="md:hidden text-zinc-400 hover:text-white transition-colors" onClick={toggleMenu}>
+          {showMenu ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
         </button>
       </div>
+
       <div
         className={[
-          'flex-col space-y-5 md:flex md:relative md:top-0',
+          'flex-col flex-1 pb-10 md:flex md:relative',
           showMenu
-            ? 'absolute top-12 bg-gray-800 right-0 left-0 h-screen'
+            ? 'absolute top-[104px] bg-zinc-900 inset-x-0 bottom-0 z-50 h-[calc(100vh-104px)] overflow-y-auto'
             : 'hidden',
         ].join(' ')}
       >
-        <Actions />
-        <div className="flex flex-col p-5 space-y-10">
-          {renderStaticMenu()}
-          {renderMenu()}
+        <div id="sidebar-actions" className="px-6 py-4">
+          <Actions />
         </div>
+
+        <nav className="flex flex-col px-4 mt-4 space-y-1">
+          <div className="px-2 py-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 px-2">Main Menu</span>
+          </div>
+          {renderStaticMenu()}
+
+          <div className="px-2 py-6 mt-4">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 px-2">Workspace</span>
+          </div>
+          {renderMenu()}
+        </nav>
       </div>
     </aside>
   );

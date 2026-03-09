@@ -1,3 +1,72 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased text-zinc-800 bg-zinc-50 font-sans selection:bg-indigo-100 selection:text-indigo-900;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-executive font-semibold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .premium-font {
+    @apply font-executive;
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800;
+  }
+
+  .glass-light {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-glass;
+  }
+
+  .glass-dark {
+    @apply bg-zinc-900/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .premium-card {
+    @apply bg-white border border-zinc-200/60 shadow-sm transition-all duration-300 hover:shadow-premium hover:border-zinc-300/80 rounded-2xl;
+  }
+
+  .premium-sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-zinc-400 hover:text-white hover:bg-white/5;
+  }
+
+  .premium-sidebar-link-active {
+    @apply text-white bg-indigo-600/10 border border-indigo-500/20 shadow-[inset_0_0_20px_rgba(79, 70, 229, 0.1)];
+  }
+}
+
+/* Driver.js Premium Overhaul */
+.premium-tour-popover {
+  @apply glass-light rounded-3xl p-8 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.premium-tour-popover .driver-popover-title {
+  @apply text-2xl font-executive font-bold text-zinc-900 mb-2 !important;
+}
+
+.premium-tour-popover .driver-popover-description {
+  @apply text-zinc-600 leading-relaxed !important;
+}
+
+.premium-tour-popover .driver-popover-next-btn {
+  @apply premium-gradient text-white hover:opacity-90 shadow-lg shadow-indigo-500/20 !important;
+}
+
+.premium-tour-popover .driver-popover-prev-btn {
+  @apply bg-zinc-100 text-zinc-600 hover:bg-zinc-200 !important;
+}

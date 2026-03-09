@@ -58,46 +58,46 @@ const Actions = () => {
   return (
     <div className="flex flex-col items-stretch justify-center px-5 space-y-3">
       <Button
-        className="text-white bg-blue-600 hover:bg-blue-500"
+        id="create-workspace-btn"
+        className="w-full justify-start gap-3 py-3 px-4 text-white premium-gradient rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all border border-indigo-400/20"
         onClick={toggleModal}
       >
         <PlusIcon className="w-5 h-5 text-white" aria-hidden="true" />
-        <span>{t('workspace.action.button.label')}</span>
+        <span className="font-semibold">{t('workspace.action.button.label')}</span>
       </Button>
       <Modal show={showModal} title="Create a Workspace" toggle={toggleModal}>
-        <div className="space-y-0 text-sm text-gray-600">
-          <p>
-            {t("workspace.action.create.description.lineOne")}
-          </p>
-          <p>{t("workspace.action.create.description.lineTwo")}</p>
-        </div>
-        <div className="space-y-1">
-          <h3 className="text-xl font-bold">{t("workspace.action.name.label")}</h3>
-          <p className="text-sm text-gray-400">
-            {t("workspace.suggesion.label")}
-          </p>
-          <input
-            className="w-full px-3 py-2 border rounded"
-            disabled={isSubmitting}
-            onChange={handleNameChange}
-            type="text"
-            value={name}
-          />
-        </div>
-        <div className="flex flex-col items-stretch">
-          <Button
-            className="text-white bg-blue-600 hover:bg-blue-500"
-            disabled={!validName || isSubmitting}
-            onClick={createWorkspace}
-          >
-            <span>{t('workspace.action.button.label')}</span>
-          </Button>
+        <div className="space-y-6">
+          <div className="space-y-2 text-zinc-500">
+            <p className="text-sm leading-relaxed">
+              {t("workspace.action.create.description.lineOne")}
+            </p>
+          </div>
+          <div className="space-y-3">
+            <h3 className="text-lg font-bold text-zinc-900 font-display">{t("workspace.action.name.label")}</h3>
+            <input
+              className="w-full px-4 py-3 bg-zinc-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none"
+              disabled={isSubmitting}
+              placeholder={t("workspace.suggesion.label")}
+              onChange={handleNameChange}
+              type="text"
+              value={name}
+            />
+          </div>
+          <div className="pt-2">
+            <Button
+              className="w-full py-4 text-white premium-gradient rounded-xl shadow-xl shadow-indigo-500/25 disabled:opacity-50"
+              disabled={!validName || isSubmitting}
+              onClick={createWorkspace}
+            >
+              <span className="font-bold">{t('workspace.action.button.label')}</span>
+            </Button>
+          </div>
         </div>
       </Modal>
       <Listbox value={workspace} onChange={handleWorkspaceChange}>
-        <div className="relative">
-          <Listbox.Button className="relative w-full py-2 pl-3 pr-10 text-left bg-white rounded-lg shadow-md cursor-default">
-            <span className="block text-gray-600 truncate">
+        <div className="relative mt-2">
+          <Listbox.Button className="relative w-full py-3.5 pl-4 pr-10 text-left bg-white/5 border border-white/10 rounded-xl cursor-default hover:bg-white/10 transition-all focus:outline-none focus:ring-1 focus:ring-white/20 group">
+            <span className="block text-zinc-300 truncate font-medium group-hover:text-white transition-colors">
               {isLoading
                 ? 'Fetching workspaces...'
                 : data?.workspaces.length === 0
@@ -106,9 +106,9 @@ const Actions = () => {
                     ? t("workspace.action.label.select")
                     : workspace.name}
             </span>
-            <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-zinc-500">
               <ChevronUpDownIcon
-                className="w-5 h-5 text-gray-400"
+                className="w-5 h-5"
                 aria-hidden="true"
               />
             </span>
@@ -120,31 +120,27 @@ const Actions = () => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <Listbox.Options className="absolute w-full py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60">
+              <Listbox.Options className="absolute z-[60] w-full py-2 mt-2 overflow-hidden text-base glass-dark rounded-2xl shadow-2xl max-h-60 border border-white/10">
                 {data?.workspaces.map((workspace, index) => (
                   <Listbox.Option
                     key={index}
                     className={({ active }) =>
-                      `${active ? 'text-blue-800 bg-blue-200' : 'text-gray-800'}
-                          cursor-pointer select-none relative py-2 pl-10 pr-4`
+                      `${active ? 'text-white bg-white/10' : 'text-zinc-400'}
+                          cursor-pointer select-none relative py-3 pl-11 pr-4 transition-colors`
                     }
                     value={workspace}
                   >
                     {({ selected, active }) => (
                       <>
                         <span
-                          className={`${
-                            selected ? 'font-bold' : 'font-normal'
-                          } block truncate`}
+                          className={`${selected ? 'text-white font-semibold' : 'font-normal'
+                            } block truncate`}
                         >
                           {workspace.name}
                         </span>
                         {selected ? (
                           <span
-                            className={`${
-                              active ? 'text-blue-600' : 'text-blue-600'
-                            }
-                                absolute inset-y-0 left-0 flex items-center pl-3`}
+                            className="absolute inset-y-0 left-0 flex items-center pl-4 text-indigo-400"
                           >
                             <CheckIcon className="w-5 h-5" aria-hidden="true" />
                           </span>

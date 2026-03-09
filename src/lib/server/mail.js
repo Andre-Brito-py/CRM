@@ -1,27 +1,33 @@
 import nodemailer from 'nodemailer';
+import { getSystemConfig } from '@/lib/server/config';
 
-export const emailConfig = {
-  auth: {
-    user: process.env.EMAIL_SERVER_USER,
-    pass: process.env.EMAIL_SERVER_PASSWORD,
-  },
-  service: process.env.EMAIL_SERVICE,
+export const getTransporter = async () => {
+  const user = await getSystemConfig('EMAIL_SERVER_USER', process.env.EMAIL_SERVER_USER);
+  const pass = await getSystemConfig('EMAIL_SERVER_PASSWORD', process.env.EMAIL_SERVER_PASSWORD);
+  const service = await getSystemConfig('EMAIL_SERVICE', process.env.EMAIL_SERVICE);
+
+  const emailConfig = {
+    auth: { user, pass },
+    service,
+  };
+
+  return nodemailer.createTransport(emailConfig);
 };
 
-const transporter = nodemailer.createTransport(emailConfig);
-
 export const sendMail = async ({ from, html, subject, text, to }) => {
+  const defaultFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
   const data = {
-    from: from ?? process.env.EMAIL_FROM,
+    from: from ?? defaultFrom,
     to,
     subject,
     text,
     html,
   };
 
-  process.env.NODE_ENV === 'production'
-    ? await transporter.sendMail(data)
-    : console.log(data);
+  if (process.env.NODE_ENV === 'production') {
+    const transporter = await getTransporter();
+    await transporter.sendMail(data);
+  } else {
+    console.log(data);
+  }
 };
-
-export default transporter;

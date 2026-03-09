@@ -21,11 +21,11 @@ const handler = async (req, res) => {
       try {
         const conversation = await getConversation(conversationId);
         if (!conversation) {
-            return res.status(404).json({ error: { msg: 'Conversation not found' } });
+          return res.status(404).json({ error: { msg: 'Conversation not found' } });
         }
-        
+
         if (conversation.workspaceId !== workspace.id) {
-            return res.status(403).json({ error: { msg: 'Access denied' } });
+          return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
         res.status(200).json({ data: { conversation } });
@@ -38,14 +38,14 @@ const handler = async (req, res) => {
     case 'PUT':
       try {
         const { assigneeId } = req.body;
-        
+
         const conversation = await getConversation(conversationId);
         if (!conversation) {
-            return res.status(404).json({ error: { msg: 'Conversation not found' } });
+          return res.status(404).json({ error: { msg: 'Conversation not found' } });
         }
-        
+
         if (conversation.workspaceId !== workspace.id) {
-            return res.status(403).json({ error: { msg: 'Access denied' } });
+          return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
         const updated = await updateConversation(conversationId, { assigneeId });
@@ -81,8 +81,13 @@ const handler = async (req, res) => {
               throw new Error('Contact phone number missing');
             }
 
+            const { integrationId } = req.body;
+            if (!integrationId) {
+              return res.status(400).json({ error: { msg: 'Integration ID is required to send from Multiple Numbers.' } });
+            }
+
             // Only send if it's a real user message (not system)
-            sentMessageId = await sendWhatsAppMessage(workspace.id, contactPhone, content);
+            sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, content);
             messageStatus = 'SENT';
           } catch (waError) {
             console.error('Failed to send WhatsApp message:', waError);

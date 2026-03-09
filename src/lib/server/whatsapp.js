@@ -1,18 +1,15 @@
 import prisma from '@/prisma/index';
 
-export const sendWhatsAppMessage = async (workspaceId, to, text) => {
-  // 1. Get Integration Credentials
+export const sendWhatsAppMessage = async (integrationId, to, text) => {
+  // 1. Get Integration Credentials by explicit integrationId
   const integration = await prisma.integration.findUnique({
     where: {
-      workspaceId_provider: {
-        workspaceId,
-        provider: 'WHATSAPP',
-      },
+      id: integrationId,
     },
   });
 
   if (!integration || !integration.enabled || !integration.credentials) {
-    throw new Error('WhatsApp integration not configured or disabled');
+    throw new Error('WhatsApp integration not configured, disabled, or not found');
   }
 
   const { phoneNumberId, accessToken } = integration.credentials;
@@ -23,7 +20,7 @@ export const sendWhatsAppMessage = async (workspaceId, to, text) => {
 
   // 2. Call Meta Graph API
   const url = `https://graph.facebook.com/v16.0/${phoneNumberId}/messages`;
-  
+
   const payload = {
     messaging_product: 'whatsapp',
     to: to,

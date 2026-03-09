@@ -53,20 +53,22 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
     - [x] Histórico completo de mensagens.
 - **Integração WhatsApp:**
     - [x] Integração com API (Meta Cloud API).
-    - [x] Envio e recebimento de mensagens diretamente no CRM.
+    - [ ] Envio ativo de mensagens (Outbound) via Interface do CRM.
+    - [x] Recebimento de mensagens (Inbound webhook).
     - [x] **Lead Gen:** Criação automática de leads quando um novo número envia mensagem.
     - [x] Associação automática de conversas a contatos existentes.
-    - [x] Templates de mensagens reutilizáveis.
-    - [x] Envio de mensagens automáticas baseadas em eventos.
+    - [ ] Templates de mensagens reutilizáveis.
+    - [ ] Envio de mensagens automáticas baseadas em eventos.
 
 ### 4. Automation & Workflows 🚧
 *Automação de vendas baseada em regras.*
 - **Workflows:**
-    - [x] Sistema de Regras e Gatilhos (Deal Stage, Incoming Message).
-    - [x] **Ações Automáticas:**
-        - [x] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
-        - [x] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
-        - [x] Quando um cliente não responde em X dias → enviar follow-up.
+    - [x] Sistema de Regras e Gatilhos no Backend (Deal Stage, Incoming Message).
+    - [ ] Interface de usuário (Builder) para criação de Automações.
+    - **Ações Automáticas:**
+        - [ ] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
+        - [ ] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
+        - [ ] Quando um cliente não responde em X dias → enviar follow-up.
 - **Tasks & Reminders:**
     - [x] Sistema de tarefas (Título, Data de vencimento, Responsável, Status).
     - [x] Associação de tarefas a Contatos e Negócios.
@@ -74,13 +76,20 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 
 ### 5. Artificial Intelligence (IA) 🚧
 *Funcionalidades para aumentar produtividade.*
+- **Integração Base:**
+    - [ ] Conectar API da OpenAI via System Config.
 - **Assistente de Resposta:**
-    - [x] Geração automática de respostas para clientes (Mock implementado).
-    - [x] Sugestões de respostas baseadas no histórico da conversa.
+    - [ ] Geração dinâmica de sugestões de resposta para clientes no Inbox.
+    - [ ] Resumo inteligente de histório de conversas.
 - **Vendas Inteligentes:**
-    - [x] Geração de mensagens de follow-up.
-    - [x] Análise de pipeline de vendas com insights automáticos.
-    - [x] Recomendações de próximos passos para vendedores.
+    - [ ] Análise de pipeline de vendas com insights automáticos.
+    - [ ] Recomendações de próximos passos para vendedores.
+
+### 5.5 Premium Visual Overhaul & Gating 🚧
+*Melhorias de design e paywall.*
+- [ ] Implementar UI de paywall (bloqueio visual para usuários Free).
+- [ ] Refinar as cores, bordas e sombras do layout para padrão "Premium SaaS" moderno (glassmorphism flexível, gradientes curados, melhor grid no Dashboard).
+- [ ] Refinar micro-interações e motion no sistema.
 
 ### 6. Analytics & Reports ✅
 *Módulo de inteligência de dados.*

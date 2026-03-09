@@ -171,6 +171,7 @@ const ChatWindow = ({
       <div className="p-4 bg-white border-t border-gray-200">
         <form onSubmit={handleSend} className="flex space-x-4">
           <button
+            id="ai-suggest-btn"
             type="button"
             onClick={onGenerateResponse}
             disabled={isGeneratingAI}

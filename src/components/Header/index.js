@@ -57,7 +57,7 @@ const Header = () => {
         </button>
         <Menu as="div" className="relative inline-block text-left">
           <div>
-            <Menu.Button className="flex items-center justify-center px-5 py-2 space-x-3 border rounded hover:bg-gray-100 dark:hover:text-gray-800">
+            <Menu.Button id="header-user-menu" className="flex items-center justify-center px-5 py-2 space-x-3 border rounded hover:bg-gray-100 dark:hover:text-gray-800">
               <CogIcon aria-hidden="true" className="w-5 h-5" />
               <span>Settings</span>
             </Menu.Button>
@@ -156,4 +156,4 @@ const Header = () => {
   );
 };
 
-      export default Header;
+export default Header;

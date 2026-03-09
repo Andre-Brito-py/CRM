@@ -4,9 +4,8 @@ import { useTranslation } from "react-i18next";
 const Menu = ({ data, isLoading, showMenu, closeMenu }) => {
   const { t } = useTranslation();
   return showMenu ? (
-    <div className="space-y-2">
-      <h5 className="text-sm font-bold text-gray-400">{t(data.name)}</h5>
-      <ul className="ml-5 leading-10">
+    <div className="space-y-1">
+      <ul className="flex flex-col px-2 space-y-1">
         {data.menuItems.map((entry, index) => (
           <Item key={index} data={entry} isLoading={isLoading} closeMenu={closeMenu} />
         ))}

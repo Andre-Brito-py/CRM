@@ -1,18 +1,31 @@
 import initStripe from 'stripe';
+import { getSystemConfig } from '@/lib/server/config';
 
-const stripe = initStripe(process.env.PAYMENTS_SECRET_KEY);
+let stripeClient = null;
 
-export const createCustomer = async (email) =>
-  await stripe.customers.create({
-    email,
-  });
+const getStripe = async () => {
+  if (!stripeClient) {
+    const secretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+    if (!secretKey) throw new Error('Stripe secret key is missing');
+    stripeClient = initStripe(secretKey);
+  }
+  return stripeClient;
+};
+
+export const createCustomer = async (email) => {
+  const stripe = await getStripe();
+  return await stripe.customers.create({ email });
+};
 
 export const getInvoices = async (customer) => {
+  if (!customer) return [];
+  const stripe = await getStripe();
   const invoices = await stripe.invoices.list({ customer });
   return invoices?.data;
 };
 
 export const getProducts = async () => {
+  const stripe = await getStripe();
   const [products, prices] = await Promise.all([
     stripe.products.list(),
     stripe.prices.list(),
@@ -23,4 +36,4 @@ export const getProducts = async () => {
   return products?.data.reverse();
 };
 
-export default stripe;
+export default getStripe;

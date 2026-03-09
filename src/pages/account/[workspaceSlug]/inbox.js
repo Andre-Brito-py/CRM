@@ -11,18 +11,21 @@ import ConversationList from '@/sections/inbox/ConversationList';
 import ChatWindow from '@/sections/inbox/ChatWindow';
 import useMembers from '@/hooks/data/useMembers';
 import api from '@/lib/common/api';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const Inbox = () => {
   const router = useRouter();
+  const { t } = useTranslation();
   const { workspace } = useWorkspace();
   const { data: session } = useSession();
   const { data: membersData } = useMembers(workspace?.slug);
-  
+
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageText, setMessageText] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  
+
   // Filter states
   const [filterAssignee, setFilterAssignee] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -33,8 +36,8 @@ const Inbox = () => {
   if (filterAssignee) queryParams.append('assigneeId', filterAssignee);
   if (filterStatus) queryParams.append('status', filterStatus);
   if (searchText) queryParams.append('search', searchText);
-  
-  const conversationsUrl = workspace 
+
+  const conversationsUrl = workspace
     ? `/api/workspace/${workspace.slug}/inbox?${queryParams.toString()}`
     : null;
 
@@ -104,7 +107,7 @@ const Inbox = () => {
         method: 'PUT',
         body: JSON.stringify({ assigneeId: memberId }),
       });
-      
+
       if (response.data) {
         toast.success('Conversation assigned');
         // Update local state
@@ -119,13 +122,13 @@ const Inbox = () => {
 
   const handleGenerateResponse = async () => {
     if (!workspace || !selectedConversation) return;
-    
+
     setIsGeneratingAI(true);
     try {
       const response = await api(`/api/workspace/${workspace.slug}/inbox/${selectedConversation.id}/suggest-reply`, {
         method: 'POST',
       });
-      
+
       if (response.data?.suggestion) {
         setMessageText(response.data.suggestion);
         toast.success('AI response generated');
@@ -145,26 +148,56 @@ const Inbox = () => {
 
   if (conversationsError) return <div>Failed to load conversations</div>;
 
+  const inboxSteps = [
+    {
+      element: '#conversation-list',
+      popover: {
+        title: t('onboarding.tour.inbox.step1.title'),
+        description: t('onboarding.tour.inbox.step1.desc'),
+        position: 'right',
+      }
+    },
+    {
+      element: '#chat-window',
+      popover: {
+        title: t('onboarding.tour.inbox.step2.title'),
+        description: t('onboarding.tour.inbox.step2.desc'),
+        position: 'left',
+      }
+    },
+    {
+      element: '#ai-suggest-btn',
+      popover: {
+        title: t('onboarding.tour.inbox.step3.title'),
+        description: t('onboarding.tour.inbox.step3.desc'),
+        position: 'top',
+      }
+    }
+  ];
+
   return (
     <AccountLayout>
+      <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Head>
         <title>Inbox | Nextacular</title>
       </Head>
       <div className="flex h-[calc(100vh-200px)] bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-        <ConversationList
-          conversations={conversationsData?.data?.conversations || []}
-          selectedId={selectedConversation?.id}
-          onSelect={handleSelectConversation}
-          filterAssignee={filterAssignee}
-          setFilterAssignee={setFilterAssignee}
-          filterStatus={filterStatus}
-          setFilterStatus={setFilterStatus}
-          searchText={searchText}
-          setSearchText={setSearchText}
-          members={membersData?.members || []}
-          user={session?.user}
-        />
-        <div className="flex-1 flex flex-col min-w-0 bg-white border-l border-gray-200">
+        <div id="conversation-list" className="w-1/3 min-w-[300px]">
+          <ConversationList
+            conversations={conversationsData?.data?.conversations || []}
+            selectedId={selectedConversation?.id}
+            onSelect={handleSelectConversation}
+            filterAssignee={filterAssignee}
+            setFilterAssignee={setFilterAssignee}
+            filterStatus={filterStatus}
+            setFilterStatus={setFilterStatus}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            members={membersData?.members || []}
+            user={session?.user}
+          />
+        </div>
+        <div id="chat-window" className="flex-1 flex flex-col min-w-0 bg-white border-l border-gray-200">
           <ChatWindow
             conversation={selectedConversation ? { ...selectedConversation, messages } : null}
             onSendMessage={handleSendMessage}

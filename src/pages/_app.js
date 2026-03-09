@@ -64,11 +64,19 @@ const App = ({ Component, pageProps }) => {
     };
   }, [router.events]);
 
-  // Load saved language preference
+  // Load saved language preference or detect from browser
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language');
     if (savedLanguage) {
       i18n.changeLanguage(savedLanguage);
+    } else {
+      // Browser language detection
+      const browserLang = navigator.language || navigator.userLanguage;
+      if (browserLang.startsWith('pt')) {
+        i18n.changeLanguage('pt');
+      } else {
+        i18n.changeLanguage('en');
+      }
     }
   }, []);
 

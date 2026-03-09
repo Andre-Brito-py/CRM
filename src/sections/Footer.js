@@ -1,16 +1,21 @@
+import Logo from '@/components/Logo';
+
 const Footer = () => {
   return (
     <div className="w-full">
       <div className="relative flex flex-col md:mx-auto md:w-3/4">
-        <footer className="flex flex-col items-center justify-center py-5 space-x-0 space-y-3 border-b md:flex-row md:space-y-0 md:space-x-3">
-          <a className="px-5 py-2 text-xl rounded hover:underline">About</a>
-          <a className="px-5 py-2 text-xl rounded hover:underline">Showcase</a>
-          <a className="px-5 py-2 text-xl rounded hover:underline">Community</a>
-          <a className="px-5 py-2 text-xl rounded hover:underline">Privacy</a>
-          <a className="px-5 py-2 text-xl rounded hover:underline">Terms</a>
+        <footer className="flex flex-col items-center justify-between py-10 border-t border-gray-100 md:flex-row space-y-5 md:space-y-0 text-gray-500">
+          <Logo variant="full" className="opacity-80 hover:opacity-100 transition-opacity" />
+          <nav className="flex flex-wrap justify-center gap-6">
+            <a className="hover:text-blue-600 transition-colors">About</a>
+            <a className="hover:text-blue-600 transition-colors">Showcase</a>
+            <a className="hover:text-blue-600 transition-colors">Community</a>
+            <a className="hover:text-blue-600 transition-colors">Privacy</a>
+            <a className="hover:text-blue-600 transition-colors">Terms</a>
+          </nav>
         </footer>
-        <p className="py-5 text-center text-gray-400">
-          &copy; Nextacular. All rights reserved {new Date().getFullYear()}.
+        <p className="py-5 text-center text-gray-400 text-sm">
+          &copy; {new Date().getFullYear()} Nextacular CRM. Elevating your business.
         </p>
       </div>
     </div>
