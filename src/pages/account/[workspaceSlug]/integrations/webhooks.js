@@ -90,7 +90,7 @@ const Webhooks = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm italic">No webhooks configured yet.</p>
+                <p className="text-zinc-400 text-sm font-medium">No webhooks configured yet.</p>
               )}
             </div>
             

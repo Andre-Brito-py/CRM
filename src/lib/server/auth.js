@@ -14,24 +14,35 @@ export const authOptions = {
   callbacks: {
     session: async ({ session, token, user }) => {
       if (session.user || token) {
-        // If using JWT, user comes from token. If using Database, user is the User object.
-        // We can fetch fresh data from DB to be sure.
-        const userEmail = session?.user?.email || token?.email;
-        const dbUser = await prisma.user.findUnique({
-          where: { email: userEmail },
-          select: { id: true, role: true, email: true, twoFactorEnabled: true }
-        });
+        const userEmail = session?.user?.email || token?.email || null;
+        const userId = token?.id || null;
+
+        const or = [];
+        if (userEmail) or.push({ email: userEmail });
+        if (userId) or.push({ id: userId });
+
+        const dbUser = or.length
+          ? await prisma.user.findFirst({
+            where: { OR: or },
+            select: { id: true, role: true, email: true, twoFactorEnabled: true },
+          })
+          : null;
 
         if (dbUser) {
           if (!session.user) session.user = {};
+          session.user.id = dbUser.id;
           session.user.userId = dbUser.id;
           session.user.role = dbUser.role;
           session.user.email = dbUser.email;
           session.user.twoFactorEnabled = dbUser.twoFactorEnabled;
 
-          const customerPayment = await getPayment(dbUser.email);
-          if (customerPayment) {
-            session.user.subscription = customerPayment.subscriptionType;
+          if (dbUser.role === 'SUPERADMIN') {
+            session.user.subscription = 'PREMIUM';
+          } else {
+            const customerPayment = await getPayment(dbUser.email);
+            if (customerPayment) {
+              session.user.subscription = customerPayment.subscriptionType;
+            }
           }
         }
       }

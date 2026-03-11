@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { DocumentDuplicateIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { getSession, signOut } from 'next-auth/react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
@@ -26,6 +26,7 @@ const Settings = ({ user }) => {
   const validEmail = isEmail(email);
   const { t, i18n } = useTranslation();
   const verifiedEmail = verifyEmail === email;
+  const currentLang = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
 
   const copyToClipboard = () => toast.success('Copied to clipboard!');
 
@@ -110,6 +111,7 @@ const Settings = ({ user }) => {
       <Content.Title
         title={t("settings.header.title")}
         subtitle={t("settings.header.description")}
+        className="font-executive"
       />
       <Content.Divider />
       <Content.Container>
@@ -120,7 +122,7 @@ const Settings = ({ user }) => {
               subtitle="Please enter your full name, or a display name you are comfortable with"
             >
               <input
-                className="px-3 py-2 border rounded md:w-1/2"
+                className="w-full md:w-2/3 px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
                 disabled={isSubmitting}
                 onChange={handleNameChange}
                 type="text"
@@ -128,9 +130,9 @@ const Settings = ({ user }) => {
               />
             </Card.Body>
             <Card.Footer>
-              <small>{t("settings.profile.name.validation.message")}</small>
+              <small className="font-medium text-zinc-400">{t("settings.profile.name.validation.message")}</small>
               <Button
-                className="text-white bg-blue-600 hover:bg-blue-500"
+                className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:bg-zinc-200"
                 disabled={!validName || isSubmitting}
                 onClick={changeName}
               >
@@ -139,6 +141,7 @@ const Settings = ({ user }) => {
             </Card.Footer>
           </form>
         </Card>
+        
         <Card>
           <form>
             <Card.Body
@@ -146,7 +149,7 @@ const Settings = ({ user }) => {
               subtitle={t("settings.profile.email.description")}
             >
               <input
-                className="px-3 py-2 border rounded md:w-1/2"
+                className="w-full md:w-2/3 px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
                 disabled={isSubmitting}
                 onChange={handleEmailChange}
                 type="email"
@@ -154,9 +157,9 @@ const Settings = ({ user }) => {
               />
             </Card.Body>
             <Card.Footer>
-              <small>{t("settings.profile.email.message")}</small>
+              <small className="font-medium text-zinc-400">{t("settings.profile.email.message")}</small>
               <Button
-                className="text-white bg-blue-600 hover:bg-blue-500"
+                className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:bg-zinc-200"
                 disabled={!validEmail || isSubmitting}
                 onClick={changeEmail}
               >
@@ -165,49 +168,66 @@ const Settings = ({ user }) => {
             </Card.Footer>
           </form>
         </Card>
+
         <Card>
           <Card.Body
             title={t("settings.profile.personal.account.id")}
             subtitle={t("settings.profile.personal.account.message")}
           >
-            <div className="flex items-center justify-between px-3 py-2 space-x-5 font-mono text-sm border rounded md:w-1/2">
-              <span className="overflow-x-auto">{userCode}</span>
+            <div className="flex items-center justify-between px-6 py-4 space-x-5 font-mono text-sm bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl md:w-2/3 group">
+              <span className="overflow-x-auto text-zinc-600 dark:text-zinc-300 select-all font-bold tracking-tight">{userCode}</span>
               <CopyToClipboard onCopy={copyToClipboard} text={userCode}>
-                <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-blue-600" />
+                <button className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 shadow-sm border-white/0 group">
+                   <DocumentDuplicateIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
+                </button>
               </CopyToClipboard>
             </div>
           </Card.Body>
         </Card>
+
         <Card>
           <Card.Body
             title={t("settings.language.label")}
             subtitle={t("settings.language.description")}
           >
-            <select
-              className="px-3 py-2 border rounded md:w-1/2"
-              onChange={(e) => {
-                const lang = e.target.value;
-                i18n.changeLanguage(lang);
-                localStorage.setItem('language', lang);
-              }}
-              value={i18n.language}
-            >
-              <option value="en">English</option>
-              <option value="pt">Português</option>
-            </select>
+            <div className="relative md:w-2/3">
+              <select
+                className="appearance-none w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all cursor-pointer"
+                onChange={(e) => {
+                  const lang = e.target.value;
+                  i18n.changeLanguage(lang);
+                  try {
+                    localStorage.setItem('language', lang);
+                  } catch (e) {
+                  }
+                  document.cookie = `language=${encodeURIComponent(lang)}; path=/; max-age=31536000; samesite=lax`;
+                  document.documentElement.lang = lang;
+                }}
+                value={currentLang}
+              >
+                <option value="en">English</option>
+                <option value="pt">Português</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="de">Deutsch</option>
+                <option value="it">Italiano</option>
+              </select>
+              <ChevronRightIcon className="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 rotate-90 pointer-events-none" />
+            </div>
           </Card.Body>
         </Card>
+
         <Card danger>
           <Card.Body
             title={t("settings.account.deactive.title")}
             subtitle={t("settings.account.deactive.description")}
           />
           <Card.Footer>
-            <small>
+            <small className="font-medium text-red-400/80">
               {t("settings.account.deactive.message")}
             </small>
             <Button
-              className="text-white bg-red-600 hover:bg-red-500"
+              className="text-white bg-red-600 hover:bg-red-700 shadow-lg shadow-red-500/20"
               onClick={toggleModal}
             >
               {t("settings.account.action.deactive.label")}
@@ -218,33 +238,37 @@ const Settings = ({ user }) => {
             title="Deactivate Personal Account"
             toggle={toggleModal}
           >
-            <p>
-              {t("settings.account.action.deactive.label")}
-            </p>
-            <p className="px-3 py-2 text-red-600 border border-red-600 rounded">
-              <strong>Warning:</strong> {t("settings.account.deactive.message")}
-            </p>
-            <div className="flex flex-col">
-              <label className="text-sm text-gray-400">
-                Enter <strong>{user.email}</strong> to continue:
-              </label>
-              <input
-                className="px-3 py-2 border rounded"
-                disabled={isSubmitting}
-                onChange={handleVerifyEmailChange}
-                type="email"
-                value={verifyEmail}
-              />
-            </div>
-            <div className="flex flex-col items-stretch">
-              <Button
-                className="text-white bg-red-600 hover:bg-red-500"
-                disabled={!verifiedEmail || isSubmitting}
-                onClick={deactivateAccount}
-              >
-                <span>{t("settings.account.action.deactive.label")}</span>
-              </Button>
-            </div>
+             <div className="p-8 space-y-6">
+                <p className="text-zinc-600 font-medium">
+                  {t("settings.account.action.deactive.label")}
+                </p>
+                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                  <p className="text-sm text-red-600 font-bold flex items-center gap-2">
+                    <span className="text-lg">⚠️</span> {t("settings.account.deactive.message")}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <label className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-2">
+                    Enter <span className="text-zinc-900 dark:text-white">{user.email}</span> to continue:
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-red-500/30 transition-all"
+                    disabled={isSubmitting}
+                    onChange={handleVerifyEmailChange}
+                    type="email"
+                    value={verifyEmail}
+                  />
+                </div>
+                <div className="pt-4">
+                  <Button
+                    className="w-full text-white bg-red-600 hover:bg-red-700 py-4 shadow-xl shadow-red-500/20"
+                    disabled={!verifiedEmail || isSubmitting}
+                    onClick={deactivateAccount}
+                  >
+                    <span className="font-bold">{t("settings.account.action.deactive.label")}</span>
+                  </Button>
+                </div>
+             </div>
           </Modal>
         </Card>
       </Content.Container>
@@ -254,16 +278,71 @@ const Settings = ({ user }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
-  const { email, name, userCode } = await getUser(session.user?.userId);
-  return {
-    props: {
-      user: {
-        email,
-        name,
-        userCode,
+
+  // Be resilient: check both userId and email for session validity
+  const userId = session?.user?.userId || session?.user?.id;
+  const userEmail = session?.user?.email;
+
+  if (!session || (!userId && !userEmail)) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
       },
-    },
-  };
+    };
+  }
+
+  try {
+    let user = null;
+
+    if (userId) {
+      user = await getUser(userId);
+    }
+
+    // Fallback: fetch by email if userId didn't work
+    if (!user && userEmail) {
+      const prisma = (await import('@/prisma/index')).default;
+      user = await prisma.user.findUnique({
+        where: { email: userEmail },
+        select: { email: true, name: true, userCode: true },
+      });
+    }
+
+    if (!user) {
+      // Instead of 404, render the page with data from session as fallback
+      return {
+        props: {
+          user: {
+            email: userEmail || '',
+            name: session?.user?.name || '',
+            userCode: '',
+          },
+        },
+      };
+    }
+
+    return {
+      props: {
+        user: {
+          email: user.email || '',
+          name: user.name || '',
+          userCode: user.userCode || '',
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching user for settings:', error);
+    // Fallback gracefully with session data rather than redirecting away
+    return {
+      props: {
+        user: {
+          email: userEmail || '',
+          name: session?.user?.name || '',
+          userCode: '',
+        },
+      },
+    };
+  }
 };
 
 export default Settings;

@@ -8,10 +8,12 @@ import sidebarMenu from '@/config/menu/sidebar-static';
 import { useWorkspaces } from '@/hooks/data';
 import { useWorkspace } from '@/providers/workspace';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 const staticMenu = sidebarMenu();
 
 const Sidebar = ({ menu }) => {
+  const { t } = useTranslation();
   const [showMenu, setMenuVisibility] = useState(false);
   const { data, isLoading } = useWorkspaces();
   const { workspace } = useWorkspace();
@@ -50,9 +52,9 @@ const Sidebar = ({ menu }) => {
   const toggleMenu = () => setMenuVisibility(!showMenu);
 
   return (
-    <aside id="sidebar-nav" className="sticky z-40 flex flex-col text-zinc-400 bg-zinc-900 border-r border-white/5 md:overflow-y-auto md:w-1/4 md:min-w-[280px] md:h-screen overscroll-contain transition-all duration-300">
-      <div className="relative flex items-center justify-between px-6 py-8 border-b border-white/5">
-        <Logo variant="full" forceLight={true} className="scale-105" />
+    <aside id="sidebar-nav" className="sticky z-40 flex flex-col glass-dark md:overflow-y-auto md:w-1/4 md:min-w-[280px] md:h-screen overscroll-contain transition-all duration-500 shadow-2xl shadow-black/50 border-r border-white/5">
+      <div className="relative flex items-center justify-between px-8 py-10 border-b border-white/5 font-executive">
+        <Logo variant="full" forceLight={true} className="scale-110 transition-transform duration-500 hover:scale-[1.12]" />
         <button className="md:hidden text-zinc-400 hover:text-white transition-colors" onClick={toggleMenu}>
           {showMenu ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
         </button>
@@ -62,22 +64,22 @@ const Sidebar = ({ menu }) => {
         className={[
           'flex-col flex-1 pb-10 md:flex md:relative',
           showMenu
-            ? 'absolute top-[104px] bg-zinc-900 inset-x-0 bottom-0 z-50 h-[calc(100vh-104px)] overflow-y-auto'
+            ? 'absolute top-[104px] bg-zinc-900 inset-x-0 bottom-0 z-50 h-[calc(100vh-104px)] overflow-y-auto pt-4'
             : 'hidden',
         ].join(' ')}
       >
-        <div id="sidebar-actions" className="px-6 py-4">
+        <div id="sidebar-actions" className="px-6 py-6 font-executive">
           <Actions />
         </div>
 
-        <nav className="flex flex-col px-4 mt-4 space-y-1">
-          <div className="px-2 py-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 px-2">Main Menu</span>
+        <nav className="flex flex-col px-6 mt-2 space-y-1.5 flex-1 pb-12 font-executive">
+          <div className="px-3 py-4">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300 px-2 leading-none">{t('sidebar.mainMenu')}</span>
           </div>
           {renderStaticMenu()}
 
-          <div className="px-2 py-6 mt-4">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-500 px-2">Workspace</span>
+          <div className="px-3 py-6 mt-6 border-t border-white/5">
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-zinc-300 px-2 leading-none">{t('common.label.workspace')}</span>
           </div>
           {renderMenu()}
         </nav>

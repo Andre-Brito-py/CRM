@@ -15,6 +15,48 @@ import WorkspaceProvider from '@/providers/workspace';
 import '@/styles/globals.css';
 let enData = require('../messages/en.json');
 let ptData = require('../messages/pt.json');
+let esData = require('../messages/es.json');
+let frData = require('../messages/fr.json');
+let deData = require('../messages/de.json');
+let itData = require('../messages/it.json');
+
+const SUPPORTED_LANGUAGES = ['en', 'pt', 'es', 'fr', 'de', 'it'];
+
+const normalizeLanguage = (lang) => {
+  if (!lang || typeof lang !== 'string') return null;
+  const normalized = lang.trim().replace('_', '-').toLowerCase();
+  const base = normalized.split('-')[0];
+  if (base === 'pt') return 'pt';
+  if (base === 'en') return 'en';
+  if (base === 'es') return 'es';
+  if (base === 'fr') return 'fr';
+  if (base === 'de') return 'de';
+  if (base === 'it') return 'it';
+  return null;
+};
+
+const getCookie = (name) => {
+  if (typeof document === 'undefined') return null;
+  const parts = document.cookie ? document.cookie.split('; ') : [];
+  for (const part of parts) {
+    const index = part.indexOf('=');
+    if (index === -1) continue;
+    const key = part.slice(0, index);
+    if (key !== name) continue;
+    return decodeURIComponent(part.slice(index + 1));
+  }
+  return null;
+};
+
+const persistLanguage = (lang) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('language', lang);
+  } catch (e) {
+  }
+  document.cookie = `language=${encodeURIComponent(lang)}; path=/; max-age=31536000; samesite=lax`;
+  document.documentElement.lang = lang;
+};
 
 const resources = {
   en: {
@@ -22,6 +64,18 @@ const resources = {
   },
   pt: {
     translation: ptData
+  },
+  es: {
+    translation: esData
+  },
+  fr: {
+    translation: frData
+  },
+  de: {
+    translation: deData
+  },
+  it: {
+    translation: itData
   }
 };
 
@@ -38,7 +92,7 @@ i18n
 
 const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
-  const { t } = useTranslation();
+  useTranslation();
   const router = useRouter();
   const swrOptions = swrConfig();
 
@@ -66,18 +120,36 @@ const App = ({ Component, pageProps }) => {
 
   // Load saved language preference or detect from browser
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language');
-    if (savedLanguage) {
-      i18n.changeLanguage(savedLanguage);
-    } else {
-      // Browser language detection
-      const browserLang = navigator.language || navigator.userLanguage;
-      if (browserLang.startsWith('pt')) {
-        i18n.changeLanguage('pt');
-      } else {
-        i18n.changeLanguage('en');
+    let preferred = null;
+
+    try {
+      preferred = normalizeLanguage(localStorage.getItem('language'));
+    } catch (e) {
+    }
+
+    if (!preferred) {
+      preferred = normalizeLanguage(getCookie('language'));
+    }
+
+    if (!preferred && typeof navigator !== 'undefined') {
+      const candidates = Array.isArray(navigator.languages) && navigator.languages.length > 0
+        ? navigator.languages
+        : [navigator.language, navigator.userLanguage].filter(Boolean);
+
+      for (const candidate of candidates) {
+        const normalized = normalizeLanguage(candidate);
+        if (normalized && SUPPORTED_LANGUAGES.includes(normalized)) {
+          preferred = normalized;
+          break;
+        }
       }
     }
+
+    const target = preferred && SUPPORTED_LANGUAGES.includes(preferred) ? preferred : 'en';
+    if (i18n.resolvedLanguage !== target) {
+      i18n.changeLanguage(target);
+    }
+    persistLanguage(target);
   }, []);
 
   return (

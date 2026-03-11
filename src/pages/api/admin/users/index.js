@@ -9,11 +9,18 @@ export default async function handler(req, res) {
     return;
   }
 
-  // Double check role from DB for security
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true },
-  });
+  const where = session?.user?.userId
+    ? { id: session.user.userId }
+    : session?.user?.email
+      ? { email: session.user.email }
+      : null;
+
+  if (!where) {
+    res.status(401).json({ error: { msg: 'Unauthorized' } });
+    return;
+  }
+
+  const user = await prisma.user.findUnique({ where, select: { role: true } });
 
   if (!user || user.role !== 'SUPERADMIN') {
     res.status(403).json({ error: { msg: 'Forbidden' } });

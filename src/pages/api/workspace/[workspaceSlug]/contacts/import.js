@@ -52,6 +52,16 @@ export default async function handler(req, res) {
     }
 
     try {
+      const { canAddContact } = await import('@/lib/server/subscription');
+      const currentContactCount = await prisma.contact.count({
+        where: { workspaceId: workspace.id }
+      });
+      
+      const isAllowed = await canAddContact(workspace.creator.email, currentContactCount + validContacts.length - 1);
+      if (!isAllowed) {
+        return res.status(403).json({ error: { msg: 'LIMIT_REACHED', details: 'A importação excede o limite de contatos do seu plano. Faça um upgrade para adicionar mais contatos.' } });
+      }
+
       const result = await prisma.contact.createMany({
         data: validContacts,
         skipDuplicates: true, // Optional: skip if unique constraint fails (e.g. email?) 

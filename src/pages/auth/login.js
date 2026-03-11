@@ -244,7 +244,7 @@ const Login = () => {
         {step === 'LOGIN' && (
           <div className="pt-4 text-center border-t border-gray-200 w-full mt-6">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link href="/auth/register" className="font-semibold text-brand-600 hover:text-brand-500">
                 Sign up
               </Link>

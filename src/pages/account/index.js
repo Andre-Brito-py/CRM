@@ -70,10 +70,10 @@ const Welcome = () => {
       <div className="flex flex-col gap-10">
         <section>
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-zinc-900 font-executive tracking-tight">
+            <h1 className="text-3xl font-bold text-zinc-900 dark:text-white font-executive tracking-tight">
               {t('workspace.dashboard.header.title')}
             </h1>
-            <p className="mt-2 text-zinc-500">
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
               {t("workspace.dashboard.header.description")}
             </p>
           </div>
@@ -81,7 +81,7 @@ const Welcome = () => {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {isFetchingWorkspaces ? (
               [1, 2, 3].map((i) => (
-                <div key={i} className="h-48 bg-white border border-zinc-200 rounded-3xl animate-pulse" />
+                <div key={i} className="h-48 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl animate-pulse" />
               ))
             ) : workspacesData?.workspaces.length > 0 ? (
               workspacesData.workspaces.map((workspace, index) => (
@@ -92,12 +92,12 @@ const Welcome = () => {
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl font-executive">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xl font-executive">
                         {workspace.name.charAt(0)}
                       </div>
-                      <span className="px-2.5 py-1 rounded-full bg-zinc-100 text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Workspace</span>
+                      <span className="px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-[10px] font-bold uppercase tracking-wider">Workspace</span>
                     </div>
-                    <h3 className="text-xl font-bold text-zinc-900 font-executive">{workspace.name}</h3>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-white font-executive">{workspace.name}</h3>
                   </div>
 
                   <div className="mt-6 flex items-center text-indigo-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
@@ -107,7 +107,7 @@ const Welcome = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-20 bg-white border-2 border-dashed border-zinc-200 rounded-3xl flex flex-col items-center justify-center text-zinc-400">
+              <div className="col-span-full py-20 bg-zinc-50/50 dark:bg-zinc-900/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500">
                 <p className="text-lg font-medium">{t('workspace.message.createworkspace')}</p>
               </div>
             )}
@@ -116,10 +116,10 @@ const Welcome = () => {
 
         <section className="pt-10 border-t border-zinc-200">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-zinc-900 font-executive tracking-tight">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white font-executive tracking-tight">
               {t("workspace.dashboard.header.invitations.title")}
             </h2>
-            <p className="mt-2 text-zinc-500">
+            <p className="mt-2 text-zinc-500 dark:text-zinc-400">
               {t("workspace.dashboard.header.invitations.description")}
             </p>
           </div>
@@ -131,17 +131,17 @@ const Welcome = () => {
               invitationsData.invitations.map((invitation, index) => (
                 <div key={index} className="premium-card p-8 border-zinc-200/80">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                       <PlusIcon className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-zinc-900">{invitation.workspace.name}</h3>
-                      <p className="text-xs text-zinc-500">Pending Invitation</p>
+                      <h3 className="font-bold text-zinc-900 dark:text-white">{invitation.workspace.name}</h3>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Pending Invitation</p>
                     </div>
                   </div>
 
-                  <p className="text-sm text-zinc-600 mb-8 leading-relaxed">
-                    You have been invited by <span className="font-semibold text-zinc-900">{invitation.invitedBy.name || invitation.invitedBy.email}</span>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-8 leading-relaxed">
+                    You have been invited by <span className="font-semibold text-zinc-900 dark:text-white">{invitation.invitedBy.name || invitation.invitedBy.email}</span>
                   </p>
 
                   <div className="flex items-center gap-3">
@@ -153,7 +153,7 @@ const Welcome = () => {
                       Accept
                     </Button>
                     <Button
-                      className="flex-1 py-3 text-zinc-600 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors"
+                      className="flex-1 py-3 text-zinc-600 dark:text-zinc-300 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors"
                       disabled={isSubmitting}
                       onClick={() => decline(invitation.id)}
                     >
@@ -163,7 +163,7 @@ const Welcome = () => {
                 </div>
               ))
             ) : (
-              <div className="col-span-full py-12 bg-white/50 border border-zinc-200 border-dashed rounded-3xl flex flex-col items-center justify-center text-zinc-400 italic">
+              <div className="col-span-full py-16 bg-zinc-50/50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 border-dashed rounded-[32px] flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 font-medium">
                 {t("workspace.team.invitations.empty.message")}
               </div>
             )}

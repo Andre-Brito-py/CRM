@@ -93,6 +93,10 @@ const Users = () => {
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
               {isLoading ? (
                 <div className="p-4 text-center text-gray-500">Loading users...</div>
+              ) : error ? (
+                <div className="p-4 text-center text-red-600">
+                  Failed to load users.
+                </div>
               ) : users.length === 0 ? (
                 <div className="p-4 text-center text-gray-500">No users found.</div>
               ) : (

@@ -4,6 +4,13 @@ import prisma from '@/prisma/index';
  * Retorna o status da assinatura de um usuário (FREE, STANDARD, PREMIUM)
  */
 export const getSubscriptionStatus = async (email) => {
+    const user = await prisma.user.findUnique({
+        where: { email },
+        select: { role: true },
+    });
+
+    if (user?.role === 'SUPERADMIN') return 'PREMIUM';
+
     const customerPayment = await prisma.customerPayment.findUnique({
         where: { email },
     });
@@ -37,10 +44,22 @@ export const canAddWorkspaceMembers = async (workspaceCreatorEmail, currentMembe
 export const canAddWhatsAppIntegration = async (workspaceCreatorEmail, currentWAintegrationsCount) => {
     const plan = await getSubscriptionStatus(workspaceCreatorEmail);
 
-    // TODO: fetch limits from SystemConfig in the future. Static for now:
     if (plan === 'PREMIUM') return true; // Unlimited
-    if (plan === 'STANDARD' && currentWAintegrationsCount < 3) return true; // Max 3
+    if (plan === 'STANDARD' && currentWAintegrationsCount < 5) return true; // Max 5
     if (plan === 'FREE' && currentWAintegrationsCount < 1) return true; // Max 1
+
+    return false;
+};
+
+/**
+ * Validation to check how many Contacts a workspace can have
+ */
+export const canAddContact = async (workspaceCreatorEmail, currentContactCount) => {
+    const plan = await getSubscriptionStatus(workspaceCreatorEmail);
+
+    if (plan === 'PREMIUM') return true; // Unlimited
+    if (plan === 'STANDARD') return true; // Unlimited
+    if (plan === 'FREE' && currentContactCount < 100) return true; // Max 100
 
     return false;
 };

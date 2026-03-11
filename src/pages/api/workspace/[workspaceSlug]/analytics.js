@@ -9,6 +9,7 @@ const handler = async (req, res) => {
   }
 
   const { workspaceSlug } = req.query;
+  const scope = req.query.scope;
 
   if (req.method === 'GET') {
     try {
@@ -19,6 +20,64 @@ const handler = async (req, res) => {
 
       if (!workspace) {
         return res.status(404).json({ error: 'Workspace not found' });
+      }
+
+      if (scope === 'whatsapp') {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const messages = await prisma.message.findMany({
+          where: {
+            createdAt: { gte: thirtyDaysAgo },
+            conversation: {
+              workspaceId: workspace.id,
+              platform: 'WHATSAPP',
+            },
+          },
+          select: {
+            createdAt: true,
+            direction: true,
+          },
+        });
+
+        const days = [];
+        const map = new Map();
+        const start = new Date(thirtyDaysAgo);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date();
+        end.setHours(0, 0, 0, 0);
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const key = d.toISOString().slice(0, 10);
+          map.set(key, { date: key, inbound: 0, outbound: 0, total: 0 });
+          days.push(key);
+        }
+
+        messages.forEach((m) => {
+          if (!m.createdAt) return;
+          const key = new Date(m.createdAt).toISOString().slice(0, 10);
+          if (!map.has(key)) return;
+          const entry = map.get(key);
+          const dir = (m.direction || '').toUpperCase();
+          if (dir === 'INBOUND') entry.inbound += 1;
+          if (dir === 'OUTBOUND') entry.outbound += 1;
+          entry.total += 1;
+        });
+
+        const messageTrend = days.map((d) => map.get(d));
+        const totals = messageTrend.reduce(
+          (acc, cur) => ({
+            inbound: acc.inbound + cur.inbound,
+            outbound: acc.outbound + cur.outbound,
+            total: acc.total + cur.total,
+          }),
+          { inbound: 0, outbound: 0, total: 0 }
+        );
+
+        return res.status(200).json({
+          messageTrend,
+          messageTotals: totals,
+        });
       }
 
       // 1. Sales by User (Won Deals)
@@ -185,8 +244,8 @@ const handler = async (req, res) => {
         const end = new Date(deal.closeDate).getTime();
         // Ensure valid dates
         if (!isNaN(start) && !isNaN(end) && end >= start) {
-            const diff = end - start;
-            totalDuration += diff;
+          const diff = end - start;
+          totalDuration += diff;
         }
       });
 
@@ -194,10 +253,10 @@ const handler = async (req, res) => {
         ? Math.round((totalDuration / closedDeals.length) / (1000 * 60 * 60 * 24)) // in days
         : 0;
 
-      res.status(200).json({ 
-        salesByUser: salesByUserWithDetails, 
-        funnelData, 
-        salesTrend, 
+      res.status(200).json({
+        salesByUser: salesByUserWithDetails,
+        funnelData,
+        salesTrend,
         taskCompletionData,
         sourceData,
         avgClosingTime

@@ -2,15 +2,15 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-1.4.0-indigo?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-1.4.1--Beta-indigo?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-13-black?style=for-the-badge&logo=next.js)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?style=for-the-badge&logo=tailwind-css)
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)
 ![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
 
-**Uma plataforma SaaS de CRM completa para gerenciamento de clientes, vendas e atendimento omnichannel.**
+**Plataforma profissional de CRM Omnichannel para gestão de clientes, vendas e atendimento.**
 
-[Instalação](#-como-começar) · [Funcionalidades](#-funcionalidades) · [Roadmap](#-roadmap) · [Contribuição](#-contribuição)
+[Instalação](#-como-começar) · [Funcionalidades](#-funcionalidades) · [Tech Stack](#-tech-stack) · [Roadmap](#-roadmap)
 
 </div>
 
@@ -20,56 +20,73 @@
 
 ### 🏢 Multi-tenancy & Workspaces
 - **Workspaces Isolados** — Ambientes separados por equipe ou empresa
-- **Gestão de Equipe** — Convite de membros e controle de permissões
+- **Gestão de Equipe** — Convite de membros, controle de permissões por papel
 - **Seletor de Workspace** — Navegação fluida entre múltiplos ambientes
 
-### 📊 CRM Completo
-- **Dashboard Executivo** — Métricas de vendas, receita e atividades em tempo real
-- **Gestão de Contatos & Empresas** — Base centralizada de leads e clientes B2B
-- **Pipeline de Vendas Visual** — Kanban com drag-and-drop (`@hello-pangea/dnd`)
-- **Histórico de Atividades** — Timeline detalhada de interações e auditoria
+### 📊 Dashboard Executivo
+- **Métricas em Tempo Real** — KPIs de vendas, receita, deals ativos e atividades
+- **Gráficos Interativos** — Recharts integrado com tema claro/escuro
+- **Atividades Recentes** — Timeline detalhada de eventos do workspace
+
+### 🗂️ Pipeline de Vendas
+- **Kanban Visual** — Drag-and-drop de deals entre etapas (`@hello-pangea/dnd`)
+- **Múltiplas Etapas** — Prospecção, Qualificação, Proposta, Negociação, Fechamento
+- **Valor por Deal** — Acompanhamento financeiro do pipeline
+
+### 👥 Contatos & Empresas
+- **Cadastro Completo** — Dados de contato, empresa, cargo, canal de comunicação
+- **Vinculação de Atividades** — Histórico de interações por contato
+- **Campos Personalizados** — Extensão do modelo de dados por workspace
+- **Importação CSV** — Carga em massa de contatos
 
 ### 💬 Inbox Omnichannel
 - **Central Unificada** — Conversas de todos os canais em um só lugar
-- **Envio de Mensagens WhatsApp** — Mensagens de saída via API do Facebook/Meta
-- **Sugestão de Resposta por IA** — Respostas inteligentes geradas por OpenAI
-- **Múltiplos Números de WhatsApp** — Gerencie vários números por workspace (com limites por plano)
+- **Integração WhatsApp via Meta API** — Envio e recebimento de mensagens em tempo real
+- **Múltiplos Números de WhatsApp** — Gerencie vários números por workspace
+- **Sugestão de Resposta por IA** — Respostas inteligentes geradas pelo OpenAI
 
-### 🔒 Autenticação Robusta
-- **Login por Magic Link** (email passwordless)
-- **Login por Senha** com credenciais seguras
-- **Autenticação em Dois Fatores (2FA)** via TOTP (Google Authenticator)
-- **Verificação de Email** no cadastro
-- **Configurações de Segurança** com QR Code para 2FA
+### 🔒 Autenticação & Segurança
+- **Magic Link** — Login passwordless por email
+- **Login por Credenciais** — Email + senha com bcrypt
+- **2FA via TOTP** — Google Authenticator com QR Code
+- **Verificação de Email** — Fluxo completo de confirmação de conta
+- **Segurança Configurável** — Ative/desative 2FA diretamente nas configurações
 
-### 💳 Billing & Planos
+### 💳 Planos & Faturamento
+- **3 Planos** — Free / Standard / Premium com limites definidos por feature
 - **Integração Stripe** — Checkout, Webhooks e gestão de assinaturas
-- **3 Planos** (Free / Standard / Premium) com limites dinâmicos
 - **Paywalls Inteligentes** — Bloqueio elegante de funcionalidades premium na UI
-- **Billing Page** completa com status do plano atual
+- **Billing Dashboard** — Status de plano, próximas cobranças e histórico de faturas
 
 ### 🛡️ Super Admin Panel
-- **Gestão de Tenants** — Suspensão, reativação e exclusão de contas
-- **Gestão de Planos** — Criação e edição de planos de assinatura
-- **Configurações de API via UI** — Stripe, OpenAI, SMTP, sem re-deploy
-- **Dashboard de Monitoramento** — Métricas de crescimento e saúde da plataforma
+- **Gestão de Tenants** — Suspensão, reativação e exclusão de usuários
+- **Gestão de Planos** — Criação e edição de planos de assinatura via UI
+- **Configurações Globais de API** — Stripe, OpenAI, SMTP — sem re-deploy
+- **Monitoramento** — Métricas de crescimento e saúde da plataforma
 
-### 🎓 Onboarding com Tours Interativos
-- **Tour guiado na primeira visita** de cada tela (driver.js)
-- **Opção de Pular** o tour a qualquer momento
-- **Persistência no banco** — o tour não reaparece após concluído
-- **Tradução automática** com base no idioma do navegador
+### 🎓 Onboarding Interativo
+- **Tours Guiados** — Tour passo a passo na primeira visita de cada tela (driver.js)
+- **Progressão Persistente** — Progresso salvo no banco, não reaparece após concluído
+- **Tradução Automática** — Tours traduzidos conforme o idioma do usuário
 
 ### 🌍 Internacionalização (i18n)
-- **Português (PT-BR)** e **Inglês (EN)** suportados
-- **Detecção automática** do idioma do navegador
-- **react-i18next** com arquivos de tradução separados
+- **6 Idiomas Suportados** — Português, Inglês, Espanhol, Francês, Alemão, Italiano
+- **Detecção Automática** — Baseada no navegador do usuário
+- **Seleção Manual** — Selector de idioma nas Configurações da conta
 
-### 🎨 Design System "Executive Zinc"
-- **Tipografia Premium** — Fonte `Outfit` para elementos de destaque
-- **Glassmorphism** — Efeitos de backdrop blur e transparência
-- **Componentes Premium** — Cards elevados, sidebar executiva com estados ativos
-- **Logo Inteligente** — Transparência processada por canvas (`SmartTransparentImage`)
+### 🎨 Design System "Elite Executive"
+- **Modo Escuro Profissional** — Paleta Zinc-950 com contraste impecável em todos os elementos
+- **Modo Claro Premium** — Glassmorphism, sombras elevadas e bordas sutis
+- **Tipografia Executiva** — Fonte `Outfit` (display) + `Inter` (corpo)
+- **Animações Fluidas** — Framer Motion com micro-interações e hover states
+- **Componentes Uniformes** — Cards, Sidebar, Header e Modais com `dark:` tokens completos
+
+### 🖥️ Página de Vendas Premium
+- **Hero Animado** — Partículas e gradientes com resposta ao movimento do mouse
+- **Seção de Funcionalidades** com ícones e descrições interativas
+- **Preços com Feature Gating** — Tabela de planos com funcionalidades por nível
+- **Testemunhos** e **FAQ** completos
+- **CTA de Alta Conversão** com animações responsivas ao scroll
 
 ---
 
@@ -77,16 +94,19 @@
 
 | Camada | Tecnologia |
 |---|---|
-| **Frontend** | Next.js 13, React, Tailwind CSS, Headless UI |
+| **Frontend** | Next.js 13, React 18, Tailwind CSS 3, Headless UI |
+| **Animações** | Framer Motion |
 | **Backend** | Next.js API Routes (Serverless) |
 | **Banco de Dados** | PostgreSQL + Prisma ORM |
 | **Autenticação** | NextAuth.js (Magic Link, Credentials, TOTP 2FA) |
 | **Pagamentos** | Stripe (Checkout, Webhooks, Subscriptions) |
 | **IA** | OpenAI API (Suggest Reply) |
 | **WhatsApp** | Facebook/Meta Graph API |
-| **Internacionalização** | react-i18next |
+| **Internacionalização** | react-i18next (6 idiomas) |
 | **Tours** | driver.js |
+| **Gráficos** | Recharts |
 | **Drag & Drop** | @hello-pangea/dnd |
+| **Notificações Push** | Web Push API |
 
 ---
 
@@ -109,8 +129,8 @@ cd CRM
 npm install
 
 # 3. Configure as variáveis de ambiente
-cp .env.example .env
-# Edite .env com suas chaves (DATABASE_URL, NEXTAUTH_SECRET, etc.)
+cp .env.sample .env
+# Edite .env com suas chaves
 
 # 4. Execute as migrations do banco
 npx prisma migrate dev
@@ -124,7 +144,7 @@ npm run dev
 
 Acesse em `http://localhost:3000`.
 
-### Variáveis de Ambiente Necessárias
+### Variáveis de Ambiente
 
 ```env
 # Banco de Dados
@@ -134,7 +154,7 @@ DATABASE_URL="postgresql://..."
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="sua-chave-secreta"
 
-# Email (para Magic Links)
+# Email (Magic Links)
 EMAIL_FROM="noreply@seudominio.com"
 EMAIL_SERVER="smtp://..."
 
@@ -146,25 +166,27 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 ADMIN_EMAIL="admin@seudominio.com"
 ```
 
-> As demais configurações (OpenAI, WhatsApp, SMTP) podem ser definidas **diretamente no painel Super Admin**, sem necessidade de re-deploy.
+> As configurações de OpenAI, WhatsApp e SMTP podem ser definidas **diretamente no Super Admin Panel**, sem necessidade de re-deploy.
 
 ---
 
 ## 🗺️ Roadmap
 
 - [x] Core CRM (Contatos, Empresas, Deals)
-- [x] Pipeline Visual Kanban com drag-and-drop
-- [x] Internacionalização PT-BR / EN
-- [x] Dashboard Executivo com métricas
-- [x] Inbox Omnichannel (UI + Backend)
-- [x] Integração WhatsApp (envio/recebimento)
-- [x] Assistente de IA (Sugestão de Resposta)
+- [x] Pipeline de Vendas Kanban com drag-and-drop
+- [x] Dashboard Executivo com métricas e gráficos
+- [x] Inbox Omnichannel (WhatsApp)
+- [x] Sugestão de Resposta por IA (OpenAI)
 - [x] Múltiplos Números de WhatsApp por Workspace
-- [x] Paywalls e Feature Gating por Plano
+- [x] Sistema de Planos & Paywalls (Free / Standard / Premium)
 - [x] Autenticação Completa (Magic Link + Senha + 2FA)
-- [x] Tours de Onboarding com tradução automática
-- [x] Painel Super Admin completo
-- [x] Design System "Executive Zinc" Premium
+- [x] Onboarding com Tours Interativos (driver.js)
+- [x] Super Admin Panel completo
+- [x] Internacionalização em 6 idiomas
+- [x] Design System "Elite Executive" (Modo Escuro Profissional)
+- [x] Página de Vendas Animada com Feature Gating
+- [x] Importação de Contatos via CSV
+- [x] Notificações Push (Web Push API)
 - [ ] Automação & Workflows de Vendas
 - [ ] App Mobile (PWA)
 - [ ] Relatórios e Exportação de Dados
@@ -175,21 +197,23 @@ ADMIN_EMAIL="admin@seudominio.com"
 
 ```
 src/
-├── components/          # Componentes reutilizáveis (Sidebar, Logo, Button...)
-├── hooks/               # React hooks customizados (data fetching)
+├── components/          # Componentes reutilizáveis (Sidebar, Card, Button...)
+├── hooks/               # React hooks customizados
 ├── layouts/             # Layouts de página (Account, Admin)
 ├── lib/
 │   ├── server/          # Lógica de servidor (Stripe, Auth, WhatsApp, Mail)
 │   └── common/          # Utilitários compartilhados
+├── messages/            # Traduções (pt, en, es, fr, de, it)
 ├── pages/
 │   ├── api/             # API routes (auth, workspace, admin, webhooks)
-│   ├── account/         # Área do usuário (Dashboard, Billing, Inbox...)
+│   ├── account/         # Área do usuário (Dashboard, Settings, Billing...)
 │   └── auth/            # Páginas de autenticação
 ├── providers/           # Context providers (workspace, session)
-├── sections/            # Seções da landing page (Hero, Pricing, Footer)
+├── sections/            # Seções da landing page (Hero, Pricing, CTA...)
 └── styles/              # CSS global e design system
 prisma/
-└── schema.prisma        # Schema do banco de dados
+├── schema.prisma        # Schema do banco de dados
+└── services/            # Serviços de acesso ao banco
 ```
 
 ---

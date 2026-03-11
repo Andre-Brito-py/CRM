@@ -34,6 +34,19 @@ const handler = async (req, res) => {
           return res.status(400).json({ error: { msg: 'Name is required' } });
         }
 
+        // Feature gating
+        const { canAddContact } = await import('@/lib/server/subscription');
+        const prisma = (await import('@/prisma/index')).default;
+        
+        const currentContactCount = await prisma.contact.count({
+          where: { workspaceId: workspace.id }
+        });
+
+        const isAllowed = await canAddContact(workspace.creator.email, currentContactCount);
+        if (!isAllowed) {
+          return res.status(403).json({ error: { msg: 'LIMIT_REACHED', details: 'Você atingiu o limite de contatos do seu plano. Faça um upgrade para adicionar mais.' } });
+        }
+
         const contact = await createContact(workspace.id, {
           name,
           email,

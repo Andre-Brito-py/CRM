@@ -9,8 +9,10 @@ import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
 import Modal from '@/components/Modal/index';
 import api from '@/lib/common/api';
+import { useTranslation } from 'react-i18next';
 
 const SecuritySettings = () => {
+    const { t } = useTranslation();
     const { data: session, update } = useSession();
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [showSetupModal, setShowSetupModal] = useState(false);
@@ -34,7 +36,7 @@ const SecuritySettings = () => {
             setQrCodeUrl(response.data.qrCodeUrl);
             setShowSetupModal(true);
         } catch (error) {
-            toast.error('Failed to initialize 2FA setup.');
+            toast.error(t('security.2fa.setupFailed'));
         }
     };
 
@@ -50,26 +52,26 @@ const SecuritySettings = () => {
             });
 
             if (response.data.success) {
-                toast.success('Two-Factor Authentication enabled successfully!');
+                toast.success(t('security.2fa.enabledSuccess'));
                 setIs2FAEnabled(true);
                 setShowSetupModal(false);
                 setToken2fa('');
                 await update(); // Update NextAuth session
             }
         } catch (error) {
-            toast.error(error.message || 'Invalid 2FA code.');
+            toast.error(error.message || t('security.2fa.invalidCode'));
         } finally {
             setIsSubmitting(false);
         }
     };
 
     const handleDisable2FA = async () => {
-        if (confirm('Are you sure you want to disable Two-Factor Authentication?')) {
+        if (confirm(t('security.2fa.disableConfirm'))) {
             try {
                 // Here we could ask for password to disable, but for simplicity we rely on an active session
                 // However, a complete flow would require verifying a token again to disable
                 // Let's assume the user has to enter a token to turn it off
-                const token = prompt('Please enter your 6-digit authenticator code to disable 2FA:');
+                const token = prompt(t('security.2fa.disablePrompt'));
 
                 if (!token) return;
 
@@ -79,43 +81,43 @@ const SecuritySettings = () => {
                 });
 
                 if (response.data.success) {
-                    toast.success('Two-Factor Authentication disabled.');
+                    toast.success(t('security.2fa.disabledSuccess'));
                     setIs2FAEnabled(false);
                     await update();
                 }
             } catch (error) {
-                toast.error('Failed to disable 2FA. Invalid code.');
+                toast.error(t('security.2fa.disableFailed'));
             }
         }
     };
 
     return (
         <AccountLayout>
-            <Meta title="Nextacular - Security Settings" />
-            <Content.Title title="Security Settings" subtitle="Manage your account security and authentication methods" />
+            <Meta title={`Nextacular - ${t('security.title')}`} />
+            <Content.Title title={t('security.title')} subtitle={t('security.subtitle')} />
             <Content.Divider />
             <Content.Container>
                 <Card>
-                    <Card.Body title="Two-Factor Authentication (2FA)">
+                    <Card.Body title={t('security.2fa.cardTitle')}>
                         <div className="flex flex-col space-y-4">
-                            <p className="text-gray-600">
-                                Add an extra layer of security to your account. Once enabled, you'll be required to enter both your password and an authentication code from your mobile device to sign in.
+                            <p className="text-zinc-600 dark:text-zinc-400">
+                                {t('security.2fa.description')}
                             </p>
 
                             <div className="flex items-center space-x-4">
-                                <span className={`px-3 py-1 text-sm font-medium rounded-full ${is2FAEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                                    {is2FAEnabled ? 'Enabled' : 'Disabled'}
+                                <span className={`px-3 py-1 text-sm font-medium rounded-full ${is2FAEnabled ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-400'}`}>
+                                    {is2FAEnabled ? t('security.2fa.status.enabled') : t('security.2fa.status.disabled')}
                                 </span>
                             </div>
 
                             <div className="pt-4 flex">
                                 {is2FAEnabled ? (
                                     <Button className="bg-red-600 hover:bg-red-700 text-white" onClick={handleDisable2FA}>
-                                        Disable 2FA
+                                        {t('security.2fa.disable')}
                                     </Button>
                                 ) : (
                                     <Button className="bg-brand-600 hover:bg-brand-700 text-white" onClick={handleSetup2FA}>
-                                        Set up 2FA
+                                        {t('security.2fa.setup')}
                                     </Button>
                                 )}
                             </div>
@@ -126,21 +128,21 @@ const SecuritySettings = () => {
 
             <Modal show={showSetupModal} toggle={() => setShowSetupModal(false)}>
                 <div className="p-6">
-                    <h3 className="text-xl font-bold mb-4 text-gray-900">Set up Two-Factor Authentication</h3>
-                    <p className="text-gray-600 mb-4">
-                        Scan the QR code below with your authenticator app (e.g., Google Authenticator, Authy, or 1Password).
+                    <h3 className="text-xl font-bold mb-4 text-zinc-900 dark:text-white">{t('security.2fa.modal.title')}</h3>
+                    <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+                        {t('security.2fa.modal.subtitle')}
                     </p>
 
-                    <div className="flex justify-center mb-6 p-4 bg-white rounded-lg border">
+                    <div className="flex justify-center mb-6 p-4 bg-white dark:bg-zinc-800 rounded-lg border dark:border-zinc-700">
                         {qrCodeUrl && <img src={qrCodeUrl} alt="2FA QR Code" className="w-48 h-48" />}
                     </div>
 
                     <form onSubmit={handleVerify2FA}>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Enter Authenticator Code</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('security.2fa.modal.codeLabel')}</label>
                             <input
                                 type="text"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+                                className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all"
                                 placeholder="000000"
                                 value={token2fa}
                                 onChange={(e) => setToken2fa(e.target.value)}
@@ -150,9 +152,9 @@ const SecuritySettings = () => {
                         </div>
 
                         <div className="flex justify-end space-x-3">
-                            <Button type="button" className="text-gray-700 bg-gray-100 hover:bg-gray-200" onClick={() => setShowSetupModal(false)}>Cancel</Button>
+                            <Button type="button" className="text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-bold" onClick={() => setShowSetupModal(false)}>{t('common.action.cancel')}</Button>
                             <Button type="submit" className="text-white bg-brand-600 hover:bg-brand-700" disabled={isSubmitting || token2fa.length < 6}>
-                                {isSubmitting ? 'Verifying...' : 'Verify & Enable'}
+                                {isSubmitting ? t('security.2fa.verifying') : t('security.2fa.verifyEnable')}
                             </Button>
                         </div>
                     </form>

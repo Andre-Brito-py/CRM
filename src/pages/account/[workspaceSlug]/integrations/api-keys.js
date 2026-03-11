@@ -106,7 +106,7 @@ const ApiKeys = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm italic">No API keys generated yet.</p>
+                <p className="text-zinc-400 text-sm font-medium">No API keys generated yet.</p>
               )}
             </div>
             

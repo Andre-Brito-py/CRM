@@ -1,10 +1,10 @@
 const Card = ({ children, danger }) => {
   return danger ? (
-    <div className="flex flex-col justify-between border-2 border-red-600 rounded-2xl bg-white shadow-premium">
+    <div className="flex flex-col justify-between border-2 border-red-500/20 rounded-[32px] bg-white dark:bg-zinc-900/50 shadow-xl shadow-red-500/5 transition-all duration-300">
       {children}
     </div>
   ) : (
-    <div className="flex flex-col justify-between border border-gray-100 rounded-2xl bg-white/60 backdrop-blur-md shadow-premium dark:border-gray-700 dark:bg-gray-800/80">
+    <div className="premium-card">
       {children}
     </div>
   );
@@ -12,23 +12,23 @@ const Card = ({ children, danger }) => {
 
 Card.Body = ({ children, subtitle, title }) => {
   return (
-    <div className="flex flex-col p-5 space-y-3 overflow-auto">
+    <div className="flex flex-col p-8 space-y-4">
       {title ? (
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-2xl font-executive font-bold tracking-tight">{title}</h2>
       ) : (
-        <div className="w-full h-8 bg-gray-400 rounded animate-pulse" />
+        <div className="w-1/3 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-lg animate-pulse" />
       )}
-      {subtitle && <h3 className="text-gray-400">{subtitle}</h3>}
-      <div className="flex flex-col">{children}</div>
+      {subtitle && <h3 className="text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed">{subtitle}</h3>}
+      <div className="flex flex-col pt-2">{children}</div>
     </div>
   );
 };
 
 Card.Empty = ({ children }) => {
   return (
-    <div>
-      <div className="flex items-center justify-center p-5 bg-gray-100 border-4 border-dashed rounded dark:bg-transparent dark:border-gray-600">
-        <p>{children}</p>
+    <div className="p-8">
+      <div className="flex flex-col items-center justify-center p-12 bg-zinc-50/50 dark:bg-zinc-900/50 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-[32px] text-zinc-400 dark:text-zinc-500">
+        <p className="font-medium">{children}</p>
       </div>
     </div>
   );
@@ -36,7 +36,7 @@ Card.Empty = ({ children }) => {
 
 Card.Footer = ({ children }) => {
   return (
-    <div className="flex flex-row items-center justify-between px-5 py-3 space-x-5 bg-gray-100 border-t rounded-b dark:border-t-gray-600 dark:bg-gray-900">
+    <div className="flex flex-row items-center justify-between px-8 py-6 space-x-5 bg-zinc-50/50 dark:bg-zinc-900/30 border-t border-zinc-100 dark:border-zinc-800/50 rounded-b-[32px]">
       {children}
     </div>
   );

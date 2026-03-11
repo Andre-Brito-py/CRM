@@ -14,17 +14,16 @@ model Account {
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
+  refresh_token      String?
+  access_token       String?
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String? @db.Text
+  id_token           String?
   session_state      String?
   oauth_token_secret String?
   oauth_token        String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -39,8 +38,7 @@ model CustomerPayment {
   createdAt        DateTime?        @default(now())
   deletedAt        DateTime?
   updatedAt        DateTime?        @updatedAt
-
-  customer User @relation(fields: [customerId], references: [id])
+  customer         User             @relation(fields: [customerId], references: [id])
 
   @@map("customerPayments")
 }
@@ -50,34 +48,32 @@ model Domain {
   workspaceId String
   addedById   String
   name        String
-  subdomain   String?
-  verified    Boolean?  @default(true)
-  value       String?
   createdAt   DateTime? @default(now())
   deletedAt   DateTime?
   updatedAt   DateTime? @updatedAt
-
-  addedBy   User      @relation(fields: [addedById], references: [id])
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  subdomain   String?
+  value       String?
+  verified    Boolean?  @default(true)
+  addedBy     User      @relation(fields: [addedById], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
   @@map("domains")
 }
 
 model Member {
-  id          String    @id @default(cuid())
+  id          String           @id @default(cuid())
   workspaceId String
   email       String
   inviter     String
-  invitedAt   DateTime? @default(now())
+  invitedAt   DateTime?        @default(now())
   joinedAt    DateTime?
   deletedAt   DateTime?
-  updatedAt   DateTime? @updatedAt
-
-  status    InvitationStatus @default(PENDING)
-  teamRole  TeamRole         @default(MEMBER)
-  member    User?            @relation(fields: [email], references: [email], name: "membership")
-  invitedBy User?            @relation(fields: [inviter], references: [email], name: "inviter")
-  workspace Workspace        @relation(fields: [workspaceId], references: [id])
+  updatedAt   DateTime?        @updatedAt
+  status      InvitationStatus @default(PENDING)
+  teamRole    TeamRole         @default(MEMBER)
+  member      User             @relation("membership", fields: [email], references: [email])
+  invitedBy   User             @relation("inviter", fields: [inviter], references: [email])
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id])
 
   @@unique([workspaceId, email])
   @@map("members")
@@ -88,43 +84,36 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
 
-enum UserRole {
-  USER
-  SUPERADMIN
-}
-
 model User {
-  id            String    @id @default(cuid())
-  userCode      String    @unique @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  role          UserRole  @default(USER)
-  password          String?
-  twoFactorEnabled  Boolean   @default(false)
-  twoFactorSecret   String?
-  createdAt     DateTime? @default(now())
-  deletedAt     DateTime?
-  updatedAt     DateTime? @updatedAt
-  suspended     Boolean   @default(false)
-
+  id               String           @id @default(cuid())
+  userCode         String           @unique @default(cuid())
+  name             String?
+  email            String?          @unique
+  emailVerified    DateTime?
+  image            String?
+  createdAt        DateTime?        @default(now())
+  deletedAt        DateTime?
+  updatedAt        DateTime?        @updatedAt
+  role             UserRole         @default(USER)
+  suspended        Boolean          @default(false)
+  password         String?
+  twoFactorEnabled Boolean          @default(false)
+  twoFactorSecret  String?
+  onboardingStatus Json?            @default("{}")
   accounts         Account[]
-  sessions         Session[]
-  membership       Member[]         @relation("membership")
-  invitedMembers   Member[]         @relation("inviter")
-  createdWorkspace Workspace[]
+  activities       Activity[]
   customerPayment  CustomerPayment?
   domains          Domain[]
-  activities       Activity[]
+  membership       Member[]         @relation("membership")
+  invitedMembers   Member[]         @relation("inviter")
+  sessions         Session[]
   assignedTasks    Task[]
-  onboardingStatus Json?     @default("{}")
+  createdWorkspace Workspace[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -140,64 +129,62 @@ model VerificationToken {
 }
 
 model Workspace {
-  id            String    @id @default(cuid())
-  workspaceCode String    @unique @default(cuid())
-  inviteCode    String    @unique @default(cuid())
-  creatorId     String
-  name          String
-  slug          String
-  createdAt     DateTime? @default(now())
-  deletedAt     DateTime?
-  updatedAt     DateTime? @updatedAt
-
-  creator User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
-  members Member[]
-  domains Domain[]
-  contacts Contact[]
-  companies Company[]
-  pipelines Pipeline[]
-  deals Deal[]
-  conversations Conversation[]
-  tasks         Task[]
-  activities    Activity[]
-  integrations  Integration[]
+  id                     String         @id @default(cuid())
+  workspaceCode          String         @unique @default(cuid())
+  inviteCode             String         @unique @default(cuid())
+  creatorId              String
+  name                   String
+  slug                   String
+  createdAt              DateTime?      @default(now())
+  deletedAt              DateTime?
+  updatedAt              DateTime?      @updatedAt
+  customFieldDefinitions Json?
+  activities             Activity[]
+  companies              Company[]
+  contacts               Contact[]
+  conversations          Conversation[]
+  deals                  Deal[]
+  domains                Domain[]
+  integrations           Integration[]
+  members                Member[]
+  pipelines              Pipeline[]
+  tasks                  Task[]
+  creator                User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
   @@map("workspaces")
 }
 
 model Integration {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   workspaceId String
-  provider    String   // WHATSAPP
-  name        String   @default("WhatsApp")
-  enabled     Boolean  @default(true)
-  credentials Json?    
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  provider    String
+  name        String    @default("WhatsApp")
+  enabled     Boolean   @default(true)
+  credentials Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
   @@map("integrations")
 }
 
 model Contact {
-  id          String    @id @default(cuid())
-  workspaceId String
-  companyId   String?
-  name        String
-  email       String?
-  phone       String?
-  jobTitle    String?
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
-  deletedAt   DateTime?
-
-  workspace     Workspace      @relation(fields: [workspaceId], references: [id])
-  company       Company?       @relation(fields: [companyId], references: [id])
-  deals         Deal[]
+  id            String         @id @default(cuid())
+  workspaceId   String
+  companyId     String?
+  name          String
+  email         String?
+  phone         String?
+  jobTitle      String?
+  createdAt     DateTime?      @default(now())
+  updatedAt     DateTime?      @updatedAt
+  deletedAt     DateTime?
   activities    Activity[]
+  company       Company?       @relation(fields: [companyId], references: [id])
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id])
   conversations Conversation[]
+  deals         Deal[]
   tasks         Task[]
 
   @@map("contacts")
@@ -212,10 +199,9 @@ model Company {
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
   deletedAt   DateTime?
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  contacts  Contact[]
-  deals     Deal[]
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  contacts    Contact[]
+  deals       Deal[]
 
   @@map("companies")
 }
@@ -227,9 +213,8 @@ model Pipeline {
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
   deletedAt   DateTime?
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  stages    Stage[]
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  stages      Stage[]
 
   @@map("pipelines")
 }
@@ -243,33 +228,31 @@ model Stage {
   createdAt  DateTime? @default(now())
   updatedAt  DateTime? @updatedAt
   deletedAt  DateTime?
-
-  pipeline Pipeline @relation(fields: [pipelineId], references: [id])
-  deals    Deal[]
+  deals      Deal[]
+  pipeline   Pipeline  @relation(fields: [pipelineId], references: [id])
 
   @@map("stages")
 }
 
 model Deal {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   workspaceId String
   contactId   String?
   companyId   String?
   stageId     String
   name        String
-  amount      Decimal?  @db.Decimal(10, 2)
+  amount      Decimal?   @db.Decimal(10, 2)
   closeDate   DateTime?
-  priority    String?   @default("MEDIUM")
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
+  priority    String?    @default("MEDIUM")
+  createdAt   DateTime?  @default(now())
+  updatedAt   DateTime?  @updatedAt
   deletedAt   DateTime?
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  contact   Contact?  @relation(fields: [contactId], references: [id])
-  company   Company?  @relation(fields: [companyId], references: [id])
-  stage     Stage     @relation(fields: [stageId], references: [id])
-  activities Activity[]
-  tasks Task[]
+  activities  Activity[]
+  company     Company?   @relation(fields: [companyId], references: [id])
+  contact     Contact?   @relation(fields: [contactId], references: [id])
+  stage       Stage      @relation(fields: [stageId], references: [id])
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  tasks       Task[]
 
   @@map("deals")
 }
@@ -278,35 +261,107 @@ model Conversation {
   id          String    @id @default(cuid())
   workspaceId String
   contactId   String?
-  platform    String    @default("WHATSAPP") // WHATSAPP, INSTAGRAM, etc
-  externalId  String?   // ID da conversa no provedor (ex: WaId)
+  platform    String    @default("WHATSAPP")
+  externalId  String?
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
   deletedAt   DateTime?
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  contact   Contact?  @relation(fields: [contactId], references: [id])
-  messages  Message[]
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  messages    Message[]
 
   @@map("conversations")
 }
 
 model Message {
-  id             String    @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
-  direction      String // INBOUND, OUTBOUND
-  type           String // TEXT, IMAGE, DOCUMENT, TEMPLATE
-  content        String?   @db.Text
+  direction      String
+  type           String
+  content        String?
   mediaUrl       String?
-  status         String    @default("SENT") // SENT, DELIVERED, READ, FAILED
-  externalId     String?   // ID da mensagem no provedor
-  createdAt      DateTime? @default(now())
-  updatedAt      DateTime? @updatedAt
+  status         String       @default("SENT")
+  externalId     String?
+  createdAt      DateTime?    @default(now())
+  updatedAt      DateTime?    @updatedAt
   deletedAt      DateTime?
-
-  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
 
   @@map("messages")
+}
+
+model Activity {
+  id          String    @id @default(cuid())
+  workspaceId String
+  contactId   String?
+  dealId      String?
+  userId      String?
+  type        String    @default("SYSTEM")
+  title       String
+  content     String?
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  deal        Deal?     @relation(fields: [dealId], references: [id])
+  user        User?     @relation(fields: [userId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@map("activities")
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  workspaceId String
+  title       String
+  content     String?
+  dueDate     DateTime?
+  isCompleted Boolean   @default(false)
+  priority    String?
+  assigneeId  String?
+  contactId   String?
+  dealId      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  assignee    User?     @relation(fields: [assigneeId], references: [id])
+  contact     Contact?  @relation(fields: [contactId], references: [id])
+  deal        Deal?     @relation(fields: [dealId], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@map("tasks")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  category  String   @default("GENERAL")
+  updatedAt DateTime @updatedAt
+
+  @@map("system_configs")
+}
+
+model Plan {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  price         Float
+  currency      String   @default("USD")
+  interval      String   @default("month")
+  stripePriceId String?
+  features      Json?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("plans")
+}
+
+enum UserRole {
+  USER
+  SUPERADMIN
 }
 
 enum InvitationStatus {
@@ -324,75 +379,4 @@ enum SubscriptionType {
 enum TeamRole {
   MEMBER
   OWNER
-}
-
-model Activity {
-  id          String    @id @default(cuid())
-  workspaceId String
-  contactId   String?
-  dealId      String?
-  userId      String?
-  type        String    @default("SYSTEM") // NOTE, CALL, TASK, SYSTEM, EMAIL, MEETING
-  title       String
-  content     String?   @db.Text
-  date        DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  contact   Contact?  @relation(fields: [contactId], references: [id])
-  deal      Deal?     @relation(fields: [dealId], references: [id])
-  user      User?     @relation(fields: [userId], references: [id])
-
-  @@map("activities")
-}
-
-model Task {
-  id          String    @id @default(cuid())
-  workspaceId String
-  title       String
-  content     String?
-  dueDate     DateTime?
-  priority    String?
-  assigneeId  String?
-  contactId   String?
-  dealId      String?
-  isCompleted Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  assignee  User?     @relation(fields: [assigneeId], references: [id])
-  contact   Contact?  @relation(fields: [contactId], references: [id])
-  deal      Deal?     @relation(fields: [dealId], references: [id])
-
-  @@map("tasks")
-}
-
-model SystemConfig {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     String
-  category  String   @default("GENERAL") // PAYMENT, EMAIL, AI, GENERAL
-  updatedAt DateTime @updatedAt
-
-  @@map("system_configs")
-}
-
-model Plan {
-  id            String    @id @default(cuid())
-  name          String
-  slug          String    @unique
-  description   String?
-  price         Float
-  currency      String    @default("USD")
-  interval      String    @default("month")
-  stripePriceId String?
-  features      Json?
-  isActive      Boolean   @default(true)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  @@map("plans")
 }

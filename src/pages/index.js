@@ -15,13 +15,12 @@ const Home = ({ products }) => {
   return (
     <LandingLayout>
       <Meta
-        title="NextJS SaaS Boilerplate"
-        description="A boilerplate for your NextJS SaaS projects."
+        title="Nextacular CRM - Omnichannel Sales & Customer Management"
+        description="The ultimate CRM platform to manage your leads, sales pipelines, and WhatsApp conversations in one place."
       />
       <Hero />
       <Features />
       <Pricing products={products} />
-      <Guides />
       <Testimonial />
       <CallToAction />
       <Footer />
@@ -31,13 +30,18 @@ const Home = ({ products }) => {
 
 export const getStaticProps = async () => {
   const plans = await getAllPlans();
-  const products = plans.map((plan) => ({
-    name: plan.name,
-    description: plan.description,
-    price: Number(plan.price),
-    currency: plan.currency,
-    interval: plan.interval,
-  }));
+  const products = plans
+    .filter((plan) => plan.isActive)
+    .map((plan) => ({
+      name: plan.name,
+      slug: plan.slug,
+      description: plan.description,
+      price: Number(plan.price),
+      currency: plan.currency,
+      interval: plan.interval,
+      features: plan.features,
+    }))
+    .sort((a, b) => a.price - b.price); // Sort by price ascending
 
   return {
     props: {

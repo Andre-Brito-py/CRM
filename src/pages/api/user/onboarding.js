@@ -9,7 +9,12 @@ export default async function handler(req, res) {
         return;
     }
 
-    const userId = session.user.userId;
+    const userId = session.user.userId || session.user.id;
+
+    if (!userId) {
+        res.status(400).json({ error: { msg: 'User ID missing in session' } });
+        return;
+    }
 
     if (req.method === 'GET') {
         try {

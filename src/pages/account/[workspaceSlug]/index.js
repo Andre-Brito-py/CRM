@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 import {
   CurrencyDollarIcon,
@@ -6,6 +6,15 @@ import {
   BriefcaseIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
@@ -13,17 +22,17 @@ import { useWorkspace } from '@/providers/workspace';
 import fetcher from '@/lib/client/fetcher';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
-  <div className="glass overflow-hidden rounded-2xl">
-    <div className="p-6">
+  <div className="premium-card overflow-hidden Group">
+    <div className="p-8">
       <div className="flex items-center">
-        <div className={`flex-shrink-0 p-3 rounded-xl bg-${color}-50 text-${color}-600`}>
+        <div className={`flex-shrink-0 p-4 rounded-2xl bg-${color}-500/10 text-${color}-500 dark:text-${color}-400 shadow-sm border border-${color}-500/20`}>
           <Icon className="h-6 w-6" aria-hidden="true" />
         </div>
-        <div className="ml-5 w-0 flex-1">
+        <div className="ml-6 w-0 flex-1">
           <dl>
-            <dt className="text-sm font-medium text-gray-500 uppercase tracking-wider truncate">{title}</dt>
+            <dt className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] truncate mb-1">{title}</dt>
             <dd>
-              <div className="text-2xl font-bold text-gray-900 mt-1">{value}</div>
+              <div className="text-3xl font-executive font-bold text-zinc-900 dark:text-white leading-tight">{value}</div>
             </dd>
           </dl>
         </div>
@@ -35,43 +44,43 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 const ActivityFeed = ({ activities }) => {
   if (!activities || activities.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-4">
+      <div className="text-center text-zinc-400 dark:text-zinc-500 py-12 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl mt-4">
         No recent activities found.
       </div>
     );
   }
 
   return (
-    <div className="flow-root">
+    <div className="flow-root mt-6">
       <ul role="list" className="-mb-8">
         {activities.map((activity, activityIdx) => (
           <li key={activity.id}>
             <div className="relative pb-8">
               {activityIdx !== activities.length - 1 ? (
                 <span
-                  className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
+                  className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-zinc-100 dark:bg-zinc-800"
                   aria-hidden="true"
                 />
               ) : null}
               <div className="relative flex space-x-3">
                 <div>
-                  <span className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center ring-8 ring-white">
-                    <UserGroupIcon className="h-5 w-5 text-white" aria-hidden="true" />
+                  <span className="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center ring-8 ring-white dark:ring-zinc-900">
+                    <UserGroupIcon className="h-4 w-4 text-white" aria-hidden="true" />
                   </span>
                 </div>
                 <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                   <div>
-                    <p className="text-sm text-gray-500">
-                      <span className="font-medium text-gray-900">
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                      <span className="font-bold text-zinc-900 dark:text-zinc-200">
                         {activity.user?.name || 'System'}
                       </span>{' '}
                       {activity.type === 'DEAL_CREATED' ? 'created deal' : 'performed action'}{' '}
-                      <span className="font-medium text-gray-900">
+                      <span className="font-bold text-zinc-900 dark:text-zinc-200">
                         {activity.deal?.name || activity.contact?.name || activity.title}
                       </span>
                     </p>
                   </div>
-                  <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                  <div className="text-right text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
                     <time dateTime={activity.createdAt}>
                       {new Date(activity.createdAt).toLocaleDateString()}
                     </time>
@@ -89,37 +98,37 @@ const ActivityFeed = ({ activities }) => {
 const UpcomingTasks = ({ tasks }) => {
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-4">
+      <div className="text-center text-zinc-400 dark:text-zinc-500 py-12 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl mt-4">
         No upcoming tasks.
       </div>
     );
   }
 
   return (
-    <div className="flow-root">
+    <div className="flow-root mt-6">
       <ul role="list" className="-mb-8">
         {tasks.map((task, idx) => (
           <li key={task.id}>
             <div className="relative pb-8">
               {idx !== tasks.length - 1 ? (
-                <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
+                <span className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-zinc-100 dark:bg-zinc-800" aria-hidden="true" />
               ) : null}
               <div className="relative flex space-x-3">
                 <div>
-                  <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${task.priority === 'HIGH' ? 'bg-red-500' :
-                    task.priority === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
+                  <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white dark:ring-zinc-900 ${task.priority === 'HIGH' ? 'bg-red-500 shadow-lg shadow-red-500/30' :
+                    task.priority === 'MEDIUM' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/30' : 'bg-green-500 shadow-lg shadow-green-500/30'
                     }`}>
-                    <span className="text-white text-xs font-bold">T</span>
+                    <span className="text-white text-[10px] font-bold px-2">T</span>
                   </span>
                 </div>
                 <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{task.title}</p>
-                    <p className="text-xs text-gray-500">
-                      {task.contact ? `Contact: ${task.contact.name}` : task.deal ? `Deal: ${task.deal.name}` : ''}
+                    <p className="text-sm font-bold text-zinc-900 dark:text-zinc-200">{task.title}</p>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-500 font-medium">
+                      {task.contact ? `Contact: ${task.contact.name}` : task.deal ? `Deal: ${task.deal.name}` : 'General Task'}
                     </p>
                   </div>
-                  <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                  <div className="text-right text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-600">
                     {new Date(task.dueDate).toLocaleDateString()}
                   </div>
                 </div>
@@ -132,6 +141,23 @@ const UpcomingTasks = ({ tasks }) => {
   );
 };
 
+const CustomTooltip = ({ active, payload, label }) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="premium-card p-4 border-indigo-500/20 dark:bg-zinc-900 dark:border-zinc-800">
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">{label}</p>
+        <p className="text-lg font-bold text-indigo-500">
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(payload[0].value)}
+        </p>
+      </div>
+    );
+  }
+  return null;
+};
+
 const Workspace = () => {
   const { workspace } = useWorkspace();
   const { data: dashboardData, error } = useSWR(
@@ -139,7 +165,7 @@ const Workspace = () => {
     fetcher
   );
 
-  const stats = [
+  const stats = useMemo(() => [
     {
       title: 'Total Contacts',
       value: dashboardData?.stats?.contacts || 0,
@@ -163,11 +189,12 @@ const Workspace = () => {
       value: new Intl.NumberFormat('pt-BR', {
         style: 'currency',
         currency: 'BRL',
+        maximumFractionDigits: 0
       }).format(dashboardData?.stats?.revenue || 0),
       icon: CurrencyDollarIcon,
-      color: 'green',
+      color: 'indigo',
     },
-  ];
+  ], [dashboardData]);
 
   return (
     workspace && (
@@ -175,63 +202,91 @@ const Workspace = () => {
         <Meta title={`Nextacular - ${workspace.name} | Dashboard`} />
         <Content.Title
           title={workspace.name}
-          subtitle="Overview of your workspace performance"
+          subtitle="Workspace Analytics and Performance"
+          className="font-executive"
         />
         <Content.Divider />
         <Content.Container>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             {stats.map((item) => (
               <StatCard key={item.title} {...item} />
             ))}
           </div>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-brand-50 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
-              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
-                Upcoming Tasks
-              </h3>
-              <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
+            <div className="premium-card p-8 lg:col-span-2">
+              <div className="flex items-center justify-between mb-8">
+                <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
+                   Revenue Performance
+                </h3>
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Monthly Growth</span>
+                </div>
+              </div>
+              
+              <div className="h-[300px] w-full mt-4">
+                {dashboardData?.salesData?.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={dashboardData.salesData}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{fill: '#a1a1aa', fontSize: 10, fontWeight: 700}}
+                        dy={10}
+                      />
+                      <YAxis 
+                        hide 
+                        domain={[0, 'auto']}
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#6366f1" 
+                        strokeWidth={4}
+                        fillOpacity={1} 
+                        fill="url(#colorRevenue)" 
+                        animationDuration={2000}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                     <ChartBarIcon className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mb-4" />
+                     <p className="text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No sales metrics yet</p>
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute bottom-0 right-0 -mb-4 -mr-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl opacity-50 pointer-events-none"></div>
-              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
-                Recent Activity
+            <div className="premium-card p-8 group">
+              <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white mb-2 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
+                Activity Feed
               </h3>
               <ActivityFeed activities={dashboardData?.recentActivities} />
             </div>
 
-            <div className="glass shadow-premium rounded-2xl p-6 relative overflow-hidden">
-              <div className="absolute top-0 left-0 -mt-10 -ml-10 w-40 h-40 bg-green-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
-              <h3 className="text-lg leading-6 font-semibold text-gray-900 mb-6">
-                Sales Performance (Last 6 Months)
-              </h3>
-              {/* Simple Bar Chart Placeholder */}
-              {dashboardData?.salesData?.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {dashboardData.salesData.map((data) => (
-                    <div key={data.name} className="flex items-center Group">
-                      <span className="w-12 text-sm font-medium text-gray-600">{data.name}</span>
-                      <div className="flex-1 ml-3 bg-gray-100/50 rounded-full h-3 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-brand-400 to-brand-600 h-full rounded-full transition-all duration-500 ease-out"
-                          style={{ width: `${Math.min((data.value / (Math.max(...dashboardData.salesData.map(d => d.value)) || 1)) * 100, 100)}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-3 text-sm font-semibold text-gray-700 w-20 text-right">
-                        {new Intl.NumberFormat('pt-BR', {
-                          style: 'currency',
-                          currency: 'BRL',
-                          maximumFractionDigits: 0
-                        }).format(data.value)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No sales data available yet.</p>
-              )}
+            <div className="premium-card p-8 lg:col-span-3">
+              <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
+                <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
+                  Action Center
+                </h3>
+                <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
+                  Priority Tasks
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                 <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
+              </div>
             </div>
           </div>
         </Content.Container>

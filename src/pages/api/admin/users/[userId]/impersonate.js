@@ -1,6 +1,5 @@
 import { getSession } from 'next-auth/react';
 import { encode } from 'next-auth/jwt';
-import { setCookie } from 'nookies'; 
 import prisma from '@/prisma/index';
 
 export default async function handler(req, res) {

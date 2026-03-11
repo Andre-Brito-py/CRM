@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, Fragment } from 'react';
 import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
+import { useTranslation } from 'react-i18next';
+import Paywall from '@/components/Paywall';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -20,6 +22,7 @@ const ChatWindow = ({
   isGeneratingAI,
   onBack
 }) => {
+  const { t } = useTranslation();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateContent, setNewTemplateContent] = useState('');
@@ -55,8 +58,8 @@ const ChatWindow = ({
     return (
       <div className="flex flex-col items-center justify-center flex-1 h-full bg-gray-50">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-700">Select a conversation</h2>
-          <p className="mt-2 text-gray-500">Choose a contact from the list to start chatting.</p>
+          <h2 className="text-xl font-semibold text-gray-700">{t('inbox.chat.empty.title')}</h2>
+          <p className="mt-2 text-gray-500">{t('inbox.chat.empty.subtitle')}</p>
         </div>
       </div>
     );
@@ -74,7 +77,7 @@ const ChatWindow = ({
           )}
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
-              {conversation.contact?.name || conversation.externalId || 'Unknown'}
+              {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h2>
             <p className="text-sm text-gray-500">
               {conversation.platform} • {conversation.contact?.phone || conversation.externalId}
@@ -84,7 +87,7 @@ const ChatWindow = ({
 
         {/* Assignee Selector */}
         <div className="flex items-center">
-          <span className="mr-2 text-sm text-gray-500">Assigned to:</span>
+          <span className="mr-2 text-sm text-gray-500">{t('inbox.assignee.label')}</span>
           <Menu as="div" className="relative inline-block text-left">
             <div>
               <Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500">
@@ -98,7 +101,7 @@ const ChatWindow = ({
                     {conversation.assignee.name}
                   </div>
                 ) : (
-                  'Unassigned'
+                  t('inbox.filter.unassigned')
                 )}
                 <ChevronDownIcon className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
               </Menu.Button>
@@ -124,7 +127,7 @@ const ChatWindow = ({
                           'block w-full text-left px-4 py-2 text-sm'
                         )}
                       >
-                        Unassigned
+                        {t('inbox.filter.unassigned')}
                       </button>
                     )}
                   </Menu.Item>
@@ -170,21 +173,38 @@ const ChatWindow = ({
       {/* Input */}
       <div className="p-4 bg-white border-t border-gray-200">
         <form onSubmit={handleSend} className="flex space-x-4">
-          <button
-            id="ai-suggest-btn"
-            type="button"
-            onClick={onGenerateResponse}
-            disabled={isGeneratingAI}
-            className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-            title="Generate AI Response"
+          <Paywall 
+            minPlan="PREMIUM" 
+            fallback={
+              <button
+                type="button"
+                disabled
+                className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                title={t('paywall.title')}
+              >
+                <SparklesIcon className="w-5 h-5" />
+              </button>
+            }
           >
-            <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'text-blue-500 animate-pulse' : ''}`} />
-          </button>
+            <button
+              id="ai-suggest-btn"
+              type="button"
+              onClick={onGenerateResponse}
+              disabled={isGeneratingAI}
+              className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              title={t('inbox.ai.generate')}
+            >
+              <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'text-blue-500 animate-pulse' : ''}`} />
+            </button>
+          </Paywall>
 
           <div className="relative">
             <Menu as="div" className="relative inline-block text-left">
               <div>
-                <Menu.Button className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" title="Templates">
+                <Menu.Button
+                  className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title={t('inbox.templates.title')}
+                >
                   <DocumentDuplicateIcon className="w-5 h-5" />
                 </Menu.Button>
               </div>
@@ -200,7 +220,7 @@ const ChatWindow = ({
                 <Menu.Items className="absolute bottom-full left-0 mb-2 w-72 origin-bottom-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
                   <div className="py-1">
                     <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                      <span>Templates</span>
+                      <span>{t('inbox.templates.title')}</span>
                       <button
                         type="button"
                         onClick={() => setIsTemplateModalOpen(true)}
@@ -211,7 +231,7 @@ const ChatWindow = ({
                     </div>
                     {templates.length === 0 ? (
                       <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                        No templates yet
+                        {t('inbox.templates.empty')}
                       </div>
                     ) : (
                       <div className="max-h-60 overflow-y-auto">
@@ -243,7 +263,7 @@ const ChatWindow = ({
           <input
             type="text"
             className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Type a message..."
+            placeholder={t('inbox.message.placeholder')}
             value={messageText || ''}
             onChange={(e) => onMessageChange(e.target.value)}
           />
@@ -288,27 +308,27 @@ const ChatWindow = ({
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Create New Template
+                    {t('inbox.templates.create.title')}
                   </Dialog.Title>
                   <div className="mt-4 space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Name</label>
+                      <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.name')}</label>
                       <input
                         type="text"
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
                         value={newTemplateName}
                         onChange={(e) => setNewTemplateName(e.target.value)}
-                        placeholder="e.g., Welcome Message"
+                        placeholder={t('inbox.templates.create.namePlaceholder')}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Content</label>
+                      <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.content')}</label>
                       <textarea
                         className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
                         rows={4}
                         value={newTemplateContent}
                         onChange={(e) => setNewTemplateContent(e.target.value)}
-                        placeholder="Type your message template here..."
+                        placeholder={t('inbox.templates.create.contentPlaceholder')}
                       />
                     </div>
                   </div>
@@ -319,7 +339,7 @@ const ChatWindow = ({
                       className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
                       onClick={() => setIsTemplateModalOpen(false)}
                     >
-                      Cancel
+                      {t('common.action.cancel')}
                     </button>
                     <button
                       type="button"
@@ -327,7 +347,7 @@ const ChatWindow = ({
                       onClick={handleCreateTemplate}
                       disabled={!newTemplateName || !newTemplateContent}
                     >
-                      Create
+                      {t('common.action.create')}
                     </button>
                   </div>
                 </Dialog.Panel>

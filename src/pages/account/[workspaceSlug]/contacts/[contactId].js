@@ -14,8 +14,10 @@ import { useWorkspace } from '@/providers/workspace';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { useTranslation } from 'react-i18next';
 
 const ContactDetails = ({ workspace }) => {
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const { workspaceSlug, contactId } = router.query;
   const { setWorkspace } = useWorkspace();
@@ -35,6 +37,8 @@ const ContactDetails = ({ workspace }) => {
     date: new Date().toISOString().split('T')[0]
   });
   const [isAddingActivity, setIsAddingActivity] = useState(false);
+
+  const locale = (i18n?.language || 'en').split('-')[0] === 'pt' ? 'pt-BR' : (i18n?.language || 'en');
 
   useEffect(() => {
     if (workspace) {
@@ -61,10 +65,10 @@ const ContactDetails = ({ workspace }) => {
         body: { customFields: customFieldValues },
       });
       mutate();
-      toast.success('Custom fields updated');
+      toast.success(t('contacts.customFields.updated'));
       setEditingCustomFields(false);
     } catch (error) {
-      toast.error('Failed to update custom fields');
+      toast.error(t('contacts.customFields.updateFailed'));
     }
   };
 
@@ -78,7 +82,7 @@ const ContactDetails = ({ workspace }) => {
         body: activityForm,
       });
       mutate();
-      toast.success('Activity added');
+      toast.success(t('contacts.activities.added'));
       setIsAddingActivity(false);
       setActivityForm({
         type: 'NOTE',
@@ -87,7 +91,7 @@ const ContactDetails = ({ workspace }) => {
         date: new Date().toISOString().split('T')[0]
       });
     } catch (error) {
-      toast.error('Failed to add activity');
+      toast.error(t('contacts.activities.addFailed'));
     }
   };
 
@@ -102,10 +106,10 @@ const ContactDetails = ({ workspace }) => {
         body: { tags: { connect: [{ id: tagId }] } },
       });
       mutate();
-      toast.success('Tag added');
+      toast.success(t('contacts.tags.added'));
       setIsAddingTag(false);
     } catch (error) {
-      toast.error('Failed to add tag');
+      toast.error(t('contacts.tags.addFailed'));
     }
   };
 
@@ -122,7 +126,7 @@ const ContactDetails = ({ workspace }) => {
       setNewTagName('');
       mutateTags();
     } catch (error) {
-      toast.error('Failed to create tag');
+      toast.error(t('contacts.tags.createFailed'));
     }
   };
 
@@ -133,9 +137,9 @@ const ContactDetails = ({ workspace }) => {
         body: { tags: { disconnect: [{ id: tagId }] } },
       });
       mutate();
-      toast.success('Tag removed');
+      toast.success(t('contacts.tags.removed'));
     } catch (error) {
-      toast.error('Failed to remove tag');
+      toast.error(t('contacts.tags.removeFailed'));
     }
   };
 
@@ -146,7 +150,7 @@ const ContactDetails = ({ workspace }) => {
   if (isLoading) {
     return (
       <AccountLayout>
-        <Content.Container>Loading...</Content.Container>
+        <Content.Container>{t('common.loading')}</Content.Container>
       </AccountLayout>
     );
   }
@@ -154,7 +158,7 @@ const ContactDetails = ({ workspace }) => {
   if (!contact) {
     return (
       <AccountLayout>
-        <Content.Container>Contact not found</Content.Container>
+        <Content.Container>{t('contacts.notFound')}</Content.Container>
       </AccountLayout>
     );
   }
@@ -164,7 +168,7 @@ const ContactDetails = ({ workspace }) => {
       <Meta title={`Nextacular - ${contact.name}`} />
       <Content.Title
         title={contact.name}
-        subtitle={contact.jobTitle || 'No job title'}
+        subtitle={contact.jobTitle || t('contacts.noJobTitle')}
       />
       <Content.Divider />
       <Content.Container>
@@ -172,30 +176,30 @@ const ContactDetails = ({ workspace }) => {
           {/* Left Column: Contact Info */}
           <div className="lg:col-span-1 space-y-6">
             <div className="bg-white shadow sm:rounded-lg p-6">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">Contact Details</h3>
+              <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">{t('contacts.details.title')}</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Email</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('common.label.email')}</label>
                   <div className="mt-1 text-sm text-gray-900">{contact.email || '-'}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Phone</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('contacts.details.phone')}</label>
                   <div className="mt-1 text-sm text-gray-900">{contact.phone || '-'}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Company</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('contacts.details.company')}</label>
                   <div className="mt-1 text-sm text-gray-900">{contact.company?.name || '-'}</div>
                 </div>
                 {/* Custom Fields Section */}
                 <div className="pt-4 border-t border-gray-200">
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-medium text-gray-900">Additional Info</h4>
+                    <h4 className="text-sm font-medium text-gray-900">{t('contacts.customFields.title')}</h4>
                     {!editingCustomFields ? (
                       <button
                         onClick={toggleEditCustomFields}
                         className="text-xs text-blue-600 hover:text-blue-800"
                       >
-                        Edit
+                        {t('common.action.edit')}
                       </button>
                     ) : (
                       <div className="flex space-x-2">
@@ -203,13 +207,13 @@ const ContactDetails = ({ workspace }) => {
                           onClick={toggleEditCustomFields}
                           className="text-xs text-gray-600 hover:text-gray-800"
                         >
-                          Cancel
+                          {t('common.action.cancel')}
                         </button>
                         <button
                           onClick={saveCustomFields}
                           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                         >
-                          Save
+                          {t('common.label.save')}
                         </button>
                       </div>
                     )}
@@ -242,7 +246,7 @@ const ContactDetails = ({ workspace }) => {
                         </div>
                       ))}
                       {(!workspace.customFieldDefinitions || workspace.customFieldDefinitions.length === 0) && (
-                        <p className="text-xs text-gray-500">No custom fields defined in Workspace Settings.</p>
+                        <p className="text-xs text-gray-500">{t('contacts.customFields.noneDefined')}</p>
                       )}
                     </div>
                   ) : (
@@ -260,7 +264,7 @@ const ContactDetails = ({ workspace }) => {
                           );
                         })
                       ) : (
-                        <p className="text-sm text-gray-500 italic">No additional info</p>
+                        <p className="text-sm text-zinc-400 font-medium">{t('contacts.customFields.empty')}</p>
                       )}
                     </div>
                   )}
@@ -271,12 +275,12 @@ const ContactDetails = ({ workspace }) => {
             {/* Tags Section */}
             <div className="bg-white shadow sm:rounded-lg p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Tags</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{t('contacts.tags.title')}</h3>
                 <button
                   onClick={() => setIsAddingTag(!isAddingTag)}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                 >
-                  <PlusIcon className="w-4 h-4 mr-1" /> Add
+                  <PlusIcon className="w-4 h-4 mr-1" /> {t('common.action.add')}
                 </button>
               </div>
 
@@ -294,18 +298,18 @@ const ContactDetails = ({ workspace }) => {
                     </span>
                   ))
                 ) : (
-                  <span className="text-sm text-gray-500">No tags assigned</span>
+                  <span className="text-sm text-gray-500">{t('contacts.tags.empty')}</span>
                 )}
               </div>
 
               {isAddingTag && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
-                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Add Tag</h4>
+                  <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('contacts.tags.addTitle')}</h4>
 
                   {/* Existing Tags */}
                   {availableTags?.length > 0 && (
                     <div className="mb-3">
-                      <label className="block text-xs text-gray-500 mb-1">Select existing:</label>
+                      <label className="block text-xs text-gray-500 mb-1">{t('contacts.tags.selectExisting')}</label>
                       <div className="flex flex-wrap gap-2">
                         {availableTags.map(tag => (
                           <button
@@ -322,20 +326,20 @@ const ContactDetails = ({ workspace }) => {
 
                   {/* New Tag */}
                   <form onSubmit={createAndAddTag} className="mt-2">
-                    <label className="block text-xs text-gray-500 mb-1">Or create new:</label>
+                    <label className="block text-xs text-gray-500 mb-1">{t('contacts.tags.orCreateNew')}</label>
                     <div className="flex">
                       <input
                         type="text"
                         value={newTagName}
                         onChange={(e) => setNewTagName(e.target.value)}
-                        placeholder="New tag name"
+                        placeholder={t('contacts.tags.newNamePlaceholder')}
                         className="flex-1 min-w-0 block w-full px-3 py-1 rounded-l-md sm:text-sm border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                       />
                       <button
                         type="submit"
                         className="inline-flex items-center px-3 py-1 border border-l-0 border-transparent rounded-r-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Create
+                        {t('common.action.create')}
                       </button>
                     </div>
                   </form>
@@ -349,12 +353,12 @@ const ContactDetails = ({ workspace }) => {
             {/* Tasks Section */}
             <div className="bg-white shadow sm:rounded-lg p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Tasks</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{t('Tasks')}</h3>
                 <button
                   onClick={toggleAddTaskModal}
                   className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
                 >
-                  <PlusIcon className="w-4 h-4 mr-1" /> Add
+                  <PlusIcon className="w-4 h-4 mr-1" /> {t('common.action.add')}
                 </button>
               </div>
               <div className="flow-root">
@@ -384,8 +388,8 @@ const ContactDetails = ({ workspace }) => {
                               </Link>
                               <p className="text-sm text-gray-500">
                                 {task.dueDate
-                                  ? `Due: ${new Date(task.dueDate).toLocaleDateString()}`
-                                  : 'No due date'}
+                                  ? t('contacts.tasks.due', { date: new Date(task.dueDate).toLocaleDateString(locale) })
+                                  : t('contacts.tasks.noDueDate')}
                               </p>
                             </div>
                             <div className="text-right text-sm whitespace-nowrap text-gray-500">
@@ -397,7 +401,7 @@ const ContactDetails = ({ workspace }) => {
                     </li>
                   ))}
                   {(!tasks || tasks.length === 0) && (
-                    <p className="text-sm text-gray-500">No tasks found.</p>
+                    <p className="text-sm text-gray-500">{t('contacts.tasks.empty')}</p>
                   )}
                 </ul>
               </div>
@@ -406,36 +410,36 @@ const ContactDetails = ({ workspace }) => {
             {/* Activity Timeline */}
             <div className="bg-white shadow sm:rounded-lg p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Activity Timeline</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{t('contacts.activities.title')}</h3>
                 <button
                   onClick={() => setIsAddingActivity(!isAddingActivity)}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <PlusIcon className="w-4 h-4 mr-1" /> Log Activity
+                  <PlusIcon className="w-4 h-4 mr-1" /> {t('contacts.activities.log')}
                 </button>
               </div>
 
               {isAddingActivity && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Log new activity</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">{t('contacts.activities.logNew')}</h4>
                   <form onSubmit={saveActivity} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Type</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('contacts.activities.form.type')}</label>
                         <select
                           value={activityForm.type}
                           onChange={(e) => setActivityForm({ ...activityForm, type: e.target.value })}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                         >
-                          <option value="NOTE">Note</option>
-                          <option value="CALL">Call</option>
-                          <option value="MEETING">Meeting</option>
-                          <option value="EMAIL">Email</option>
-                          <option value="TASK">Task</option>
+                          <option value="NOTE">{t('contacts.activities.type.note')}</option>
+                          <option value="CALL">{t('contacts.activities.type.call')}</option>
+                          <option value="MEETING">{t('contacts.activities.type.meeting')}</option>
+                          <option value="EMAIL">{t('common.label.email')}</option>
+                          <option value="TASK">{t('Tasks')}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Date</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('contacts.activities.form.date')}</label>
                         <input
                           type="date"
                           value={activityForm.date}
@@ -445,23 +449,23 @@ const ContactDetails = ({ workspace }) => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700">Title / Summary</label>
+                      <label className="block text-xs font-medium text-gray-700">{t('contacts.activities.form.title')}</label>
                       <input
                         type="text"
                         value={activityForm.title}
                         onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
-                        placeholder="e.g. Discovery call with client"
+                        placeholder={t('contacts.activities.form.titlePlaceholder')}
                         required
                         className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700">Details</label>
+                      <label className="block text-xs font-medium text-gray-700">{t('contacts.activities.form.details')}</label>
                       <textarea
                         rows={3}
                         value={activityForm.content}
                         onChange={(e) => setActivityForm({ ...activityForm, content: e.target.value })}
-                        placeholder="Add more details..."
+                        placeholder={t('contacts.activities.form.detailsPlaceholder')}
                         className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
@@ -471,13 +475,13 @@ const ContactDetails = ({ workspace }) => {
                         onClick={() => setIsAddingActivity(false)}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Cancel
+                        {t('common.action.cancel')}
                       </button>
                       <button
                         type="submit"
                         className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Save Activity
+                        {t('contacts.activities.save')}
                       </button>
                     </div>
                   </form>
@@ -505,14 +509,17 @@ const ContactDetails = ({ workspace }) => {
                           <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                             <div>
                               <p className="text-sm text-gray-500">
-                                {activity.title} <span className="font-medium text-gray-900">by {activity.user?.name || 'System'}</span>
+                                {activity.title}{' '}
+                                <span className="font-medium text-gray-900">
+                                  {t('common.byName', { name: activity.user?.name || t('common.system') })}
+                                </span>
                               </p>
                               {activity.content && (
                                 <p className="mt-1 text-sm text-gray-600">{activity.content}</p>
                               )}
                             </div>
                             <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                              <time dateTime={activity.createdAt}>{new Date(activity.createdAt).toLocaleDateString()}</time>
+                              <time dateTime={activity.createdAt}>{new Date(activity.createdAt).toLocaleDateString(locale)}</time>
                             </div>
                           </div>
                         </div>
@@ -520,7 +527,7 @@ const ContactDetails = ({ workspace }) => {
                     </li>
                   ))}
                   {(!contact.activities || contact.activities.length === 0) && (
-                    <p className="text-sm text-gray-500">No activities yet.</p>
+                    <p className="text-sm text-gray-500">{t('contacts.activities.empty')}</p>
                   )}
                 </ul>
               </div>

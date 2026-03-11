@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { LockClosedIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
+import { motion } from 'framer-motion';
 
 const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];
 
@@ -15,12 +16,13 @@ const Item = ({ data, isLoading, closeMenu }) => {
   const isActive = router.asPath === data.path;
   const isPremiumFeature = PREMIUM_FEATURES.includes(data.name);
   const userSubscription = session?.user?.subscription || 'FREE';
-  const isLocked = isPremiumFeature && userSubscription === 'FREE';
+  const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+  const isLocked = isPremiumFeature && userSubscription === 'FREE' && !isSuperAdmin;
 
   const handleClick = (e) => {
     if (isLocked) {
       e.preventDefault();
-      toast('Upgrade to Premium to access this feature.', {
+      toast(t('sidebar.premium.lockedToast'), {
         icon: '🔒',
         style: {
           borderRadius: '12px',
@@ -30,6 +32,8 @@ const Item = ({ data, isLoading, closeMenu }) => {
         }
       });
     } else {
+      // For non-locked items, we want to allow the Link to handle it.
+      // If closeMenu exists (mobile), call it but don't prevent navigation.
       if (closeMenu) closeMenu();
     }
   };
@@ -37,31 +41,42 @@ const Item = ({ data, isLoading, closeMenu }) => {
   return isLoading ? (
     <div className="h-10 mb-2 bg-white/5 rounded-xl animate-pulse mx-2" />
   ) : (
-    <li className="list-none">
+    <motion.li 
+      className="list-none"
+      whileHover={{ x: 4 }}
+      transition={{ type: 'spring', stiffness: 300 }}
+    >
       <Link
         href={isLocked ? '#' : data.path}
-        className={`group flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 border border-transparent ${isActive
-            ? 'text-white bg-indigo-600/10 border-indigo-500/20 shadow-[inset_0_0_20px_rgba(79,70,229,0.05)]'
-            : isLocked
-              ? 'text-zinc-600 cursor-not-allowed'
-              : 'text-zinc-400 hover:text-white hover:bg-white/5'
+        className={`group relative flex items-center gap-3 px-5 py-3 rounded-2xl transition-all duration-300 border border-transparent ${isActive
+          ? 'text-white bg-indigo-600/15 border-indigo-500/30 shadow-[0_0_20px_rgba(79,70,229,0.1)] ring-1 ring-white/5'
+          : isLocked
+            ? 'text-zinc-600 cursor-not-allowed grayscale'
+            : 'text-zinc-300 hover:text-white hover:bg-white/[0.03] hover:border-white/[0.05]'
           }`}
         onClick={handleClick}
+        prefetch={false}
       >
-        <span className={`text-sm font-medium transition-colors ${isActive ? 'text-white' : ''}`}>
+        {isActive && (
+          <motion.div 
+            layoutId="active-sidebar-pill"
+            className="absolute left-0 w-1 h-6 bg-indigo-500 rounded-r-full shadow-[0_0_15px_rgba(99,102,241,0.8)]"
+          />
+        )}
+        <span className={`text-[14px] font-medium tracking-tight transition-colors ${isActive ? 'text-white' : ''}`}>
           {t(data.name)}
         </span>
         {isLocked && (
-          <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-800/50 border border-white/5">
+          <div className="ml-auto flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800/40 border border-white/5 backdrop-blur-sm">
             <LockClosedIcon className="w-3 h-3 text-zinc-500" />
-            <span className="text-[10px] font-bold text-zinc-500">PRO</span>
+            <span className="text-[9px] font-bold text-zinc-500 tracking-wider">PRO</span>
           </div>
         )}
         {isActive && !isLocked && (
-          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+          <div className="ml-auto w-1 h-1 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
         )}
       </Link>
-    </li>
+    </motion.li>
   );
 };
 

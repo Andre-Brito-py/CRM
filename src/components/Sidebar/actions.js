@@ -41,7 +41,7 @@ const Actions = () => {
       } else {
         toggleModal();
         setName('');
-        toast.success('Workspace successfully created!');
+        toast.success(t('workspace.created.success'));
       }
     });
   };
@@ -65,7 +65,7 @@ const Actions = () => {
         <PlusIcon className="w-5 h-5 text-white" aria-hidden="true" />
         <span className="font-semibold">{t('workspace.action.button.label')}</span>
       </Button>
-      <Modal show={showModal} title="Create a Workspace" toggle={toggleModal}>
+      <Modal show={showModal} title={t('workspace.action.create.title')} toggle={toggleModal}>
         <div className="space-y-6">
           <div className="space-y-2 text-zinc-500">
             <p className="text-sm leading-relaxed">
@@ -99,7 +99,7 @@ const Actions = () => {
           <Listbox.Button className="relative w-full py-3.5 pl-4 pr-10 text-left bg-white/5 border border-white/10 rounded-xl cursor-default hover:bg-white/10 transition-all focus:outline-none focus:ring-1 focus:ring-white/20 group">
             <span className="block text-zinc-300 truncate font-medium group-hover:text-white transition-colors">
               {isLoading
-                ? 'Fetching workspaces...'
+                ? t('workspace.fetching')
                 : data?.workspaces.length === 0
                   ? t("workspace.message.notfound")
                   : workspace === null

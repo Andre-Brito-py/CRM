@@ -2,6 +2,7 @@ import { validateSession } from '@/config/api-validation';
 import { getConversation, createMessage, updateConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
+import prisma from '@/prisma/index';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -81,9 +82,15 @@ const handler = async (req, res) => {
               throw new Error('Contact phone number missing');
             }
 
-            const { integrationId } = req.body;
+            let { integrationId } = req.body;
             if (!integrationId) {
-              return res.status(400).json({ error: { msg: 'Integration ID is required to send from Multiple Numbers.' } });
+              const defaultIntegration = await prisma.integration.findFirst({
+                where: { workspaceId: workspace.id, provider: 'WHATSAPP', enabled: true }
+              });
+              if (!defaultIntegration) {
+                return res.status(400).json({ error: { msg: 'No active WhatsApp integration found.' } });
+              }
+              integrationId = defaultIntegration.id;
             }
 
             // Only send if it's a real user message (not system)

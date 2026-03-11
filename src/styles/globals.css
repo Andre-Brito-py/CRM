@@ -4,69 +4,116 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg-primary: #fdfdfe;
+  --bg-card: #ffffff;
+  --bg-sidebar: #09090b;
+  --text-primary: #09090b;
+  --text-secondary: #71717a;
+  --border-primary: rgba(228, 228, 231, 0.6);
+  --border-secondary: rgba(255, 255, 255, 0.1);
+  --shadow-premium: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+
+.dark {
+  --bg-primary: #020202;
+  --bg-card: #09090b;
+  --bg-sidebar: #010101;
+  --text-primary: #fcfcfc;
+  --text-secondary: #a1a1aa;
+  --border-primary: rgba(39, 39, 42, 0.4);
+  --border-secondary: rgba(255, 255, 255, 0.03);
+  --shadow-premium: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
 @layer base {
-  body {
-    @apply antialiased text-zinc-800 bg-zinc-50 font-sans selection:bg-indigo-100 selection:text-indigo-900;
+  html {
+    @apply scroll-smooth;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    @apply font-executive font-semibold tracking-tight;
+  body {
+    @apply antialiased font-sans selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-executive font-bold tracking-tight;
+    color: var(--text-primary);
+  }
+
+  * {
+    font-style: normal !important;
+  }
+
+  .allow-italic {
+    font-style: italic !important;
   }
 }
 
 @layer utilities {
-  .premium-font {
-    @apply font-executive;
-  }
-
-  .premium-gradient {
-    @apply bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800;
-  }
-
+  .premium-font { @apply font-executive; }
+  .premium-gradient { @apply bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800; }
+  
   .glass-light {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-glass;
+    @apply backdrop-blur-lg border shadow-glass;
+    background-color: rgba(255, 255, 255, 0.7);
+    border-color: var(--border-primary);
+  }
+
+  .dark .glass-light {
+    background-color: rgba(24, 24, 27, 0.7);
+    border-color: var(--border-primary);
   }
 
   .glass-dark {
-    @apply bg-zinc-900/80 backdrop-blur-xl border border-white/10 shadow-2xl;
+    @apply backdrop-blur-2xl border-r shadow-2xl;
+    background-color: var(--bg-sidebar);
+    border-color: var(--border-secondary);
   }
 
   .premium-card {
-    @apply bg-white border border-zinc-200/60 shadow-sm transition-all duration-300 hover:shadow-premium hover:border-zinc-300/80 rounded-2xl;
+    @apply border transition-all duration-500 rounded-3xl;
+    background-color: var(--bg-card);
+    border-color: var(--border-primary);
+    box-shadow: var(--shadow-premium);
+  }
+  
+  .premium-card:hover {
+    @apply -translate-y-1;
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   }
 
-  .premium-sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-zinc-400 hover:text-white hover:bg-white/5;
-  }
-
-  .premium-sidebar-link-active {
-    @apply text-white bg-indigo-600/10 border border-indigo-500/20 shadow-[inset_0_0_20px_rgba(79, 70, 229, 0.1)];
+  .dark .premium-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   }
 }
 
-/* Driver.js Premium Overhaul */
+/* Driver.js Elite Overhaul */
 .premium-tour-popover {
-  @apply glass-light rounded-3xl p-8 !important;
-  font-family: 'Inter', sans-serif !important;
+  @apply backdrop-blur-2xl border shadow-2xl p-10 font-executive !important;
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-primary) !important;
+  border-radius: 40px !important;
 }
 
 .premium-tour-popover .driver-popover-title {
-  @apply text-2xl font-executive font-bold text-zinc-900 mb-2 !important;
+  @apply text-3xl font-bold mb-4 tracking-tight !important;
+  color: var(--text-primary) !important;
 }
 
 .premium-tour-popover .driver-popover-description {
-  @apply text-zinc-600 leading-relaxed !important;
+  @apply text-lg leading-relaxed mb-6 opacity-90 !important;
+  color: var(--text-primary) !important;
 }
 
 .premium-tour-popover .driver-popover-next-btn {
-  @apply premium-gradient text-white hover:opacity-90 shadow-lg shadow-indigo-500/20 !important;
+  @apply premium-gradient text-white hover:scale-105 active:scale-95 transition-all text-sm font-bold px-8 py-3 rounded-2xl shadow-xl shadow-indigo-500/30 !important;
 }
 
 .premium-tour-popover .driver-popover-prev-btn {
-  @apply bg-zinc-100 text-zinc-600 hover:bg-zinc-200 !important;
-}
+  @apply text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors text-sm font-bold !important;
+  background: transparent !important;
+}

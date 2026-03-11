@@ -52,12 +52,18 @@ const AccountLayout = ({ children }) => {
 
   if (status === 'loading') return <></>;
   return (
-    <main className="relative flex flex-col w-screen h-screen overflow-hidden text-zinc-900 md:flex-row bg-zinc-50 selection:bg-indigo-100 italic selection:text-indigo-900">
+    <main className="relative flex flex-col w-screen h-screen overflow-hidden md:flex-row selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
       <Sidebar menu={menu(workspace?.slug)} />
       <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} active={!workspace} />
       <Content>
-        <div className="relative flex flex-col flex-1 h-full overflow-y-auto">
-          <Toaster position="bottom-left" toastOptions={{ duration: 10000 }} />
+        <div className="relative flex flex-col flex-1 h-full overflow-y-auto bg-[var(--bg-primary)]">
+          <Toaster 
+            position="bottom-left" 
+            toastOptions={{ 
+              duration: 10000,
+              className: 'dark:bg-zinc-900 dark:text-white dark:border dark:border-zinc-800'
+            }} 
+          />
           <Header />
           <div className="px-6 py-10 lg:px-10 lg:py-12">
             {children}

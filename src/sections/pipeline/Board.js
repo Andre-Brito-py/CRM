@@ -8,10 +8,10 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
   const router = useRouter();
 
   return (
-    <div className="flex flex-col flex-shrink-0 w-72 bg-gray-100 rounded-lg p-2 mr-4">
-      <div className="flex items-center justify-between mb-2 p-1">
-        <h3 className="font-semibold text-gray-700">{stage.name}</h3>
-        <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">
+    <div className="flex flex-col flex-shrink-0 w-[320px] bg-zinc-50/50 rounded-[32px] p-3 mr-6 border border-zinc-100/50 shadow-sm transition-all duration-300">
+      <div className="flex items-center justify-between mb-4 px-3 pt-2">
+        <h3 className="font-executive font-bold text-zinc-900 tracking-tight">{stage.name}</h3>
+        <span className="bg-zinc-200/50 text-zinc-500 text-[10px] font-bold px-2.5 py-1 rounded-lg border border-zinc-200/50 uppercase tracking-wider">
           {deals.length}
         </span>
       </div>
@@ -21,7 +21,7 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
           <div
             {...provided.droppableProps}
             ref={provided.innerRef}
-            className={`flex-1 overflow-y-auto min-h-[200px] rounded transition-colors duration-200 ${snapshot.isDraggingOver ? 'bg-blue-50 ring-2 ring-blue-200' : ''
+            className={`flex-1 overflow-y-auto min-h-[500px] rounded-3xl p-1 transition-all duration-300 custom-scrollbar ${snapshot.isDraggingOver ? 'bg-indigo-50/30 ring-2 ring-indigo-500/10' : ''
               }`}
           >
             {deals.map((deal, index) => (
@@ -32,35 +32,40 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                     onClick={() => router.push(`/account/${workspaceSlug}/deals/${deal.id}`)}
-                    className={`bg-white p-3 mb-2 rounded shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-pointer ${snapshot.isDragging ? 'rotate-2 ring-2 ring-blue-400 z-50' : ''
+                    className={`bg-white p-5 mb-4 rounded-2xl shadow-premium-sm border border-zinc-100 hover:shadow-premium hover:border-zinc-200 transition-all duration-300 cursor-pointer group ${snapshot.isDragging ? 'rotate-2 ring-4 ring-indigo-500/20 shadow-2xl z-50 scale-105' : ''
                       }`}
                     style={provided.draggableProps.style}
                   >
-                    <div className="font-medium text-gray-800 mb-1 truncate">{deal.name}</div>
-                    <div className="flex justify-between items-center mt-2">
-                      <span className="text-sm font-semibold text-gray-700">
-                        {deal.amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.amount) : '-'}
+                    <div className="font-executive font-bold text-zinc-900 text-[15px] mb-2 truncate group-hover:text-indigo-600 transition-colors">{deal.name}</div>
+                    <div className="flex justify-between items-center mt-3">
+                      <span className="text-sm font-bold text-zinc-900">
+                        {deal.amount ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(deal.amount) : '—'}
                       </span>
                       {deal.priority && (
-                        <span className={`text-xs px-1.5 py-0.5 rounded ${deal.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                          deal.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                            'bg-green-100 text-green-700'
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border uppercase tracking-wider ${deal.priority === 'HIGH' ? 'bg-red-50 text-red-600 border-red-100/50' :
+                          deal.priority === 'MEDIUM' ? 'bg-amber-50 text-amber-600 border-amber-100/50' :
+                            'bg-emerald-50 text-emerald-600 border-emerald-100/50'
                           }`}>
                           {deal.priority}
                         </span>
                       )}
                     </div>
                     {(deal.company || deal.user) && (
-                      <div className="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                        <span className="truncate max-w-[70%]">
-                          {deal.company && `🏢 ${deal.company.name}`}
+                      <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-between text-[11px] font-medium text-zinc-400">
+                        <span className="truncate max-w-[70%] flex items-center gap-1.5 uppercase tracking-tighter">
+                          {deal.company && (
+                            <>
+                              <span className="text-zinc-300">🏢</span>
+                              <span className="truncate">{deal.company.name}</span>
+                            </>
+                          )}
                         </span>
                         {deal.user && (
                           <div className="flex items-center" title={deal.user.name}>
                             {deal.user.image ? (
-                              <img src={deal.user.image} alt={deal.user.name} className="w-5 h-5 rounded-full object-cover" />
+                              <img src={deal.user.image} alt={deal.user.name} className="w-6 h-6 rounded-full object-cover ring-2 ring-white shadow-sm" />
                             ) : (
-                              <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">
+                              <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-500 flex items-center justify-center font-bold text-[10px] ring-2 ring-white shadow-sm border border-indigo-100/50">
                                 {deal.user.name?.charAt(0) || '?'}
                               </div>
                             )}
@@ -140,7 +145,7 @@ const PipelineBoard = ({ pipeline, workspaceSlug }) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex h-full overflow-x-auto pb-4 items-start">
+      <div className="flex h-full overflow-x-auto pb-8 items-start custom-scrollbar">
         {stages.map((stage) => (
           <BoardColumn
             key={stage.id}

@@ -3,6 +3,7 @@ import formatDistance from 'date-fns/formatDistance';
 import Link from 'next/link';
 import { getSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 import Button from '@/components/Button/index';
 import Card from '@/components/Card/index';
@@ -43,30 +44,33 @@ const Billing = ({ invoices, products }) => {
     <AccountLayout>
       <Meta title="Nextacular - Billing" />
       <Content.Title
-        title="Billing"
-        subtitle="Manage your billing and preferences"
+        title="Billing & Subscription"
+        subtitle="Manage your professional plan and invoicing"
+        className="font-executive"
       />
       <Content.Divider />
       <Content.Container>
         <Card>
           <Card.Body
-            title="Upgrade Plan"
-            subtitle="You are currently under the&nbsp; FREE plan"
+            title="Premium Subscription"
+            subtitle="Current status: Professional Suite"
           >
-            <p className="p-3 text-sm border rounded">
-              Personal accounts cannot be upgraded and will remain free forever.
-              In order to use the platform for professional purposes or work
-              with a team, get started by creating a team or contacting sales.
-            </p>
+            <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+              <p className="text-sm">
+                Professional and Enterprise accounts unlock the full power of Nextacular. 
+                Manage unlimited contacts, advanced pipelines, and team collaboration 
+                with our executive suite.
+              </p>
+            </div>
           </Card.Body>
           <Card.Footer>
-            <small>You will be redirected to the payment page</small>
+            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Secure Stripe Payment</span>
             <Button
-              className="text-white bg-blue-600 hover:bg-blue-500"
+              className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-8"
               disabled={isSubmitting}
               onClick={toggleModal}
             >
-              Upgrade
+              Manage Plan
             </Button>
           </Card.Footer>
         </Card>
@@ -102,58 +106,66 @@ const Billing = ({ invoices, products }) => {
           </div>
         </Modal>
       </Content.Container>
-      <Content.Divider thick />
-      <Content.Title
-        title="Invoices"
-        subtitle="View and download invoices you may need"
-      />
+      <div className="mt-16">
+        <Content.Title
+          title="Invoices"
+          subtitle="Reference your past transactions"
+          className="font-executive"
+        />
+      </div>
       <Content.Divider />
       {invoices.length > 0 ? (
         <Content.Container>
-          <table className="table-auto">
-            <thead>
-              <tr className="text-left">
-                <th>Invoice Number</th>
-                <th>Created</th>
-                <th>Status</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice, index) => (
-                <tr key={index} className="text-sm hover:bg-gray-100">
-                  <td className="px-3 py-5">
-                    <Link
-                      href={invoice.hosted_invoice_url}
-                      className="text-blue-600"
-                      target="_blank"
-                    >
-                      {invoice.number}
-                    </Link>
-                  </td>
-                  <td className="py-5">
-                    {formatDistance(
-                      new Date(invoice.created * 1000),
-                      new Date(),
-                      {
-                        addSuffix: true,
-                      }
-                    )}
-                  </td>
-                  <td className="py-5">{invoice.status}</td>
-                  <td className="py-5">
-                    <Link
-                      href={invoice.hosted_invoice_url}
-                      className="text-blue-600"
-                      target="_blank"
-                    >
-                      &rarr;
-                    </Link>
-                  </td>
+          <div className="premium-card overflow-hidden">
+            <table className="min-w-full divide-y divide-zinc-100">
+              <thead className="bg-zinc-50/50">
+                <tr className="text-left font-executive">
+                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Invoice Number</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
+                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
+                  <th className="px-8 py-4 text-right" />
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                {invoices.map((invoice, index) => (
+                  <tr key={index} className="hover:bg-zinc-50/50 transition-colors group">
+                    <td className="px-8 py-5">
+                      <Link
+                        href={invoice.hosted_invoice_url}
+                        className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                        target="_blank"
+                      >
+                        {invoice.number}
+                      </Link>
+                    </td>
+                    <td className="px-8 py-5 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                      {formatDistance(
+                        new Date(invoice.created * 1000),
+                        new Date(),
+                        { addSuffix: true }
+                      )}
+                    </td>
+                    <td className="px-8 py-5">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
+                        invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-500'
+                      }`}>
+                        {invoice.status}
+                      </span>
+                    </td>
+                    <td className="px-8 py-5 text-right">
+                      <Link
+                        href={invoice.hosted_invoice_url}
+                        className="text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
+                        target="_blank"
+                      >
+                        <ChevronRightIcon className="w-5 h-5 inline-block group-hover:translate-x-1 transition-transform" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Content.Container>
       ) : (
         <Content.Empty>
@@ -168,6 +180,15 @@ const Billing = ({ invoices, products }) => {
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
 
+  if (!session || !session.user?.email) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
   // Se não tiver chave do Stripe configurada, retornar props vazias para evitar erro
   if (!process.env.PAYMENTS_SECRET_KEY) {
     return {
@@ -178,29 +199,39 @@ export const getServerSideProps = async (context) => {
     };
   }
 
-  const customerPayment = await getPayment(session.user?.email);
-  const [invoices, plans] = await Promise.all([
-    getInvoices(customerPayment?.paymentId),
-    getAllPlans(),
-  ]);
+  try {
+    const customerPayment = await getPayment(session.user.email);
+    const [invoices, plans] = await Promise.all([
+      getInvoices(customerPayment?.paymentId),
+      getAllPlans(),
+    ]);
 
-  const products = plans.map((plan) => ({
-    name: plan.name,
-    description: plan.description,
-    prices: {
-      id: plan.stripePriceId,
-      unit_amount: Number(plan.price) * 100,
-      currency: plan.currency,
-      interval: plan.interval,
-    },
-  }));
+    const products = (plans || []).map((plan) => ({
+      name: plan.name,
+      description: plan.description,
+      prices: {
+        id: plan.stripePriceId,
+        unit_amount: Number(plan.price) * 100,
+        currency: plan.currency,
+        interval: plan.interval,
+      },
+    }));
 
-  return {
-    props: {
-      invoices: invoices || [],
-      products: products || [],
-    },
-  };
+    return {
+      props: {
+        invoices: invoices || [],
+        products: products || [],
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching billing data:', error);
+    return {
+      props: {
+        invoices: [],
+        products: [],
+      },
+    };
+  }
 };
 
 export default Billing;

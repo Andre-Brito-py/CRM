@@ -18,7 +18,7 @@ const sidebarMenu = () => [
         path: `/account/settings`,
       },
       {
-        name: 'Security',
+        name: 'common.label.security',
         path: `/account/security`,
       },
     ],

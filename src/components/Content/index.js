@@ -20,9 +20,9 @@ Content.Divider = ({ thick }) => {
 
 Content.Empty = ({ children }) => {
   return (
-    <div>
-      <div className="flex items-center justify-center p-5 bg-gray-100 border-4 border-dashed rounded">
-        <p>{children}</p>
+    <div className="p-8">
+      <div className="flex items-center justify-center p-5 bg-zinc-100 dark:bg-zinc-800/50 border-4 border-dashed border-zinc-200 dark:border-zinc-800 rounded-2xl">
+        <p className="text-zinc-500 dark:text-zinc-400 font-medium">{children}</p>
       </div>
     </div>
   );
@@ -31,8 +31,8 @@ Content.Empty = ({ children }) => {
 Content.Title = ({ subtitle, title }) => {
   return (
     <div>
-      <h1 className="text-3xl font-bold md:text-4xl">{title}</h1>
-      <h3 className="text-gray-400">{subtitle}</h3>
+      <h1 className="text-3xl font-bold md:text-4xl text-zinc-900 dark:text-white">{title}</h1>
+      <h3 className="text-zinc-400 dark:text-zinc-500 font-medium">{subtitle}</h3>
     </div>
   );
 };

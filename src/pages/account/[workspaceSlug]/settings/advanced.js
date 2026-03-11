@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 
@@ -14,21 +14,30 @@ import { getSession } from 'next-auth/react';
 import { getWorkspace, isWorkspaceCreator } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
 
-const Advanced = ({ isCreator }) => {
-  const { setWorkspace, workspace } = useWorkspace();
+const Advanced = ({ isCreator, workspace }) => {
+  const { setWorkspace, workspace: workspaceFromContext } = useWorkspace();
   const { t } = useTranslation();
   const router = useRouter();
   const [isSubmitting, setSubmittingState] = useState(false);
   const [showModal, setModalState] = useState(false);
   const [verifyWorkspace, setVerifyWorkspace] = useState('');
-  const verifiedWorkspace = verifyWorkspace === workspace?.slug;
+  const currentWorkspace = workspaceFromContext || workspace;
+  const verifiedWorkspace = verifyWorkspace === currentWorkspace?.slug;
+
+  useEffect(() => {
+    if (workspace) setWorkspace(workspace);
+  }, [setWorkspace, workspace]);
 
   const handleVerifyWorkspaceChange = (event) =>
     setVerifyWorkspace(event.target.value);
 
   const deleteWorkspace = () => {
+    if (!currentWorkspace?.slug) {
+      toast.error('Workspace not found');
+      return;
+    }
     setSubmittingState(true);
-    api(`/api/workspace/${workspace.slug}`, {
+    api(`/api/workspace/${currentWorkspace.slug}`, {
       method: 'DELETE',
     }).then((response) => {
       setSubmittingState(false);
@@ -53,7 +62,7 @@ const Advanced = ({ isCreator }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Nextacular - ${workspace?.name} | Advanced Settings`} />
+      <Meta title={`Nextacular - ${currentWorkspace?.name} | Advanced Settings`} />
       <Content.Title
         title={t("settings.workspace.advanced")}
         subtitle={t("settings.workspace.manage.label")}
@@ -66,7 +75,7 @@ const Advanced = ({ isCreator }) => {
             subtitle={t("settings.workspace.delete.message")}
           />
           <Card.Footer>
-            <small className={[isCreator && 'text-red-600']}>
+            <small className={isCreator ? 'text-red-600' : ''}>
               {isCreator
                 ? t("setting.workspace.delete.warning.message")
                 : t("settings.workspace.delete.contact.message")}
@@ -100,7 +109,7 @@ const Advanced = ({ isCreator }) => {
             </p>
             <div className="flex flex-col">
               <label className="text-sm text-gray-400">
-                Enter <strong>{workspace?.slug}</strong> to continue:
+                Enter <strong>{currentWorkspace?.slug}</strong> to continue:
               </label>
               <input
                 className="px-3 py-2 border rounded"
@@ -129,17 +138,29 @@ const Advanced = ({ isCreator }) => {
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
   let isCreator = false;
+  let workspace = null;
 
   if (session) {
-    const workspace = await getWorkspace(
+    workspace = await getWorkspace(
       session.user.userId,
       session.user.email,
       context.params.workspaceSlug
     );
-    isCreator = isWorkspaceCreator(session.user.userId, workspace.creatorId);
+    if (workspace) {
+      isCreator = isWorkspaceCreator(session.user.userId, workspace.creatorId);
+    }
   }
 
-  return { props: { isCreator } };
+  if (!session || !workspace) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
+  return { props: { isCreator, workspace } };
 };
 
 export default Advanced;

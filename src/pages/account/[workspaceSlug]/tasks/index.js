@@ -7,20 +7,23 @@ import useTasks from '@/hooks/data/useTasks';
 import { useWorkspace } from '@/providers/workspace';
 import AddTaskModal from '@/sections/tasks/AddTaskModal';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 
 const Tasks = () => {
+  const { t, i18n } = useTranslation();
   const { workspace } = useWorkspace();
   const { data, isLoading } = useTasks(workspace?.slug);
   const [isModalOpen, setModalOpen] = useState(false);
 
   const toggleModal = () => setModalOpen(!isModalOpen);
+  const locale = (i18n?.language || 'en').split('-')[0] === 'pt' ? 'pt-BR' : (i18n?.language || 'en');
 
   return (
     <AccountLayout>
-      <Meta title={`Nextacular - ${workspace?.name} | Tasks`} />
+      <Meta title={`Nextacular - ${workspace?.name} | ${t('Tasks')}`} />
       <Content.Title
-        title="Tasks"
-        subtitle="Manage your tasks and to-dos"
+        title={t('Tasks')}
+        subtitle={t('tasks.subtitle')}
       />
       <Content.Divider />
       <Content.Container>
@@ -30,11 +33,11 @@ const Tasks = () => {
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
-            Add Task
+            {t('tasks.add')}
           </button>
         </div>
         {isLoading ? (
-          <p className="mt-4 text-center text-gray-500">Loading tasks...</p>
+          <p className="mt-4 text-center text-gray-500">{t('tasks.loading')}</p>
         ) : data?.tasks.length > 0 ? (
           <>
             <div className="overflow-x-auto mt-4 hidden md:block">
@@ -45,25 +48,25 @@ const Tasks = () => {
                       scope="col"
                       className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                     >
-                      Title
+                      {t('tasks.columns.title')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                     >
-                      Priority
+                      {t('tasks.columns.priority')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                     >
-                      Due Date
+                      {t('tasks.columns.dueDate')}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                     >
-                      Status
+                      {t('tasks.columns.status')}
                     </th>
                   </tr>
                 </thead>
@@ -87,13 +90,13 @@ const Tasks = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">
-                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+                          {task.dueDate ? new Date(task.dueDate).toLocaleDateString(locale) : '-'}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${task.isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                           }`}>
-                          {task.isCompleted ? 'Completed' : 'Pending'}
+                          {task.isCompleted ? t('tasks.status.completed') : t('tasks.status.pending')}
                         </span>
                       </td>
                     </tr>
@@ -120,13 +123,13 @@ const Tasks = () => {
                   </div>
                   <div className="mt-2 flex justify-between items-center text-sm text-gray-500">
                     <div>
-                      <span className="block text-xs text-gray-400">Due Date</span>
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
+                      <span className="block text-xs text-gray-400">{t('tasks.columns.dueDate')}</span>
+                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString(locale) : '-'}
                     </div>
                     <div>
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${task.isCompleted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
-                        {task.isCompleted ? 'Completed' : 'Pending'}
+                        {task.isCompleted ? t('tasks.status.completed') : t('tasks.status.pending')}
                       </span>
                     </div>
                   </div>
@@ -136,14 +139,14 @@ const Tasks = () => {
           </>
         ) : (
           <div className="flex flex-col items-center justify-center p-8 mt-8 border-2 border-dashed border-gray-300 rounded-lg">
-            <h3 className="text-lg font-medium text-gray-900">No tasks yet</h3>
-            <p className="mt-1 text-gray-500">Get started by creating a new task.</p>
+            <h3 className="text-lg font-medium text-gray-900">{t('tasks.empty.title')}</h3>
+            <p className="mt-1 text-gray-500">{t('tasks.empty.subtitle')}</p>
             <button
               className="mt-4 flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-500"
               onClick={toggleModal}
             >
               <PlusIcon className="w-5 h-5 mr-2" />
-              Add Task
+              {t('tasks.add')}
             </button>
           </div>
         )}
