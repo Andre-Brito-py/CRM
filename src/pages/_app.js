@@ -98,6 +98,7 @@ if (!i18n.isInitialized) {
 
 const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
+  const [gaReady, setGaReady] = useState(false);
   useTranslation();
   const router = useRouter();
   const swrOptions = swrConfig();
@@ -108,13 +109,30 @@ const App = ({ Component, pageProps }) => {
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return;
-    if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) return;
-    ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const response = await fetch('/api/public-config?keys=GOOGLE_ANALYTICS_ID');
+        const json = await response.json();
+        const gaId =
+          json?.data?.config?.GOOGLE_ANALYTICS_ID ||
+          process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+        if (!gaId || cancelled) return;
+        ReactGA.initialize(gaId);
+        setGaReady(true);
+      } catch (e) {
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return;
-    if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) return;
+    if (!gaReady) return;
 
     const handleRouteChange = (url) => {
       ReactGA.pageview(url);
@@ -125,7 +143,7 @@ const App = ({ Component, pageProps }) => {
     return () => {
       router.events.off('routeChangeComplete', handleRouteChange);
     };
-  }, [router.events]);
+  }, [router.events, gaReady]);
 
   // Load saved language preference or detect from browser
   useEffect(() => {

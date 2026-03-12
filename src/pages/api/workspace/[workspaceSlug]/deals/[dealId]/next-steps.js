@@ -1,6 +1,7 @@
 import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -40,8 +41,9 @@ const handler = async (req, res) => {
       return res.status(404).json({ error: { msg: 'Deal not found' } });
     }
 
-    // Mock response if no API key
-    if (!process.env.OPENAI_API_KEY) {
+    const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
+
+    if (!openAiApiKey) {
       await new Promise(resolve => setTimeout(resolve, 1200));
       return res.status(200).json({
         data: {
@@ -65,7 +67,7 @@ const handler = async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${openAiApiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
@@ -79,7 +81,7 @@ const handler = async (req, res) => {
     });
 
     if (!response.ok) {
-        throw new Error('OpenAI API Error');
+      throw new Error('OpenAI API Error');
     }
 
     const data = await response.json();

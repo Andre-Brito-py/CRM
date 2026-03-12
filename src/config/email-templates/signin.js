@@ -1,4 +1,4 @@
-const html = ({ email, url }) => {
+const html = ({ email, url, from }) => {
   return `
 <body>
     <p>Welcome! You are logging in with ${email}</p>
@@ -6,12 +6,12 @@ const html = ({ email, url }) => {
     <p>Alternatively, you can copy this link and open via browser: ${url}</p>
     <p>If you did not request this email you can safely ignore it.</p>
     <p>In case you need any assistance, just hit reply.</p>
-    <p>Cheers,<br />${process.env.EMAIL_FROM}</p>
+    <p>Cheers,<br />${from || 'Nextacular'}</p>
 </body>
 `;
 };
 
-const text = ({ email, url }) => {
+const text = ({ email, url, from }) => {
   return `
 Welcome! You are logging in with ${email}
 
@@ -22,7 +22,7 @@ If you did not request this email you can safely ignore it.
 In case you need any assistance, just hit reply.
 
 Cheers,
-${process.env.EMAIL_FROM}
+${from || 'Nextacular'}
 `;
 };
 

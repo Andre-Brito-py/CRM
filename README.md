@@ -29,6 +29,7 @@ npm run dev
 ```
 
 Se a porta 3000 estiver ocupada, o Next sobe em outra (3001/3002…). Conferir o log do terminal.
+Em dev, evite fixar `NEXTAUTH_URL` no `.env`, porque isso pode causar “tela branca” quando o Next mudar de porta automaticamente.
 
 Se o Prisma reclamar de drift/migration em ambiente local, priorizar consistência do dev:
 
@@ -42,10 +43,11 @@ Arquivo: `.env`
 
 ```env
 DATABASE_URL="postgresql://..."
-NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="..."
 EMAIL_FROM="..."
-EMAIL_SERVER="smtp://..."
+EMAIL_SERVICE="..."
+EMAIL_SERVER_USER="..."
+EMAIL_SERVER_PASSWORD="..."
 PAYMENTS_SECRET_KEY="..."        # Stripe (assinaturas do SaaS)
 STRIPE_WEBHOOK_SECRET="..."      # webhook de assinatura (Stripe)
 ADMIN_EMAIL="..."
@@ -56,6 +58,26 @@ ADMIN_EMAIL="..."
 # MERCADOPAGO_ACCESS_TOKEN="..."
 # PAGARME_SECRET_KEY="..."
 ```
+
+Produção:
+- Definir `NEXTAUTH_URL` com a URL pública canônica (ex.: `https://app.seudominio.com`).
+
+## Configuração de APIs (Super Admin)
+As credenciais abaixo podem ser configuradas em runtime no painel de Super Admin (API Configuration), sem redeploy. O backend lê via `getSystemConfig(...)` com fallback para `process.env`.
+
+Chaves comuns:
+- IA: `OPENAI_API_KEY`
+- Pagamentos da plataforma: `PAYMENTS_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`
+- Email: `EMAIL_FROM`, `EMAIL_SERVICE`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`
+- Domínios (Vercel): `VERCEL_API_URL`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `VERCEL_AUTH_BEARER_TOKEN`, `VERCEL_IP_ADDRESS`
+- Storage (S3): `AWS_S3_ACCESS_KEY_ID`, `AWS_S3_SECRET_ACCESS_KEY`, `AWS_S3_REGION`, `AWS_S3_BUCKET_NAME`
+- Web Push: `WEB_PUSH_EMAIL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`
+- Cron: `CRON_SECRET`
+- Analytics: `GOOGLE_ANALYTICS_ID`
+- Geral: `APP_URL`
+
+Valores “public” expostos via `/api/public-config` (seguros para o browser):
+- `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
 
 ## Coisas que já estão no produto (resumo curto)
 - Workspaces (multi-tenant)

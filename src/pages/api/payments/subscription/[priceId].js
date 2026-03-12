@@ -1,6 +1,7 @@
 import { validateSession } from '@/config/api-validation';
 import getStripe from '@/lib/server/stripe';
 import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -11,7 +12,8 @@ const handler = async (req, res) => {
       const { priceId } = req.query;
       const stripe = await getStripe();
 
-      if (!process.env.APP_URL) {
+      const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+      if (!appUrl) {
         res.status(500).json({ errors: { error: { msg: 'APP_URL is missing' } } });
         return;
       }
@@ -35,8 +37,8 @@ const handler = async (req, res) => {
         mode: 'subscription',
         payment_method_types: ['card'],
         line_items: [{ price: price.id, quantity: 1 }],
-        success_url: `${process.env.APP_URL}/account/payment?status=success`,
-        cancel_url: `${process.env.APP_URL}/account/payment?status=cancelled`,
+        success_url: `${appUrl}/account/payment?status=success`,
+        cancel_url: `${appUrl}/account/payment?status=cancelled`,
         metadata: {
           customerId: customerPayment.customerId,
           type: product.metadata.type,

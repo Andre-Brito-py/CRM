@@ -1,4 +1,5 @@
 import { processDueAutomationJobs } from '@/prisma/services/automation';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
   if (req.method !== 'GET' && req.method !== 'POST') {
@@ -6,7 +7,7 @@ const handler = async (req, res) => {
   }
 
   if (process.env.NODE_ENV === 'production') {
-    const secret = process.env.CRON_SECRET;
+    const secret = await getSystemConfig('CRON_SECRET', process.env.CRON_SECRET);
     if (!secret) {
       return res.status(500).json({ error: 'CRON_SECRET not configured' });
     }

@@ -126,10 +126,11 @@ export const authOptions = {
     EmailProvider({
       sendVerificationRequest: async ({ identifier: email, url }) => {
         const { host } = new URL(url);
+        const emailFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
         await sendMail({
-          html: html({ email, url }),
+          html: html({ email, url, from: emailFrom }),
           subject: `[Nextacular] Sign in to ${host}`,
-          text: text({ email, url }),
+          text: text({ email, url, from: emailFrom }),
           to: email,
         });
       },

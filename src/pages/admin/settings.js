@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useSWR, { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
-import { 
-  PlusIcon, 
-  TrashIcon, 
+import {
+  TrashIcon,
   KeyIcon,
   EyeIcon,
   EyeSlashIcon
@@ -16,56 +15,87 @@ import Card from '@/components/Card/index';
 import fetcher from '@/lib/client/fetcher';
 import Meta from '@/components/Meta/index';
 
-const ConfigItem = ({ config, onDelete }) => {
-  const [showValue, setShowValue] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+const CATALOG = [
+  {
+    title: 'Pagamentos (Assinatura da plataforma)',
+    items: [
+      { key: 'PAYMENTS_SECRET_KEY', category: 'PAYMENT', label: 'Stripe Secret Key', secret: true },
+      { key: 'STRIPE_PUBLISHABLE_KEY', category: 'PAYMENT', label: 'Stripe Publishable Key', secret: false, public: true },
+      { key: 'STRIPE_WEBHOOK_SECRET', category: 'PAYMENT', label: 'Stripe Webhook Secret', secret: true },
+      { key: 'PAYMENTS_SIGNING_SECRET', category: 'PAYMENT', label: 'Stripe Signing Secret (fallback)', secret: true },
+    ],
+  },
+  {
+    title: 'IA',
+    items: [{ key: 'OPENAI_API_KEY', category: 'AI', label: 'OpenAI API Key', secret: true }],
+  },
+  {
+    title: 'Email',
+    items: [
+      { key: 'EMAIL_FROM', category: 'EMAIL', label: 'Email From', secret: false },
+      { key: 'EMAIL_SERVICE', category: 'EMAIL', label: 'Email Service', secret: false },
+      { key: 'EMAIL_SERVER_USER', category: 'EMAIL', label: 'SMTP User', secret: false },
+      { key: 'EMAIL_SERVER_PASSWORD', category: 'EMAIL', label: 'SMTP Password', secret: true },
+    ],
+  },
+  {
+    title: 'Domínios (Vercel)',
+    items: [
+      { key: 'VERCEL_API_URL', category: 'INTEGRATIONS', label: 'Vercel API URL', secret: false },
+      { key: 'VERCEL_PROJECT_ID', category: 'INTEGRATIONS', label: 'Vercel Project ID', secret: false },
+      { key: 'VERCEL_TEAM_ID', category: 'INTEGRATIONS', label: 'Vercel Team ID', secret: false },
+      { key: 'VERCEL_AUTH_BEARER_TOKEN', category: 'INTEGRATIONS', label: 'Vercel Auth Token', secret: true },
+      { key: 'VERCEL_IP_ADDRESS', category: 'INTEGRATIONS', label: 'Vercel IP (apex)', secret: false, public: true },
+    ],
+  },
+  {
+    title: 'Storage (S3)',
+    items: [
+      { key: 'AWS_S3_ACCESS_KEY_ID', category: 'INTEGRATIONS', label: 'S3 Access Key ID', secret: true },
+      { key: 'AWS_S3_SECRET_ACCESS_KEY', category: 'INTEGRATIONS', label: 'S3 Secret Access Key', secret: true },
+      { key: 'AWS_S3_REGION', category: 'INTEGRATIONS', label: 'S3 Region', secret: false },
+      { key: 'AWS_S3_BUCKET_NAME', category: 'INTEGRATIONS', label: 'S3 Bucket Name', secret: false },
+    ],
+  },
+  {
+    title: 'Web Push',
+    items: [
+      { key: 'WEB_PUSH_EMAIL', category: 'INTEGRATIONS', label: 'Web Push Email', secret: false },
+      { key: 'VAPID_PUBLIC_KEY', category: 'INTEGRATIONS', label: 'VAPID Public Key', secret: false, public: true },
+      { key: 'VAPID_PRIVATE_KEY', category: 'INTEGRATIONS', label: 'VAPID Private Key', secret: true },
+    ],
+  },
+  {
+    title: 'Webhooks (Asaas)',
+    items: [
+      { key: 'ASAAS_API_KEY', category: 'INTEGRATIONS', label: 'Asaas API Key', secret: true },
+      { key: 'ASAAS_ENV', category: 'INTEGRATIONS', label: 'Asaas Environment', secret: false },
+      { key: 'ASAAS_WEBHOOK_TOKEN', category: 'INTEGRATIONS', label: 'Asaas Webhook Token', secret: true },
+      { key: 'ASAAS_USER_AGENT', category: 'INTEGRATIONS', label: 'Asaas User-Agent', secret: false },
+    ],
+  },
+  {
+    title: 'Jobs (cron)',
+    items: [{ key: 'CRON_SECRET', category: 'INTEGRATIONS', label: 'Cron Secret', secret: true }],
+  },
+  {
+    title: 'Analytics',
+    items: [{ key: 'GOOGLE_ANALYTICS_ID', category: 'INTEGRATIONS', label: 'Google Analytics ID', secret: false, public: true }],
+  },
+  {
+    title: 'Geral',
+    items: [{ key: 'APP_URL', category: 'GENERAL', label: 'App URL', secret: false }],
+  },
+];
 
-  const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this configuration?')) {
-      setIsDeleting(true);
-      await onDelete(config.key);
-      setIsDeleting(false);
-    }
-  };
-
-  return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-        {config.key}
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        <div className="flex items-center space-x-2">
-          <span className="font-mono bg-gray-100 px-2 py-1 rounded">
-            {showValue ? config.value : '••••••••••••••••'}
-          </span>
-          <button
-            onClick={() => setShowValue(!showValue)}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            {showValue ? (
-              <EyeSlashIcon className="h-4 w-4" />
-            ) : (
-              <EyeIcon className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-          {config.category}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <button
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="text-red-600 hover:text-red-900 disabled:opacity-50"
-        >
-          <TrashIcon className="h-5 w-5" />
-        </button>
-      </td>
-    </tr>
-  );
+const getConfigStatus = (config, def) => {
+  if (!def?.secret) {
+    const value = config?.value ?? '';
+    return { isSet: String(value).trim().length > 0, isSecret: false };
+  }
+  if (!config) return { isSet: false, isSecret: true };
+  if (typeof config.isSet === 'boolean') return { isSet: config.isSet, isSecret: true };
+  return { isSet: true, isSecret: true };
 };
 
 const AdminSettings = () => {
@@ -76,59 +106,81 @@ const AdminSettings = () => {
     fetcher
   );
 
-  const [isAdding, setIsAdding] = useState(false);
-  const [newConfig, setNewConfig] = useState({
-    key: '',
-    value: '',
-    category: 'GENERAL',
-  });
+  const [values, setValues] = useState({});
+  const [isSavingKey, setIsSavingKey] = useState({});
+  const [showValue, setShowValue] = useState({});
 
   const configs = data?.data?.configs || [];
+  const configsByKey = useMemo(() => {
+    const map = new Map();
+    for (const c of configs) map.set(String(c.key || '').toUpperCase(), c);
+    return map;
+  }, [configs]);
 
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    setIsAdding(true);
+  useEffect(() => {
+    const next = {};
+    for (const section of CATALOG) {
+      for (const item of section.items) {
+        const existing = configsByKey.get(item.key);
+        if (!item.secret) {
+          if (existing && typeof existing.value === 'string') next[item.key] = existing.value;
+          else next[item.key] = '';
+        } else {
+          next[item.key] = '';
+        }
+      }
+    }
+    setValues((prev) => ({ ...next, ...prev }));
+  }, [configsByKey]);
 
+  const setKeyValue = (key, value) => setValues((prev) => ({ ...prev, [key]: value }));
+  const toggleKeyVisibility = (key) => setShowValue((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const saveKey = async ({ key, category, value, secret }) => {
+    setIsSavingKey((prev) => ({ ...prev, [key]: true }));
     try {
       const response = await fetch('/api/admin/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newConfig),
+        body: JSON.stringify({ key, category, value }),
       });
-      
+
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Configuration saved successfully');
-        setNewConfig({ key: '', value: '', category: 'GENERAL' });
+        toast.success('Configuração salva');
         mutate('/api/admin/settings');
+        if (secret) setKeyValue(key, '');
       } else {
-        toast.error(result.error.msg || 'Failed to save configuration');
+        toast.error(result?.error?.msg || 'Falha ao salvar configuração');
       }
     } catch (error) {
-      toast.error('An error occurred');
+      toast.error('Falha ao salvar configuração');
     } finally {
-      setIsAdding(false);
+      setIsSavingKey((prev) => ({ ...prev, [key]: false }));
     }
   };
 
-  const handleDelete = async (key) => {
+  const clearKey = async ({ key }) => {
+    setIsSavingKey((prev) => ({ ...prev, [key]: true }));
     try {
       const response = await fetch('/api/admin/settings', {
-        method: 'DELETE',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key }),
+        body: JSON.stringify({ key, clear: true }),
       });
 
       if (response.ok) {
-        toast.success('Configuration deleted');
+        toast.success('Configuração removida');
         mutate('/api/admin/settings');
       } else {
         const result = await response.json();
-        toast.error(result.error.msg || 'Failed to delete configuration');
+        toast.error(result?.error?.msg || 'Falha ao remover configuração');
       }
     } catch (error) {
-      toast.error('An error occurred');
+      toast.error('Falha ao remover configuração');
+    } finally {
+      setIsSavingKey((prev) => ({ ...prev, [key]: false }));
     }
   };
 
@@ -136,114 +188,130 @@ const AdminSettings = () => {
     <AdminLayout>
       <Meta title="Nextacular - Admin Settings" />
       <Content.Title
-        title="System Settings"
-        subtitle="Manage system-wide API keys and configurations"
+        title="Configurações de API"
+        subtitle="Chaves e integrações em runtime (sem re-deploy)"
       />
       <Content.Divider />
 
       <Content.Container>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1">
-            <Card>
-              <Card.Body title="Add New Config" subtitle="Add a new system-wide configuration">
-                <form onSubmit={handleAdd} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Category</label>
-                    <select
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                      value={newConfig.category}
-                      onChange={(e) => setNewConfig({ ...newConfig, category: e.target.value })}
-                    >
-                      <option value="GENERAL">General</option>
-                      <option value="PAYMENT">Payment</option>
-                      <option value="EMAIL">Email</option>
-                      <option value="AI">AI</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Key Name</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. STRIPE_SECRET_KEY"
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newConfig.key}
-                      onChange={(e) => setNewConfig({ ...newConfig, key: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
-                    />
-                    <p className="mt-1 text-xs text-gray-500">
-                      Use uppercase and underscores (e.g. API_KEY)
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Value</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Enter value..."
-                      className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      value={newConfig.value}
-                      onChange={(e) => setNewConfig({ ...newConfig, value: e.target.value })}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={isAdding}
-                    className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                  >
-                    {isAdding ? 'Saving...' : 'Add Configuration'}
-                  </button>
-                </form>
+        <div className="space-y-6">
+          {CATALOG.map((section) => (
+            <Card key={section.title}>
+              <Card.Body title={section.title} subtitle="Salva no banco e aplica em runtime">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {section.items.map((item) => {
+                    const config = configsByKey.get(item.key);
+                    const status = getConfigStatus(config, item);
+                    const currentValue = values[item.key] ?? '';
+                    const inputType = item.secret ? (showValue[item.key] ? 'text' : 'password') : 'text';
+                    const canClear = Boolean(config);
+                    const saving = Boolean(isSavingKey[item.key]);
+
+                    return (
+                      <div key={item.key} className="border rounded-lg p-4">
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="text-sm font-semibold text-gray-900">{item.label}</div>
+                            <div className="text-xs text-gray-500 font-mono">{item.key}</div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={[
+                                'px-2 py-1 rounded-full text-xs font-semibold',
+                                status.isSet ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700',
+                              ].join(' ')}
+                            >
+                              {status.isSet ? 'Configurado' : 'Pendente'}
+                            </span>
+                            {item.public ? (
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                                Public
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <label className="block text-xs font-medium text-gray-700">Valor</label>
+                          <div className="mt-1 flex items-center gap-2">
+                            <input
+                              type={inputType}
+                              className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
+                              value={currentValue}
+                              onChange={(e) => setKeyValue(item.key, e.target.value)}
+                              placeholder={item.secret ? '••••••••••' : ''}
+                              autoComplete={item.secret ? 'new-password' : 'off'}
+                              disabled={isLoading}
+                            />
+                            {item.secret ? (
+                              <button
+                                type="button"
+                                onClick={() => toggleKeyVisibility(item.key)}
+                                className="p-2 rounded-md border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                              >
+                                {showValue[item.key] ? <EyeSlashIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                              </button>
+                            ) : null}
+                          </div>
+                          {item.secret ? (
+                            <div className="mt-1 text-xs text-gray-500">
+                              Para manter o valor atual, deixe em branco.
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-4 flex items-center justify-between">
+                          <div className="text-xs text-gray-500">
+                            Categoria: <span className="font-semibold">{item.category}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {canClear ? (
+                              <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => clearKey({ key: item.key })}
+                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                                Remover
+                              </button>
+                            ) : null}
+                            <button
+                              type="button"
+                              disabled={saving || isLoading}
+                              onClick={() =>
+                                saveKey({
+                                  key: item.key,
+                                  category: item.category,
+                                  value: currentValue,
+                                  secret: item.secret,
+                                })
+                              }
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              <KeyIcon className="h-4 w-4" />
+                              {saving ? 'Salvando...' : 'Salvar'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </Card.Body>
             </Card>
-          </div>
+          ))}
 
-          <div className="md:col-span-2">
-            <Card>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Key
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Value
-                      </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th scope="col" className="relative px-6 py-3">
-                        <span className="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {isLoading ? (
-                      <tr>
-                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                          Loading...
-                        </td>
-                      </tr>
-                    ) : configs.length === 0 ? (
-                      <tr>
-                        <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
-                          No configurations found. Add one to get started.
-                        </td>
-                      </tr>
-                    ) : (
-                      configs.map((config) => (
-                        <ConfigItem 
-                          key={config.id} 
-                          config={config} 
-                          onDelete={handleDelete} 
-                        />
-                      ))
-                    )}
-                  </tbody>
-                </table>
+          <Card>
+            <Card.Body
+              title="Gateways do CRM"
+              subtitle="Credenciais por gateway + ambiente (sandbox/prod) ficam no Finance"
+            >
+              <div className="text-sm text-gray-700">
+                As credenciais de gateways (Asaas/Mercado Pago/Pagar.me/Stripe do CRM) são gerenciadas em <span className="font-semibold">Finance / Payment Providers</span>.
               </div>
-            </Card>
-          </div>
+            </Card.Body>
+          </Card>
         </div>
       </Content.Container>
     </AdminLayout>

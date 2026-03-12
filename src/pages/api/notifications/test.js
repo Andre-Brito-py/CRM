@@ -1,30 +1,32 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import webPush from 'web-push';
-
-webPush.setVapidDetails(
-  process.env.WEB_PUSH_EMAIL,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+import { getSystemConfig } from '@/lib/server/config';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  // Optional: Restrict to workspace owner or specific role
-  
   if (req.method === 'POST') {
     const { title, body, url, userId } = req.body;
 
     try {
+      const [email, publicKey, privateKey] = await Promise.all([
+        getSystemConfig('WEB_PUSH_EMAIL', process.env.WEB_PUSH_EMAIL),
+        getSystemConfig('VAPID_PUBLIC_KEY', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
+        getSystemConfig('VAPID_PRIVATE_KEY', process.env.VAPID_PRIVATE_KEY),
+      ]);
+
+      if (!email || !publicKey || !privateKey) {
+        return res.status(500).json({ error: 'Web push is not configured' });
+      }
+
+      webPush.setVapidDetails(email, publicKey, privateKey);
+
       // Find subscriptions for the user
       // If userId is provided, send to that user. Otherwise send to current user.
       const targetUserId = userId || session.user.userId;
-      
+
       const subscriptions = await prisma.notificationSubscription.findMany({
         where: {
           userId: targetUserId,

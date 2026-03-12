@@ -40,10 +40,20 @@ export function usePushNotifications(workspaceId) {
     if (!registration) return;
 
     try {
+      const response = await fetch('/api/public-config?keys=VAPID_PUBLIC_KEY');
+      const json = await response.json();
+      const vapidPublicKey =
+        json?.data?.config?.VAPID_PUBLIC_KEY ||
+        process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+
+      if (!vapidPublicKey) {
+        throw new Error('VAPID public key is missing');
+      }
+
       const sub = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(
-          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+          vapidPublicKey
         ),
       });
 

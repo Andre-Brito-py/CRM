@@ -5,6 +5,7 @@ import {
   deleteDomain,
   verifyDomain,
 } from '@/prisma/services/domain';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -13,15 +14,22 @@ const handler = async (req, res) => {
     const session = await validateSession(req, res);
     await validateAddDomain(req, res);
     const { domainName } = req.body;
-    const teamId = process.env.VERCEL_TEAM_ID;
+    const [teamId, apiUrl, projectId, token] = await Promise.all([
+      getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
+      getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
+      getSystemConfig('VERCEL_PROJECT_ID', process.env.VERCEL_PROJECT_ID),
+      getSystemConfig('VERCEL_AUTH_BEARER_TOKEN', process.env.VERCEL_AUTH_BEARER_TOKEN),
+    ]);
+    if (!apiUrl || !projectId || !token) {
+      res.status(500).json({ errors: { error: { msg: 'Vercel domain integration is not configured' } } });
+      return;
+    }
     const response = await api(
-      `${process.env.VERCEL_API_URL}/v9/projects/${
-        process.env.VERCEL_PROJECT_ID
-      }/domains${teamId ? `?teamId=${teamId}` : ''}`,
+      `${apiUrl}/v9/projects/${projectId}/domains${teamId ? `?teamId=${teamId}` : ''}`,
       {
         body: { name: domainName },
         headers: {
-          Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'POST',
       }
@@ -47,14 +55,21 @@ const handler = async (req, res) => {
   } else if (method === 'PUT') {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
-    const teamId = process.env.VERCEL_TEAM_ID;
+    const [teamId, apiUrl, projectId, token] = await Promise.all([
+      getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
+      getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
+      getSystemConfig('VERCEL_PROJECT_ID', process.env.VERCEL_PROJECT_ID),
+      getSystemConfig('VERCEL_AUTH_BEARER_TOKEN', process.env.VERCEL_AUTH_BEARER_TOKEN),
+    ]);
+    if (!apiUrl || !projectId || !token) {
+      res.status(500).json({ errors: { error: { msg: 'Vercel domain integration is not configured' } } });
+      return;
+    }
     const response = await api(
-      `${process.env.VERCEL_API_URL}/v9/projects/${
-        process.env.VERCEL_PROJECT_ID
-      }/domains/${domainName}/verify${teamId ? `?teamId=${teamId}` : ''}`,
+      `${apiUrl}/v9/projects/${projectId}/domains/${domainName}/verify${teamId ? `?teamId=${teamId}` : ''}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'POST',
       }
@@ -77,14 +92,21 @@ const handler = async (req, res) => {
   } else if (method === 'DELETE') {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
-    const teamId = process.env.VERCEL_TEAM_ID;
+    const [teamId, apiUrl, projectId, token] = await Promise.all([
+      getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
+      getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
+      getSystemConfig('VERCEL_PROJECT_ID', process.env.VERCEL_PROJECT_ID),
+      getSystemConfig('VERCEL_AUTH_BEARER_TOKEN', process.env.VERCEL_AUTH_BEARER_TOKEN),
+    ]);
+    if (!apiUrl || !projectId || !token) {
+      res.status(500).json({ errors: { error: { msg: 'Vercel domain integration is not configured' } } });
+      return;
+    }
     await api(
-      `${process.env.VERCEL_API_URL}/v8/projects/${
-        process.env.VERCEL_PROJECT_ID
-      }/domains/${domainName}${teamId ? `?teamId=${teamId}` : ''}`,
+      `${apiUrl}/v8/projects/${projectId}/domains/${domainName}${teamId ? `?teamId=${teamId}` : ''}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.VERCEL_AUTH_BEARER_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         method: 'DELETE',
       }

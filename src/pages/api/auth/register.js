@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import prisma from '@/prisma/index';
 import { sendMail } from '@/lib/server/mail';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
@@ -47,7 +48,8 @@ const handler = async (req, res) => {
         });
 
         // Send Verification Email
-        const verificationUrl = `${process.env.APP_URL}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+        const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+        const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
 
         await sendMail({
             html: `

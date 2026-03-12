@@ -236,7 +236,9 @@ export const getServerSideProps = async (context) => {
   }
 
   // Se não tiver chave do Stripe configurada, retornar props vazias para evitar erro
-  if (!process.env.PAYMENTS_SECRET_KEY) {
+  const { getSystemConfig } = await import('@/lib/server/config');
+  const stripeKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+  if (!stripeKey) {
     return {
       props: {
         invoices: [],

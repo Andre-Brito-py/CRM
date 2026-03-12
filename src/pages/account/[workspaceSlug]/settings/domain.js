@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import { getSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -22,7 +22,24 @@ const Domain = ({ isTeamOwner, workspace }) => {
   const { data, isLoading } = useDomains(workspace.slug);
   const [domain, setDomain] = useState('');
   const [isSubmitting, setSubmittingState] = useState(false);
+  const [vercelIpAddress, setVercelIpAddress] = useState(process.env.NEXT_PUBLIC_VERCEL_IP_ADDRESS || '');
   const validDomainName = isFQDN(domain);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch('/api/public-config?keys=VERCEL_IP_ADDRESS');
+        const json = await response.json();
+        const value = json?.data?.config?.VERCEL_IP_ADDRESS;
+        if (!cancelled && value) setVercelIpAddress(String(value));
+      } catch (e) {
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const addDomain = (event) => {
     event.preventDefault();
@@ -156,7 +173,7 @@ const Domain = ({ isTeamOwner, workspace }) => {
               data.domains.map((domain, index) => (
                 <DomainCard
                   key={index}
-                  apex={process.env.NEXT_PUBLIC_VERCEL_IP_ADDRESS}
+                  apex={vercelIpAddress}
                   cname={workspace.hostname}
                   isLoading={isSubmitting}
                   domain={domain}
@@ -189,7 +206,9 @@ export const getServerSideProps = async (context) => {
     );
 
     if (workspace) {
-      const { host } = new URL(process.env.APP_URL);
+      const { getSystemConfig } = await import('@/lib/server/config');
+      const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+      const { host } = new URL(appUrl);
       isTeamOwner = isWorkspaceOwner(session.user.email, workspace);
       workspace.host = host;
       workspace.hostname = `${workspace.slug}.${host}`;

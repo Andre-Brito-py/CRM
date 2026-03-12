@@ -1,6 +1,7 @@
 import { validateSession } from '@/config/api-validation';
 import getStripe from '@/lib/server/stripe';
 import { getPayment } from '@/prisma/services/customer';
+import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
   if (req.method !== 'POST') {
@@ -11,7 +12,8 @@ const handler = async (req, res) => {
   try {
     const session = await validateSession(req, res);
 
-    if (!process.env.APP_URL) {
+    const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+    if (!appUrl) {
       res.status(500).json({ errors: { error: { msg: 'APP_URL is missing' } } });
       return;
     }
@@ -25,7 +27,7 @@ const handler = async (req, res) => {
     const stripe = await getStripe();
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerPayment.paymentId,
-      return_url: `${process.env.APP_URL}/account/billing`,
+      return_url: `${appUrl}/account/billing`,
     });
 
     res.status(200).json({ data: { url: portalSession.url } });

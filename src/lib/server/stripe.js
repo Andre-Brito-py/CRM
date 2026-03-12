@@ -2,12 +2,26 @@ import initStripe from 'stripe';
 import { getSystemConfig } from '@/lib/server/config';
 
 let stripeClient = null;
+let stripeClientKeyHash = null;
+
+const hashKey = (value) => {
+  if (!value) return null;
+  let hash = 0;
+  const s = String(value);
+  for (let i = 0; i < s.length; i += 1) {
+    hash = ((hash << 5) - hash + s.charCodeAt(i)) | 0;
+  }
+  return String(hash);
+};
 
 const getStripe = async () => {
-  if (!stripeClient) {
-    const secretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
-    if (!secretKey) throw new Error('Stripe secret key is missing');
+  const secretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+  if (!secretKey) throw new Error('Stripe secret key is missing');
+
+  const nextHash = hashKey(secretKey);
+  if (!stripeClient || stripeClientKeyHash !== nextHash) {
     stripeClient = initStripe(secretKey);
+    stripeClientKeyHash = nextHash;
   }
   return stripeClient;
 };
