@@ -55,7 +55,6 @@ const Item = ({ data, isLoading, closeMenu }) => {
             : 'text-zinc-300 hover:text-white hover:bg-white/[0.03] hover:border-white/[0.05]'
           }`}
         onClick={handleClick}
-        prefetch={false}
       >
         {isActive && (
           <motion.div 

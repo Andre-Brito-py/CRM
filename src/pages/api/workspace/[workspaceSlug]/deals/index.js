@@ -10,7 +10,11 @@ const handler = async (req, res) => {
 
   if (!session) return;
 
-  const workspace = await getWorkspace(undefined, session.user.email, workspaceSlug);
+  const workspace = await getWorkspace(
+    session.user.userId || session.user.id,
+    session.user.email,
+    workspaceSlug
+  );
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
@@ -28,7 +32,7 @@ const handler = async (req, res) => {
 
     case 'POST':
       try {
-        const { name, stageId, amount, closeDate, priority, contactId, companyId, userId } = req.body;
+        const { name, stageId, amount, closeDate, priority, contactId, companyId, userId, customFields } = req.body;
 
         if (!name || !stageId) {
           return res.status(400).json({ error: { msg: 'Name and Stage are required' } });
@@ -42,7 +46,8 @@ const handler = async (req, res) => {
           priority,
           contactId,
           companyId,
-          userId
+          userId,
+          customFields
         });
 
         await createActivity(workspace.id, session.user.userId, {

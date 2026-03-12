@@ -79,16 +79,22 @@ const resources = {
   }
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: "en", // Default language
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false
-    }
-  });
+if (!i18n.isInitialized) {
+  i18n
+    .use(initReactI18next)
+    .init({
+      resources,
+      lng: "en",
+      fallbackLng: "en",
+      initImmediate: false,
+      react: {
+        useSuspense: false,
+      },
+      interpolation: {
+        escapeValue: false
+      }
+    });
+}
 
 const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
@@ -101,12 +107,15 @@ const App = ({ Component, pageProps }) => {
   TopBarProgress.config(progressBarConfig());
 
   useEffect(() => {
-    if (process.env.NODE_ENV === 'production') {
-      ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
-    }
+    if (process.env.NODE_ENV !== 'production') return;
+    if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) return;
+    ReactGA.initialize(process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID);
   }, []);
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== 'production') return;
+    if (!process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID) return;
+
     const handleRouteChange = (url) => {
       ReactGA.pageview(url);
     };

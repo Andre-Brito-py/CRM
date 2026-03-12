@@ -53,22 +53,22 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
     - [x] Histórico completo de mensagens.
 - **Integração WhatsApp:**
     - [x] Integração com API (Meta Cloud API).
-    - [ ] Envio ativo de mensagens (Outbound) via Interface do CRM.
+    - [x] Envio ativo de mensagens (Outbound) via Interface do CRM.
     - [x] Recebimento de mensagens (Inbound webhook).
     - [x] **Lead Gen:** Criação automática de leads quando um novo número envia mensagem.
     - [x] Associação automática de conversas a contatos existentes.
-    - [ ] Templates de mensagens reutilizáveis.
-    - [ ] Envio de mensagens automáticas baseadas em eventos.
+    - [x] Templates de mensagens reutilizáveis.
+    - [x] Envio de mensagens automáticas baseadas em eventos.
 
 ### 4. Automation & Workflows 🚧
 *Automação de vendas baseada em regras.*
 - **Workflows:**
-    - [x] Sistema de Regras e Gatilhos no Backend (Deal Stage, Incoming Message).
-    - [ ] Interface de usuário (Builder) para criação de Automações.
+    - [x] Sistema de Regras e Gatilhos no Backend (Deal Stage, Incoming Message, Inatividade).
+    - [x] Interface básica para criação e gestão de Automações.
     - **Ações Automáticas:**
-        - [ ] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
-        - [ ] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
-        - [ ] Quando um cliente não responde em X dias → enviar follow-up.
+        - [x] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
+        - [x] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
+        - [x] Quando um cliente não responde em X dias → enviar follow-up.
 - **Tasks & Reminders:**
     - [x] Sistema de tarefas (Título, Data de vencimento, Responsável, Status).
     - [x] Associação de tarefas a Contatos e Negócios.
@@ -77,9 +77,9 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 ### 5. Artificial Intelligence (IA) 🚧
 *Funcionalidades para aumentar produtividade.*
 - **Integração Base:**
-    - [ ] Conectar API da OpenAI via System Config.
+    - [x] Conectar API da OpenAI via System Config.
 - **Assistente de Resposta:**
-    - [ ] Geração dinâmica de sugestões de resposta para clientes no Inbox.
+    - [x] Geração dinâmica de sugestões de resposta para clientes no Inbox.
     - [ ] Resumo inteligente de histório de conversas.
 - **Vendas Inteligentes:**
     - [ ] Análise de pipeline de vendas com insights automáticos.
@@ -111,10 +111,39 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
     - ✅ Integração com Stripe (Assinaturas).
 - **Integrações Externas:**
     - [x] Webhooks (Eventos de sistema).
+    - [x] API Keys (para integrações externas).
     - [x] Gmail (UI Pronta).
     - [x] Google Calendar (UI pronta).
     - [x] Zapier (UI pronta).
     - [x] WhatsApp (Cloud API).
+
+### 7.1 Plataforma No-Code (Personalização para PMEs) 🚧
+*Camada de personalização e automação para adaptar o CRM a diferentes negócios.*
+- **Workflows v2 (Automação avançada):**
+    - [x] Condições compostas (AND/OR).
+    - [x] Filtros por tags/canal/horário.
+    - [x] Múltiplas ações por regra e ações com atraso (wait/delay).
+    - [x] Novas ações: criar tarefa, chamar webhook.
+    - [x] Novas ações: mover estágio, aplicar tag.
+    - [x] Auditoria e logs por execução de regra.
+    - [x] Simulação/teste de regras com “explicação” do disparo.
+- **Templates v2 (Mensagens):**
+    - [x] Variáveis ampliadas (contato/empresa/negócio/atendente).
+    - [x] Pastas, busca, templates por idioma e duplicação (versionamento simples via nome).
+    - [ ] Assistência por IA para revisão/encurtamento do texto.
+- **Custom Fields v2 (Dados):**
+    - [x] Novos tipos (checkbox, multi-select, moeda, URL, telefone).
+    - [x] Validação e obrigatoriedade.
+    - [ ] Conjuntos de campos por área (vendas/suporte) e permissões.
+- **Integrações v2 (Webhooks e API Keys):**
+    - [x] Segredos assinados (HMAC) e rotação de segredos.
+    - [x] Retentativas e painel de entregas (status, erros, histórico).
+    - [x] Filtros por evento e opção de “enviar todos” (`*`).
+- **Presets por segmento (1-click setup):**
+    - [x] Pipelines + campos + templates + automações para nichos (imobiliária, clínica, agência, assistência técnica).
+- **Roteamento e SLA (Inbox):**
+    - [x] Regras de atribuição (por origin/palavra-chave/região/horário/carga).
+    - [x] Escalonamento automático e alertas de SLA.
 
 ### 8. Experiência Mobile ✅
 *Acesso em qualquer lugar.*
@@ -148,3 +177,21 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 - ✅ Interface Kanban (`@hello-pangea/dnd`).
 - ✅ Gestão de Deals e Colunas Dinâmicas.
 - ✅ Lógica de Persistência e Optimistic UI.
+
+### Fase 4: Inbox, WhatsApp e Automations (Base) ✅
+- ✅ Inbox com atribuição e status.
+- ✅ Integração WhatsApp (inbound/outbound).
+- ✅ Templates (CRUD) para mensagens.
+- ✅ Automações (regras + execução) e UI básica.
+- ✅ IA: sugestão de resposta no Inbox (endpoint).
+
+### Fase 5: Plataforma No-Code (Evolução para PMEs) 🚧
+- [ ] Alinhar schema Prisma aos modelos no-code (rules/templates/webhooks/api-keys/status/assignee).
+- [ ] Workflows v2 (condições, delays, múltiplas ações, logs, simulação).
+- [x] Templates v2 (variáveis ampliadas, pastas, versionamento simples via nome, idioma).
+- [ ] Custom Fields v2 (novos tipos, validação por estágio, permissões).
+- [ ] Integrações v2:
+    - [x] HMAC e rotação de segredos.
+    - [x] Filtros por evento e opção de “enviar todos” (`*`).
+    - [x] Retentativas e painel de entregas (status, erros, histórico).
+- [x] Presets por nicho e mini-apps internos para fluxos recorrentes.

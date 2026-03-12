@@ -12,47 +12,41 @@ import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
   callbacks: {
-    session: async ({ session, token, user }) => {
-      if (session.user || token) {
-        const userEmail = session?.user?.email || token?.email || null;
-        const userId = token?.id || null;
-
-        const or = [];
-        if (userEmail) or.push({ email: userEmail });
-        if (userId) or.push({ id: userId });
-
-        const dbUser = or.length
-          ? await prisma.user.findFirst({
-            where: { OR: or },
-            select: { id: true, role: true, email: true, twoFactorEnabled: true },
-          })
-          : null;
-
-        if (dbUser) {
-          if (!session.user) session.user = {};
-          session.user.id = dbUser.id;
-          session.user.userId = dbUser.id;
-          session.user.role = dbUser.role;
-          session.user.email = dbUser.email;
-          session.user.twoFactorEnabled = dbUser.twoFactorEnabled;
-
-          if (dbUser.role === 'SUPERADMIN') {
-            session.user.subscription = 'PREMIUM';
-          } else {
-            const customerPayment = await getPayment(dbUser.email);
-            if (customerPayment) {
-              session.user.subscription = customerPayment.subscriptionType;
-            }
-          }
-        }
+    session: async ({ session, token }) => {
+      if (token) {
+        if (!session.user) session.user = {};
+        session.user.id = token.id || null;
+        session.user.userId = token.id || null;
+        session.user.role = token.role || null;
+        session.user.email = token.email || null;
+        session.user.twoFactorEnabled = token.twoFactorEnabled || false;
+        session.user.subscription = token.subscription || null;
       }
-
       return session;
     },
     jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
         token.email = user.email;
+
+        const dbUser = await prisma.user.findUnique({
+          where: { id: user.id },
+          select: { role: true, twoFactorEnabled: true, email: true },
+        });
+
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.twoFactorEnabled = dbUser.twoFactorEnabled;
+
+          if (dbUser.role === 'SUPERADMIN') {
+            token.subscription = 'PREMIUM';
+          } else {
+            const customerPayment = await getPayment(dbUser.email);
+            if (customerPayment) {
+              token.subscription = customerPayment.subscriptionType;
+            }
+          }
+        }
       }
       return token;
     }

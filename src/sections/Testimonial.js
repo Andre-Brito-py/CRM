@@ -15,11 +15,12 @@ const Testimonial = () => {
           transition={{ duration: 0.8, type: "spring" }}
           className="relative px-8 py-16 md:px-16 md:py-20 bg-zinc-900/40 border border-white/5 rounded-[3rem] backdrop-blur-sm overflow-hidden text-center"
         >
-          {/* Quote mark decoration */}
-          <div className="absolute -top-6 -left-6 text-9xl text-indigo-500/20 font-serif leading-none">"</div>
+          <div className="absolute -top-6 -left-6 text-9xl text-indigo-500/20 font-serif leading-none">&ldquo;</div>
           
           <h3 className="relative z-10 text-2xl md:text-4xl font-medium leading-relaxed text-white tracking-tight">
-            "{t('landing.testimonial.quote', "Since moving our team to Nextacular CRM, our response times dropped by 80% and we closed 3x more enterprise deals in the first month. It’s the ultimate sales machine.")}"
+            <span>&ldquo;</span>
+            {t('landing.testimonial.quote', "Since moving our team to Nextacular CRM, our response times dropped by 80% and we closed 3x more enterprise deals in the first month. It’s the ultimate sales machine.")}
+            <span>&rdquo;</span>
           </h3>
           
           <div className="relative z-10 flex flex-col items-center justify-center mt-12 space-y-2">

@@ -517,6 +517,10 @@ export async function getServerSideProps(context) {
     );
   }
 
+  if (!workspace) {
+    return { notFound: true };
+  }
+
   return {
     props: {
       workspace,

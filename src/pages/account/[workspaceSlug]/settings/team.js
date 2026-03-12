@@ -350,6 +350,19 @@ export const getServerSideProps = async (context) => {
     }
   }
 
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
+  if (!workspace) {
+    return { notFound: true };
+  }
+
   return {
     props: {
       isTeamOwner,

@@ -45,6 +45,14 @@
 - **Múltiplos Números de WhatsApp** — Gerencie vários números por workspace
 - **Sugestão de Resposta por IA** — Respostas inteligentes geradas pelo OpenAI
 
+### ⚙️ Automations & No-Code (Plataforma para PMEs)
+- **Workflows v2** — Condições AND/OR, filtros (tags/canal/horário), múltiplas ações e delays
+- **Simulação & Auditoria** — Simule regras e consulte logs de execução/erros
+- **Templates v2** — Variáveis ampliadas, pastas, busca, idioma e duplicação (versionamento simples via nome)
+- **Presets por Segmento** — Setup em 1 clique (pipelines + campos + tags + templates)
+- **Integrações v2 (Webhooks)** — Histórico de entregas e visibilidade de falhas
+- **SLA** — Processamento de violações de SLA via endpoint de CRON
+
 ### 🔒 Autenticação & Segurança
 - **Magic Link** — Login passwordless por email
 - **Login por Credenciais** — Email + senha com bcrypt
@@ -177,6 +185,8 @@ ADMIN_EMAIL="admin@seudominio.com"
 - [x] Dashboard Executivo com métricas e gráficos
 - [x] Inbox Omnichannel (WhatsApp)
 - [x] Sugestão de Resposta por IA (OpenAI)
+- [x] Resumo de conversas por IA (Inbox)
+- [x] Insights do pipeline e recomendações (IA)
 - [x] Múltiplos Números de WhatsApp por Workspace
 - [x] Sistema de Planos & Paywalls (Free / Standard / Premium)
 - [x] Autenticação Completa (Magic Link + Senha + 2FA)
@@ -187,9 +197,9 @@ ADMIN_EMAIL="admin@seudominio.com"
 - [x] Página de Vendas Animada com Feature Gating
 - [x] Importação de Contatos via CSV
 - [x] Notificações Push (Web Push API)
-- [ ] Automação & Workflows de Vendas
-- [ ] App Mobile (PWA)
-- [ ] Relatórios e Exportação de Dados
+- [x] Automação & Workflows de Vendas (Workflows v2 + simulação + logs)
+- [x] App Mobile (PWA)
+- [x] Relatórios e Exportação de Dados
 
 ---
 

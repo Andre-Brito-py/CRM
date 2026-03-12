@@ -151,13 +151,17 @@ export const getServerSideProps = async (context) => {
     }
   }
 
-  if (!session || !workspace) {
+  if (!session) {
     return {
       redirect: {
         destination: '/auth/login',
         permanent: false,
       },
     };
+  }
+
+  if (!workspace) {
+    return { notFound: true };
   }
 
   return { props: { isCreator, workspace } };

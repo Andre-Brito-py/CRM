@@ -2,6 +2,7 @@ import { validateSession } from '@/config/api-validation';
 import { getConversation, createMessage, updateConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
+import { renderTemplateString } from '@/prisma/services/template';
 import prisma from '@/prisma/index';
 
 const handler = async (req, res) => {
@@ -73,6 +74,16 @@ const handler = async (req, res) => {
 
         let sentMessageId = externalId;
         let messageStatus = status || 'SENT';
+        let resolvedContent = content;
+
+        if (typeof resolvedContent === 'string' && resolvedContent.includes('{{')) {
+          resolvedContent = await renderTemplateString(workspace.id, resolvedContent, {
+            conversationId: conversation.id,
+            contact: conversation.contact,
+            contactId: conversation.contactId,
+            dealId: req.body?.dealId || null,
+          });
+        }
 
         // 2. If outbound WhatsApp message, send via API
         if ((!direction || direction === 'OUTBOUND') && conversation.platform === 'WHATSAPP') {
@@ -94,7 +105,7 @@ const handler = async (req, res) => {
             }
 
             // Only send if it's a real user message (not system)
-            sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, content);
+            sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, resolvedContent);
             messageStatus = 'SENT';
           } catch (waError) {
             console.error('Failed to send WhatsApp message:', waError);
@@ -106,7 +117,7 @@ const handler = async (req, res) => {
         const message = await createMessage(conversationId, {
           direction: direction || 'OUTBOUND',
           type: type || 'TEXT',
-          content,
+          content: resolvedContent,
           mediaUrl,
           status: messageStatus,
           externalId: sentMessageId

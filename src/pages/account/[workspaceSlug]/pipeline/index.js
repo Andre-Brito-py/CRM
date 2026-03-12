@@ -7,6 +7,7 @@ import usePipelines from '@/hooks/data/usePipelines';
 import { useWorkspace } from '@/providers/workspace';
 import PipelineBoard from '@/sections/pipeline/Board';
 import AddDealModal from '@/sections/pipeline/AddDealModal';
+import Paywall from '@/components/Paywall/index';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
 
@@ -59,20 +60,22 @@ const Pipeline = () => {
               {pipeline?.name || 'Sales Pipeline'}
             </h2>
             {pipeline && (
-              <button
-                onClick={generateInsights}
-                disabled={isGeneratingInsights}
-                className="flex items-center justify-center px-5 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all duration-300 shadow-sm shadow-indigo-500/5 group disabled:opacity-50"
-              >
-                {isGeneratingInsights ? (
-                  <span className="animate-pulse">Analyzing...</span>
-                ) : (
-                  <>
-                    <SparklesIcon className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                    Get AI Insights
-                  </>
-                )}
-              </button>
+              <Paywall minPlan="STANDARD" compact>
+                <button
+                  onClick={generateInsights}
+                  disabled={isGeneratingInsights}
+                  className="flex items-center justify-center px-5 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all duration-300 shadow-sm shadow-indigo-500/5 group disabled:opacity-50"
+                >
+                  {isGeneratingInsights ? (
+                    <span className="animate-pulse">Analyzing...</span>
+                  ) : (
+                    <>
+                      <SparklesIcon className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
+                      Get AI Insights
+                    </>
+                  )}
+                </button>
+              </Paywall>
             )}
           </div>
           <button

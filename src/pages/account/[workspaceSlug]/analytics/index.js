@@ -5,6 +5,7 @@ import { AccountLayout } from '@/layouts/index';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import Card from '@/components/Card/index';
+import Paywall from '@/components/Paywall/index';
 import api from '@/lib/common/api';
 import { useTranslation } from 'react-i18next';
 import {
@@ -229,6 +230,10 @@ const Analytics = () => {
       </div>
       <Content.Divider />
       <Content.Container>
+        <Paywall
+          minPlan="STANDARD"
+          message="Analytics avançados como funil de conversão, desempenho de vendedores e tendências de receita estão disponíveis no plano Standard ou superior."
+        >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
             <Card.Body title={t('analytics.avgClosingTime.title')}>
@@ -411,6 +416,7 @@ const Analytics = () => {
             </Card.Body>
           </Card>
         </div>
+        </Paywall>
       </Content.Container>
     </AccountLayout>
   );

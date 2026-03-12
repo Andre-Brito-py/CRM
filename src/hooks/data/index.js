@@ -3,6 +3,7 @@ import useDomains from './useDomains';
 import useInvitations from './useInvitations';
 import useMembers from './useMembers';
 import useWorkspaces from './useWorkspaces';
+import useWorkspace from './useWorkspace';
 import useContact from './useContact';
 import useContacts from './useContacts';
 import useCompanies from './useCompanies';
@@ -27,5 +28,6 @@ export {
   useTasks,
   useTask,
   useDeal,
-  useDeals
+  useDeals,
+  useWorkspace
 };

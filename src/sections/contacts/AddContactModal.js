@@ -4,14 +4,22 @@ import { useSWRConfig } from 'swr';
 import Modal from '@/components/Modal/index';
 import Button from '@/components/Button/index';
 import api from '@/lib/common/api';
+import useWorkspace from '@/hooks/data/useWorkspace';
+import CustomFieldsRenderer from '@/components/CustomFieldsRenderer';
 
 const AddContactModal = ({ isOpen, toggle, slug }) => {
   const { mutate } = useSWRConfig();
+  const { data: workspaceData } = useWorkspace(slug);
   const [isSubmitting, setSubmitting] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [jobTitle, setJobTitle] = useState('');
+  const [customFields, setCustomFields] = useState({});
+
+  const handleCustomFieldChange = (key, value) => {
+    setCustomFields(prev => ({ ...prev, [key]: value }));
+  };
 
   const handleCreateContact = async (e) => {
     e.preventDefault();
@@ -19,7 +27,7 @@ const AddContactModal = ({ isOpen, toggle, slug }) => {
 
     try {
       const response = await api(`/api/workspace/${slug}/contacts`, {
-        body: { name, email, phone, jobTitle },
+        body: { name, email, phone, jobTitle, customFields },
         method: 'POST',
       });
 
@@ -30,6 +38,7 @@ const AddContactModal = ({ isOpen, toggle, slug }) => {
         setEmail('');
         setPhone('');
         setJobTitle('');
+        setCustomFields({});
         toggle();
       } else if (response.error) {
         toast.error(response.error.msg);
@@ -99,7 +108,15 @@ const AddContactModal = ({ isOpen, toggle, slug }) => {
             onChange={(e) => setJobTitle(e.target.value)}
           />
         </div>
-        <div className="flex justify-end pt-4">
+
+        <CustomFieldsRenderer
+          fields={workspaceData?.workspace?.customFieldDefinitions}
+          values={customFields}
+          onChange={handleCustomFieldChange}
+          area="support"
+        />
+
+        <div className="flex justify-end pt-4 border-t border-gray-100">
           <Button
             type="button"
             className="mr-2 text-gray-600 bg-white border border-gray-300 hover:bg-gray-50"

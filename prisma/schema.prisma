@@ -112,6 +112,8 @@ model User {
   membership       Member[]         @relation("membership")
   invitedMembers   Member[]         @relation("inviter")
   sessions         Session[]
+  assignedConversations Conversation[] @relation("conversationAssignee")
+  assignedDeals   Deal[]         @relation("dealAssignee")
   assignedTasks    Task[]
   createdWorkspace Workspace[]
 
@@ -140,15 +142,21 @@ model Workspace {
   updatedAt              DateTime?      @updatedAt
   customFieldDefinitions Json?
   activities             Activity[]
+  apiKeys                ApiKey[]
+  automationRules        AutomationRule[]
+  automationJobs         AutomationJob[]
   companies              Company[]
   contacts               Contact[]
   conversations          Conversation[]
   deals                  Deal[]
   domains                Domain[]
   integrations           Integration[]
+  messageTemplates       MessageTemplate[]
   members                Member[]
   pipelines              Pipeline[]
+  tags                   Tag[]
   tasks                  Task[]
+  webhooks               Webhook[]
   creator                User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
@@ -177,6 +185,7 @@ model Contact {
   email         String?
   phone         String?
   jobTitle      String?
+  customFields  Json?
   createdAt     DateTime?      @default(now())
   updatedAt     DateTime?      @updatedAt
   deletedAt     DateTime?
@@ -185,9 +194,27 @@ model Contact {
   workspace     Workspace      @relation(fields: [workspaceId], references: [id])
   conversations Conversation[]
   deals         Deal[]
+  tags          Tag[]
   tasks         Task[]
 
+  @@index([workspaceId])
+  @@index([workspaceId, createdAt])
   @@map("contacts")
+}
+
+model Tag {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  color       String?
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts    Contact[]
+
+  @@index([workspaceId])
+  @@map("tags")
 }
 
 model Company {
@@ -196,6 +223,7 @@ model Company {
   name        String
   website     String?
   industry    String?
+  customFields Json?
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
   deletedAt   DateTime?
@@ -203,6 +231,7 @@ model Company {
   contacts    Contact[]
   deals       Deal[]
 
+  @@index([workspaceId])
   @@map("companies")
 }
 
@@ -216,6 +245,7 @@ model Pipeline {
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   stages      Stage[]
 
+  @@index([workspaceId])
   @@map("pipelines")
 }
 
@@ -231,6 +261,7 @@ model Stage {
   deals      Deal[]
   pipeline   Pipeline  @relation(fields: [pipelineId], references: [id])
 
+  @@index([pipelineId])
   @@map("stages")
 }
 
@@ -243,17 +274,24 @@ model Deal {
   name        String
   amount      Decimal?   @db.Decimal(10, 2)
   closeDate   DateTime?
+  customFields Json?
   priority    String?    @default("MEDIUM")
+  assigneeId  String?
   createdAt   DateTime?  @default(now())
   updatedAt   DateTime?  @updatedAt
   deletedAt   DateTime?
   activities  Activity[]
+  assignee    User?      @relation("dealAssignee", fields: [assigneeId], references: [id])
   company     Company?   @relation(fields: [companyId], references: [id])
   contact     Contact?   @relation(fields: [contactId], references: [id])
   stage       Stage      @relation(fields: [stageId], references: [id])
   workspace   Workspace  @relation(fields: [workspaceId], references: [id])
   tasks       Task[]
 
+  @@index([workspaceId])
+  @@index([workspaceId, stageId])
+  @@index([workspaceId, createdAt])
+  @@index([stageId])
   @@map("deals")
 }
 
@@ -261,16 +299,120 @@ model Conversation {
   id          String    @id @default(cuid())
   workspaceId String
   contactId   String?
+  assigneeId  String?
   platform    String    @default("WHATSAPP")
   externalId  String?
+  status      ConversationStatus @default(OPEN)
   createdAt   DateTime? @default(now())
   updatedAt   DateTime? @updatedAt
   deletedAt   DateTime?
+  assignee    User?     @relation("conversationAssignee", fields: [assigneeId], references: [id])
   contact     Contact?  @relation(fields: [contactId], references: [id])
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   messages    Message[]
 
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, assigneeId])
   @@map("conversations")
+}
+
+model AutomationRule {
+  id           String    @id @default(cuid())
+  workspaceId   String
+  name         String
+  triggerType  String
+  triggerConfig Json?
+  actionType   String
+  actionConfig Json?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+  deletedAt    DateTime?
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("automation_rules")
+}
+
+model AutomationJob {
+  id         String    @id @default(cuid())
+  workspaceId String
+  ruleId     String?
+  status     String    @default("PENDING")
+  runAt      DateTime
+  attempts   Int       @default(0)
+  lastError  String?
+  actionType String
+  actionConfig Json?
+  eventData  Json?
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, status, runAt])
+  @@map("automation_jobs")
+}
+
+model MessageTemplate {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  content     String
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("message_templates")
+}
+
+model Webhook {
+  id          String    @id @default(cuid())
+  workspaceId String
+  url         String
+  events      Json
+  secret      String
+  isActive    Boolean   @default(true)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deliveries  WebhookDelivery[]
+
+  @@map("webhooks")
+}
+
+model WebhookDelivery {
+  id           String   @id @default(cuid())
+  webhookId    String
+  event        String
+  payload      Json?
+  responseCode Int?
+  responseBody String?
+  status       String   @default("PENDING") // PENDING, SUCCESS, FAILED
+  attempts     Int      @default(0)
+  nextRetryAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, status])
+  @@map("webhook_deliveries")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  workspaceId String
+  name        String
+  key         String    @unique
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
+  deletedAt   DateTime?
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
 }
 
 model Message {
@@ -287,6 +429,8 @@ model Message {
   deletedAt      DateTime?
   conversation   Conversation @relation(fields: [conversationId], references: [id])
 
+  @@index([conversationId])
+  @@index([conversationId, createdAt])
   @@map("messages")
 }
 
@@ -307,6 +451,10 @@ model Activity {
   user        User?     @relation(fields: [userId], references: [id])
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
+  @@index([workspaceId])
+  @@index([workspaceId, createdAt])
+  @@index([contactId])
+  @@index([dealId])
   @@map("activities")
 }
 
@@ -329,6 +477,9 @@ model Task {
   deal        Deal?     @relation(fields: [dealId], references: [id])
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
 
+  @@index([workspaceId])
+  @@index([workspaceId, assigneeId])
+  @@index([workspaceId, isCompleted, dueDate])
   @@map("tasks")
 }
 
@@ -379,4 +530,10 @@ enum SubscriptionType {
 enum TeamRole {
   MEMBER
   OWNER
+}
+
+enum ConversationStatus {
+  OPEN
+  RESOLVED
+  PENDING
 }

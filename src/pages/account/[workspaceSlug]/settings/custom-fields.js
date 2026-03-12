@@ -31,12 +31,12 @@ const CustomFields = ({ workspace }) => {
     setFields(newFields);
   };
 
-  const updateField = (index, key, value) => {
+    const updateField = (index, key, value) => {
     const newFields = [...fields];
     newFields[index][key] = value;
-    // Auto-generate key from label if key is empty
+    // Auto-generate key from label if key is empty and we're updating the label
     if (key === 'label' && !newFields[index].key) {
-      newFields[index].key = value.toLowerCase().replace(/\s+/g, '_');
+      newFields[index].key = value.toLowerCase().replace(/[^a-z0-9]/g, '_');
     }
     setFields(newFields);
   };
@@ -61,61 +61,96 @@ const CustomFields = ({ workspace }) => {
       <Meta title={`Nextacular - ${workspace.name} | Custom Fields`} />
       <Content.Title
         title="Custom Fields"
-        subtitle="Define custom fields for your contacts"
+        subtitle="Define custom fields for your contacts and deals"
       />
       <Content.Divider />
       <Content.Container>
-        <div className="bg-white shadow sm:rounded-lg">
+        <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg border border-zinc-200 dark:border-zinc-800">
           <div className="px-4 py-5 sm:p-6">
             <div className="space-y-4">
               {fields.map((field, index) => (
-                <div key={index} className="flex items-start space-x-4 p-4 border rounded-md bg-gray-50">
-                  <div className="flex-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div key={index} className="flex items-start space-x-4 p-6 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                  <div className="flex-1 grid grid-cols-1 gap-6 sm:grid-cols-3">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Label</label>
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Label</label>
                       <input
                         type="text"
-                        value={field.label}
+                        value={field.label || ''}
                         onChange={(e) => updateField(index, 'label', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         placeholder="e.g. Birthday"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Key (Internal)</label>
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Key (Internal)</label>
                       <input
                         type="text"
-                        value={field.key}
+                        value={field.key || ''}
                         onChange={(e) => updateField(index, 'key', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                         placeholder="e.g. birthday"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">Type</label>
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Type</label>
                       <select
-                        value={field.type}
+                        value={field.type || 'text'}
                         onChange={(e) => updateField(index, 'type', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                       >
                         <option value="text">Text</option>
                         <option value="date">Date</option>
                         <option value="number">Number</option>
-                        <option value="select">Select</option>
+                        <option value="select">Select (Dropdown)</option>
+                        <option value="multi-select">Multi-Select</option>
+                        <option value="checkbox">Checkbox</option>
+                        <option value="currency">Currency</option>
+                        <option value="url">URL</option>
+                        <option value="phone">Phone</option>
                       </select>
                     </div>
-                    {field.type === 'select' && (
+
+                    {(field.type === 'select' || field.type === 'multi-select') && (
                       <div className="sm:col-span-3">
-                         <label className="block text-sm font-medium text-gray-700">Options (comma separated)</label>
+                         <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Options (comma separated)</label>
                          <input
                           type="text"
                           value={field.options || ''}
                           onChange={(e) => updateField(index, 'options', e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                          placeholder="Option 1, Option 2"
+                          className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          placeholder="Option 1, Option 2, Option 3"
                         />
                       </div>
                     )}
+
+                    <div className="sm:col-span-1">
+                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Visibility (Area)</label>
+                      <select
+                        value={field.area || 'both'}
+                        onChange={(e) => updateField(index, 'area', e.target.value)}
+                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      >
+                        <option value="both">Both (Sales & Support)</option>
+                        <option value="sales">Sales Only</option>
+                        <option value="support">Support Only</option>
+                      </select>
+                    </div>
+
+                    <div className="sm:col-span-2 flex items-center pt-6">
+                      <div className="flex items-center h-5">
+                        <input
+                          id={`required-${index}`}
+                          type="checkbox"
+                          checked={field.required || false}
+                          onChange={(e) => updateField(index, 'required', e.target.checked)}
+                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label htmlFor={`required-${index}`} className="font-medium text-zinc-700 dark:text-zinc-300">Required Field</label>
+                        <p className="text-zinc-500 dark:text-zinc-400">If checked, users must fill this field when creating/editing.</p>
+                      </div>
+                    </div>
                   </div>
                   <button
                     onClick={() => removeField(index)}
@@ -163,13 +198,17 @@ export const getServerSideProps = async (context) => {
     );
   }
 
-  if (!session || !workspace) {
+  if (!session) {
     return {
       redirect: {
         destination: '/auth/login',
         permanent: false,
       },
     };
+  }
+
+  if (!workspace) {
+    return { notFound: true };
   }
 
   return {

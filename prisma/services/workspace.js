@@ -26,7 +26,7 @@ export const createWorkspace = async (creatorId, email, name, slug) => {
 
   const workspace = await prisma.workspace.create({
     data: {
-      creatorId,
+      creator: { connect: { id: creatorId } },
       members: {
         create: {
           email,

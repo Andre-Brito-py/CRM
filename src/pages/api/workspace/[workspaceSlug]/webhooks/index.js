@@ -2,6 +2,20 @@ import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getWebhooks, createWebhook } from '@/prisma/services/webhook';
 
+const normalizeEvents = (value) => {
+  if (Array.isArray(value)) {
+    const events = value.map((e) => `${e}`.trim()).filter(Boolean);
+    return events.length > 0 ? events : ['*'];
+  }
+  if (typeof value === 'string') {
+    const raw = value.trim();
+    if (!raw) return ['*'];
+    const events = raw.split(',').map((e) => e.trim()).filter(Boolean);
+    return events.length > 0 ? events : ['*'];
+  }
+  return ['*'];
+};
+
 const handler = async (req, res) => {
   const session = await getSession({ req });
   if (!session) {
@@ -22,10 +36,10 @@ const handler = async (req, res) => {
 
   if (req.method === 'POST') {
     const { url, events } = req.body;
-    if (!url || !events) {
+    if (!url) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    const webhook = await createWebhook(workspace.id, url, events);
+    const webhook = await createWebhook(workspace.id, url, normalizeEvents(events));
     return res.status(201).json({ webhook });
   }
 

@@ -557,6 +557,10 @@ export const getServerSideProps = async (context) => {
     );
   }
 
+  if (!workspace) {
+    return { notFound: true };
+  }
+
   return {
     props: {
       workspace,

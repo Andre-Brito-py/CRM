@@ -167,6 +167,58 @@ const General = ({ isTeamOwner, workspace }) => {
             </div>
           </Card.Body>
         </Card>
+
+        {/* Presets Card */}
+        {isTeamOwner && (
+          <Card>
+            <Card.Body
+              title="Industry Presets"
+              subtitle="Apply a 1-click setup to your workspace to automatically configure pipelines, custom fields, and tags for your niche."
+            >
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                {[
+                  { id: 'real_estate', name: 'Real Estate', icon: '🏠' },
+                  { id: 'clinic', name: 'Clinic', icon: '⚕️' },
+                  { id: 'agency', name: 'Agency / B2B', icon: '💼' },
+                ].map(preset => (
+                  <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-blue-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
+                    <span className="text-3xl mb-2">{preset.icon}</span>
+                    <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{preset.name}</h4>
+                    <p className="text-xs text-zinc-500 mt-2">Pipelines, Fields & Tags</p>
+                    <Button
+                      className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700 text-xs py-1.5"
+                      onClick={async () => {
+                        if (confirm(`Are you sure you want to apply the ${preset.name} preset? This will add new pipelines and fields to your workspace.`)) {
+                          try {
+                            setSubmittingState(true);
+                            toast.loading('Applying preset...', { id: 'preset' });
+                            const res = await api(`/api/workspace/${workspace.slug}/presets`, {
+                              method: 'POST',
+                              body: { presetId: preset.id }
+                            });
+                            if (res.data) {
+                              toast.success('Preset applied successfully!', { id: 'preset' });
+                              setTimeout(() => router.reload(), 1500);
+                            } else {
+                              throw new Error(res.error?.msg || 'Error');
+                            }
+                          } catch (err) {
+                            toast.error('Failed to apply preset', { id: 'preset' });
+                          } finally {
+                            setSubmittingState(false);
+                          }
+                        }
+                      }}
+                      disabled={isSubmitting}
+                    >
+                      Apply Preset
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </Card.Body>
+          </Card>
+        )}
       </Content.Container>
     </AccountLayout>
   );
@@ -187,6 +239,19 @@ export const getServerSideProps = async (context) => {
     if (workspace) {
       isTeamOwner = isWorkspaceOwner(session.user.email, workspace);
     }
+  }
+
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/auth/login',
+        permanent: false,
+      },
+    };
+  }
+
+  if (!workspace) {
+    return { notFound: true };
   }
 
   return {

@@ -7,12 +7,15 @@ import api from '@/lib/common/api';
 import useContacts from '@/hooks/data/useContacts';
 import useCompanies from '@/hooks/data/useCompanies';
 import useMembers from '@/hooks/data/useMembers';
+import useWorkspace from '@/hooks/data/useWorkspace';
+import CustomFieldsRenderer from '@/components/CustomFieldsRenderer';
 
 const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
   const { mutate } = useSWRConfig();
   const { data: contactsData } = useContacts(slug);
   const { data: companiesData } = useCompanies(slug);
   const { data: membersData } = useMembers(slug);
+  const { data: workspaceData } = useWorkspace(slug);
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [name, setName] = useState('');
@@ -23,6 +26,11 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
   const [companyId, setCompanyId] = useState('');
   const [userId, setUserId] = useState('');
   const [closeDate, setCloseDate] = useState('');
+  const [customFields, setCustomFields] = useState({});
+
+  const handleCustomFieldChange = (key, value) => {
+    setCustomFields(prev => ({ ...prev, [key]: value }));
+  };
 
   // Set default stage
   useEffect(() => {
@@ -45,7 +53,8 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           contactId: contactId || undefined,
           companyId: companyId || undefined,
           userId: userId || undefined,
-          closeDate: closeDate || undefined
+          closeDate: closeDate || undefined,
+          customFields
         },
         method: 'POST',
       });
@@ -201,7 +210,14 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </select>
         </div>
 
-        <div className="flex justify-end pt-4">
+        <CustomFieldsRenderer
+          fields={workspaceData?.workspace?.customFieldDefinitions}
+          values={customFields}
+          onChange={handleCustomFieldChange}
+          area="sales"
+        />
+
+        <div className="flex justify-end pt-4 border-t border-gray-100">
           <Button
             type="button"
             className="mr-2 text-gray-600 bg-white border border-gray-300 hover:bg-gray-50"

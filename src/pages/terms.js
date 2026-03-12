@@ -15,7 +15,7 @@ const TermsOfUse = () => {
         
         <h2 className="text-2xl font-semibold mt-8 mb-4">1. Acceptance of Terms</h2>
         <p className="mb-4">
-          By accessing and using Nextacular CRM ("the Service"), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the Service.
+          By accessing and using Nextacular CRM (&quot;the Service&quot;), you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the Service.
         </p>
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">2. Description of Service</h2>
@@ -25,7 +25,7 @@ const TermsOfUse = () => {
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">3. User Obligations</h2>
         <p className="mb-4">
-          You must provide accurate information during registration and keep your account details secure. You are responsible for all activities that occur under your account. You agree not to use the Service for any unlawful or prohibited activities, including sending spam or violating third-party network policies (e.g., Meta's WhatsApp Business Policies).
+          You must provide accurate information during registration and keep your account details secure. You are responsible for all activities that occur under your account. You agree not to use the Service for any unlawful or prohibited activities, including sending spam or violating third-party network policies (e.g., Meta&apos;s WhatsApp Business Policies).
         </p>
 
         <h2 className="text-2xl font-semibold mt-8 mb-4">4. Payment and Subscriptions</h2>

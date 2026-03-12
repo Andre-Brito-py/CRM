@@ -1,7 +1,7 @@
 import prisma from '@/prisma/index';
 import { processAutomation } from '@/prisma/services/automation';
 
-export const createDeal = async (workspaceId, { name, amount, closeDate, stageId, contactId, companyId, userId, priority = 'MEDIUM' }) => {
+export const createDeal = async (workspaceId, { name, amount, closeDate, stageId, contactId, companyId, userId, priority = 'MEDIUM', customFields }) => {
   const deal = await prisma.deal.create({
     data: {
       workspaceId,
@@ -13,6 +13,7 @@ export const createDeal = async (workspaceId, { name, amount, closeDate, stageId
       companyId,
       userId,
       priority,
+      customFields,
     },
     include: { contact: true, user: true }
   });

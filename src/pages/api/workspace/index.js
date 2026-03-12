@@ -11,11 +11,17 @@ const handler = async (req, res) => {
 
   if (method === 'POST') {
     const session = await validateSession(req, res);
+    console.log('API Workspace Session User:', session.user);
     await validateCreateWorkspace(req, res);
     const { name } = req.body;
     let slug = slugify(name.toLowerCase());
-    await createWorkspace(session.user.userId, session.user.email, name, slug);
-    res.status(200).json({ data: { name, slug } });
+    try {
+      await createWorkspace(session.user.id, session.user.email, name, slug);
+      res.status(200).json({ data: { name, slug } });
+    } catch (error) {
+      console.error('Failed to create workspace:', error);
+      res.status(400).json({ errors: { error: { msg: error.message || 'Error creating workspace' } } });
+    }
   } else {
     res
       .status(405)
