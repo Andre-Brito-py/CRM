@@ -33,3 +33,9 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# local helpers / artifacts
+/public/*.map
+/seed-test-user.js
+/implementation_plan.md
+/manutencao

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
+import toast from 'react-hot-toast';
 import Modal from '@/components/Modal/index';
 import Button from '@/components/Button/index';
 import api from '@/lib/common/api';
