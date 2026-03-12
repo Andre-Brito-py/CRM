@@ -42,6 +42,18 @@ const main = async () => {
     emailVerified: user.emailVerified,
   };
 
+  if (prisma.paymentProvider) {
+    await prisma.paymentProvider.createMany({
+      data: [
+        { name: 'asaas', displayName: 'Asaas', status: 'active' },
+        { name: 'stripe', displayName: 'Stripe', status: 'active' },
+        { name: 'pagarme', displayName: 'Pagar.me', status: 'disabled' },
+        { name: 'mercadopago', displayName: 'Mercado Pago', status: 'disabled' },
+      ],
+      skipDuplicates: true,
+    });
+  }
+
   console.info(safeUser);
 };
 

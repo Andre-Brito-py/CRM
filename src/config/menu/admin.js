@@ -23,6 +23,26 @@ const menu = () => [
         path: '/admin/payments',
       },
       {
+        name: 'Payments (Overdue)',
+        path: '/admin/payments/overdue',
+      },
+      {
+        name: 'Payments (Forecast)',
+        path: '/admin/payments/forecast',
+      },
+      {
+        name: 'Finance / Payment Providers',
+        path: '/admin/finance/payment-providers',
+      },
+      {
+        name: 'Finance / Workspace Gateways',
+        path: '/admin/finance/workspace-payment-settings',
+      },
+      {
+        name: 'Finance / Platform Revenue',
+        path: '/admin/finance/revenue',
+      },
+      {
         name: 'Plans',
         path: '/admin/plans',
       },

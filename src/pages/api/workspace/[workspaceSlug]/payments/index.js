@@ -1,20 +1,13 @@
 import prisma from '@/prisma/index';
 import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
-import { createCustomer, createPayment, findCustomerByExternalReference } from '@/lib/server/asaas';
 import { processAutomation } from '@/prisma/services/automation';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
 import { createConversation, createMessage } from '@/prisma/services/conversation';
 import { renderTemplateString } from '@/prisma/services/template';
 import { getSystemConfig } from '@/lib/server/config';
-
-const mapAsaasStatusToLocal = (asaasStatus) => {
-  const status = String(asaasStatus || '').toUpperCase();
-  if (['RECEIVED', 'CONFIRMED', 'RECEIVED_IN_CASH'].includes(status)) return 'PAID';
-  if (['CANCELLED', 'DELETED'].includes(status)) return 'CANCELED';
-  if (['OVERDUE', 'REFUNDED', 'CHARGEBACK'].includes(status)) return 'FAILED';
-  return 'PENDING';
-};
+import { calculateFees, getPlatformFeeSettings, getProvider } from '@/lib/server/payment-providers/resolver';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -54,6 +47,11 @@ const handler = async (req, res) => {
   }
 
   if (method === 'POST') {
+    const rl = rateLimit({ req, limit: 120, windowMs: 60_000 });
+    if (!rl.ok) {
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
     try {
       const warnings = [];
       const {
@@ -95,12 +93,18 @@ const handler = async (req, res) => {
         return res.status(404).json({ error: { msg: 'Contact not found' } });
       }
 
+      const { percentage, fixed } = await getPlatformFeeSettings(workspace.id);
+      const { platformFee, netAmount } = calculateFees({ amount: parsedValue, percentage, fixed });
+
       const localPayment = await prisma.payment.create({
         data: {
           workspaceId: workspace.id,
           contactId: contact.id,
           dealId: deal?.id || (dealId || null),
+          amount: parsedValue,
           value: parsedValue,
+          platformFee,
+          netAmount,
           description: description || null,
           billingType,
           dueDate: dueDate ? new Date(dueDate) : null,
@@ -109,62 +113,83 @@ const handler = async (req, res) => {
         },
       });
 
-      const customerExternalReference = `workspace:${workspace.id}:contact:${contact.id}`;
-      let asaasCustomerId = contact.asaasCustomerId;
+      const provider = await getProvider(workspace.id);
+      const providerName = String(provider?.provider?.name || '').toLowerCase();
+      const paymentSetting = await prisma.workspacePaymentSetting.findUnique({
+        where: { workspaceId: workspace.id },
+        select: { providerAccountId: true },
+      });
+      const providerAccountId = paymentSetting?.providerAccountId || null;
+      if (providerName === 'asaas' && platformFee > 0 && !providerAccountId) {
+        warnings.push('Monetização: defina Provider Account (walletId) para habilitar split no Asaas.');
+      }
+      if (providerName === 'mercadopago' && platformFee > 0 && !providerAccountId) {
+        warnings.push('Monetização: defina Provider Account (collector_id) para habilitar taxa no Mercado Pago.');
+      }
+      if (providerName === 'pagarme' && platformFee > 0 && !providerAccountId) {
+        warnings.push('Monetização: defina Provider Account (recipient_id) para habilitar split no Pagar.me.');
+      }
+      if (providerName === 'stripe' && platformFee > 0) {
+        warnings.push('Monetização: Stripe sem split automático (necessário Stripe Connect para dividir valores).');
+      }
 
-      if (!asaasCustomerId) {
-        const existing = await findCustomerByExternalReference(customerExternalReference);
-        if (existing?.id) {
-          asaasCustomerId = existing.id;
-        } else {
-          const createdCustomer = await createCustomer({
+      let providerCustomerId = null;
+      if (providerName === 'asaas') {
+        providerCustomerId = contact.asaasCustomerId || null;
+        if (!providerCustomerId) {
+          const customerExternalReference = `workspace:${workspace.id}:contact:${contact.id}`;
+          const createdCustomer = await provider.createCustomer({
             name: contact.name,
             email: contact.email || undefined,
             phone: contact.phone || undefined,
-            mobilePhone: contact.phone || undefined,
             externalReference: customerExternalReference,
           });
-          asaasCustomerId = createdCustomer?.id;
-        }
-
-        if (asaasCustomerId) {
-          await prisma.contact.update({
-            where: { id: contact.id },
-            data: { asaasCustomerId },
-          });
+          providerCustomerId = createdCustomer?.id || null;
+          if (providerCustomerId) {
+            await prisma.contact.update({
+              where: { id: contact.id },
+              data: { asaasCustomerId: providerCustomerId },
+            });
+          }
         }
       }
 
-      if (!asaasCustomerId) {
-        return res.status(500).json({ error: { msg: 'Failed to create or resolve Asaas customer' } });
-      }
-
-      const callbackSuccessUrl = await getSystemConfig('ASAAS_PAYMENT_SUCCESS_URL', process.env.ASAAS_PAYMENT_SUCCESS_URL);
-      const callback =
-        callbackSuccessUrl
-          ? { successUrl: callbackSuccessUrl, autoRedirect: false }
-          : undefined;
-
-      const asaasPayment = await createPayment({
-        customer: asaasCustomerId,
+      const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+      const paymentResult = await provider.createPayment({
+        customerId: providerCustomerId,
         billingType,
-        value: parsedValue,
+        amount: parsedValue,
+        currency: 'BRL',
         dueDate: dueDate ? String(dueDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
         description,
         externalReference: localPayment.id,
-        callback,
+        successUrl: appUrl ? `${appUrl}/account/${workspaceSlug}/payments?status=success` : undefined,
+        cancelUrl: appUrl ? `${appUrl}/account/${workspaceSlug}/payments?status=cancelled` : undefined,
+        recipientAccountId: providerAccountId,
+        splitFixedValue: netAmount,
+        platformFee,
+        metadata: {
+          workspaceId: workspace.id,
+          contactId: contact.id,
+          dealId: deal?.id || null,
+          paymentId: localPayment.id,
+        },
       });
 
+      const paymentLink = paymentResult?.paymentLink || null;
       const updated = await prisma.payment.update({
         where: { id: localPayment.id },
         data: {
-          asaasCustomerId,
-          asaasPaymentId: asaasPayment?.id || null,
-          invoiceUrl: asaasPayment?.invoiceUrl || null,
-          paymentUrl: asaasPayment?.invoiceUrl || null,
-          externalReference: asaasPayment?.externalReference || localPayment.id,
-          status: mapAsaasStatusToLocal(asaasPayment?.status),
-          dueDate: asaasPayment?.dueDate ? new Date(asaasPayment.dueDate) : localPayment.dueDate,
+          providerId: provider?.provider?.id || null,
+          providerPaymentId: paymentResult?.providerPaymentId || null,
+          paymentLink,
+          status: paymentResult?.status || 'PENDING',
+          dueDate: localPayment.dueDate,
+          externalReference: localPayment.id,
+          asaasCustomerId: providerName === 'asaas' ? providerCustomerId : null,
+          asaasPaymentId: providerName === 'asaas' ? (paymentResult?.providerPaymentId || null) : null,
+          invoiceUrl: providerName === 'asaas' ? paymentLink : null,
+          paymentUrl: providerName === 'asaas' ? paymentLink : null,
         },
       });
 
@@ -189,8 +214,9 @@ const handler = async (req, res) => {
             const messageTemplate =
               whatsAppMessage ||
               (await getSystemConfig(
-                'ASAAS_WHATSAPP_MESSAGE_TEMPLATE',
-                process.env.ASAAS_WHATSAPP_MESSAGE_TEMPLATE || 'Olá {{contact.firstName}}, segue o link para pagamento: {{payment.invoiceUrl}}'
+                'PAYMENT_WHATSAPP_MESSAGE_TEMPLATE',
+                process.env.PAYMENT_WHATSAPP_MESSAGE_TEMPLATE ||
+                'Olá {{contact.name}} 👋\n\nSegue o link para pagamento:\n\n{{payment.paymentLink}}\n\nQualquer dúvida estou à disposição.'
               ));
 
             const rendered = await renderTemplateString(workspace.id, messageTemplate, {

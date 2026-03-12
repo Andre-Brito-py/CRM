@@ -1,7 +1,7 @@
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
+import Link from 'next/link';
 import { format } from 'date-fns';
-import { CreditCardIcon } from '@heroicons/react/24/outline';
 
 import AdminLayout from '@/layouts/AdminLayout';
 import fetcher from '@/lib/client/fetcher';
@@ -16,32 +16,40 @@ const Payments = () => {
   return (
     <AdminLayout>
       <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Payments</h1>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-gray-900">Pagamentos</h1>
+          <div className="flex items-center gap-3">
+            <Link href="/admin/payments/overdue" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              Atrasados
+            </Link>
+            <Link href="/admin/payments/forecast" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+              Previsão
+            </Link>
+          </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="py-4">
             <div className="bg-white shadow overflow-hidden sm:rounded-md">
               {isLoading ? (
-                <div className="p-4 text-center text-gray-500">Loading payments...</div>
+                <div className="p-4 text-center text-gray-500">Carregando...</div>
               ) : payments.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">No payments found.</div>
+                <div className="p-4 text-center text-gray-500">Nenhum pagamento encontrado.</div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Customer
+                          Cliente
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Plan
+                          Plano
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Payment ID
                         </th>
                         <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Date
+                          Data
                         </th>
                       </tr>
                     </thead>
@@ -66,10 +74,9 @@ const Payments = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              payment.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' : 
-                              payment.subscriptionType === 'STANDARD' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                payment.subscriptionType === 'STANDARD' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                              }`}>
                               {payment.subscriptionType}
                             </span>
                           </td>

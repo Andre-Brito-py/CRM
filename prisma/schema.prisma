@@ -43,6 +43,92 @@ model CustomerPayment {
   @@map("customerPayments")
 }
 
+enum PaymentProviderName {
+  asaas
+  stripe
+  pagarme
+  mercadopago
+}
+
+enum PaymentProviderStatus {
+  active
+  disabled
+}
+
+enum PaymentProviderEnvironment {
+  sandbox
+  production
+}
+
+model PaymentProvider {
+  id          String                @id @default(uuid())
+  name        PaymentProviderName   @unique
+  displayName String
+  status      PaymentProviderStatus @default(active)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  credentials PaymentProviderCredential[]
+  workspaceSettings WorkspacePaymentSetting[]
+  payments    Payment[]
+  subscriptions PlatformSubscription[]
+
+  @@map("payment_providers")
+}
+
+model PaymentProviderCredential {
+  id            String                     @id @default(uuid())
+  providerId    String
+  environment   PaymentProviderEnvironment
+  apiKey        String
+  apiSecret     String?
+  webhookSecret String?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+
+  provider      PaymentProvider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, environment])
+  @@map("payment_provider_credentials")
+}
+
+model WorkspacePaymentSetting {
+  id                   String   @id @default(uuid())
+  workspaceId           String   @unique
+  providerId            String
+  providerAccountId     String?
+  platformFeePercentage Decimal? @db.Decimal(5, 2)
+  platformFeeFixed      Decimal? @db.Decimal(10, 2)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  provider  PaymentProvider @relation(fields: [providerId], references: [id])
+
+  @@index([providerId])
+  @@map("workspace_payment_settings")
+}
+
+model PlatformSubscription {
+  id                     String   @id @default(uuid())
+  workspaceId             String   @unique
+  planId                  String
+  providerId              String
+  providerSubscriptionId  String?
+  status                  String   @default("ACTIVE")
+  nextBillingDate         DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan      Plan      @relation(fields: [planId], references: [id])
+  provider  PaymentProvider @relation(fields: [providerId], references: [id])
+
+  @@index([planId])
+  @@index([providerId])
+  @@map("platform_subscriptions")
+}
+
 model Domain {
   id          String    @id @default(cuid())
   workspaceId String
@@ -156,7 +242,9 @@ model Workspace {
   npsSurveys             NpsSurvey[]
   npsResponses           NpsResponse[]
   payments               Payment[]
+  paymentSetting         WorkspacePaymentSetting?
   pipelines              Pipeline[]
+  platformSubscription   PlatformSubscription?
   tags                   Tag[]
   tasks                  Task[]
   webhooks               Webhook[]
@@ -307,15 +395,21 @@ model Payment {
   workspaceId       String
   contactId         String?
   dealId            String?
+  providerId        String?
+  providerPaymentId String?
   asaasCustomerId   String?
   asaasPaymentId    String?   @unique
+  amount            Decimal?  @db.Decimal(10, 2)
   value             Decimal   @db.Decimal(10, 2)
+  platformFee       Decimal?  @db.Decimal(10, 2)
+  netAmount         Decimal?  @db.Decimal(10, 2)
   description       String?
   status            String    @default("PENDING")
   billingType       String?
   dueDate           DateTime?
   invoiceUrl        String?
   paymentUrl        String?
+  paymentLink       String?
   externalReference String?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -324,12 +418,15 @@ model Payment {
   workspace         Workspace @relation(fields: [workspaceId], references: [id])
   contact           Contact?  @relation(fields: [contactId], references: [id])
   deal              Deal?     @relation(fields: [dealId], references: [id])
+  provider          PaymentProvider? @relation(fields: [providerId], references: [id])
 
   @@index([workspaceId])
   @@index([workspaceId, contactId])
   @@index([workspaceId, dealId])
   @@index([workspaceId, status])
   @@index([workspaceId, createdAt])
+  @@index([providerId])
+  @@index([providerId, providerPaymentId])
   @@map("payments")
 }
 
@@ -595,6 +692,7 @@ model Plan {
   isActive      Boolean  @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  subscriptions PlatformSubscription[]
 
   @@map("plans")
 }

@@ -1,19 +1,17 @@
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import prisma from '@/prisma/index';
+import { authOptions } from '@/lib/server/auth';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await getServerSession(req, res, authOptions);
 
   if (!session) {
     res.status(401).json({ error: { msg: 'Unauthorized' } });
     return;
   }
 
-  const where = session?.user?.userId
-    ? { id: session.user.userId }
-    : session?.user?.email
-      ? { email: session.user.email }
-      : null;
+  const userId = session?.user?.userId || session?.user?.id || null;
+  const where = userId ? { id: userId } : session?.user?.email ? { email: session.user.email } : null;
 
   if (!where) {
     res.status(401).json({ error: { msg: 'Unauthorized' } });
