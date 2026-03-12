@@ -226,15 +226,13 @@ const Plans = () => {
       if (selectedPlan) {
         await api(`/api/admin/plans/${selectedPlan.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(planData),
+          body: planData,
         });
         toast.success('Plan updated successfully');
       } else {
         await api('/api/admin/plans', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(planData),
+          body: planData,
         });
         toast.success('Plan created successfully');
       }

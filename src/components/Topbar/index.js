@@ -26,6 +26,7 @@ import {
   PuzzlePieceIcon,
   BoltIcon,
   ChartBarIcon,
+  FaceSmileIcon,
   Cog6ToothIcon,
   GlobeAltIcon,
   UsersIcon,
@@ -61,6 +62,9 @@ const ITEM_ICONS = {
   'common.label.integrations': PuzzlePieceIcon,
   'Automations': BoltIcon,
   'Analytics': ChartBarIcon,
+  'NPS Surveys': FaceSmileIcon,
+  'NPS Responses': CheckCircleIcon,
+  'NPS Analytics': ChartBarIcon,
   'settings.workspace.information': Cog6ToothIcon,
   'settings.domain.configuration': GlobeAltIcon,
   'settings.team.management': UsersIcon,
@@ -145,6 +149,11 @@ const Topbar = ({ menu, staticMenu }) => {
       id: 'workspace',
       label: t('common.label.workspace'),
       items: menu?.find((m) => m.name === 'Workspace')?.menuItems || [],
+    },
+    {
+      id: 'customer-satisfaction',
+      label: 'Customer Satisfaction',
+      items: menu?.find((m) => m.name === 'Customer Satisfaction')?.menuItems || [],
     },
     {
       id: 'settings',
@@ -406,7 +415,9 @@ const NavDropdown = ({
           router.asPath.startsWith('/account/settings') ||
           router.asPath === '/account/security')
         && !router.asPath.includes(`/account/${workspace?.slug}`)
-        : section.id === 'workspace' && workspace && router.asPath.startsWith(`/account/${workspace?.slug}`);
+        : section.id === 'customer-satisfaction'
+          ? Boolean(workspace && router.asPath.includes(`/account/${workspace?.slug}/customer-satisfaction`))
+          : section.id === 'workspace' && workspace && router.asPath.startsWith(`/account/${workspace?.slug}`);
 
   const handleMouseEnter = () => {
     clearTimeout(timeoutRef.current);

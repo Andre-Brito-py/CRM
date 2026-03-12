@@ -153,6 +153,9 @@ model Workspace {
   integrations           Integration[]
   messageTemplates       MessageTemplate[]
   members                Member[]
+  npsSurveys             NpsSurvey[]
+  npsResponses           NpsResponse[]
+  payments               Payment[]
   pipelines              Pipeline[]
   tags                   Tag[]
   tasks                  Task[]
@@ -184,6 +187,7 @@ model Contact {
   name          String
   email         String?
   phone         String?
+  asaasCustomerId String?
   jobTitle      String?
   customFields  Json?
   createdAt     DateTime?      @default(now())
@@ -194,6 +198,8 @@ model Contact {
   workspace     Workspace      @relation(fields: [workspaceId], references: [id])
   conversations Conversation[]
   deals         Deal[]
+  npsResponses  NpsResponse[]
+  payments      Payment[]
   tags          Tag[]
   tasks         Task[]
 
@@ -281,6 +287,7 @@ model Deal {
   updatedAt   DateTime?  @updatedAt
   deletedAt   DateTime?
   activities  Activity[]
+  payments    Payment[]
   assignee    User?      @relation("dealAssignee", fields: [assigneeId], references: [id])
   company     Company?   @relation(fields: [companyId], references: [id])
   contact     Contact?   @relation(fields: [contactId], references: [id])
@@ -293,6 +300,88 @@ model Deal {
   @@index([workspaceId, createdAt])
   @@index([stageId])
   @@map("deals")
+}
+
+model Payment {
+  id                String    @id @default(cuid())
+  workspaceId       String
+  contactId         String?
+  dealId            String?
+  asaasCustomerId   String?
+  asaasPaymentId    String?   @unique
+  value             Decimal   @db.Decimal(10, 2)
+  description       String?
+  status            String    @default("PENDING")
+  billingType       String?
+  dueDate           DateTime?
+  invoiceUrl        String?
+  paymentUrl        String?
+  externalReference String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  workspace         Workspace @relation(fields: [workspaceId], references: [id])
+  contact           Contact?  @relation(fields: [contactId], references: [id])
+  deal              Deal?     @relation(fields: [dealId], references: [id])
+
+  @@index([workspaceId])
+  @@index([workspaceId, contactId])
+  @@index([workspaceId, dealId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt])
+  @@map("payments")
+}
+
+enum NpsSurveyTriggerType {
+  manual
+  deal_closed
+  scheduled
+}
+
+enum NpsClassification {
+  promoter
+  passive
+  detractor
+}
+
+model NpsSurvey {
+  id          String               @id @default(uuid())
+  workspaceId String
+  name        String
+  triggerType NpsSurveyTriggerType @default(manual)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  workspace   Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  responses   NpsResponse[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, createdAt])
+  @@map("nps_surveys")
+}
+
+model NpsResponse {
+  id             String           @id @default(uuid())
+  workspaceId    String
+  surveyId       String
+  contactId      String
+  score          Int
+  feedbackText   String?          @db.Text
+  classification NpsClassification
+  createdAt      DateTime         @default(now())
+
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  survey         NpsSurvey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  contact        Contact          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, surveyId])
+  @@index([workspaceId, contactId])
+  @@index([workspaceId, classification])
+  @@index([workspaceId, createdAt])
+  @@unique([surveyId, contactId])
+  @@map("nps_responses")
 }
 
 model Conversation {

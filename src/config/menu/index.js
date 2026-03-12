@@ -41,6 +41,23 @@ const menu = (workspaceId) => [
     ],
   },
   {
+    name: 'Customer Satisfaction',
+    menuItems: [
+      {
+        name: 'NPS Surveys',
+        path: `/account/${workspaceId}/customer-satisfaction/nps-surveys`,
+      },
+      {
+        name: 'NPS Responses',
+        path: `/account/${workspaceId}/customer-satisfaction/responses`,
+      },
+      {
+        name: 'NPS Analytics',
+        path: `/account/${workspaceId}/customer-satisfaction/analytics`,
+      },
+    ],
+  },
+  {
     name: 'Settings',
     menuItems: [
       {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import { PlusIcon, XMarkIcon, PencilIcon, SparklesIcon, ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import EditDealModal from '@/sections/pipeline/EditDealModal';
 import { useWorkspace } from '@/providers/workspace';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
+import fetcher from '@/lib/client/fetcher';
 
 const DealDetails = ({ workspace }) => {
   const router = useRouter();
@@ -35,6 +37,16 @@ const DealDetails = ({ workspace }) => {
     date: new Date().toISOString().split('T')[0]
   });
   const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const [isCreatePaymentOpen, setIsCreatePaymentOpen] = useState(false);
+  const [isCreatingPayment, setIsCreatingPayment] = useState(false);
+  const [paymentForm, setPaymentForm] = useState({
+    value: '',
+    description: '',
+    billingType: 'PIX',
+    dueDate: new Date().toISOString().slice(0, 10),
+    sendWhatsApp: true,
+    whatsAppMessage: '',
+  });
 
   // AI Features
   const [aiNextStep, setAiNextStep] = useState(null);
@@ -82,6 +94,12 @@ const DealDetails = ({ workspace }) => {
     }
   }, [workspace, setWorkspace]);
 
+  const { data: paymentsData, mutate: mutatePayments } = useSWR(
+    workspaceSlug && dealId ? `/api/workspace/${workspaceSlug}/payments?dealId=${dealId}` : null,
+    fetcher
+  );
+  const payments = paymentsData?.data?.payments || [];
+
   const saveActivity = async (e) => {
     e.preventDefault();
     if (!activityForm.title) return;
@@ -115,6 +133,50 @@ const DealDetails = ({ workspace }) => {
       // Ideally mutate tasks here, but useTasks hook handles it if we import mutate from it
     } catch (error) {
       toast.error('Failed to update task');
+    }
+  };
+
+  const toggleCreatePayment = () => {
+    setIsCreatePaymentOpen((v) => !v);
+  };
+
+  const createPayment = async (e) => {
+    e.preventDefault();
+    setIsCreatingPayment(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/payments`, {
+        method: 'POST',
+        body: {
+          dealId,
+          value: paymentForm.value,
+          description: paymentForm.description || null,
+          billingType: paymentForm.billingType,
+          dueDate: paymentForm.dueDate,
+          sendWhatsApp: Boolean(paymentForm.sendWhatsApp),
+          whatsAppMessage: paymentForm.whatsAppMessage || null,
+        },
+      });
+
+      if (response?.error) {
+        toast.error(response.error.msg || 'Failed to create payment');
+        return;
+      }
+
+      await mutatePayments();
+      toast.success('Payment created');
+      setPaymentForm({
+        value: '',
+        description: '',
+        billingType: 'PIX',
+        dueDate: new Date().toISOString().slice(0, 10),
+        sendWhatsApp: true,
+        whatsAppMessage: '',
+      });
+      setIsCreatePaymentOpen(false);
+    } catch (error) {
+      toast.error('Failed to create payment');
+    } finally {
+      setIsCreatingPayment(false);
     }
   };
 
@@ -350,6 +412,154 @@ const DealDetails = ({ workspace }) => {
                 ) : (
                   <p className="text-sm text-gray-500 text-center py-4">No tasks associated with this deal.</p>
                 )}
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Payments</h3>
+                <button
+                  onClick={toggleCreatePayment}
+                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  <PlusIcon className="w-4 h-4 mr-1" />
+                  Create
+                </button>
+              </div>
+
+              {isCreatePaymentOpen && (
+                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                  <form onSubmit={createPayment} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700">Value</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          required
+                          value={paymentForm.value}
+                          onChange={(e) => setPaymentForm({ ...paymentForm, value: e.target.value })}
+                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700">Due date</label>
+                        <input
+                          type="date"
+                          value={paymentForm.dueDate}
+                          onChange={(e) => setPaymentForm({ ...paymentForm, dueDate: e.target.value })}
+                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700">Billing type</label>
+                        <select
+                          value={paymentForm.billingType}
+                          onChange={(e) => setPaymentForm({ ...paymentForm, billingType: e.target.value })}
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                        >
+                          <option value="PIX">PIX</option>
+                          <option value="BOLETO">Boleto</option>
+                          <option value="CREDIT_CARD">Cartão</option>
+                          <option value="UNDEFINED">Checkout</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700">Description</label>
+                        <input
+                          type="text"
+                          value={paymentForm.description}
+                          onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })}
+                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        id="sendWhatsAppDealPayment"
+                        type="checkbox"
+                        checked={paymentForm.sendWhatsApp}
+                        onChange={(e) => setPaymentForm({ ...paymentForm, sendWhatsApp: e.target.checked })}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label htmlFor="sendWhatsAppDealPayment" className="ml-2 block text-sm text-gray-700">
+                        Send via WhatsApp
+                      </label>
+                    </div>
+
+                    {paymentForm.sendWhatsApp && (
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700">WhatsApp message (optional)</label>
+                        <textarea
+                          value={paymentForm.whatsAppMessage}
+                          onChange={(e) => setPaymentForm({ ...paymentForm, whatsAppMessage: e.target.value })}
+                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          rows={3}
+                          placeholder="Olá {{contact.firstName}}, segue o link para pagamento: {{payment.invoiceUrl}}"
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={toggleCreatePayment}
+                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isCreatingPayment}
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {isCreatingPayment ? 'Creating...' : 'Create payment'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {payments.map((p) => (
+                      <tr key={p.id}>
+                        <td className="px-4 py-2 text-sm text-gray-900">{p.status}</td>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(p.value) || 0)}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-500">{p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '-'}</td>
+                        <td className="px-4 py-2 text-sm">
+                          {p.invoiceUrl ? (
+                            <a href={p.invoiceUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                              Open
+                            </a>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {payments.length === 0 && (
+                      <tr>
+                        <td colSpan="4" className="px-4 py-4 text-center text-sm text-gray-500">
+                          No payments yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 

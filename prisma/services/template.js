@@ -44,6 +44,11 @@ const inferConversationId = (eventData) => {
   return eventData.conversationId || eventData.conversation?.id || null;
 };
 
+const inferPaymentId = (eventData) => {
+  if (!eventData || typeof eventData !== 'object') return null;
+  return eventData.paymentId || eventData.payment?.id || null;
+};
+
 const hydrateTemplateContext = async (workspaceId, eventData) => {
   const workspace = await prisma.workspace.findUnique({
     where: { id: workspaceId },
@@ -53,6 +58,7 @@ const hydrateTemplateContext = async (workspaceId, eventData) => {
   let conversation = eventData?.conversation || null;
   let contact = eventData?.contact || null;
   let deal = eventData?.deal || null;
+  let payment = eventData?.payment || null;
 
   const conversationId = inferConversationId(eventData);
   if (!conversation && conversationId) {
@@ -101,10 +107,17 @@ const hydrateTemplateContext = async (workspaceId, eventData) => {
     });
   }
 
+  const paymentId = inferPaymentId(eventData);
+  if (!payment && paymentId) {
+    payment = await prisma.payment.findFirst({
+      where: { id: paymentId, workspaceId },
+    });
+  }
+
   const assignee = eventData?.assignee || conversation?.assignee || null;
   const company = deal?.company || contact?.company || deal?.contact?.company || null;
 
-  return { workspace, conversation, contact, deal, company, assignee };
+  return { workspace, conversation, contact, deal, payment, company, assignee };
 };
 
 const getValueByPath = (obj, path) => {

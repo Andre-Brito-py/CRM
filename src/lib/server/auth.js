@@ -7,6 +7,7 @@ import { authenticator } from 'otplib';
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
 import { sendMail } from '@/lib/server/mail';
+import { getSystemConfig } from '@/lib/server/config';
 import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 
 export const authOptions = {
@@ -55,9 +56,15 @@ export const authOptions = {
   events: {
     signIn: async ({ user, isNewUser }) => {
       const customerPayment = await getPayment(user.email);
+      const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
 
       if (isNewUser || customerPayment === null || user.createdAt === null) {
-        await Promise.all([createPaymentAccount(user.email, user.id)]);
+        if (!paymentsSecretKey) return;
+        try {
+          await Promise.all([createPaymentAccount(user.email, user.id)]);
+        } catch (error) {
+          console.error('Error creating Stripe customer payment account:', error);
+        }
       }
     },
   },

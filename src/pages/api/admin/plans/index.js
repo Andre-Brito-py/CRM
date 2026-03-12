@@ -1,5 +1,6 @@
 import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
+import getStripe from '@/lib/server/stripe';
 
 export default async function handler(req, res) {
   const session = await getSession({ req });
@@ -34,19 +35,44 @@ export default async function handler(req, res) {
       res.status(500).json({ error: { msg: 'Failed to fetch plans' } });
     }
   } else if (req.method === 'POST') {
-    const { name, slug, price, interval, currency, features, stripePriceId, description } = req.body;
+    const { name, slug, price, interval, currency, features, stripePriceId, description, isActive } = req.body;
 
     try {
+      let syncedPrice = price;
+      let syncedCurrency = currency;
+      let syncedInterval = interval;
+
+      if (stripePriceId) {
+        let stripePrice = null;
+        try {
+          const stripe = await getStripe();
+          stripePrice = await stripe.prices.retrieve(stripePriceId);
+        } catch (error) {
+          res.status(400).json({ error: { msg: 'Unable to fetch Stripe price. Check Stripe keys and Price ID.' } });
+          return;
+        }
+
+        if (!stripePrice?.recurring?.interval) {
+          res.status(400).json({ error: { msg: 'Stripe Price ID must be recurring for subscriptions' } });
+          return;
+        }
+
+        syncedPrice = Number(stripePrice.unit_amount || 0) / 100;
+        syncedCurrency = (stripePrice.currency || currency || 'USD').toUpperCase();
+        syncedInterval = stripePrice.recurring.interval;
+      }
+
       const plan = await prisma.plan.create({
         data: {
           name,
           slug,
-          price,
-          interval,
-          currency,
+          price: syncedPrice,
+          interval: syncedInterval,
+          currency: syncedCurrency,
           features,
           stripePriceId,
           description,
+          isActive: typeof isActive === 'boolean' ? isActive : true,
         },
       });
 

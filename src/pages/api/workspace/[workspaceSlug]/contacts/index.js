@@ -41,6 +41,25 @@ const handler = async (req, res) => {
           return res.status(400).json({ error: { msg: 'Name is required' } });
         }
 
+        const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+        if (isSuperAdmin) {
+          const contact = await createContact(workspace.id, {
+            name, email, phone, jobTitle, companyId, customFields,
+          });
+
+          prisma.activity.create({
+            data: {
+              workspaceId: workspace.id,
+              userId: session.user.userId,
+              type: 'CONTACT_CREATED',
+              title: `Contact "${name}" created`,
+              contactId: contact.id,
+            },
+          }).catch((err) => console.error('Activity log failed:', err));
+
+          return res.status(201).json({ data: { contact } });
+        }
+
         // Run count and permission check in parallel — no dynamic imports
         const [currentContactCount] = await Promise.all([
           prisma.contact.count({ where: { workspaceId: workspace.id } }),

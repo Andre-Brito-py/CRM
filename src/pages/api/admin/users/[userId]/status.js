@@ -1,17 +1,18 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/server/auth';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
-
+  const session = await getServerSession(req, res, authOptions);
   if (!session) {
     res.status(401).json({ error: { msg: 'Unauthorized' } });
     return;
   }
 
   // Security check: Only SUPERADMIN can manage users
+  const adminUserId = session.user.userId || session.user.id;
   const admin = await prisma.user.findUnique({
-    where: { id: session.user.userId },
+    where: { id: adminUserId },
     select: { role: true },
   });
 
@@ -24,7 +25,20 @@ export default async function handler(req, res) {
   const { userId } = req.query;
 
   if (req.method === 'PATCH') {
-    const { suspended } = req.body;
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        res.status(400).json({ error: { msg: 'Invalid JSON body' } });
+        return;
+      }
+    }
+    const { suspended } = body || {};
+    if (typeof suspended !== 'boolean') {
+      res.status(400).json({ error: { msg: 'Missing suspended boolean' } });
+      return;
+    }
 
     try {
       // Prevent suspending another SUPERADMIN

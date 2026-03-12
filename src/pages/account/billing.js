@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import formatDistance from 'date-fns/formatDistance';
 import Link from 'next/link';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import toast from 'react-hot-toast';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -18,10 +18,38 @@ import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
 
 const Billing = ({ invoices, products }) => {
+  const { data: session } = useSession();
   const [isSubmitting, setSubmittingState] = useState(false);
   const [showModal, setModalVisibility] = useState(false);
 
+  const openBillingPortal = async () => {
+    setSubmittingState(true);
+    try {
+      const response = await api('/api/payments/portal', { method: 'POST' });
+      if (response?.data?.url) {
+        window.location.href = response.data.url;
+        return;
+      }
+
+      const errors = response?.errors || response?.error;
+      if (errors) {
+        const msg = errors?.error?.msg || errors?.msg;
+        if (msg) toast.error(msg);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Unable to open billing portal');
+    } finally {
+      setSubmittingState(false);
+    }
+  };
+
   const subscribe = (priceId) => {
+    if (!priceId) {
+      toast.error('Stripe Price ID is missing for this plan');
+      return;
+    }
+
     setSubmittingState(true);
     api(`/api/payments/subscription/${priceId}`, {
       method: 'POST',
@@ -39,6 +67,7 @@ const Billing = ({ invoices, products }) => {
   };
 
   const toggleModal = () => setModalVisibility(!showModal);
+  const currentSubscription = session?.user?.subscription || 'FREE';
 
   return (
     <AccountLayout>
@@ -53,12 +82,12 @@ const Billing = ({ invoices, products }) => {
         <Card>
           <Card.Body
             title="Premium Subscription"
-            subtitle="Current status: Professional Suite"
+            subtitle={`Current status: ${currentSubscription}`}
           >
             <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
               <p className="text-sm">
-                Professional and Enterprise accounts unlock the full power of Nextacular. 
-                Manage unlimited contacts, advanced pipelines, and team collaboration 
+                Professional and Enterprise accounts unlock the full power of Nextacular.
+                Manage unlimited contacts, advanced pipelines, and team collaboration
                 with our executive suite.
               </p>
             </div>
@@ -80,25 +109,43 @@ const Billing = ({ invoices, products }) => {
           toggle={toggleModal}
         >
           <div className="space-y-0 text-sm text-gray-600">
-            <p>You are currently under the FREE plan</p>
+            <p>You are currently under the {currentSubscription} plan</p>
+          </div>
+          <div className="mt-4">
+            <Button
+              className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-6"
+              disabled={isSubmitting}
+              onClick={openBillingPortal}
+            >
+              Open Billing Portal
+            </Button>
           </div>
           <div className="flex space-x-5">
             {products.map((product, index) => (
               <Card key={index}>
                 <Card.Body title={product.name} subtitle={product.description}>
                   <h3 className="text-4xl font-bold">
-                    ${Number(product.prices.unit_amount / 100).toFixed(2)}
+                    {new Intl.NumberFormat('en-US', {
+                      style: 'currency',
+                      currency: (product.prices.currency || 'USD').toUpperCase(),
+                      maximumFractionDigits: 2,
+                    }).format(Number(product.prices.unit_amount / 100))}
+                    <span className="text-sm text-gray-400 font-medium ml-2">
+                      / {product.prices.interval}
+                    </span>
                   </h3>
                 </Card.Body>
                 <Card.Footer>
                   <Button
                     className="w-full text-white bg-blue-600 hover:bg-blue-500"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !product.prices.id}
                     onClick={() => subscribe(product.prices.id)}
                   >
                     {isSubmitting
                       ? 'Redirecting...'
-                      : `Upgrade to ${product.name}`}
+                      : product.prices.id
+                        ? `Upgrade to ${product.name}`
+                        : 'Unavailable'}
                   </Button>
                 </Card.Footer>
               </Card>
@@ -146,9 +193,8 @@ const Billing = ({ invoices, products }) => {
                       )}
                     </td>
                     <td className="px-8 py-5">
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${
-                        invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-500'
-                      }`}>
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-500'
+                        }`}>
                         {invoice.status}
                       </span>
                     </td>

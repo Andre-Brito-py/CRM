@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
+import { getNpsAnalytics } from '@/prisma/services/nps';
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
@@ -33,9 +34,12 @@ const handler = async (req, res) => {
       contactsCount,
       openDealsCount,
       wonDealsResult,
+      paymentsPaidResult,
+      paymentsPendingResult,
       recentActivities,
       dealsLast6Months,
       upcomingTasks,
+      npsAnalytics,
     ] = await Promise.all([
       // Total contacts
       prisma.contact.count({ where: { workspaceId } }),
@@ -57,6 +61,26 @@ const handler = async (req, res) => {
           workspaceId,
           deletedAt: null,
           stage: { name: { in: ['Fechado', 'Closed', 'Won'] } },
+        },
+      }),
+
+      prisma.payment.aggregate({
+        _sum: { value: true },
+        _count: { _all: true },
+        where: {
+          workspaceId,
+          deletedAt: null,
+          status: 'PAID',
+        },
+      }),
+
+      prisma.payment.aggregate({
+        _sum: { value: true },
+        _count: { _all: true },
+        where: {
+          workspaceId,
+          deletedAt: null,
+          status: 'PENDING',
         },
       }),
 
@@ -109,6 +133,8 @@ const handler = async (req, res) => {
           deal: { select: { name: true } },
         },
       }),
+
+      getNpsAnalytics(workspaceId, { from: sixMonthsAgo }),
     ]);
 
     // ── 3. Process deals chart in JS (already fetched) ─────────────────
@@ -130,7 +156,14 @@ const handler = async (req, res) => {
         openDeals: openDealsCount,
         wonDeals: wonDealsResult._count._all,
         revenue: Number(wonDealsResult._sum.amount) || 0,
+        paymentsPaid: paymentsPaidResult._count._all,
+        paymentsPaidAmount: Number(paymentsPaidResult._sum.value) || 0,
+        paymentsPending: paymentsPendingResult._count._all,
+        paymentsPendingAmount: Number(paymentsPendingResult._sum.value) || 0,
+        npsScore: npsAnalytics?.nps_score ?? 0,
+        npsResponses: npsAnalytics?.total_responses ?? 0,
       },
+      nps: npsAnalytics || null,
       recentActivities,
       salesData: Object.values(salesByMonth),
       upcomingTasks,

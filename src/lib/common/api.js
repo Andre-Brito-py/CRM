@@ -1,14 +1,18 @@
 const api = async (url, options) => {
   const { body, headers, ...opts } = options;
-  const requestBody = JSON.stringify(body);
-  const response = await fetch(url, {
-    body: requestBody,
+  const fetchOptions = {
     headers: {
       'Content-Type': 'application/json',
       ...headers,
     },
     ...opts,
-  });
+  };
+
+  if (body !== undefined) {
+    fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+
+  const response = await fetch(url, fetchOptions);
   let result;
   try {
     result = await response.json();

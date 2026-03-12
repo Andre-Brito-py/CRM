@@ -1,10 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
+import { motion } from 'framer-motion';
 import {
   CurrencyDollarIcon,
   UserGroupIcon,
   BriefcaseIcon,
   ChartBarIcon,
+  CreditCardIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import {
   AreaChart,
@@ -14,6 +17,10 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
 } from 'recharts';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -194,7 +201,45 @@ const Workspace = () => {
       icon: CurrencyDollarIcon,
       color: 'indigo',
     },
+    {
+      title: 'Payments Paid',
+      value: new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0
+      }).format(dashboardData?.stats?.paymentsPaidAmount || 0),
+      icon: CreditCardIcon,
+      color: 'green',
+    },
+    {
+      title: 'Payments Pending',
+      value: new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL',
+        maximumFractionDigits: 0
+      }).format(dashboardData?.stats?.paymentsPendingAmount || 0),
+      icon: ClockIcon,
+      color: 'yellow',
+    },
+    {
+      title: 'NPS Score',
+      value: dashboardData?.stats?.npsScore ?? 0,
+      icon: ChartBarIcon,
+      color: 'sky',
+    },
+    {
+      title: 'NPS Responses',
+      value: dashboardData?.stats?.npsResponses ?? 0,
+      icon: UserGroupIcon,
+      color: 'indigo',
+    },
   ], [dashboardData]);
+
+  const motionIn = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+  };
 
   return (
     workspace && (
@@ -217,62 +262,138 @@ const Workspace = () => {
             <div className="premium-card p-8 lg:col-span-2">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
-                   Revenue Performance
+                  Revenue Performance
                 </h3>
                 <div className="flex items-center gap-2">
-                   <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
-                   <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Monthly Growth</span>
+                  <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Monthly Growth</span>
                 </div>
               </div>
-              
+
               <div className="h-[300px] w-full mt-4">
                 {dashboardData?.salesData?.length > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={dashboardData.salesData}>
                       <defs>
                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
-                      <XAxis 
-                        dataKey="name" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{fill: '#a1a1aa', fontSize: 10, fontWeight: 700}}
+                      <XAxis
+                        dataKey="name"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }}
                         dy={10}
                       />
-                      <YAxis 
-                        hide 
+                      <YAxis
+                        hide
                         domain={[0, 'auto']}
                       />
                       <Tooltip content={<CustomTooltip />} />
-                      <Area 
-                        type="monotone" 
-                        dataKey="value" 
-                        stroke="#6366f1" 
+                      <Area
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#6366f1"
                         strokeWidth={4}
-                        fillOpacity={1} 
-                        fill="url(#colorRevenue)" 
+                        fillOpacity={1}
+                        fill="url(#colorRevenue)"
                         animationDuration={2000}
                       />
                     </AreaChart>
                   </ResponsiveContainer>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                     <ChartBarIcon className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mb-4" />
-                     <p className="text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No sales metrics yet</p>
+                    <ChartBarIcon className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mb-4" />
+                    <p className="text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No sales metrics yet</p>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="premium-card p-8 group">
-              <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white mb-2 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
-                Activity Feed
-              </h3>
-              <ActivityFeed activities={dashboardData?.recentActivities} />
+            <div className="space-y-8 lg:col-span-1">
+              <motion.div {...motionIn} transition={{ ...motionIn.transition, delay: 0.06 }} className="premium-card p-8">
+                <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
+                  <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
+                    NPS
+                  </h3>
+                  <span className="px-3 py-1 bg-sky-50 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
+                    Last 6 months
+                  </span>
+                </div>
+
+                <div className="mb-8">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    NPS Score
+                  </div>
+                  <div className="mt-1 text-4xl font-executive font-bold text-zinc-900 dark:text-white leading-tight">
+                    {dashboardData?.nps?.nps_score ?? 0}
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    Total respostas: {dashboardData?.nps?.total_responses ?? 0}
+                  </div>
+                </div>
+
+                <div className="h-[140px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      key={`dash-nps-dist-${workspace?.id}`}
+                      data={dashboardData?.nps?.distribution || []}
+                      barCategoryGap={10}
+                    >
+                      <defs>
+                        <linearGradient id="dashNpsDistBar" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="#6366f1" stopOpacity={0.2} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.12} />
+                      <XAxis dataKey="score" axisLine={false} tickLine={false} tickMargin={10} />
+                      <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={28} />
+                      <Tooltip />
+                      <Bar
+                        dataKey="count"
+                        fill="url(#dashNpsDistBar)"
+                        radius={[10, 10, 0, 0]}
+                        isAnimationActive
+                        animationDuration={900}
+                        animationEasing="ease-out"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                <div className="h-[140px] w-full mt-8">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart key={`dash-nps-trend-${workspace?.id}`} data={dashboardData?.nps?.trend || []}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.12} />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
+                      <YAxis axisLine={false} tickLine={false} width={28} />
+                      <Tooltip />
+                      <Line
+                        type="monotone"
+                        dataKey="nps"
+                        stroke="#0ea5e9"
+                        strokeWidth={3}
+                        dot={false}
+                        strokeLinecap="round"
+                        isAnimationActive
+                        animationDuration={1100}
+                        animationEasing="ease-out"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </motion.div>
+
+              <div className="premium-card p-8 group">
+                <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white mb-2 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
+                  Activity Feed
+                </h3>
+                <ActivityFeed activities={dashboardData?.recentActivities} />
+              </div>
             </div>
 
             <div className="premium-card p-8 lg:col-span-3">
@@ -285,7 +406,7 @@ const Workspace = () => {
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                 <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
+                <UpcomingTasks tasks={dashboardData?.upcomingTasks} />
               </div>
             </div>
           </div>

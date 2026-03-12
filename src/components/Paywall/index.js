@@ -2,6 +2,7 @@ import { useWorkspace } from '@/providers/workspace';
 import Link from 'next/link';
 import { useTranslation } from 'react-i18next';
 import { LockClosedIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
 
 const planTiers = {
   FREE: 0,
@@ -20,6 +21,10 @@ const planTiers = {
 const Paywall = ({ children, minPlan = 'STANDARD', message, compact = false }) => {
   const { workspace } = useWorkspace();
   const { t } = useTranslation();
+  const { data: session } = useSession();
+
+  const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+  if (isSuperAdmin) return <>{children}</>;
 
   const subType = workspace?.creator?.customerPayment?.subscriptionType || 'FREE';
   const hasAccess = planTiers[subType] >= planTiers[minPlan];

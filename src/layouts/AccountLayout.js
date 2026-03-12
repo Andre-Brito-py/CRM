@@ -31,6 +31,10 @@ const AccountLayout = ({ children }) => {
       const settingsSection = workspaceMenu.find((m) => m.name === 'Settings');
       return { label: t('common.label.settings'), items: settingsSection?.menuItems || [] };
     }
+    if (slug && path.includes(`/account/${slug}/customer-satisfaction`)) {
+      const csSection = workspaceMenu.find((m) => m.name === 'Customer Satisfaction');
+      return { label: 'Customer Satisfaction', items: csSection?.menuItems || [] };
+    }
     if (slug && path.startsWith(`/account/${slug}`)) {
       const wsSection = workspaceMenu.find((m) => m.name === 'Workspace');
       return { label: t('common.label.workspace'), items: wsSection?.menuItems || [] };

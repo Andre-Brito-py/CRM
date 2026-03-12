@@ -96,19 +96,41 @@ const Automations = () => {
   const handleSimulateRule = async () => {
     setIsSimulating(true);
     try {
+      const baseEventData = {
+        contactId: simulateInputs.contactId || null,
+        dealId: simulateInputs.dealId || null,
+      };
+
       const eventData =
         newRule.triggerType === 'INCOMING_MESSAGE'
           ? {
-            contactId: simulateInputs.contactId || null,
-            dealId: simulateInputs.dealId || null,
+            ...baseEventData,
             message: { content: simulateInputs.message || '' },
             conversation: { platform: newRule.triggerConfig.platform || 'WHATSAPP' },
           }
-          : {
-            contactId: simulateInputs.contactId || null,
-            dealId: simulateInputs.dealId || null,
-            stageId: newRule.triggerConfig.stageId || null,
-          };
+          : newRule.triggerType === 'PAYMENT_CREATED' || newRule.triggerType === 'PAYMENT_PAID' || newRule.triggerType === 'PAYMENT_FAILED'
+            ? {
+              ...baseEventData,
+              payment: {
+                id: 'simulated',
+                status: newRule.triggerType === 'PAYMENT_PAID' ? 'PAID' : newRule.triggerType === 'PAYMENT_FAILED' ? 'FAILED' : 'PENDING',
+                invoiceUrl: 'https://example.com/invoice',
+                value: 100,
+              },
+            }
+            : newRule.triggerType === 'NPS_RESPONSE_RECEIVED' || newRule.triggerType === 'NPS_PROMOTER' || newRule.triggerType === 'NPS_DETRACTOR'
+              ? {
+                ...baseEventData,
+                npsResponse: {
+                  id: 'simulated',
+                  score: newRule.triggerType === 'NPS_DETRACTOR' ? 2 : 10,
+                  classification: newRule.triggerType === 'NPS_DETRACTOR' ? 'detractor' : 'promoter',
+                },
+              }
+              : {
+                ...baseEventData,
+                stageId: newRule.triggerConfig.stageId || null,
+              };
 
       const rule = {
         triggerType: newRule.triggerType,
@@ -334,6 +356,18 @@ const Automations = () => {
           SLA Breach <span className="ml-1 px-2 py-0.5 bg-red-100 text-red-800 rounded text-xs">{minutes} minutes</span>
         </span>
       );
+    } else if (rule.triggerType === 'PAYMENT_CREATED') {
+      return <span>{t('automations.trigger.paymentCreated')}</span>;
+    } else if (rule.triggerType === 'PAYMENT_PAID') {
+      return <span>{t('automations.trigger.paymentPaid')}</span>;
+    } else if (rule.triggerType === 'PAYMENT_FAILED') {
+      return <span>{t('automations.trigger.paymentFailed')}</span>;
+    } else if (rule.triggerType === 'NPS_RESPONSE_RECEIVED') {
+      return <span>{t('automations.trigger.npsResponseReceived')}</span>;
+    } else if (rule.triggerType === 'NPS_PROMOTER') {
+      return <span>{t('automations.trigger.npsPromoter')}</span>;
+    } else if (rule.triggerType === 'NPS_DETRACTOR') {
+      return <span>{t('automations.trigger.npsDetractor')}</span>;
     }
     return <span>{rule.triggerType}</span>;
   };
@@ -553,6 +587,12 @@ const Automations = () => {
                   >
                     <option value="DEAL_STAGE_CHANGED">{t('automations.trigger.option.dealStageChanged')}</option>
                     <option value="INCOMING_MESSAGE">{t('automations.trigger.option.incomingMessage')}</option>
+                    <option value="PAYMENT_CREATED">{t('automations.trigger.option.paymentCreated')}</option>
+                    <option value="PAYMENT_PAID">{t('automations.trigger.option.paymentPaid')}</option>
+                    <option value="PAYMENT_FAILED">{t('automations.trigger.option.paymentFailed')}</option>
+                    <option value="NPS_RESPONSE_RECEIVED">{t('automations.trigger.option.npsResponseReceived')}</option>
+                    <option value="NPS_PROMOTER">{t('automations.trigger.option.npsPromoter')}</option>
+                    <option value="NPS_DETRACTOR">{t('automations.trigger.option.npsDetractor')}</option>
                     <option value="SLA_BREACH">SLA Breach</option>
                   </select>
                 </div>
