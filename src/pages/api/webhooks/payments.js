@@ -3,6 +3,8 @@ import prisma from '@/prisma/index';
 import { resolveWebhookProvider } from '@/lib/server/payment-providers/resolver';
 import { processAutomation } from '@/prisma/services/automation';
 import { rateLimit } from '@/lib/server/rateLimit';
+import { ensureRequestId } from '@/lib/server/request-id';
+import { log, reportError } from '@/lib/server/logger';
 
 export const config = {
   api: {
@@ -18,6 +20,7 @@ const triggerFromWebhook = (status) => {
 };
 
 export default async function handler(req, res) {
+  const requestId = ensureRequestId(req, res);
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
@@ -25,6 +28,7 @@ export default async function handler(req, res) {
 
   const rl = rateLimit({ req, limit: 300, windowMs: 60_000 });
   if (!rl.ok) {
+    log({ level: 'warn', msg: 'payments webhook rate limited', requestId });
     return res.status(429).json({ error: { msg: 'Too Many Requests' } });
   }
 
@@ -52,21 +56,21 @@ export default async function handler(req, res) {
     const payment =
       (providerId
         ? await prisma.payment.findFirst({
-            where: { providerId, providerPaymentId: result.providerPaymentId },
-          })
+          where: { providerId, providerPaymentId: result.providerPaymentId },
+        })
         : null) ||
       (result?.externalReference
         ? await prisma.payment.findFirst({
-            where: {
-              workspaceId: result?.workspaceId || undefined,
-              OR: [{ id: String(result.externalReference) }, { externalReference: String(result.externalReference) }],
-            },
-          })
+          where: {
+            workspaceId: result?.workspaceId || undefined,
+            OR: [{ id: String(result.externalReference) }, { externalReference: String(result.externalReference) }],
+          },
+        })
         : null) ||
       (providerName === 'asaas'
         ? await prisma.payment.findFirst({
-            where: { asaasPaymentId: result.providerPaymentId },
-          })
+          where: { asaasPaymentId: result.providerPaymentId },
+        })
         : null);
 
     if (!payment) {
@@ -89,7 +93,16 @@ export default async function handler(req, res) {
         payment: updated,
         contactId: updated.contactId,
         dealId: updated.dealId,
-      }).catch((err) => console.error(`processAutomation ${trigger} failed:`, err));
+      }).catch((err) =>
+        log({
+          level: 'error',
+          msg: 'processAutomation failed',
+          requestId,
+          trigger,
+          workspaceId: updated.workspaceId,
+          err,
+        })
+      );
     }
 
     await prisma.activity.create({
@@ -105,7 +118,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ received: true });
   } catch (error) {
-    console.error('Payments webhook error:', error);
+    log({ level: 'error', msg: 'payments webhook error', requestId, err: error });
+    reportError(error, { requestId, route: 'webhooks/payments', provider: req.query?.provider });
     const statusCode = error?.statusCode || 500;
     return res.status(statusCode).json({ error: { msg: error?.message || 'Webhook handler failed' } });
   }

@@ -1,7 +1,9 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/server/auth';
+import { ensureRequestId } from '@/lib/server/request-id';
 
 export const requireSuperAdmin = async (req, res) => {
+  ensureRequestId(req, res);
   const session = await getServerSession(req, res, authOptions);
   if (!session) {
     res.status(401).json({ error: { msg: 'Unauthorized' } });
@@ -13,4 +15,3 @@ export const requireSuperAdmin = async (req, res) => {
   }
   return session;
 };
-

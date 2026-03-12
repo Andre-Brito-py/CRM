@@ -90,6 +90,30 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
 - Monetização por taxa da plataforma (split/fee quando disponível)
 
+## Plataforma No-Code (o que torna o CRM “adaptável”)
+A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.
+
+O que já existe hoje:
+- **Workflows (automações por regra):** gatilhos + condições + ações, com suporte a ações encadeadas e ações com atraso (delay).
+- **Simulação / explicação do disparo:** ajuda a entender “por que uma regra rodou” (ou não) antes de colocar em produção.
+- **Logs de execução:** registro de regras executadas e falhas para auditoria e debug operacional.
+- **Templates de mensagem v2:** variáveis (contato/empresa/negócio/atendente), pastas, busca, idioma e duplicação simples (versionamento via nome).
+- **Campos personalizados v2 (schema flexível):** tipos avançados (checkbox, multi-select, moeda, URL, telefone), validação e obrigatoriedade.
+- **Webhooks v2 (integrações):** assinatura HMAC com rotação de segredo, filtros por evento (inclusive “enviar todos”), painel de entregas com histórico e retentativas.
+- **API Keys por workspace:** gera chaves para integrações externas consumirem dados do workspace com controle de acesso.
+- **Presets por nicho (1-click setup):** cria pipeline + campos + templates + automações prontos para segmentos (imobiliária, clínica, agência, assistência técnica).
+- **Roteamento e SLA no Inbox:** regras de atribuição (origem/palavra-chave/região/horário/carga), escalonamento automático e alertas.
+
+Exemplos práticos (sem código):
+- Quando um lead chega via WhatsApp e contém “orçamento” → criar negócio no pipeline X e atribuir para o vendedor A.
+- Quando um negócio entra em “Proposta enviada” → agendar follow-up em 2 dias e enviar template de mensagem.
+- Quando um cliente fica sem resposta por 15 min → escalonar para outro atendente e registrar atividade.
+- Quando um pagamento muda para “PAID” → disparar automação e webhook para uma ferramenta externa.
+
+Como isso funciona internamente (resumo):
+- As regras, templates e definições de campos ficam **no banco** e são avaliadas no backend.
+- O workspace pode ter seu próprio conjunto de regras, campos e templates, sem impactar outros clientes.
+
 ## Próximas decisões (anotar antes de codar)
 - Qual é o ICP real (quem paga)?
 - Qual é o MVP que dá pra cobrar rápido?

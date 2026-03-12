@@ -1,6 +1,8 @@
 import prisma from '@/prisma/index';
 import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 import { encryptSecret, isEncryptedValue } from '@/lib/server/config';
+import { ensureRequestId } from '@/lib/server/request-id';
+import { log, reportError } from '@/lib/server/logger';
 
 const SECRET_KEYS = new Set([
   'OPENAI_API_KEY',
@@ -20,6 +22,7 @@ const SECRET_KEYS = new Set([
 const isSecretKey = (key) => SECRET_KEYS.has(String(key || '').toUpperCase());
 
 const handler = async (req, res) => {
+  const requestId = ensureRequestId(req, res);
   const session = await requireSuperAdmin(req, res);
   if (!session) return;
 
@@ -115,7 +118,8 @@ const handler = async (req, res) => {
         },
       });
     } catch (error) {
-      console.error(error);
+      log({ level: 'error', msg: 'failed to save system config', requestId, err: error });
+      reportError(error, { requestId, route: 'admin/settings', op: 'upsert' });
       return res.status(500).json({ error: { msg: 'Failed to save config' } });
     }
   } else if (req.method === 'DELETE') {
@@ -124,7 +128,8 @@ const handler = async (req, res) => {
       await prisma.systemConfig.delete({ where: { key: String(key || '').trim().toUpperCase() } });
       return res.status(200).json({ data: { success: true } });
     } catch (error) {
-      console.error(error);
+      log({ level: 'error', msg: 'failed to delete system config', requestId, err: error });
+      reportError(error, { requestId, route: 'admin/settings', op: 'delete' });
       return res.status(500).json({ error: { msg: 'Failed to delete config' } });
     }
   } else {

@@ -16,6 +16,74 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 
 ---
 
+## ✅ Objetivo Comercial (Prontidão para 500 clientes)
+Meta: deixar a plataforma pronta para operar com **~500 clientes pagantes** com estabilidade, segurança e suporte.
+
+O que isso significa na prática:
+- **Confiabilidade:** o sistema precisa continuar funcional sob picos, falhas parciais e retries de integrações.
+- **Observabilidade:** ter visibilidade real de erros, latência, filas/jobs, webhooks e pagamentos (com alertas).
+- **Segurança:** proteger endpoints públicos (auth/webhooks/cron), segredos e dados multi-tenant.
+- **Operação:** deploy, rollback, backups, migrações e runbooks para incidentes.
+- **Compliance básico (LGPD):** trilha de auditoria, políticas de retenção e mecanismos de exportação/remoção.
+
+### Requisitos mínimos antes de vender em escala (500 clientes)
+
+### Fase 1 (Base de Produção) — primeira entrega para escalar com segurança
+Objetivo: criar os fundamentos técnicos para operar em produção com previsibilidade (logs, erros, CI, segurança de endpoints e rotinas operacionais).
+
+- [ ] Padronizar logs server-side em JSON (níveis, request-id, mascaramento de dados sensíveis).
+- [ ] Adicionar request-id em todas as rotas API e incluir em logs/respostas de erro.
+- [ ] Capturar exceções e eventos críticos com alertas (auth, billing, webhooks, jobs).
+- [ ] Definir ambientes e rotina de deploy/rollback (staging/prod) com checks automáticos.
+- [ ] Criar testes smoke/E2E mínimos para fluxos críticos e rodar no CI.
+- [ ] Proteger endpoints públicos críticos com rate limit, limites de payload e validações.
+- [ ] Definir rotina de backups e testar restore (processo + evidência).
+
+#### 1) Observabilidade & Operação
+- [ ] Padronizar logs server-side (níveis, request-id/correlation-id, mascaramento de dados sensíveis).
+- [ ] Capturar exceções e eventos críticos (auth, billing, webhooks, jobs, integrações) com alertas.
+- [ ] Métricas e dashboards mínimos: taxa de erro, latência, webhooks falhando, jobs atrasados, pagamentos inconsistentes.
+- [ ] Playbooks: como investigar falha de webhook, falha de pagamento, falha de envio WhatsApp, queda de DB.
+
+#### 2) Testes & CI/CD
+- [ ] Testes smoke/E2E para fluxos críticos (login, criação de workspace, inbox, billing, webhooks).
+- [ ] Testes de contrato/parsing de webhooks de pagamento (por provider).
+- [ ] Pipeline de CI bloqueando deploy/merge quando lint/build/test falhar.
+- [ ] Ambientes por estágio (dev/staging/prod) e deploy com rollback.
+
+#### 3) Rate limit, abuso e proteção de endpoints
+- [ ] Rate limit distribuído (não em memória) para suportar múltiplas instâncias.
+- [ ] Proteções nos endpoints mais críticos: `/api/auth/*`, webhooks públicos, upload, endpoints de IA.
+- [ ] Timeouts e limites de payload; validação rigorosa de assinatura nos webhooks.
+- [ ] Estratégias anti-spam/bot (principalmente em auth e endpoints públicos).
+
+#### 4) Jobs/Cron, filas e resiliência
+- [ ] Tornar jobs e rotas de cron idempotentes (rodar duas vezes não duplica ação/cobrança).
+- [ ] Locks/concorrência para evitar corrida em múltiplas instâncias.
+- [ ] Retries com backoff e dead-letter (ou tabela de falhas) para integrações externas.
+- [ ] Observabilidade de jobs: status, duração, falhas, reprocessamento seguro.
+
+#### 5) Billing & “edge cases” de assinatura/pagamento
+- [ ] Cobrir casos: upgrade/downgrade, cancelamento, falha de pagamento, reativação, mudança de plano, limites por plano.
+- [ ] Reconciliação via webhook (fonte de verdade) e ferramentas internas de suporte para correção.
+- [ ] Idempotência e proteção contra eventos duplicados (webhook reentregue).
+
+#### 6) Auditoria, LGPD e segurança de dados
+- [ ] Trilhas de auditoria para ações sensíveis (Super Admin, billing, integrações, convites, permissões, exclusões).
+- [ ] Exportação/remoção de dados por workspace (e política de retenção).
+- [ ] Garantir isolamento multi-tenant consistente em todas as rotas (workspaceId sempre filtrando).
+
+#### 7) Performance de banco e escalabilidade
+- [ ] Índices e queries revisadas nas áreas críticas: inbox, deals/pipeline, automações, webhooks deliveries.
+- [ ] Estratégia de paginação e limites de listagens (evitar consultas pesadas).
+- [ ] Cache onde fizer sentido (config pública, settings, contagens).
+- [ ] Estratégia de backups, restore testado e migrações seguras (Prisma).
+
+#### 8) Suporte e operação comercial
+- [ ] Rotina de incidentes e SLA interno (tempo de resposta, prioridade, escalonamento).
+- [ ] Ferramentas de suporte: masquerade com audit, reprocessar webhook/job, inspecionar estado de pagamentos.
+- [ ] Migração/onboarding: importação, templates/presets, guias e checklist para clientes.
+
 ## �️ Estrutura de Módulos e Funcionalidades
 
 ### 1. Dashboard ✅
@@ -161,6 +229,38 @@ O objetivo é criar um sistema onde cada "Workspace" é uma empresa que gerencia
 - [x] **System Health:** Monitoramento de status do banco de dados, uptime e performance.
 
 ---
+
+## ✅ O que eu preciso que você me passe (para executar a preparação para 500 clientes)
+Para eu implementar isso com o mínimo de suposições e retrabalho, eu preciso destas decisões/dados:
+
+### Infra & Deploy
+- Onde vai rodar: Vercel / VPS / Docker / Kubernetes.
+- Estratégia de ambientes: staging e produção separados? Domínios e certificados.
+- Observabilidade escolhida: Sentry / OpenTelemetry + collector / outra.
+
+### Banco & dados
+- Postgres gerenciado (qual fornecedor) e tamanho esperado (contatos/mensagens por cliente).
+- Política de backup: frequência, retenção e teste de restore.
+
+### Cache / Rate limit / filas
+- Redis/Upstash (ou equivalente) para rate limit e locks.
+- Se vamos introduzir fila (ex.: BullMQ/Cloud queue) para webhooks/jobs, ou manter via DB com worker.
+
+### Pagamentos
+- Gateway principal para o SaaS (assinatura da plataforma) e o que você vai oferecer primeiro.
+- Regras de planos: limites por plano (usuarios, conversas, mensagens, webhooks, automações, storage).
+
+### WhatsApp & limites de uso
+- Provedor (Meta Cloud API/Twilio) e volume estimado de mensagens.
+- Regras de template/aprovação e estratégia de throttling (limite por workspace).
+
+### Segurança & compliance
+- Nível de LGPD desejado no curto prazo (básico vs mais rigoroso).
+- Exigências contratuais: auditoria, retenção, exportação, remoção, logs.
+
+### Produto & suporte
+- Vertical inicial (imobiliária/clínica/agência etc.) para priorizar o MVP comercial.
+- Modelo de suporte: horário, SLA, canal, e quem responde.
 
 ## 📅 Histórico de Implementação (Roadmap Original)
 
