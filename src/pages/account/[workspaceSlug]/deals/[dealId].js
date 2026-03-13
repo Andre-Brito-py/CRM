@@ -21,7 +21,7 @@ const DealDetails = ({ workspace }) => {
   const { workspaceSlug, dealId } = router.query;
   const { setWorkspace } = useWorkspace();
   const { deal, isLoading, mutate } = useDeal(workspaceSlug, dealId);
-  const { tasks } = useTasks(workspaceSlug, { dealId });
+  const { tasks } = useTasks(workspaceSlug, { dealId, page: 1, pageSize: 200 });
   const { data: pipelinesData } = usePipelines(workspaceSlug);
 
   const [isAddTaskModalOpen, setAddTaskModalOpen] = useState(false);

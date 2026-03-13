@@ -57,7 +57,12 @@ const Site = ({ workspace }) => {
 };
 
 export const getStaticPaths = async () => {
-  const paths = await getWorkspacePaths();
+  let paths = [];
+  try {
+    paths = await getWorkspacePaths();
+  } catch (e) {
+    paths = [];
+  }
   return {
     paths,
     fallback: true,

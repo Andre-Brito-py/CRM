@@ -23,14 +23,16 @@ export const createPipeline = async (workspaceId, { name }) => {
 
 export const getPipelines = async (workspaceId) => {
   return await prisma.pipeline.findMany({
-    where: { workspaceId },
+    where: { workspaceId, deletedAt: null },
     include: {
       stages: {
+        where: { deletedAt: null },
         orderBy: { order: 'asc' },
         include: {
           deals: {
             orderBy: { createdAt: 'desc' },
             where: { deletedAt: null },
+            take: 200,
             include: {
               company: true,
               contact: true,

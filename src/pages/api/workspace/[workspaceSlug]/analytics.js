@@ -2,6 +2,8 @@ import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 
+const WON_STAGE_NAMES_LOWER = ['fechado', 'closed', 'won'];
+
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not supported' });
@@ -82,10 +84,10 @@ const handler = async (req, res) => {
     const [
       salesByUser,
       dealsByStage,
-      wonDeals,
       tasksByAssignee,
-      dealsBySource,
-      closedDeals,
+      salesTrendRows,
+      sourceRows,
+      avgClosingRows,
     ] = await Promise.all([
       // 1. Sales by assignee (won deals)
       prisma.deal.groupBy({
@@ -103,43 +105,56 @@ const handler = async (req, res) => {
         _sum: { amount: true },
       }),
 
-      // 3. Won deals for sales trend (last 12 months)
-      prisma.deal.findMany({
-        where: {
-          workspaceId,
-          deletedAt: null,
-          stage: { name: { in: wonStageNames } },
-          OR: [{ closeDate: { gte: oneYearAgo } }, { createdAt: { gte: oneYearAgo } }],
-        },
-        select: { closeDate: true, createdAt: true, amount: true },
-      }),
-
-      // 4. Tasks by assignee (completion stats)
+      // 3. Tasks by assignee (completion stats)
       prisma.task.groupBy({
         by: ['assigneeId', 'isCompleted'],
-        where: { workspaceId },
-        _count: { id: true },
-      }),
-
-      // 5. Deals by source
-      prisma.deal.groupBy({
-        by: ['source'],
         where: { workspaceId, deletedAt: null },
         _count: { id: true },
-        _sum: { amount: true },
       }),
 
-      // 6. Closed deals for avg closing time
-      prisma.deal.findMany({
-        where: {
-          workspaceId,
-          deletedAt: null,
-          stage: { name: { in: wonStageNames } },
-          closeDate: { not: null },
-          createdAt: { not: null },
-        },
-        select: { createdAt: true, closeDate: true },
-      }),
+      // 4. Sales trend (aggregated in DB)
+      prisma.$queryRaw`
+        SELECT
+          date_trunc('month', COALESCE(d."closeDate", d."createdAt")) AS month,
+          COALESCE(SUM(d."amount"), 0) AS amount
+        FROM "deals" d
+        JOIN "stages" s ON s."id" = d."stageId"
+        WHERE
+          d."workspaceId" = ${workspaceId}
+          AND d."deletedAt" IS NULL
+          AND lower(s."name") IN (${WON_STAGE_NAMES_LOWER[0]}, ${WON_STAGE_NAMES_LOWER[1]}, ${WON_STAGE_NAMES_LOWER[2]})
+          AND (d."closeDate" >= ${oneYearAgo} OR d."createdAt" >= ${oneYearAgo})
+        GROUP BY 1
+        ORDER BY 1 ASC
+      `,
+
+      // 5. Deals by source (JSON extraction)
+      prisma.$queryRaw`
+        SELECT
+          COALESCE(NULLIF(d."customFields"->>'source', ''), 'Direct') AS source,
+          COUNT(*)::int AS count,
+          COALESCE(SUM(d."amount"), 0) AS amount
+        FROM "deals" d
+        WHERE
+          d."workspaceId" = ${workspaceId}
+          AND d."deletedAt" IS NULL
+        GROUP BY 1
+        ORDER BY 3 DESC
+      `,
+
+      // 6. Avg closing time (days) in DB
+      prisma.$queryRaw`
+        SELECT
+          AVG(EXTRACT(EPOCH FROM (d."closeDate" - d."createdAt")) / 86400.0) AS avg_days
+        FROM "deals" d
+        JOIN "stages" s ON s."id" = d."stageId"
+        WHERE
+          d."workspaceId" = ${workspaceId}
+          AND d."deletedAt" IS NULL
+          AND d."closeDate" IS NOT NULL
+          AND d."createdAt" IS NOT NULL
+          AND lower(s."name") IN (${WON_STAGE_NAMES_LOWER[0]}, ${WON_STAGE_NAMES_LOWER[1]}, ${WON_STAGE_NAMES_LOWER[2]})
+      `,
     ]);
 
     // ── Enrich user data in ONE batch query ───────────────────────────
@@ -188,16 +203,13 @@ const handler = async (req, res) => {
       })
       .sort((a, b) => a.order - b.order);
 
-    const salesMap = new Map();
-    wonDeals.forEach((deal) => {
-      const date = deal.closeDate || deal.createdAt;
-      const key = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-      const sortDate = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
-      if (!salesMap.has(key)) salesMap.set(key, { amount: 0, sortDate });
-      salesMap.get(key).amount += Number(deal.amount) || 0;
-    });
-    const salesTrend = Array.from(salesMap.entries())
-      .map(([month, data]) => ({ month, amount: data.amount, sortDate: data.sortDate }))
+    const salesTrend = (salesTrendRows || [])
+      .map((r) => {
+        const d = r?.month ? new Date(r.month) : null;
+        const month = d ? d.toLocaleString('default', { month: 'short', year: 'numeric' }) : '';
+        return { month, amount: Number(r?.amount) || 0, sortDate: d ? d.getTime() : 0 };
+      })
+      .filter((r) => r.month)
       .sort((a, b) => a.sortDate - b.sortDate)
       .map(({ month, amount }) => ({ month, amount }));
 
@@ -220,26 +232,15 @@ const handler = async (req, res) => {
       })
       .sort((a, b) => b.completed - a.completed);
 
-    const sourceData = dealsBySource
-      .map((d) => ({
-        source: d.source || 'Direct',
-        count: d._count.id,
-        amount: Number(d._sum.amount) || 0,
+    const sourceData = (sourceRows || [])
+      .map((r) => ({
+        source: r?.source || 'Direct',
+        count: Number(r?.count) || 0,
+        amount: Number(r?.amount) || 0,
       }))
       .sort((a, b) => b.amount - a.amount);
 
-    let totalDuration = 0;
-    closedDeals.forEach((deal) => {
-      const start = new Date(deal.createdAt).getTime();
-      const end = new Date(deal.closeDate).getTime();
-      if (!isNaN(start) && !isNaN(end) && end >= start) {
-        totalDuration += end - start;
-      }
-    });
-    const avgClosingTime =
-      closedDeals.length > 0
-        ? Math.round(totalDuration / closedDeals.length / (1000 * 60 * 60 * 24))
-        : 0;
+    const avgClosingTime = Math.round(Number(avgClosingRows?.[0]?.avg_days) || 0);
 
     res.status(200).json({
       salesByUser: salesByUserWithDetails,

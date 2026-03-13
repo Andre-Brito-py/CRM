@@ -33,7 +33,7 @@ const AddContactModal = ({ isOpen, toggle, slug }) => {
 
       if (response.data) {
         toast.success('Contact created successfully!');
-        mutate(`/api/workspace/${slug}/contacts`);
+        mutate((key) => typeof key === 'string' && key.startsWith(`/api/workspace/${slug}/contacts`));
         setName('');
         setEmail('');
         setPhone('');

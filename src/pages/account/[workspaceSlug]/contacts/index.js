@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -10,10 +10,19 @@ import AddContactModal from '@/sections/contacts/AddContactModal';
 
 const Contacts = () => {
   const { workspace } = useWorkspace();
-  const { data, isLoading } = useContacts(workspace?.slug);
+  const [page, setPage] = useState(1);
+  const pageSize = 25;
+
+  const { data, isLoading } = useContacts(workspace?.slug, { page, pageSize });
   const [isModalOpen, setModalOpen] = useState(false);
 
   const toggleModal = () => setModalOpen(!isModalOpen);
+  const meta = data?.meta || null;
+
+  const canGoPrev = page > 1;
+  const canGoNext = Boolean(meta?.hasMore);
+
+  const contacts = useMemo(() => data?.contacts || [], [data?.contacts]);
 
   return (
     <AccountLayout>
@@ -43,7 +52,7 @@ const Contacts = () => {
         </div>
         {isLoading ? (
           <p>Loading contacts...</p>
-        ) : data?.contacts.length > 0 ? (
+        ) : contacts.length > 0 ? (
           <div className="premium-card overflow-hidden">
             <table className="min-w-full divide-y divide-zinc-100">
               <thead className="bg-zinc-50/50">
@@ -55,7 +64,7 @@ const Contacts = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-zinc-50">
-                {data.contacts.map((contact) => (
+                {contacts.map((contact) => (
                   <tr key={contact.id} className="hover:bg-zinc-50/50 transition-colors group">
                     <td className="px-8 py-5 whitespace-nowrap">
                       <Link
@@ -85,6 +94,32 @@ const Contacts = () => {
           <Content.Empty>
             No contacts found. Start by adding a new contact.
           </Content.Empty>
+        )}
+
+        {meta && (
+          <div className="mt-6 flex items-center justify-between gap-3">
+            <div className="text-xs text-zinc-500">
+              Page {meta.page} of {meta.totalPages} • {meta.total} total
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-700 disabled:opacity-50"
+                disabled={!canGoPrev}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                className="px-4 py-2 rounded-xl border border-zinc-200 bg-white text-sm font-semibold text-zinc-700 disabled:opacity-50"
+                disabled={!canGoNext}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         )}
       </Content.Container>
       <AddContactModal isOpen={isModalOpen} toggle={toggleModal} slug={workspace?.slug} />

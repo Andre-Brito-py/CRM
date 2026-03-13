@@ -12,11 +12,17 @@ import { useTranslation } from 'react-i18next';
 const Tasks = () => {
   const { t, i18n } = useTranslation();
   const { workspace } = useWorkspace();
-  const { data, isLoading } = useTasks(workspace?.slug);
+  const [page, setPage] = useState(1);
+  const pageSize = 25;
+
+  const { tasks, meta, isLoading } = useTasks(workspace?.slug, { page, pageSize });
   const [isModalOpen, setModalOpen] = useState(false);
 
   const toggleModal = () => setModalOpen(!isModalOpen);
   const locale = (i18n?.language || 'en').split('-')[0] === 'pt' ? 'pt-BR' : (i18n?.language || 'en');
+  const rows = tasks || [];
+  const canGoPrev = page > 1;
+  const canGoNext = Boolean(meta?.hasMore);
 
   return (
     <AccountLayout>
@@ -38,7 +44,7 @@ const Tasks = () => {
         </div>
         {isLoading ? (
           <p className="mt-4 text-center text-gray-500">{t('tasks.loading')}</p>
-        ) : data?.tasks.length > 0 ? (
+        ) : rows.length > 0 ? (
           <>
             <div className="overflow-x-auto mt-4 hidden md:block">
               <table className="min-w-full divide-y divide-gray-200">
@@ -71,7 +77,7 @@ const Tasks = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.tasks.map((task) => (
+                  {rows.map((task) => (
                     <tr key={task.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link href={`/account/${workspace.slug}/tasks/${task.id}`}>
@@ -106,7 +112,7 @@ const Tasks = () => {
             </div>
 
             <div className="mt-4 space-y-4 md:hidden">
-              {data.tasks.map((task) => (
+              {rows.map((task) => (
                 <div key={task.id} className="bg-white shadow rounded-lg p-4 border border-gray-200">
                   <div className="flex justify-between items-start">
                     <Link href={`/account/${workspace.slug}/tasks/${task.id}`}>
@@ -136,6 +142,32 @@ const Tasks = () => {
                 </div>
               ))}
             </div>
+
+            {meta && (
+              <div className="mt-6 flex items-center justify-between gap-3">
+                <div className="text-xs text-gray-500">
+                  Page {meta.page} of {meta.totalPages} • {meta.total} total
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border border-gray-300 bg-white text-sm font-semibold text-gray-700 disabled:opacity-50"
+                    disabled={!canGoPrev}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    className="px-4 py-2 rounded border border-gray-300 bg-white text-sm font-semibold text-gray-700 disabled:opacity-50"
+                    disabled={!canGoNext}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center p-8 mt-8 border-2 border-dashed border-gray-300 rounded-lg">

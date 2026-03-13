@@ -4,7 +4,7 @@ const usePipelines = (slug) => {
   const apiRoute = `/api/workspace/${slug}/pipelines`;
   const { data, error, mutate } = useSWR(slug ? apiRoute : null);
   return {
-    ...data,
+    data: data?.data,
     isLoading: !error && !data,
     isError: error,
     mutate,

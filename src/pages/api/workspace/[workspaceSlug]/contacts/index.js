@@ -4,6 +4,12 @@ import { createContact, getContacts } from '@/prisma/services/contact';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { canAddContact } from '@/lib/server/subscription';
 
+const parsePositiveInt = (value) => {
+  const n = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+};
+
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug } = req.query;
@@ -24,13 +30,38 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET': {
       try {
+        const page = parsePositiveInt(req.query.page);
+        const pageSizeRaw = parsePositiveInt(req.query.pageSize);
+        const pageSize = pageSizeRaw ? Math.min(100, pageSizeRaw) : null;
+
+        if (page && pageSize) {
+          const skip = (page - 1) * pageSize;
+          const [contacts, total] = await Promise.all([
+            getContacts(workspace.id, { take: pageSize, skip }),
+            prisma.contact.count({ where: { workspaceId: workspace.id } }),
+          ]);
+
+          const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
+          return res.status(200).json({
+            data: {
+              contacts,
+              meta: {
+                page,
+                pageSize,
+                total,
+                totalPages,
+                hasMore: page < totalPages,
+              },
+            },
+          });
+        }
+
         const contacts = await getContacts(workspace.id);
-        res.status(200).json({ data: { contacts } });
+        return res.status(200).json({ data: { contacts } });
       } catch (error) {
         console.error('getContacts error:', error);
-        res.status(500).json({ error: { msg: 'Unable to fetch contacts' } });
+        return res.status(500).json({ error: { msg: 'Unable to fetch contacts' } });
       }
-      break;
     }
 
     case 'POST': {

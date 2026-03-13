@@ -25,10 +25,12 @@ export const createContact = async (workspaceId, { name, email, phone, jobTitle,
  * List contacts — lightweight payload for the contacts table.
  * Includes company name + deal count instead of full nested objects.
  */
-export const getContacts = async (workspaceId) => {
+export const getContacts = async (workspaceId, { take, skip } = {}) => {
   return await prisma.contact.findMany({
     where: { workspaceId },
     orderBy: { createdAt: 'desc' },
+    ...(Number.isFinite(take) ? { take } : {}),
+    ...(Number.isFinite(skip) ? { skip } : {}),
     select: {
       id: true,
       name: true,

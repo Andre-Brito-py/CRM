@@ -79,15 +79,15 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 - [x] Garantir isolamento multi-tenant consistente em todas as rotas (workspaceId sempre filtrando).
 
 #### 7) Performance de banco e escalabilidade
-- [ ] Índices e queries revisadas nas áreas críticas: inbox, deals/pipeline, automações, webhooks deliveries.
-- [ ] Estratégia de paginação e limites de listagens (evitar consultas pesadas).
-- [ ] Cache onde fizer sentido (config pública, settings, contagens).
-- [ ] Estratégia de backups, restore testado e migrações seguras (Prisma).
+- [x] Índices e queries revisadas nas áreas críticas: inbox, deals/pipeline, automações, webhooks deliveries.
+- [x] Estratégia de paginação e limites de listagens (evitar consultas pesadas).
+- [x] Cache onde fizer sentido (config pública, settings, contagens).
+- [x] Estratégia de backups, restore testado e migrações seguras (Prisma).
 
 #### 8) Suporte e operação comercial
-- [ ] Rotina de incidentes e SLA interno (tempo de resposta, prioridade, escalonamento).
-- [ ] Ferramentas de suporte: masquerade com audit, reprocessar webhook/job, inspecionar estado de pagamentos.
-- [ ] Migração/onboarding: importação, templates/presets, guias e checklist para clientes.
+- [x] Rotina de incidentes e SLA interno (tempo de resposta, prioridade, escalonamento).
+- [x] Ferramentas de suporte: masquerade com audit, reprocessar webhook/job, inspecionar estado de pagamentos.
+- [x] Migração/onboarding: importação, templates/presets, guias e checklist para clientes.
 
 ## �️ Estrutura de Módulos e Funcionalidades
 

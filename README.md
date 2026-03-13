@@ -99,6 +99,13 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
   - Erase: `POST /api/workspace/:workspaceSlug/privacy/erase`
 - **Hardening multi-tenant:** rotas críticas passaram a checar permissão + filtrar por `workspaceId` (incluindo endpoints de IA como resumo de conversa e insights de pipeline).
 
+## Fase 8 (Suporte e operação comercial) — o que mudou
+- **Masquerade auditável:** iniciar/parar impersonação com trilha de auditoria.
+- **Operação (SUPERADMIN):** botões no Admin → System para reprocessar entregas de webhook e jobs de automação “due”.
+- **Reconciliação de pagamentos:** UI no Admin → Payments para inspeção/ação rápida quando o gateway divergir do estado interno.
+- **Incidentes e SLA interno:** registro de incidentes (P0–P3) com prazos de resposta/resolução, ack e resolução, direto no Admin → System.
+- **Onboarding/migração:** checklist operacional e atalhos por workspace (presets, importação, integrações, templates).
+
 ## Plataforma No-Code (o que torna o CRM “adaptável”)
 A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.
 
@@ -153,6 +160,7 @@ Como isso funciona internamente (resumo):
 - Auditoria com `AUDIT_*` incluindo request metadata (ip, user-agent, rota, método, request-id).
 - Exportação e remoção de dados por workspace (LGPD) via `/privacy/export` e `/privacy/erase`.
 - Ajustes de isolamento: reforço de `workspaceId` em rotas críticas e endpoints de IA.
+- Fase 8 concluída: ferramentas operacionais (masquerade, reprocessos), incidentes/SLA e onboarding.
 
 ---
 

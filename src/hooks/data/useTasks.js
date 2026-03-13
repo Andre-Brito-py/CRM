@@ -18,6 +18,7 @@ const useTasks = (slug, filters) => {
   const { data, error, mutate } = useSWR(slug ? apiRoute : null);
   return {
     tasks: data?.data?.tasks,
+    meta: data?.data?.meta,
     isLoading: !error && !data,
     isError: error,
     mutate,

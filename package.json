@@ -8,9 +8,15 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "ci": "npm run lint && npm run build && npm test",
+    "prisma:validate": "prisma validate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:status": "prisma migrate status",
+    "ci": "npm run prisma:validate && npm run lint && npm run build && npm test",
     "db:backup": "node scripts/db-backup.js",
     "db:restore": "node scripts/db-restore.js",
+    "db:backup:check": "node scripts/db-backup.js --check",
+    "db:restore:check": "node scripts/db-restore.js --check",
     "postinstall": "prisma generate"
   },
   "prisma": {

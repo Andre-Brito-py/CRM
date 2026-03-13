@@ -16,7 +16,7 @@ export const createTask = async (workspaceId, { title, content, dueDate, priorit
 };
 
 export const getTasks = async (workspaceId, filters = {}) => {
-  const { assigneeId, contactId, dealId, isCompleted } = filters;
+  const { assigneeId, contactId, dealId, isCompleted, take, skip } = filters;
 
   const where = {
     workspaceId,
@@ -31,6 +31,8 @@ export const getTasks = async (workspaceId, filters = {}) => {
   return await prisma.task.findMany({
     where,
     orderBy: { createdAt: 'desc' },
+    ...(Number.isFinite(take) ? { take } : {}),
+    ...(Number.isFinite(skip) ? { skip } : {}),
     include: {
       assignee: {
         select: {

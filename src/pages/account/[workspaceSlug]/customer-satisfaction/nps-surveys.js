@@ -33,7 +33,7 @@ const NpsSurveys = () => {
     fetcher
   );
   const { data: contactsData } = useSWR(
-    workspaceSlug ? `/api/workspace/${workspaceSlug}/contacts` : null,
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/contacts?page=1&pageSize=500` : null,
     fetcher
   );
   const { data: integrationsData } = useSWR(

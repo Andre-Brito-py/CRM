@@ -18,14 +18,25 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET':
       try {
-        const { assigneeId, status, search } = req.query;
+        const parsePositiveInt = (v) => {
+          const n = Number(v);
+          if (!Number.isFinite(n) || n <= 0) return null;
+          return Math.floor(n);
+        };
+
+        const { assigneeId, status, search, page, pageSize } = req.query;
         const filters = {};
         if (assigneeId) filters.assigneeId = assigneeId;
         if (status) filters.status = status;
         if (search) filters.search = search;
 
-        const conversations = await getConversations(workspace.id, filters);
-        res.status(200).json({ data: { conversations } });
+        const options = {
+          page: parsePositiveInt(page) || 1,
+          pageSize: parsePositiveInt(pageSize) || 50,
+        };
+
+        const { conversations, meta } = await getConversations(workspace.id, filters, options);
+        res.status(200).json({ data: { conversations, meta } });
       } catch (error) {
         console.error(error);
         res.status(500).json({ error: { msg: 'Unable to fetch conversations' } });

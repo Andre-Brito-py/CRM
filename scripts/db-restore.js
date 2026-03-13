@@ -46,9 +46,27 @@ async function main() {
   const dockerImage = String(args.get('docker-image') || process.env.BACKUP_DOCKER_IMAGE || 'postgres:16-alpine').trim();
   const dockerNetwork = String(args.get('docker-network') || process.env.DOCKER_NETWORK || '').trim();
   const confirm = String(args.get('confirm') || process.env.CONFIRM_RESTORE || '').trim();
+  const isCheckOnly = Boolean(args.get('check'));
 
   const backupFileName = requireString(backupFileArg, '--file (or BACKUP_FILE)');
-  const safeRestoreUrl = requireString(restoreUrl, '--restore-url (or RESTORE_DATABASE_URL)');
+  const safeRestoreUrl = restoreUrl ? requireString(restoreUrl, '--restore-url (or RESTORE_DATABASE_URL)') : '';
+
+  const backupsDir = path.join(process.cwd(), 'backups');
+  const hostFilePath = path.isAbsolute(backupFileName)
+    ? backupFileName
+    : path.join(backupsDir, backupFileName);
+
+  if (isCheckOnly) {
+    run('docker', ['version']);
+    run('docker', ['run', '--rm', dockerImage, 'pg_restore', '--version']);
+    if (!fs.existsSync(hostFilePath)) {
+      throw new Error(`Backup file not found: ${hostFilePath}`);
+    }
+    process.stdout.write('restore_check_ok\n');
+    return;
+  }
+
+  requireString(safeRestoreUrl, '--restore-url (or RESTORE_DATABASE_URL)');
 
   if (sourceUrl && sourceUrl === safeRestoreUrl && confirm !== 'YES') {
     throw new Error('Refusing to restore into DATABASE_URL without CONFIRM_RESTORE=YES');
@@ -57,18 +75,14 @@ async function main() {
     throw new Error('CONFIRM_RESTORE=YES is required');
   }
 
-  const backupsDir = path.join(process.cwd(), 'backups');
-  const hostFilePath = path.isAbsolute(backupFileName)
-    ? backupFileName
-    : path.join(backupsDir, backupFileName);
-
   if (!fs.existsSync(hostFilePath)) {
     throw new Error(`Backup file not found: ${hostFilePath}`);
   }
 
+  const mountDir = path.dirname(hostFilePath);
   const dockerArgs = ['run', '--rm'];
   if (dockerNetwork) dockerArgs.push('--network', dockerNetwork);
-  dockerArgs.push('-v', `${backupsDir}:/backups`, dockerImage);
+  dockerArgs.push('-v', `${mountDir}:/backups`, dockerImage);
 
   dockerArgs.push(
     'pg_restore',
@@ -89,4 +103,3 @@ main().catch((err) => {
   process.stderr.write(`${err?.message || err}\n`);
   process.exit(1);
 });
-

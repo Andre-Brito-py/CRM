@@ -42,5 +42,6 @@ export default async function handler(req, res) {
     if (value) config[key] = value;
   }
 
+  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=300, stale-while-revalidate=3600');
   res.status(200).json({ data: { config } });
 }

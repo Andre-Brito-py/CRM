@@ -25,7 +25,7 @@ const ContactDetails = ({ workspace }) => {
   const { setWorkspace } = useWorkspace();
   const { contact, isLoading, mutate } = useContact(workspaceSlug, contactId);
   const { tags: allTags, mutate: mutateTags } = useTags(workspaceSlug);
-  const { tasks } = useTasks(workspaceSlug, { contactId });
+  const { tasks } = useTasks(workspaceSlug, { contactId, page: 1, pageSize: 200 });
   const [isAddingTag, setIsAddingTag] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [editingCustomFields, setEditingCustomFields] = useState(false);

@@ -387,6 +387,7 @@ model Deal {
   @@index([workspaceId, stageId])
   @@index([workspaceId, createdAt])
   @@index([stageId])
+  @@index([stageId, deletedAt, createdAt])
   @@map("deals")
 }
 
@@ -500,6 +501,7 @@ model Conversation {
   @@index([workspaceId])
   @@index([workspaceId, status])
   @@index([workspaceId, assigneeId])
+  @@index([workspaceId, updatedAt])
   @@map("conversations")
 }
 
@@ -585,6 +587,7 @@ model WebhookDelivery {
   webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId, status])
+  @@index([status, nextRetryAt, attempts])
   @@map("webhook_deliveries")
 }
 
@@ -666,6 +669,7 @@ model Task {
   @@index([workspaceId])
   @@index([workspaceId, assigneeId])
   @@index([workspaceId, isCompleted, dueDate])
+  @@index([workspaceId, deletedAt, createdAt])
   @@map("tasks")
 }
 

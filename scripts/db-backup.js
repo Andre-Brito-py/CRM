@@ -63,15 +63,28 @@ async function main() {
   requireString(databaseUrl, 'DATABASE_URL (or BACKUP_DATABASE_URL)');
 
   const backupsDir = path.join(process.cwd(), 'backups');
-  fs.mkdirSync(backupsDir, { recursive: true });
+  const getOut = () => {
+    if (!outArg) {
+      return { dir: backupsDir, fileName: `db_${nowStamp()}.dump` };
+    }
 
-  const fileName = outArg ? path.basename(outArg) : `db_${nowStamp()}.dump`;
-  const outPath = path.isAbsolute(outArg) ? outArg : path.join(backupsDir, fileName);
-  const containerOutPath = `/backups/${path.basename(outPath)}`;
+    const hasPath = outArg.includes('/') || outArg.includes('\\');
+    const isAbs = path.isAbsolute(outArg);
+    const dir = (isAbs || hasPath) ? (isAbs ? path.dirname(outArg) : path.resolve(process.cwd(), path.dirname(outArg))) : backupsDir;
+    const base = path.basename(outArg);
+    const fileName = path.extname(base) ? base : `${base}.dump`;
+    return { dir, fileName };
+  };
+
+  const { dir: outDir, fileName } = getOut();
+  fs.mkdirSync(outDir, { recursive: true });
+
+  const outPath = path.join(outDir, fileName);
+  const containerOutPath = `/backups/${fileName}`;
 
   const dockerArgs = ['run', '--rm'];
   if (dockerNetwork) dockerArgs.push('--network', dockerNetwork);
-  dockerArgs.push('-v', `${backupsDir}:/backups`, dockerImage);
+  dockerArgs.push('-v', `${outDir}:/backups`, dockerImage);
 
   dockerArgs.push(
     'pg_dump',
@@ -92,4 +105,3 @@ main().catch((err) => {
   process.stderr.write(`${err?.message || err}\n`);
   process.exit(1);
 });
-

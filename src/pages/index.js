@@ -29,19 +29,24 @@ const Home = ({ products }) => {
 };
 
 export const getStaticProps = async () => {
-  const plans = await getAllPlans();
-  const products = plans
-    .filter((plan) => plan.isActive)
-    .map((plan) => ({
-      name: plan.name,
-      slug: plan.slug,
-      description: plan.description,
-      price: Number(plan.price),
-      currency: plan.currency,
-      interval: plan.interval,
-      features: plan.features,
-    }))
-    .sort((a, b) => a.price - b.price); // Sort by price ascending
+  let products = [];
+  try {
+    const plans = await getAllPlans();
+    products = plans
+      .filter((plan) => plan.isActive)
+      .map((plan) => ({
+        name: plan.name,
+        slug: plan.slug,
+        description: plan.description,
+        price: Number(plan.price),
+        currency: plan.currency,
+        interval: plan.interval,
+        features: plan.features,
+      }))
+      .sort((a, b) => a.price - b.price);
+  } catch (e) {
+    products = [];
+  }
 
   return {
     props: {

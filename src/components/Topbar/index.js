@@ -92,7 +92,14 @@ const Topbar = ({ menu, staticMenu }) => {
   const [name, setName] = useState('');
   const [isSubmitting, setSubmittingState] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [isImpersonating, setIsImpersonating] = useState(false);
   const validName = name.length > 0 && name.length <= 16;
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const cookie = document.cookie || '';
+    setIsImpersonating(cookie.includes('nextacular_impersonating=1'));
+  }, []);
 
   const logOut = () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -288,6 +295,27 @@ const Topbar = ({ menu, staticMenu }) => {
                   </Menu.Item>
                 </div>
                 <div className="p-2">
+                  {isImpersonating && (
+                    <Menu.Item>
+                      <button
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 rounded-xl transition-all"
+                        onClick={async () => {
+                          try {
+                            toast.loading('Saindo do masquerade...', { id: 'stop_masq' });
+                            const res = await api('/api/impersonation/stop', { method: 'POST' });
+                            if (res?.error?.msg) throw new Error(res.error.msg);
+                            toast.success('Masquerade finalizado', { id: 'stop_masq' });
+                            window.location.href = '/admin/users';
+                          } catch (e) {
+                            toast.error(e?.message || 'Falha ao finalizar masquerade', { id: 'stop_masq' });
+                          }
+                        }}
+                      >
+                        <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                        Parar masquerade
+                      </button>
+                    </Menu.Item>
+                  )}
                   <Menu.Item>
                     <button
                       className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all"

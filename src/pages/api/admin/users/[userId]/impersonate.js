@@ -1,6 +1,8 @@
 import { getSession } from 'next-auth/react';
 import { encode } from 'next-auth/jwt';
+import crypto from 'crypto';
 import prisma from '@/prisma/index';
+import { createPlatformAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
   const session = await getSession({ req });
@@ -25,6 +27,11 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
+      const secret = process.env.NEXTAUTH_SECRET;
+      if (!secret) {
+        return res.status(500).json({ error: { msg: 'NEXTAUTH_SECRET not configured' } });
+      }
+
       const targetUser = await prisma.user.findUnique({
         where: { id: userId },
       });
@@ -45,7 +52,7 @@ export default async function handler(req, res) {
 
       const jwt = await encode({
         token,
-        secret: process.env.NEXTAUTH_SECRET,
+        secret,
       });
 
       // Determine cookie name based on environment
@@ -53,9 +60,32 @@ export default async function handler(req, res) {
         ? '__Secure-next-auth.session-token'
         : 'next-auth.session-token';
 
+      const issuedAt = Date.now();
+      const cookiePayload = `${session.user.userId}.${issuedAt}`;
+      const sig = crypto.createHmac('sha256', secret).update(cookiePayload).digest('hex');
+      const impersonationToken = `${cookiePayload}.${sig}`;
+      const maxAgeSeconds = 60 * 60 * 8;
+
       // Set the cookie
       // We use setHeader because we are in an API route
-      res.setHeader('Set-Cookie', `${cookieName}=${jwt}; Path=/; HttpOnly; SameSite=Lax${process.env.NODE_ENV === 'production' ? '; Secure' : ''}`);
+      const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+      res.setHeader('Set-Cookie', [
+        `${cookieName}=${jwt}; Path=/; HttpOnly; SameSite=Lax${secure}`,
+        `nextacular_impersonation=${impersonationToken}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly; SameSite=Lax${secure}`,
+        `nextacular_impersonating=1; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`,
+      ]);
+
+      await createPlatformAuditActivity(
+        session.user.userId || session.user.id,
+        session.user.email,
+        {
+          action: 'IMPERSONATE_START',
+          title: 'Masquerade started',
+          target: { userId: targetUser.id },
+          metadata: { email: targetUser.email || null },
+        },
+        req
+      );
 
       res.status(200).json({ success: true });
     } catch (error) {

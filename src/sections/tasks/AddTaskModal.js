@@ -10,7 +10,7 @@ import useDeals from '@/hooks/data/useDeals';
 const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId }) => {
   const { mutate } = useSWRConfig();
   const { data: membersData } = useMembers(slug);
-  const { data: contactsData } = useContacts(slug);
+  const { data: contactsData } = useContacts(slug, { page: 1, pageSize: 500 });
   const { data: dealsData } = useDeals(slug);
 
   const [isSubmitting, setSubmitting] = useState(false);
@@ -49,10 +49,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
 
       if (response.data) {
         toast.success('Task created successfully!');
-        mutate(`/api/workspace/${slug}/tasks`);
-        // If we are in a context where we filter by contact/deal, we might want to mutate that too
-        if (contactId) mutate(`/api/workspace/${slug}/tasks?contactId=${contactId}`);
-        if (dealId) mutate(`/api/workspace/${slug}/tasks?dealId=${dealId}`);
+        mutate((key) => typeof key === 'string' && key.startsWith(`/api/workspace/${slug}/tasks`));
 
         setTitle('');
         setContent('');
