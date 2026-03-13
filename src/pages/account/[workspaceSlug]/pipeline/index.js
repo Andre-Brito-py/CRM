@@ -142,7 +142,10 @@ const Pipeline = () => {
         )}
 
         {isLoading ? (
-          <p>Loading pipeline...</p>
+          <div className="flex flex-col items-center justify-center py-32 animate-pulse">
+            <div className="w-16 h-16 border-[6px] border-zinc-100 border-t-indigo-600 rounded-full animate-spin mb-6 shadow-xl shadow-indigo-500/10"></div>
+            <p className="text-zinc-500 font-bold tracking-[0.15em] text-xs uppercase">Orchestrating segments...</p>
+          </div>
         ) : pipeline ? (
           <PipelineBoard pipeline={pipeline} workspaceSlug={workspace?.slug} />
         ) : (

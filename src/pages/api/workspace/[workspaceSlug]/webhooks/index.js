@@ -56,7 +56,7 @@ const handler = async (req, res) => {
       const currentWebhookCount = await prisma.webhook.count({
         where: { workspaceId: workspace.id, deletedAt: null, isActive: true },
       });
-      const isAllowed = await canAddWebhook(workspace.creator?.email, currentWebhookCount);
+      const isAllowed = await canAddWebhook(workspace.id, currentWebhookCount);
       if (!isAllowed) {
         return res.status(403).json({
           error: {

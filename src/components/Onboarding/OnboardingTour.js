@@ -11,35 +11,28 @@ const OnboardingTour = ({ tourId, steps, active = true }) => {
     const { t } = useTranslation();
     const driverRef = useRef(null);
     const startAttemptedRef = useRef(false);
+    const startingRef = useRef(false);
 
     const handleComplete = useCallback(async (completed) => {
+        if (!completed) return;
         try {
-            mutate((current) => {
-                const currentStatus = current?.data || {};
-                return {
-                    data: {
-                        ...currentStatus,
-                        [tourId]: completed ? true : (currentStatus[tourId] || false),
-                    },
-                };
-            }, false);
             await api('/api/user/onboarding', {
                 method: 'POST',
-                body: { tourId, completed },
+                body: { tourId, completed: true },
             });
-            mutate();
+            mutate(); // Revalidate SWR
         } catch (err) {
-            mutate();
+            console.error('Failed to save onboarding status', err);
         }
     }, [mutate, tourId]);
 
     const isCompleted = !!onboardingStatus?.data?.[tourId];
-    const shouldStart = !!(active && onboardingStatus?.data && steps && !isCompleted && !driverRef.current && !startAttemptedRef.current);
+    const canStart = !!(active && onboardingStatus?.data && steps && !isCompleted);
 
     useEffect(() => {
-        if (!shouldStart) return;
-        startAttemptedRef.current = true;
-
+        if (!canStart || startAttemptedRef.current || startingRef.current) return;
+        
+        startingRef.current = true;
         let cancelled = false;
 
         const resolveElement = (step) => {
@@ -61,14 +54,14 @@ const OnboardingTour = ({ tourId, steps, active = true }) => {
                     ...step,
                     popover: {
                         ...step.popover,
-                        className: 'premium-tour-popover',
+                        className: 'premium-tour-popover shadow-2xl border-none p-1',
                     }
                 }));
         };
 
         const waitForAtLeastOneStep = async () => {
-            const timeoutMs = 2500;
-            const pollMs = 100;
+            const timeoutMs = 3000;
+            const pollMs = 150;
             const startedAt = Date.now();
 
             while (!cancelled) {
@@ -82,21 +75,39 @@ const OnboardingTour = ({ tourId, steps, active = true }) => {
         };
 
         (async () => {
+            // Wait a moment for layout to settle and SWR to potentially update
+            await new Promise((r) => setTimeout(r, 500));
+            
             const resolvedSteps = await waitForAtLeastOneStep();
-            if (cancelled || resolvedSteps.length === 0) return;
+            
+            if (cancelled || resolvedSteps.length === 0 || startAttemptedRef.current) {
+                startingRef.current = false;
+                return;
+            }
+
+            // Double check completion status right before driving
+            // This helps if the user fast-navigated and the prev tour just finished
+            if (isCompleted) {
+                startingRef.current = false;
+                return;
+            }
+
+            startAttemptedRef.current = true;
+            startingRef.current = false;
+
+            if (driverRef.current) {
+                driverRef.current.destroy();
+            }
 
             driverRef.current = driver({
                 showProgress: true,
                 animate: true,
-                overlayColor: 'rgba(0, 0, 0, 0.75)',
+                overlayColor: 'rgba(0, 0, 0, 0.7)',
                 nextBtnText: t('onboarding.tour.btn.next'),
                 prevBtnText: t('onboarding.tour.btn.prev'),
                 doneBtnText: t('onboarding.tour.btn.done'),
                 allowClose: true,
                 onDismissed: () => {
-                    handleComplete(true);
-                },
-                onDestroyed: () => {
                     handleComplete(true);
                 },
                 steps: resolvedSteps,
@@ -108,7 +119,7 @@ const OnboardingTour = ({ tourId, steps, active = true }) => {
         return () => {
             cancelled = true;
         };
-    }, [handleComplete, shouldStart, steps, t]);
+    }, [handleComplete, canStart, steps, t, isCompleted]);
 
     useEffect(() => {
         return () => {

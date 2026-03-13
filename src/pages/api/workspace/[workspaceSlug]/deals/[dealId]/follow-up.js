@@ -4,7 +4,7 @@ import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
-import { getSubscriptionStatus } from '@/lib/server/subscription';
+import { getWorkspaceLimits } from '@/lib/server/subscription';
 
 export const config = {
   api: {
@@ -38,11 +38,9 @@ const handler = async (req, res) => {
 
   try {
     const userId = session.user.userId || session.user.id;
-    const plan = await getSubscriptionStatus(workspace?.creator?.email || session.user.email);
-    const per5Min =
-      plan === 'FREE' ? 10 : plan === 'STANDARD' ? 35 : 180;
-    const perDay =
-      plan === 'FREE' ? 25 : plan === 'STANDARD' ? 200 : 2000;
+    const limits = await getWorkspaceLimits(workspace.id);
+    const perDay = limits.aiRequests24h || 15;
+    const per5Min = Math.ceil(perDay / 10); // Burst limit proportional to daily limit
 
     const [rlBurst, rlDaily] = await Promise.all([
       rateLimit({ req, limit: per5Min, windowMs: 5 * 60_000, key: `u:${userId}:ai:follow-up:5m` }),

@@ -11,6 +11,7 @@ import Button from '@/components/Button/index';
 import Card from '@/components/Card/index';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
@@ -83,9 +84,22 @@ const General = ({ isTeamOwner, workspace }) => {
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
 
+  const settingsSteps = [
+    {
+      element: '#settings-general-content',
+      popover: {
+        title: t('onboarding.tour.settings.step1.title'),
+        description: t('onboarding.tour.settings.step1.desc'),
+        position: 'bottom',
+      }
+    }
+  ];
+
   return (
     <AccountLayout>
+      <OnboardingTour tourId="settings-tour" steps={settingsSteps} />
       <Meta title={`Nextacular - ${workspace.name} | Settings`} />
+      <div id="settings-general-content">
       <Content.Title
         title={t("settings.workspace.information")}
         subtitle={t("settings.general.workspace.description")}
@@ -220,6 +234,7 @@ const General = ({ isTeamOwner, workspace }) => {
           </Card>
         )}
       </Content.Container>
+      </div>
     </AccountLayout>
   );
 };

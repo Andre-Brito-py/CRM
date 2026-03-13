@@ -504,6 +504,12 @@ export const simulateAutomationRule = async (workspaceId, rule, eventData) => {
     preview.stageId = actionConfig?.stageId || null;
   }
 
+  if (actionType === 'SEND_NOTIFICATION') {
+    preview.title = actionConfig?.title ? await renderTemplateString(workspaceId, actionConfig.title, { ...eventData }) : '';
+    preview.content = actionConfig?.content ? await renderTemplateString(workspaceId, actionConfig.content, { ...eventData }) : '';
+    preview.userIdToNotify = actionConfig?.userIdToNotify || null;
+  }
+
   if (actionType === 'APPLY_TAG') {
     preview.tagId = actionConfig?.tagId || null;
   }
@@ -576,6 +582,9 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
       break;
     case 'APPLY_TAG':
       await executeApplyTagAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'SEND_NOTIFICATION':
+      await executeSendNotificationAction(workspaceId, actionConfig, eventData);
       break;
     default:
       console.warn(`Unknown action type: ${actionType}`);
@@ -1114,6 +1123,37 @@ const executeSendWhatsAppAction = async (workspaceId, actionConfig, eventData) =
 
   } catch (error) {
     console.error('Failed to execute WhatsApp automation:', error);
+    throw error;
+  }
+};
+
+const executeSendNotificationAction = async (workspaceId, actionConfig, eventData) => {
+  const userId = actionConfig?.userIdToNotify || null;
+  const titleTemplate = actionConfig?.title || '';
+  const contentTemplate = actionConfig?.content || '';
+  const link = actionConfig?.link || null;
+
+  if (!userId || !titleTemplate) {
+    console.warn('Missing userId or title for SEND_NOTIFICATION action');
+    return;
+  }
+
+  const title = await renderTemplateString(workspaceId, titleTemplate, eventData);
+  const content = contentTemplate ? await renderTemplateString(workspaceId, contentTemplate, eventData) : null;
+
+  try {
+    await prisma.notification.create({
+      data: {
+        workspaceId,
+        userId,
+        title,
+        content,
+        link,
+      },
+    });
+    console.log(`Notification sent to user ${userId} in workspace ${workspaceId}`);
+  } catch (error) {
+    console.error('Failed to execute Send Notification automation:', error);
     throw error;
   }
 };

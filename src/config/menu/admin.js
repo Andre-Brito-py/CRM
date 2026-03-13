@@ -43,6 +43,10 @@ const menu = () => [
         path: '/admin/finance/revenue',
       },
       {
+        name: 'Finance / Coupons & Promos',
+        path: '/admin/finance/coupons',
+      },
+      {
         name: 'Plans',
         path: '/admin/plans',
       },

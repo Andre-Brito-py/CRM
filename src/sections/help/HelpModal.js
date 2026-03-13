@@ -66,6 +66,64 @@ const TutorialImage = ({ src, alt, caption }) => (
 
 /* ─── Tutorial content (rich JSX) ──────────────────────────────────── */
 const TUTORIAL_CONTENT = {
+  crm: {
+    title: '👥 Tutorial: CRM Básico (Contatos e Empresas)',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          A base do seu CRM são os Contatos (pessoas) e Empresas (organizações). Aprenda como criar e gerenciar seu banco de clientes.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Acesse o menu de Contatos ou Empresas' desc='No menu superior da plataforma, clique em "Contacts" ou "Companies" para ver a lista completa de clientes.' />
+          <Step number={2} title='Adicione um novo cliente' desc='Clique no botão "+ Add Contact" ou "+ Add Company" no canto superior direito.' />
+          <Step number={3} title='Preencha as informações básicas' desc='Insira o Nome, E-mail, Telefone e outros dados importantes. Aqui aparecem também os "Campos Personalizados" (Custom Fields) se você tiver criado algum.' />
+          <Step number={4} title='Gerencie o Histórico' desc='Ao clicar no nome de um Contato na lista, um perfil completo se abre. Lá você pode adicionar Notas, criar Tarefas, enviar Mensagens de WhatsApp e ver os Negócios (Deals) associados à pessoa.' />
+        </div>
+        <TipBox>
+          Você pode importar Contatos em lote a partir de uma planilha CSV! Basta clicar em "Upload CSV" na tela de Contatos e mapear as colunas desejadas.
+        </TipBox>
+      </div>
+    ),
+  },
+
+  pipelines: {
+    title: '📊 Tutorial: Gestão de Funis (Pipelines & Deals)',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Um Pipeline representa seu processo de vendas. Os estágios indicam o progresso de cada Negócio (Deal) do primeiro contato até o fechamento.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Acesse os Painéis' desc='Clique em "Pipeline" ou "Deals" no menu superior.' />
+          <Step number={2} title='Como ler o Kanban' desc='Cada coluna é um estágio. Cada "Card" é um Negócio associado a um Contato. Você visualiza rapidamente os valores, prioridades e quem está cuidando do negócio.' />
+          <Step number={3} title='Crie um novo Deal' desc='Clique no botão de "+" no topo da tela ou logo abaixo das colunas para criar um card rapidamente naquele estágio.' />
+          <Step number={4} title='Avance no funil (Drag and Drop)' desc='Para mudar o Card de um Estágio ou Coluna, basta clicar, segurar e arrastar o cartão para a coluna seguinte!' />
+          <Step number={5} title='Crie ou edite funis' desc='Você pode ter diversos funis operando ao mesmo tempo. Vá em Configurações → Pipelines para criar funis e editar as cores das colunas.' />
+        </div>
+        <TipBox>
+          Preencha o valor (R$) dos seus cards no Funil. Nossa Inteligência Artificial ("AI Insights") usa esses valores para gerar projeções de faturamento.
+        </TipBox>
+      </div>
+    ),
+  },
+
+  inbox: {
+    title: '💬 Tutorial: Caixa de Entrada (Inbox) Omnichannel',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Receba todas as mensagens de múltiplos canais de captura (como WhatsApp e Web Chat) numa única Caixa de Entrada para equipes colaborativas.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Vá para a Inbox' desc='No menu superior, clique em "Inbox".' />
+          <Step number={2} title='Leia as mensagens na Fila de Atendimento' desc='A barra lateral esquerda exibe as conversas. As mensagens não lidas, abertas ou não atribuídas para algum membro aparecem disponíveis para interações.' />
+          <Step number={3} title='Atribua a conversa' desc='Clique em "Assign Member" para direcionar o chat para algum usuário (vendedor).' />
+          <Step number={4} title='Responda e Encerre' desc='Use "Message Templates" caso tenha salvo para responder rápido, envie áudios ou anexos à vontade. Quando terminado, feche marcando como "Closed".' />
+        </div>
+      </div>
+    ),
+  },
+
   custom_fields: {
     title: '🎛️ Tutorial: Campos Personalizados',
     render: () => (
@@ -217,6 +275,7 @@ const TUTORIAL_CONTENT = {
             { icon: '🏥', name: 'Clínica Médica', desc: 'Pipeline: Agendamento → Consulta → Retorno. Campos: Convênio, Data Nascimento, Prontuário.' },
             { icon: '💼', name: 'Agência Digital', desc: 'Pipeline: Proposta → Onboarding → Recorrência. Campos: Pacote Contratado, MRR, Data renovação.' },
             { icon: '🔧', name: 'Assistência Técnica', desc: 'Pipeline: Orçamento → Aprovação → Execução → Entrega. Campos: Equipamento, Nº Série, Garantia.' },
+            { icon: '🍽️', name: 'Restaurante', desc: 'Pipeline: Solicitação → Orçamento → Reserva Confirmada. Campos: Nº Pessoas, Data Evento, Restrições.' },
           ].map((p) => (
             <div key={p.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
               <div className="text-lg mb-1">{p.icon}</div>
@@ -363,6 +422,79 @@ const TUTORIAL_CONTENT = {
       </div>
     ),
   },
+
+  tasks: {
+    title: '✅ Tutorial: Gestão de Tarefas (Tasks)',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          As tarefas evitam que você se esqueça de ligar para um cliente, mandar um contrato, acompanhar um pagamento ou fazer follow-ups vitais.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Adicione tarefas num Perfil' desc='Quando estiver no perfil de um Contato ou editando as notas de um Deal (Negócio), encontre a aba de Tarefas (ícone de check) e clique em "+ Adicionar".' />
+          <Step number={2} title='Defina o responsável e o prazo (Due Date)' desc='Ao criar o lembrete, selecione qual membro da equipe deve ser cobrado por ela e defina a data-limite.' />
+          <Step number={3} title='Painel Central de Tarefas' desc='Para ver TODAS as tarefas suas ou da sua equipe, vá até "Tasks" no menu superior. As tarefas em vermelho já estão atrasadas, as amarelas vencem hoje.' />
+          <Step number={4} title='Conclua a Tarefa' desc='Simplesmente clique na caixinha de verificação (checkbox) para marcar o lembrete como concluído!' />
+        </div>
+      </div>
+    ),
+  },
+
+  analytics: {
+    title: '📈 Tutorial: Relatórios (Analytics)',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Os relatórios gráficos mostram se sua operação está sendo rentável e o volume de conversão nos vários canais.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Acesse os Painéis' desc='No menu superior, acesse "Analytics" (para dados completos) ou o Dashboard na tela inicial (que provém um painel reduzido com cartões rápidos).' />
+          <Step number={2} title='Métricas do CRM (Pipeline)' desc='Você verá gráficos apontando os Negócios que foram "Ganhos" vs "Perdidos", comparativos de faturamento e visualização do tempo de fechamento.' />
+          <Step number={3} title='Métricas da Inbox (Atendimento)' desc='Nesta aba você conseguirá relatórios precisos do seu SLA (tempo médio de resposta), horários de pico e qual agente resolve mais chats.' />
+        </div>
+        <TipBox>
+          O sistema recalcula estatísticas periodicamente. Se você fechar um contrato de 10 mil no Pipeline, o valor subirá para os Gráficos do Dashboard de forma orgânica.
+        </TipBox>
+      </div>
+    ),
+  },
+
+  team: {
+    title: '🤝 Tutorial: Minha Equipe',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Traga os times de venda, inteligência e suporte para o Workspace onde todo o mapa de negócios acontece.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Vá em Configurações → Team' desc='No menu de Configurações, clique em "Team" (Minha Equipe).' />
+          <Step number={2} title='Clique em "+ Invite Member" (Convidar Membro)' desc='Você digitará o endereço de E-mail daquele funcionário.' />
+          <Step number={3} title='Defina as Permissões do cargo' desc='Selecione a Função: Owner (proprietário), Admin (administrador), ou Member (limitado). O perfil "Member" não pode ver ou alterar informações de faturamento.' />
+          <Step number={4} title='Acompanhe o Aceite' desc='Eles receberão um convite e também uma notificação. Se a conta ainda não for do sistema, eles precisarão criar uma senha.' />
+        </div>
+        <TipBox>
+          Evite dar cargos "Owner / Admin" para agentes temporários de atendimento. Utilize os papéis (Roles) com sabedoria!
+        </TipBox>
+      </div>
+    ),
+  },
+
+  billing: {
+    title: '💳 Tutorial: Assinaturas e Bilhetagem',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Centralize suas faturas, extratos e métodos de pagamento para expandir a força tecnológica com a IA do seu CRM.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Acesse o menu Billing' desc='Encontre a página "Billing" no menu lateral das Configurações.' />
+          <Step number={2} title='Consumo do Plano (AI e Mensagens)' desc='No painel esquerdo superior estará o Plano vigente e a barra de progresso mostrando quantos disparos de AI você ainda tem neste mês.' />
+          <Step number={3} title='Alterar plano assinado' desc='Clique no respectivo botão do cartão e então nossa janela interativa (Stripe) mostrará as opções atualizadas para upgrade/downgrade.' />
+          <Step number={4} title='Histórico de Faturas (Invoices)' desc='Na aba Payment de faturas haverá uma listagem onde os recibos gerados estão disponíveis em formato PDF.' />
+        </div>
+      </div>
+    ),
+  },
 };
 
 /* ─── All tutorial keys for sidebar nav ────────────────────────────── */
@@ -374,7 +506,7 @@ const HelpModal = ({ isOpen, toggle }) => {
   const [activeCategory, setActiveCategory] = useState('crm');
   const [searchQuery, setSearchQuery] = useState('');
   const [mode, setMode] = useState('help'); // 'help' | 'tutorials'
-  const [activeTutorial, setActiveTutorial] = useState('custom_fields');
+  const [activeTutorial, setActiveTutorial] = useState('crm');
 
   const filteredCategories = HELP_CATEGORIES.filter((cat) =>
     t(`help.category.${cat.key}.title`).toLowerCase().includes(searchQuery.toLowerCase())

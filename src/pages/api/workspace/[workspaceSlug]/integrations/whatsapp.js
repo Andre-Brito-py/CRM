@@ -92,7 +92,7 @@ export default async function handler(req, res) {
       // 2. Validate against Subscription Limit
       const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
       if (!isSuperAdmin) {
-        const canAdd = await canAddWhatsAppIntegration(workspace.creator.email, currentCount);
+        const canAdd = await canAddWhatsAppIntegration(workspace.id, currentCount);
         if (!canAdd) {
           return res.status(403).json({ error: { msg: 'LIMIT_REACHED', details: 'Please upgrade your plan to add more WhatsApp numbers.' } });
         }

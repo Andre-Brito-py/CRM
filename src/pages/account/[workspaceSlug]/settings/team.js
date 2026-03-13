@@ -22,6 +22,7 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const MEMBERS_TEMPLATE = { email: '', role: TeamRole.MEMBER };
 
@@ -30,6 +31,33 @@ const Team = ({ isTeamOwner, workspace }) => {
   const { data, isLoading } = useMembers(workspace.slug);
   const [isSubmitting, setSubmittingState] = useState(false);
   const [members, setMembers] = useState([{ ...MEMBERS_TEMPLATE }]);
+
+  const teamSteps = [
+    {
+      element: '#invite-link-card',
+      popover: {
+        title: t('onboarding.tour.team.step1.title'),
+        description: t('onboarding.tour.team.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#add-members-card',
+      popover: {
+        title: t('onboarding.tour.team.step2.title'),
+        description: t('onboarding.tour.team.step2.desc'),
+        position: 'top',
+      }
+    },
+    {
+      element: '#manage-members-card',
+      popover: {
+        title: t('onboarding.tour.team.step3.title'),
+        description: t('onboarding.tour.team.step3.desc'),
+        position: 'top',
+      }
+    }
+  ];
   const validateEmails =
     members.filter((member) => !isEmail(member.email)).length !== 0;
 
@@ -109,6 +137,7 @@ const Team = ({ isTeamOwner, workspace }) => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="team-management-tour" steps={teamSteps} />
       <Meta title={`Nextacular - ${workspace.name} | Team Management`} />
       <Content.Title
         title={t("settings.team.management")}
@@ -116,11 +145,12 @@ const Team = ({ isTeamOwner, workspace }) => {
       />
       <Content.Divider />
       <Content.Container>
-        <Card>
-          <Card.Body
-            title={t("settings.team.invite.link")}
-            subtitle={t("settings.team.invite.link.description")}
-          >
+        <div id="invite-link-card">
+          <Card>
+            <Card.Body
+              title={t("settings.team.invite.link")}
+              subtitle={t("settings.team.invite.link.description")}
+            >
             <div className="flex items-center justify-between px-3 py-2 space-x-5 font-mono text-sm border rounded">
               <span className="overflow-x-auto">{workspace.inviteLink}</span>
               <CopyToClipboard
@@ -132,12 +162,14 @@ const Team = ({ isTeamOwner, workspace }) => {
             </div>
           </Card.Body>
         </Card>
+        </div>
         {isTeamOwner && (
-          <Card>
-            <Card.Body
-              title="Add New Members"
-              subtitle="Invite Team members using email address"
-            >
+          <div id="add-members-card">
+            <Card>
+              <Card.Body
+                title="Add New Members"
+                subtitle="Invite Team members using email address"
+              >
               <div className="flex flex-col space-y-3">
                 <div className="flex flex-row space-x-5">
                   <div className="w-1/2">
@@ -210,8 +242,9 @@ const Team = ({ isTeamOwner, workspace }) => {
               >
                 {t("common.label.invite")}
               </Button>
-            </Card.Footer>
-          </Card>
+              </Card.Footer>
+            </Card>
+          </div>
         )}
       </Content.Container>
       <Content.Divider thick />
@@ -221,8 +254,9 @@ const Team = ({ isTeamOwner, workspace }) => {
       />
       <Content.Divider />
       <Content.Container>
-        <Card>
-          <Card.Body title="Manage Team Members">
+        <div id="manage-members-card">
+          <Card>
+            <Card.Body title="Manage Team Members">
             <table className="table-fixed">
               <thead className="text-gray-400 border-b">
                 <tr>
@@ -323,8 +357,9 @@ const Team = ({ isTeamOwner, workspace }) => {
                 )}
               </tbody>
             </table>
-          </Card.Body>
-        </Card>
+            </Card.Body>
+          </Card>
+        </div>
       </Content.Container>
     </AccountLayout>
   );

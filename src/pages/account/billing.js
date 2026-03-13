@@ -16,11 +16,41 @@ import { redirectToCheckout } from '@/lib/client/stripe';
 import { getInvoices } from '@/lib/server/stripe';
 import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const Billing = ({ invoices, products }) => {
+  const { t } = useTranslation();
   const { data: session } = useSession();
   const [isSubmitting, setSubmittingState] = useState(false);
   const [showModal, setModalVisibility] = useState(false);
+
+  const billingSteps = [
+    {
+      element: '#subscription-card',
+      popover: {
+        title: t('onboarding.tour.billing.step1.title'),
+        description: t('onboarding.tour.billing.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#manage-plan-btn',
+      popover: {
+        title: t('onboarding.tour.billing.step2.title'),
+        description: t('onboarding.tour.billing.step2.desc'),
+        position: 'left',
+      }
+    },
+    {
+      element: '#invoices-container',
+      popover: {
+        title: t('onboarding.tour.billing.step3.title'),
+        description: t('onboarding.tour.billing.step3.desc'),
+        position: 'top',
+      }
+    }
+  ];
 
   const openBillingPortal = async () => {
     setSubmittingState(true);
@@ -71,6 +101,7 @@ const Billing = ({ invoices, products }) => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="billing-tour" steps={billingSteps} />
       <Meta title="Nextacular - Billing" />
       <Content.Title
         title="Billing & Subscription"
@@ -79,11 +110,12 @@ const Billing = ({ invoices, products }) => {
       />
       <Content.Divider />
       <Content.Container>
-        <Card>
-          <Card.Body
-            title="Premium Subscription"
-            subtitle={`Current status: ${currentSubscription}`}
-          >
+        <div id="subscription-card">
+          <Card>
+            <Card.Body
+              title="Premium Subscription"
+              subtitle={`Current status: ${currentSubscription}`}
+            >
             <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
               <p className="text-sm">
                 Professional and Enterprise accounts unlock the full power of Nextacular.
@@ -95,6 +127,7 @@ const Billing = ({ invoices, products }) => {
           <Card.Footer>
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Secure Stripe Payment</span>
             <Button
+              id="manage-plan-btn"
               className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-8"
               disabled={isSubmitting}
               onClick={toggleModal}
@@ -103,6 +136,7 @@ const Billing = ({ invoices, products }) => {
             </Button>
           </Card.Footer>
         </Card>
+      </div>
         <Modal
           show={showModal}
           title="Upgrade Subscription"
@@ -161,64 +195,66 @@ const Billing = ({ invoices, products }) => {
         />
       </div>
       <Content.Divider />
-      {invoices.length > 0 ? (
-        <Content.Container>
-          <div className="premium-card overflow-hidden">
-            <table className="min-w-full divide-y divide-zinc-100">
-              <thead className="bg-zinc-50/50">
-                <tr className="text-left font-executive">
-                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Invoice Number</th>
-                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
-                  <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
-                  <th className="px-8 py-4 text-right" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
-                {invoices.map((invoice, index) => (
-                  <tr key={index} className="hover:bg-zinc-50/50 transition-colors group">
-                    <td className="px-8 py-5">
-                      <Link
-                        href={invoice.hosted_invoice_url}
-                        className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
-                        target="_blank"
-                      >
-                        {invoice.number}
-                      </Link>
-                    </td>
-                    <td className="px-8 py-5 text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                      {formatDistance(
-                        new Date(invoice.created * 1000),
-                        new Date(),
-                        { addSuffix: true }
-                      )}
-                    </td>
-                    <td className="px-8 py-5">
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-500'
-                        }`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 text-right">
-                      <Link
-                        href={invoice.hosted_invoice_url}
-                        className="text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
-                        target="_blank"
-                      >
-                        <ChevronRightIcon className="w-5 h-5 inline-block group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </td>
+      <div id="invoices-container">
+        {invoices.length > 0 ? (
+          <Content.Container>
+            <div className="premium-card overflow-hidden">
+              <table className="min-w-full divide-y divide-zinc-100">
+                <thead className="bg-zinc-50/50">
+                  <tr className="text-left font-executive">
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Invoice Number</th>
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
+                    <th className="px-8 py-4 text-right" />
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Content.Container>
-      ) : (
-        <Content.Empty>
-          Once you&apos;ve paid for something on Nextacular, invoices will show
-          up here
-        </Content.Empty>
-      )}
+                </thead>
+                <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800">
+                  {invoices.map((invoice, index) => (
+                    <tr key={index} className="hover:bg-zinc-50/50 transition-colors group">
+                      <td className="px-8 py-5">
+                        <Link
+                          href={invoice.hosted_invoice_url}
+                          className="text-sm font-bold text-indigo-600 hover:text-indigo-800 transition-colors"
+                          target="_blank"
+                        >
+                          {invoice.number}
+                        </Link>
+                      </td>
+                      <td className="px-8 py-5 text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                        {formatDistance(
+                          new Date(invoice.created * 1000),
+                          new Date(),
+                          { addSuffix: true }
+                        )}
+                      </td>
+                      <td className="px-8 py-5">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase tracking-wider ${invoice.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-zinc-100 text-zinc-500'
+                          }`}>
+                          {invoice.status}
+                        </span>
+                      </td>
+                      <td className="px-8 py-5 text-right">
+                        <Link
+                          href={invoice.hosted_invoice_url}
+                          className="text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
+                          target="_blank"
+                        >
+                          <ChevronRightIcon className="w-5 h-5 inline-block group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Content.Container>
+        ) : (
+          <Content.Empty>
+            Once you&apos;ve paid for something on Nextacular, invoices will show
+            up here
+          </Content.Empty>
+        )}
+      </div>
     </AccountLayout>
   );
 };

@@ -15,8 +15,11 @@ import { useWorkspace } from '@/providers/workspace';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
 import fetcher from '@/lib/client/fetcher';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const DealDetails = ({ workspace }) => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { workspaceSlug, dealId } = router.query;
   const { setWorkspace } = useWorkspace();
@@ -47,6 +50,33 @@ const DealDetails = ({ workspace }) => {
     sendWhatsApp: true,
     whatsAppMessage: '',
   });
+
+  const dealSteps = [
+    {
+      element: '#ai-assistant-card',
+      popover: {
+        title: t('onboarding.tour.deals.step1.title'),
+        description: t('onboarding.tour.deals.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#deal-info-card',
+      popover: {
+        title: t('onboarding.tour.deals.step2.title'),
+        description: t('onboarding.tour.deals.step2.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#payments-section-card',
+      popover: {
+        title: t('onboarding.tour.deals.step3.title'),
+        description: t('onboarding.tour.deals.step3.desc'),
+        position: 'top',
+      }
+    }
+  ];
 
   // AI Features
   const [aiNextStep, setAiNextStep] = useState(null);
@@ -203,6 +233,7 @@ const DealDetails = ({ workspace }) => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="deal-details-tour" steps={dealSteps} />
       <Meta title={`${deal.name} | Nextacular`} />
       <Content>
         <Content.Title
@@ -215,7 +246,7 @@ const DealDetails = ({ workspace }) => {
           <div className="col-span-12 md:col-span-8 space-y-6">
 
             {/* AI Smart Assistant */}
-            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg shadow border border-purple-100">
+            <div id="ai-assistant-card" className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg shadow border border-purple-100">
               <div className="flex items-center mb-4">
                 <SparklesIcon className="h-5 w-5 text-purple-600 mr-2" />
                 <h3 className="text-lg font-medium text-gray-900">Smart Sales Assistant</h3>
@@ -294,7 +325,7 @@ const DealDetails = ({ workspace }) => {
             </div>
 
             {/* Deal Info */}
-            <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+            <div id="deal-info-card" className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-medium text-gray-900">Details</h3>
                 <button
@@ -415,7 +446,7 @@ const DealDetails = ({ workspace }) => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
+            <div id="payments-section-card" className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-900">Payments</h3>
                 <button

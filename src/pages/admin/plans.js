@@ -20,17 +20,37 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     currency: plan?.currency || 'USD',
     interval: plan?.interval || 'month',
     stripePriceId: plan?.stripePriceId || '',
-    features: plan?.features ? JSON.stringify(plan.features, null, 2) : '{\n  "maxUsers": 5,\n  "maxContacts": 1000\n}',
+    features: plan?.features ? JSON.stringify(plan.features, null, 2) : '{\n  "maxUsers": 5,\n  "maxContacts": 1000,\n  "maxAutomations": 10,\n  "maxAiRequests24h": 50,\n  "maxUploads24h": 30\n}',
+    maxUsers: plan?.features?.maxUsers || 5,
+    maxContacts: plan?.features?.maxContacts || 1000,
+    maxAutomations: plan?.features?.maxAutomations || 10,
+    maxAiRequests24h: plan?.features?.maxAiRequests24h || 50,
+    maxUploads24h: plan?.features?.maxUploads24h || 30,
     isActive: plan ? plan.isActive : true,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+
+      // Se mudar um campo individual, sincroniza o JSON de features (opcional mas bom para manter compatibilidade)
+      if (['maxUsers', 'maxContacts', 'maxAutomations', 'maxAiRequests24h', 'maxUploads24h'].includes(name)) {
+        try {
+          const features = JSON.parse(prev.features || '{}');
+          features[name] = type === 'number' ? Number(value) : value;
+          newData.features = JSON.stringify(features, null, 2);
+        } catch (e) {
+          // ignore silent
+        }
+      }
+
+      return newData;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -144,8 +164,58 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
           />
         </div>
+        <div className="grid grid-cols-2 gap-4 border-t pt-4 border-gray-100">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">Max Users</label>
+            <input
+              type="number"
+              name="maxUsers"
+              required
+              min="1"
+              value={formData.maxUsers}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">Max Contacts</label>
+            <input
+              type="number"
+              name="maxContacts"
+              required
+              min="1"
+              value={formData.maxContacts}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">Max Automations</label>
+            <input
+              type="number"
+              name="maxAutomations"
+              required
+              min="0"
+              value={formData.maxAutomations}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700">Max IA Requests (24h)</label>
+            <input
+              type="number"
+              name="maxAiRequests24h"
+              required
+              min="0"
+              value={formData.maxAiRequests24h}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 text-blue-600 font-bold"
+            />
+          </div>
+        </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Features (JSON)</label>
+          <label className="block text-sm font-medium text-gray-700">Features (JSON - Advanced)</label>
           <textarea
             name="features"
             rows={5}

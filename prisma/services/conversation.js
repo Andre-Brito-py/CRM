@@ -1,4 +1,5 @@
 import prisma from '@/prisma/index';
+import { createNotification } from '@/prisma/services/notification';
 
 export const getConversations = async (workspaceId, filters = {}, options = {}) => {
   const where = { workspaceId };
@@ -154,6 +155,23 @@ export const createMessage = async (conversationId, { direction, type, content, 
     where: { id: conversationId },
     data: { updatedAt: new Date() },
   });
+
+  // Notify assignee if message is INCOMING
+  if (direction === 'INCOMING') {
+    const conversation = await prisma.conversation.findUnique({
+      where: { id: conversationId },
+      select: { workspaceId: true, assigneeId: true, workspace: { select: { slug: true } } }
+    });
+
+    if (conversation?.assigneeId) {
+      createNotification(conversation.workspaceId, {
+        userId: conversation.assigneeId,
+        title: 'Nova Mensagem Recebida',
+        content: content || 'Você recebeu uma nova mensagem.',
+        link: `/account/${conversation.workspace.slug}/inbox?id=${conversationId}`,
+      }).catch(err => console.error('Notification error:', err));
+    }
+  }
 
   return message;
 };

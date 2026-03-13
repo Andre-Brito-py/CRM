@@ -89,5 +89,34 @@ export const INDUSTRY_PRESETS = [
       { name: 'Indicação' },
       { name: 'Enterprise' }
     ]
+  },
+  {
+    id: 'restaurant',
+    name: 'Restaurante / Eventos',
+    description: 'Ideal para restaurantes gerenciarem reservas, orçamentos para eventos e feedback de clientes.',
+    icon: 'StarIcon',
+    pipelines: [
+      {
+        name: 'Reservas e Eventos',
+        stages: [
+          { name: 'Nova Solicitação', color: '#3b82f6' },
+          { name: 'Negociando / Orçamento', color: '#f59e0b' },
+          { name: 'Reserva Confirmada', color: '#10b981' },
+          { name: 'Evento Realizado', color: '#8b5cf6' },
+          { name: 'Cancelado', color: '#ef4444' }
+        ]
+      }
+    ],
+    customFields: [
+      { key: 'party_size', label: 'Número de Pessoas', type: 'number', area: 'both' },
+      { key: 'event_date', label: 'Data do Evento', type: 'date', area: 'both' },
+      { key: 'dietary_restrictions', label: 'Restrições Alimentares', type: 'text', area: 'support' }
+    ],
+    tags: [
+      { name: 'Aniversário' },
+      { name: 'Corporativo' },
+      { name: 'VIP' },
+      { name: 'Casamento' }
+    ]
   }
 ];

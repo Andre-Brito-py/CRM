@@ -1,7 +1,8 @@
 import prisma from '@/prisma/index';
+import { createNotification } from '@/prisma/services/notification';
 
 export const createTask = async (workspaceId, { title, content, dueDate, priority, assigneeId, contactId, dealId }) => {
-  return await prisma.task.create({
+  const task = await prisma.task.create({
     data: {
       workspaceId,
       title,
@@ -13,6 +14,17 @@ export const createTask = async (workspaceId, { title, content, dueDate, priorit
       dealId,
     },
   });
+
+  if (assigneeId) {
+    createNotification(workspaceId, {
+      userId: assigneeId,
+      title: 'Nova Tarefa Atribuída',
+      content: `Você recebeu uma nova tarefa: ${title}`,
+      link: `/account/${workspaceId}/tasks`,
+    }).catch(err => console.error('Notification error:', err));
+  }
+
+  return task;
 };
 
 export const getTasks = async (workspaceId, filters = {}) => {

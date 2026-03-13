@@ -289,39 +289,46 @@ const Inbox = () => {
               ) : null}
             </div>
           </Card>
-
-          <div className="flex flex-1 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200">
-            <div id="conversation-list" className={`${selectedId ? 'hidden md:block h-full md:flex-shrink-0' : 'block w-full h-full'}`}>
-              <ConversationList
-                conversations={conversations}
-                selectedId={selectedId}
-                onSelect={(conv) => setSelectedId(conv.id)}
-                filterAssignee={filterAssignee}
-                setFilterAssignee={setFilterAssignee}
-                filterStatus={filterStatus}
-                setFilterStatus={setFilterStatus}
-                searchText={searchText}
-                setSearchText={setSearchText}
-                members={members}
-                user={session?.user}
-              />
+          
+          {(conversationsData === undefined && !!workspaceSlug) ? (
+            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg border border-gray-200">
+               <div className="w-12 h-12 border-4 border-zinc-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+               <p className="text-zinc-500 font-medium tracking-wide italic">Synchronizing communications...</p>
             </div>
-            <div id="chat-window" className={`${selectedId ? 'block w-full md:w-auto' : 'hidden md:block'} flex-1 h-full`}>
-              <ChatWindow
-                conversation={selectedConversation}
-                messages={selectedConversation?.messages || []}
-                onSendMessage={handleSendMessage}
-                members={members}
-                onAssign={handleAssign}
-                templates={templates}
-                messageText={messageText}
-                onMessageChange={setMessageText}
-                onGenerateResponse={handleGenerateResponse}
-                isGeneratingAI={isGeneratingAI}
-                onBack={() => setSelectedId(null)}
-              />
+          ) : (
+            <div className="flex flex-1 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200">
+              <div id="conversation-list" className={`${selectedId ? 'hidden md:block h-full md:flex-shrink-0' : 'block w-full h-full'}`}>
+                <ConversationList
+                  conversations={conversations}
+                  selectedId={selectedId}
+                  onSelect={(conv) => setSelectedId(conv.id)}
+                  filterAssignee={filterAssignee}
+                  setFilterAssignee={setFilterAssignee}
+                  filterStatus={filterStatus}
+                  setFilterStatus={setFilterStatus}
+                  searchText={searchText}
+                  setSearchText={setSearchText}
+                  members={members}
+                  user={session?.user}
+                />
+              </div>
+              <div id="chat-window" className={`${selectedId ? 'block w-full md:w-auto' : 'hidden md:block'} flex-1 h-full`}>
+                <ChatWindow
+                  conversation={selectedConversation}
+                  messages={selectedConversation?.messages || []}
+                  onSendMessage={handleSendMessage}
+                  members={members}
+                  onAssign={handleAssign}
+                  templates={templates}
+                  messageText={messageText}
+                  onMessageChange={setMessageText}
+                  onGenerateResponse={handleGenerateResponse}
+                  isGeneratingAI={isGeneratingAI}
+                  onBack={() => setSelectedId(null)}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Content>
     </AccountLayout>

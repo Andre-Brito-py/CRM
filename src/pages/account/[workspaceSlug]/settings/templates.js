@@ -8,6 +8,8 @@ import Meta from '@/components/Meta/index';
 import AccountLayout from '@/layouts/AccountLayout';
 import Modal from '@/components/Modal';
 import api from '@/lib/common/api';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const SUPPORTED_LANGUAGES = ['und', 'pt', 'en', 'es', 'fr', 'de', 'it'];
 
@@ -70,6 +72,34 @@ const Templates = () => {
   const [activeFolder, setActiveFolder] = useState('all');
   const [activeLanguage, setActiveLanguage] = useState('all');
   const [formValues, setFormValues] = useState({ name: '', folder: '', language: 'und', content: '' });
+  const { t } = useTranslation();
+
+  const templateSteps = [
+    {
+      element: '#search-filters-bar',
+      popover: {
+        title: t('onboarding.tour.templates.step1.title'),
+        description: t('onboarding.tour.templates.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#add-template-btn',
+      popover: {
+        title: t('onboarding.tour.templates.step2.title'),
+        description: t('onboarding.tour.templates.step2.desc'),
+        position: 'left',
+      }
+    },
+    {
+      element: '#templates-list-container',
+      popover: {
+        title: t('onboarding.tour.templates.step3.title'),
+        description: t('onboarding.tour.templates.step3.desc'),
+        position: 'top',
+      }
+    }
+  ];
 
   const { data, mutate } = useSWR(workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox/templates` : null, api);
   const templates = data?.data?.templates || [];
@@ -223,6 +253,7 @@ const Templates = () => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="message-templates-tour" steps={templateSteps} />
       <Meta title="Nextacular - Templates" />
       <Content.Title
         title="Message Templates"
@@ -230,7 +261,7 @@ const Templates = () => {
       />
       <Content.Divider />
       <Content.Container>
-        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div id="search-filters-bar" className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col gap-3 md:flex-row md:items-center">
             <input
               value={searchQuery}
@@ -260,6 +291,7 @@ const Templates = () => {
             </select>
           </div>
           <button
+            id="add-template-btn"
             onClick={() => openModal()}
             className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
           >
@@ -268,8 +300,9 @@ const Templates = () => {
           </button>
         </div>
 
-        <div className="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul className="divide-y divide-gray-200">
+        <div id="templates-list-container">
+          <div className="bg-white shadow overflow-hidden sm:rounded-md">
+            <ul className="divide-y divide-gray-200">
             {filteredTemplates.length === 0 && (
               <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
                 No templates found. Create one to get started.
@@ -328,6 +361,7 @@ const Templates = () => {
             ))}
           </ul>
         </div>
+      </div>
 
         <Modal show={isModalOpen} toggle={closeModal} title={currentTemplate ? 'Edit Template' : 'New Template'}>
           <form onSubmit={handleSave} className="space-y-4 w-full" key={currentTemplate?.id || 'new'}>

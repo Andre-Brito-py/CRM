@@ -8,18 +8,18 @@ import { useTranslation } from "react-i18next";
 
 const getFeatures = (t) => [
   {
-    name: t("landing.features.item1.title", 'Omnichannel Inbox'),
-    description: t("landing.features.item1.desc", 'Centralize all your WhatsApp, Instagram, and Email conversations in one lightning-fast interface.'),
+    name: t("landing.features.item1.title", 'Integração WhatsApp Nativa'),
+    description: t("landing.features.item1.desc", 'Conecte seu WhatsApp Business ou Pessoal sem gambiarras. Receba, responda e faça gestão de fluxo de conversas omnichannel (Instagram, Email, WhatsApp) na mesma tela.'),
     icon: ChatBubbleBottomCenterTextIcon,
   },
   {
-    name: t("landing.features.item2.title", 'AI-Powered Responses'),
-    description: t("landing.features.item2.desc", 'Let ChatGPT draft perfect responses based on your company context, saving your team hundreds of hours.'),
+    name: t("landing.features.item2.title", 'Piloto Automático com Inteligência Artificial'),
+    description: t("landing.features.item2.desc", 'Aumente o tempo útil do seu time. Resumos de conversas, sugestões de respostas por ChatGPT treinadas com seus dados e alertas de leads esfriando no funil.'),
     icon: BoltIcon,
   },
   {
-    name: t("landing.features.item3.title", 'Executive Analytics'),
-    description: t("landing.features.item3.desc", 'Track team performance, response times, and revenue attribution with military-grade precision.'),
+    name: t("landing.features.item3.title", 'Poder de No-code & Workflow Engine'),
+    description: t("landing.features.item3.desc", 'Crie regras, fluxos, gatilhos de e-mail e campos personalizados para o seu nicho sem escrever nenhuma linha de código. Nextacular se molda 100% à sua operação.'),
     icon: ChartBarSquareIcon,
   },
 ];
@@ -93,6 +93,40 @@ const Features = () => {
               </div>
             </motion.div>
           ))}
+        </motion.div>
+
+        {/* Feature Inbox Screenshot */}
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.8 }}
+          className="w-full mt-24 relative group"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-3xl blur-2xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+          
+          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0a0a0b] p-2 sm:p-4">
+             <div className="rounded-2xl flex flex-col overflow-hidden relative border border-white/5 bg-[#0a0a0b]">
+               <div className="flex items-center justify-between p-4 bg-[#111113] border-b border-white/5">
+                 <div className="flex gap-2">
+                   <div className="w-3 h-3 rounded-full bg-zinc-700"></div>
+                   <div className="w-3 h-3 rounded-full bg-zinc-700"></div>
+                   <div className="w-3 h-3 rounded-full bg-zinc-700"></div>
+                 </div>
+                 <div className="text-xs text-zinc-500 font-medium tracking-wide uppercase">Nextacular Omnichannel Inbox</div>
+                 <div className="w-12"></div>
+               </div>
+               
+               <div className="relative aspect-[21/9] w-full bg-zinc-900 overflow-hidden">
+                 <img
+                    src="/images/mockups/inbox.png"
+                    alt="Omnichannel Inbox View"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.02]"
+                 />
+                 <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-2xl"></div>
+               </div>
+             </div>
+          </div>
         </motion.div>
       </div>
     </div>

@@ -13,7 +13,7 @@ const useContacts = (slug, options) => {
   const { data, error, mutate } = useSWR(slug ? apiRoute : null);
   return {
     data: data?.data,
-    isLoading: !error && !data,
+    isLoading: !!slug && !error && !data,
     isError: error,
     mutate,
   };

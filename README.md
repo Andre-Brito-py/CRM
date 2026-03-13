@@ -96,6 +96,10 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Customer Satisfaction (NPS): páginas + gráficos com animação
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
 - Monetização por taxa da plataforma (split/fee quando disponível)
+- Notificações in-app (web push + bell icon) com opção no-code de envio via automações
+- Cupons e promoções (Stripe) gerenciados pelo Super Admin
+- Limites dinâmicos por plano (IA, automações, membros) com enforcement real
+- Tours de onboarding interativos por tela (com persistência "apenas uma vez")
 
 ## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
 - **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.
@@ -132,8 +136,9 @@ O que já existe hoje:
 - **Campos personalizados v2 (schema flexível):** tipos avançados (checkbox, multi-select, moeda, URL, telefone), validação e obrigatoriedade.
 - **Webhooks v2 (integrações):** assinatura HMAC com rotação de segredo, filtros por evento (inclusive “enviar todos”), painel de entregas com histórico e retentativas.
 - **API Keys por workspace:** gera chaves para integrações externas consumirem dados do workspace com controle de acesso.
-- **Presets por nicho (1-click setup):** cria pipeline + campos + templates + automações prontos para segmentos (imobiliária, clínica, agência, assistência técnica).
+- **Presets por nicho (1-click setup):** cria pipeline + campos + templates + automações prontos para segmentos (imobiliária, clínica, agência, assistência técnica, restaurante).
 - **Roteamento e SLA no Inbox:** regras de atribuição (origem/palavra-chave/região/horário/carga), escalonamento automático e alertas.
+- **Notificações por automação:** ação "Enviar notificação" disponível no builder de automações — o usuário pode escolher se sua app envia push ou não, sem código.
 
 Exemplos práticos (sem código):
 - Quando um lead chega via WhatsApp e contém “orçamento” → criar negócio no pipeline X e atribuir para o vendedor A.
@@ -177,6 +182,13 @@ Como isso funciona internamente (resumo):
 - Ajustes de isolamento: reforço de `workspaceId` em rotas críticas e endpoints de IA.
 - Fase 8 concluída: ferramentas operacionais (masquerade, reprocessos), incidentes/SLA e onboarding.
 - Fase 9 concluída: limites por plano, SLO/alertas, FinOps por workspace e suporte a pooler Postgres.
+- Sistema de notificações in-app implementado (modelo Prisma, API, web push, bell icon na topbar).
+- Ação no-code "Enviar Notificação" adicionada ao builder de automações.
+- Cupons e promoções (Stripe): criação de cupom + código promocional via Super Admin, integrado ao checkout.
+- Limites dinâmicos de IA/automação por plano: campos no editor de planos, enforcement nos endpoints, dashboard refletindo uso real.
+- Tours de onboarding expandidos para todas as telas principais (contatos, empresas, pipeline, inbox, tarefas, automações, analytics, settings, campos personalizados, equipe, templates, billing, NPS, detalhes do negócio).
+- Corrigido bug onde tours repetiam ou exibiam mensagens vazias (persistência + traduções PT/EN corrigidas).
+- Preset "Restaurante" adicionado ao setup em 1 clique.
 
 ---
 

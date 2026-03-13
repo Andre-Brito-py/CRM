@@ -41,6 +41,7 @@ const handler = async (req, res) => {
         line_items: [{ price: price.id, quantity: 1 }],
         success_url: `${appUrl}/account/payment?status=success`,
         cancel_url: `${appUrl}/account/payment?status=cancelled`,
+        allow_promotion_codes: true,
         metadata: {
           customerId: customerPayment.customerId,
           type: product.metadata.type,

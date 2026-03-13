@@ -206,12 +206,12 @@ const Hero = () => {
           </motion.div>
         </motion.div>
 
-        {/* Floating Abstract Dashboard Mockup */}
+        {/* Dashboard Mockup (Screenshot gerado) */}
         <motion.div 
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.6, type: "spring" }}
-          className="relative mt-20 mb-32 w-full max-w-5xl"
+          className="relative mt-20 mb-32 w-full max-w-6xl"
         >
           {/* Glow effect behind mockup */}
           <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-3xl blur-2xl opacity-20"></div>
@@ -219,23 +219,33 @@ const Hero = () => {
           <motion.div 
             animate={{ y: [-10, 10, -10] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-[#111113]/80 backdrop-blur-xl p-2 sm:p-4"
+            className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl bg-[#0a0a0b] p-2 sm:p-4 group"
           >
-            <div className="bg-[#0a0a0b] border border-white/5 rounded-2xl aspect-[16/9] flex flex-col pt-4 px-4 overflow-hidden relative">
-               {/* Mockup UI Elements */}
-               <div className="flex gap-2 mb-6">
+            <div className="rounded-2xl flex flex-col overflow-hidden relative border border-white/5 bg-[#0a0a0b]">
+               {/* Traffic Lights / Browser Bar */}
+               <div className="flex gap-2 p-4 bg-[#111113] border-b border-white/5">
                  <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
                  <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
                  <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                 <div className="ml-4 flex-1 flex">
+                   <div className="mx-auto bg-[#0a0a0b] rounded-md px-4 py-1 text-xs text-zinc-500 tracking-wider">
+                     acme-corp.nextacular.com
+                   </div>
+                 </div>
                </div>
-               <div className="flex-1 flex flex-col items-center justify-center text-zinc-500 font-executive">
-                  <svg className="w-16 h-16 mb-4 text-indigo-500/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  {t("landing.hero.mockup")}
+               
+               {/* Real Screenshot Output */}
+               <div className="relative aspect-[16/9] w-full bg-zinc-900 overflow-hidden">
+                 {/* This img accesses our puppeteer-generated image */}
+                 <img
+                    src="/images/mockups/dashboard.png"
+                    alt="Nextacular Dashboard View"
+                    className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.02]"
+                 />
+                 
+                 {/* Gradient Fade out at bottom for style */}
+                 <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-[#0a0a0b] via-[#0a0a0b]/50 to-transparent"></div>
                </div>
-               {/* Decorative chart lines */}
-               <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-indigo-500/10 to-transparent"></div>
             </div>
           </motion.div>
         </motion.div>

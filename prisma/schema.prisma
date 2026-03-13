@@ -202,6 +202,7 @@ model User {
   assignedConversations Conversation[] @relation("conversationAssignee")
   assignedDeals   Deal[]         @relation("dealAssignee")
   assignedTasks    Task[]
+  notifications    Notification[]
   createdWorkspace Workspace[]
 
   @@unique([userCode, email])
@@ -248,6 +249,7 @@ model Workspace {
   platformSubscription   PlatformSubscription?
   tags                   Tag[]
   tasks                  Task[]
+  notifications          Notification[]
   webhooks               Webhook[]
   creator                User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
@@ -718,6 +720,44 @@ model RateLimitCounter {
   @@map("rate_limit_counters")
 }
 
+model Coupon {
+  id               String   @id @default(cuid())
+  name             String
+  stripeCouponId   String?  @unique
+  amountOff        Float?   // Fixed amount discount
+  percentOff       Float?   // Percentage discount
+  currency         String   @default("USD")
+  duration         String   @default("once") // once, forever, repeating
+  durationInMonths Int?
+  maxRedemptions   Int?
+  timesRedeemed    Int      @default(0)
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  promotionCodes   PromotionCode[]
+
+  @@map("coupons")
+}
+
+model PromotionCode {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  couponId        String
+  stripePromoId   String?  @unique
+  maxRedemptions  Int?
+  timesRedeemed   Int      @default(0)
+  expiresAt       DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  coupon          Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@map("promotion_codes")
+}
+
 enum UserRole {
   USER
   SUPERADMIN
@@ -744,4 +784,23 @@ enum ConversationStatus {
   OPEN
   RESOLVED
   PENDING
+}
+
+model Notification {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String    // The recipient of the notification
+  title       String
+  content     String?
+  link        String?   // Optional URL to redirect when clicked
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, userId])
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
 }

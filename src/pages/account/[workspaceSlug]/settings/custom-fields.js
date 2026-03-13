@@ -8,11 +8,33 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const CustomFields = ({ workspace }) => {
+  const { t } = useTranslation();
   const { setWorkspace } = useWorkspace();
   const [fields, setFields] = useState(workspace.customFieldDefinitions || []);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const customFieldsSteps = [
+    {
+      element: '#add-field-btn',
+      popover: {
+        title: t('onboarding.tour.custom_fields.step1.title'),
+        description: t('onboarding.tour.custom_fields.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#fields-container',
+      popover: {
+        title: t('onboarding.tour.custom_fields.step2.title'),
+        description: t('onboarding.tour.custom_fields.step2.desc'),
+        position: 'top',
+      }
+    }
+  ];
 
   useEffect(() => {
     setWorkspace(workspace);
@@ -58,6 +80,7 @@ const CustomFields = ({ workspace }) => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="custom-fields-tour" steps={customFieldsSteps} />
       <Meta title={`Nextacular - ${workspace.name} | Custom Fields`} />
       <Content.Title
         title="Custom Fields"
@@ -65,7 +88,7 @@ const CustomFields = ({ workspace }) => {
       />
       <Content.Divider />
       <Content.Container>
-        <div className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg border border-zinc-200 dark:border-zinc-800">
+        <div id="fields-container" className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg border border-zinc-200 dark:border-zinc-800">
           <div className="px-4 py-5 sm:p-6">
             <div className="space-y-4">
               {fields.map((field, index) => (
@@ -164,6 +187,7 @@ const CustomFields = ({ workspace }) => {
             
             <div className="mt-4 flex justify-between">
               <button
+                id="add-field-btn"
                 onClick={addField}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >

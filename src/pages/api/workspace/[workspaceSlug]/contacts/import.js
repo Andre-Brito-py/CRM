@@ -59,7 +59,7 @@ export default async function handler(req, res) {
 
       const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
       if (!isSuperAdmin) {
-        const isAllowed = await canAddContact(workspace.creator.email, currentContactCount + validContacts.length - 1);
+        const isAllowed = await canAddContact(workspace.id, currentContactCount + validContacts.length - 1);
         if (!isAllowed) {
           return res.status(403).json({ error: { msg: 'LIMIT_REACHED', details: 'A importação excede o limite de contatos do seu plano. Faça um upgrade para adicionar mais contatos.' } });
         }

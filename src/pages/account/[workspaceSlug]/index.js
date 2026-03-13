@@ -22,6 +22,7 @@ import {
   LineChart,
   Line,
 } from 'recharts';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
@@ -166,6 +167,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 const Workspace = () => {
+  const { t } = useTranslation();
   const { workspace } = useWorkspace();
   const { data: dashboardData, error } = useSWR(
     workspace ? `/api/workspace/${workspace.slug}/dashboard` : null,
@@ -244,15 +246,21 @@ const Workspace = () => {
     },
   ], [dashboardData]);
 
-  const motionIn = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
-  };
+  const dashboardSteps = [
+    {
+      element: '#dashboard-stats',
+      popover: {
+        title: t('onboarding.tour.dashboard.step1.title'),
+        description: t('onboarding.tour.dashboard.step1.desc'),
+        position: 'bottom',
+      }
+    }
+  ];
 
   return (
     workspace && (
       <AccountLayout>
+        <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} />
         <Meta title={`Nextacular - ${workspace.name} | Dashboard`} />
         <Content.Title
           title={workspace.name}
@@ -261,7 +269,7 @@ const Workspace = () => {
         />
         <Content.Divider />
         <Content.Container>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+          <div id="dashboard-stats" className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
             {stats.map((item) => (
               <StatCard key={item.title} {...item} />
             ))}

@@ -2,7 +2,7 @@ import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
 import { getNpsAnalytics } from '@/prisma/services/nps';
 import { getWorkspace } from '@/prisma/services/workspace';
-import { getSubscriptionStatus } from '@/lib/server/subscription';
+import { getSubscriptionStatus, getWorkspaceLimits } from '@/lib/server/subscription';
 import { getSystemConfig } from '@/lib/server/config';
 
 const parseUnitCost = (raw) => {
@@ -10,21 +10,6 @@ const parseUnitCost = (raw) => {
   if (!Number.isFinite(value) || value < 0) return 0;
   return value;
 };
-
-const getPlanLimits = (plan) => ({
-  members: plan === 'FREE' ? 3 : plan === 'STANDARD' ? 10 : null,
-  webhooks: plan === 'FREE' ? 1 : plan === 'STANDARD' ? 10 : null,
-  automations: plan === 'FREE' ? 3 : plan === 'STANDARD' ? 20 : null,
-  whatsappIntegrations: plan === 'FREE' ? 1 : plan === 'STANDARD' ? 5 : null,
-  contacts: plan === 'FREE' ? 100 : null,
-  aiRequests24h:
-    plan === 'FREE'
-      ? 30 + 15 + 25 + 25 + 6
-      : plan === 'STANDARD'
-        ? 250 + 120 + 200 + 200 + 60
-        : 2500 + 1200 + 2000 + 2000 + 600,
-  uploads24h: plan === 'FREE' ? 30 : plan === 'STANDARD' ? 500 : 5000,
-});
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
@@ -50,8 +35,8 @@ const handler = async (req, res) => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const plan = await getSubscriptionStatus(workspace?.creator?.email || session.user.email);
-    const limits = getPlanLimits(plan);
+    const limits = await getWorkspaceLimits(workspaceId);
+    const plan = limits.plan;
 
     // ── 2. Run ALL queries in parallel with Promise.all ────────────────
     const [

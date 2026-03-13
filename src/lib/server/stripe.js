@@ -50,4 +50,42 @@ export const getProducts = async () => {
   return products?.data.reverse();
 };
 
+export const createCoupon = async ({ name, amountOff, percentOff, currency, duration, durationInMonths }) => {
+  const stripe = await getStripe();
+  const params = {
+    name,
+    duration,
+    duration_in_months: duration === 'repeating' ? durationInMonths : undefined,
+  };
+
+  if (amountOff) {
+    params.amount_off = Math.round(amountOff * 100);
+    params.currency = currency || 'usd';
+  } else if (percentOff) {
+    params.percent_off = percentOff;
+  }
+
+  return await stripe.coupons.create(params);
+};
+
+export const deleteCoupon = async (couponId) => {
+  const stripe = await getStripe();
+  return await stripe.coupons.del(couponId);
+};
+
+export const createPromotionCode = async ({ couponId, code, maxRedemptions, expiresAt }) => {
+  const stripe = await getStripe();
+  return await stripe.promotionCodes.create({
+    coupon: couponId,
+    code,
+    max_redemptions: maxRedemptions || undefined,
+    expires_at: expiresAt ? Math.floor(new Date(expiresAt).getTime() / 1000) : undefined,
+  });
+};
+
+export const updatePromotionCode = async (promoId, { active }) => {
+  const stripe = await getStripe();
+  return await stripe.promotionCodes.update(promoId, { active });
+};
+
 export default getStripe;

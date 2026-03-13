@@ -49,7 +49,7 @@ const handler = async (req, res) => {
           const currentAutomationRuleCount = await prisma.automationRule.count({
             where: { workspaceId: workspace.id, deletedAt: null },
           });
-          const isAllowed = await canAddAutomationRule(workspace.creator?.email, currentAutomationRuleCount);
+          const isAllowed = await canAddAutomationRule(workspace.id, currentAutomationRuleCount);
           if (!isAllowed) {
             return res.status(403).json({
               error: {

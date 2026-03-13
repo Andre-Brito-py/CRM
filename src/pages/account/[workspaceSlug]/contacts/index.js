@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
@@ -24,12 +25,32 @@ const Contacts = () => {
 
   const contacts = useMemo(() => data?.contacts || [], [data?.contacts]);
 
+  const contactSteps = [
+    {
+      element: '#contacts-table',
+      popover: {
+        title: t('onboarding.tour.contacts.step1.title'),
+        description: t('onboarding.tour.contacts.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#add-contact-btn',
+      popover: {
+        title: t('onboarding.tour.contacts.step2.title'),
+        description: t('onboarding.tour.contacts.step2.desc'),
+        position: 'left',
+      }
+    }
+  ];
+
   return (
     <AccountLayout>
+      <OnboardingTour tourId="contacts-tour" steps={contactSteps} />
       <Meta title={`Nextacular - ${workspace?.name} | Contacts`} />
       <Content.Title
-        title="Contacts"
-        subtitle="Manage your customers and leads with precision"
+        title={t('Contacts')}
+        subtitle="Manage your leads and customers"
         className="font-executive"
       />
       <Content.Divider />
@@ -51,9 +72,12 @@ const Contacts = () => {
           </button>
         </div>
         {isLoading ? (
-          <p>Loading contacts...</p>
+          <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+            <div className="w-12 h-12 border-4 border-zinc-200 border-t-zinc-900 rounded-full animate-spin mb-4"></div>
+            <p className="text-zinc-500 font-medium tracking-wide italic">Loading your executive connections...</p>
+          </div>
         ) : contacts.length > 0 ? (
-          <div className="premium-card overflow-hidden">
+          <div id="contacts-table" className="premium-card overflow-hidden">
             <table className="min-w-full divide-y divide-zinc-100">
               <thead className="bg-zinc-50/50">
                 <tr>

@@ -10,8 +10,11 @@ import Card from '@/components/Card/index';
 import Modal from '@/components/Modal/index';
 import api from '@/lib/common/api';
 import fetcher from '@/lib/client/fetcher';
+import { useTranslation } from 'react-i18next';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const NpsSurveys = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { workspaceSlug } = router.query;
 
@@ -27,6 +30,25 @@ const NpsSurveys = () => {
   const [sendMessage, setSendMessage] = useState('');
   const [sendSubject, setSendSubject] = useState('');
   const [generatedLink, setGeneratedLink] = useState('');
+
+  const npsSteps = [
+    {
+      element: '#create-survey-section',
+      popover: {
+        title: t('onboarding.tour.nps.step1.title'),
+        description: t('onboarding.tour.nps.step1.desc'),
+        position: 'bottom',
+      }
+    },
+    {
+      element: '#send-survey-section',
+      popover: {
+        title: t('onboarding.tour.nps.step2.title'),
+        description: t('onboarding.tour.nps.step2.desc'),
+        position: 'left',
+      }
+    }
+  ];
 
   const { data: surveysData, mutate: mutateSurveys } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/nps/surveys` : null,
@@ -121,12 +143,13 @@ const NpsSurveys = () => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="nps-surveys-tour" steps={npsSteps} />
       <Meta title="Customer Satisfaction - NPS Surveys" />
       <Content.Title title="Customer Satisfaction" subtitle="NPS Surveys" className="font-executive" />
       <Content.Divider />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div id="create-survey-section" className="lg:col-span-2">
           <Card>
             <Card.Body title="Pesquisas" subtitle="Crie e gerencie suas pesquisas NPS.">
               <div className="flex justify-end">
@@ -164,7 +187,7 @@ const NpsSurveys = () => {
           </Card>
         </div>
 
-        <div className="lg:col-span-1">
+        <div id="send-survey-section" className="lg:col-span-1">
           <Card>
             <Card.Body title="Enviar" subtitle="WhatsApp, Email ou Link.">
               <form onSubmit={onSend} className="space-y-4">

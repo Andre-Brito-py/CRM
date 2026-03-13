@@ -2,6 +2,7 @@ import Meta from '@/components/Meta/index';
 import { LandingLayout } from '@/layouts/index';
 import {
   CallToAction,
+  FAQ,
   Features,
   Footer,
   Guides,
@@ -22,6 +23,7 @@ const Home = ({ products }) => {
       <Features />
       <Pricing products={products} />
       <Testimonial />
+      <FAQ />
       <CallToAction />
       <Footer />
     </LandingLayout>

@@ -18,7 +18,7 @@ const useDeals = (slug, options) => {
     data: data?.data,
     deals: data?.data?.deals,
     meta: data?.data?.meta,
-    isLoading: !error && !data,
+    isLoading: !!slug && !error && !data,
     isError: error,
     mutate,
   };

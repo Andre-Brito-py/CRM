@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { AccountLayout } from '@/layouts/index';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import Card from '@/components/Card/index';
@@ -216,10 +217,22 @@ const Analytics = () => {
     </AccountLayout>
   );
 
+  const analyticsSteps = [
+    {
+      element: '#analytics-cards',
+      popover: {
+        title: t('onboarding.tour.analytics.step1.title'),
+        description: t('onboarding.tour.analytics.step1.desc'),
+        position: 'bottom',
+      }
+    }
+  ];
+
   return (
     <AccountLayout>
+      <OnboardingTour tourId="analytics-tour" steps={analyticsSteps} />
       <Meta title={`${t('Analytics')} - ${workspaceSlug}`} />
-      <div className="flex justify-between items-end">
+      <div id="analytics-header" className="flex justify-between items-end">
         <Content.Title title={t('Analytics')} subtitle={t('analytics.subtitle')} />
         <button
           onClick={exportToCSV}
@@ -230,6 +243,7 @@ const Analytics = () => {
       </div>
       <Content.Divider />
       <Content.Container>
+        <div id="analytics-cards">
         <Paywall
           minPlan="STANDARD"
           message="Analytics avançados como funil de conversão, desempenho de vendedores e tendências de receita estão disponíveis no plano Standard ou superior."
@@ -417,6 +431,7 @@ const Analytics = () => {
           </Card>
         </div>
         </Paywall>
+        </div>
       </Content.Container>
     </AccountLayout>
   );

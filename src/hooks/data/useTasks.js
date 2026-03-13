@@ -19,7 +19,7 @@ const useTasks = (slug, filters) => {
   return {
     tasks: data?.data?.tasks,
     meta: data?.data?.meta,
-    isLoading: !error && !data,
+    isLoading: !!slug && !error && !data,
     isError: error,
     mutate,
   };

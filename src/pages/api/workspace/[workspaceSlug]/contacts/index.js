@@ -96,7 +96,7 @@ const handler = async (req, res) => {
           prisma.contact.count({ where: { workspaceId: workspace.id } }),
         ]);
 
-        const isAllowed = await canAddContact(workspace.creator?.email, currentContactCount);
+        const isAllowed = await canAddContact(workspace.id, currentContactCount);
         if (!isAllowed) {
           return res.status(403).json({
             error: {

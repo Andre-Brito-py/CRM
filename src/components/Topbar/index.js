@@ -1,6 +1,7 @@
 import { Fragment, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import useSWR from 'swr';
 import { Menu, Transition, Popover } from '@headlessui/react';
 import {
   ArrowRightOnRectangleIcon,
@@ -95,11 +96,50 @@ const Topbar = ({ menu, staticMenu }) => {
   const [isImpersonating, setIsImpersonating] = useState(false);
   const validName = name.length > 0 && name.length <= 16;
 
+  const { data: notificationsData, mutate: mutateNotifications } = useSWR(
+    workspace?.slug ? `/api/workspace/${workspace.slug}/notifications` : null,
+    { refreshInterval: 30000 } // Refresh every 30s
+  );
+
+  const notifications = notificationsData?.notifications || [];
+  const unreadCount = notificationsData?.unreadCount || 0;
+
+  const markAllAsRead = async () => {
+    if (unreadCount === 0) return;
+    try {
+      await api(`/api/workspace/${workspace.slug}/notifications`, { method: 'PUT' });
+      mutateNotifications();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
+  };
+
+  const markAsRead = async (id) => {
+    try {
+      await api(`/api/workspace/${workspace.slug}/notifications/${id}`, { method: 'PUT' });
+      mutateNotifications();
+    } catch (error) {
+      console.error('Failed to mark as read:', error);
+    }
+  };
+
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const cookie = document.cookie || '';
     setIsImpersonating(cookie.includes('nextacular_impersonating=1'));
   }, []);
+
+  // Sync workspace from URL slug if not set
+  useEffect(() => {
+    if (router.query.workspaceSlug && workspacesData?.workspaces && !workspace) {
+      const currentWorkspace = workspacesData.workspaces.find(
+        (ws) => ws.slug === router.query.workspaceSlug
+      );
+      if (currentWorkspace) {
+        setWorkspace(currentWorkspace);
+      }
+    }
+  }, [router.query.workspaceSlug, workspacesData, workspace, setWorkspace]);
 
   const logOut = () => {
     if (confirm('Are you sure you want to logout?')) {
@@ -206,17 +246,92 @@ const Topbar = ({ menu, staticMenu }) => {
         {/* Right: Notifications + User Menu */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <button
-            className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-200"
-            onClick={isSubscribed ? unsubscribe : subscribe}
-            title={isSubscribed ? 'Disable Notifications' : 'Enable Notifications'}
-          >
-            {isSubscribed ? (
-              <BellIcon className="w-5 h-5 text-indigo-400" />
-            ) : (
-              <BellSlashIcon className="w-5 h-5" />
+          <Popover className="relative hidden sm:block">
+            {({ open }) => (
+              <>
+                <Popover.Button
+                  className={`flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 transition-all duration-200 ${open ? 'text-white bg-white/10 border-indigo-500/50' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                  title="Notificações"
+                >
+                  <BellIcon className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span>
+                    </span>
+                  )}
+                </Popover.Button>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-2 scale-95"
+                  enterTo="opacity-100 translate-y-0 scale-100"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0 scale-100"
+                  leaveTo="opacity-0 translate-y-2 scale-95"
+                >
+                  <Popover.Panel className="absolute right-0 mt-3 w-80 origin-top-right bg-zinc-900 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden backdrop-blur-xl">
+                    <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Notificações</h3>
+                      {unreadCount > 0 && (
+                        <button
+                          onClick={markAllAsRead}
+                          className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase underline decoration-indigo-500/30"
+                        >
+                          Marcar todas como lidas
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-96 overflow-y-auto divide-y divide-white/5 custom-scrollbar">
+                      {notifications.length === 0 ? (
+                        <div className="p-10 text-center">
+                          <BellSlashIcon className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
+                          <p className="text-xs text-zinc-500">Nenhuma notificação por aqui.</p>
+                        </div>
+                      ) : (
+                        notifications.map((n) => (
+                          <div
+                            key={n.id}
+                            className={`p-4 hover:bg-white/5 transition-colors cursor-pointer group relative ${!n.isRead ? 'bg-white/[0.02]' : ''}`}
+                            onClick={() => {
+                              if (!n.isRead) markAsRead(n.id);
+                              if (n.link) router.push(n.link);
+                            }}
+                          >
+                            {!n.isRead && (
+                              <div className="absolute top-4 left-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                            )}
+                            <div className="pl-2">
+                              <p className={`text-sm font-semibold ${!n.isRead ? 'text-white' : 'text-zinc-400'}`}>
+                                {n.title}
+                              </p>
+                              {n.content && (
+                                <p className="mt-1 text-xs text-zinc-500 truncate group-hover:whitespace-normal transition-all">
+                                  {n.content}
+                                </p>
+                              )}
+                              <p className="mt-2 text-[10px] text-zinc-600 font-medium">
+                                {new Date(n.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    <div className="p-3 bg-black/20 border-t border-white/5 flex items-center justify-center">
+                       <button
+                         onClick={isSubscribed ? unsubscribe : subscribe}
+                         className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
+                       >
+                         {isSubscribed ? '🔔 Desativar Notificações do Navegador' : '🔕 Ativar Notificações do Navegador'}
+                       </button>
+                    </div>
+                  </Popover.Panel>
+                </Transition>
+              </>
             )}
-          </button>
+          </Popover>
 
           {/* Help Menu */}
           <button

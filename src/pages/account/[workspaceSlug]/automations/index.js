@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 
 import AccountLayout from '@/layouts/AccountLayout';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import Card from '@/components/Card/index';
@@ -39,7 +40,7 @@ const Automations = () => {
     triggerType: 'DEAL_STAGE_CHANGED',
     triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', operator: 'AND', hours: { start: null, end: null } },
     actionType: 'SEND_WHATSAPP',
-    actionConfig: { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' }
+    actionConfig: { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
   });
 
   // Fetch Data
@@ -197,6 +198,11 @@ const Automations = () => {
 
     if (newRule.actionType === 'APPLY_TAG' && !newRule.actionConfig.tagId) {
       toast.error(t('automations.validation.tagRequired'));
+      return;
+    }
+
+    if (newRule.actionType === 'SEND_NOTIFICATION' && (!newRule.actionConfig.userIdToNotify || !newRule.actionConfig.title)) {
+      toast.error('User and Title are required for notifications');
       return;
     }
 
@@ -424,22 +430,27 @@ const Automations = () => {
           <span className="ml-1 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">{count}</span>
         </span>
       );
+    } else if (rule.actionType === 'SEND_NOTIFICATION') {
+      const member = members.find(m => m.member?.id === rule.actionConfig?.userIdToNotify);
+      const memberName = member?.member?.name || t('automations.unknownUser');
+      return (
+        <span>
+          Send Notification to <span className="ml-1 px-2 py-0.5 bg-orange-100 text-orange-800 rounded text-xs">{memberName}</span>
+        </span>
+      );
     }
     return <span>{rule.actionType}</span>;
   };
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="automations-tour" steps={automationSteps} />
       <Meta title={`Nextacular - ${workspace?.name} | ${t('Automations')}`} />
-      <Content.Title
-        title={t('Automations')}
-        subtitle={t('automations.subtitle')}
-      />
-      <Content.Divider />
-      <Content.Container>
+      <Content title={t('Automations')} subtitle={t('automations.subtitle')}>
         <div className="flex justify-end mb-5">
           <button
-            className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            id="create-rule-btn"
+            className="premium-button flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -769,6 +780,7 @@ const Automations = () => {
                           ]
                         }
                       });
+                      else if (next === 'SEND_NOTIFICATION') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, userIdToNotify: '' } });
                       else setNewRule({ ...newRule, actionType: next, actionConfig: base });
                     }}
                   >
@@ -778,6 +790,7 @@ const Automations = () => {
                     <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
                     <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
                     <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
+                    <option value="SEND_NOTIFICATION">Send In-App Notification</option>
                     <option value="MULTI_ACTIONS">{t('automations.action.option.multiActions')}</option>
                   </select>
                 </div>
@@ -803,6 +816,7 @@ const Automations = () => {
                         else if (nextType === 'CALL_WEBHOOK') setAction({ type: nextType, config: { eventName: '' } });
                         else if (nextType === 'MOVE_DEAL_STAGE') setAction({ type: nextType, config: { stageId: '' } });
                         else if (nextType === 'APPLY_TAG') setAction({ type: nextType, config: { tagId: '' } });
+                        else if (nextType === 'SEND_NOTIFICATION') setAction({ type: nextType, config: { userIdToNotify: '', title: '', content: '', link: '' } });
                         else setAction({ type: nextType, config: nextConfigBase });
                       };
 
@@ -822,6 +836,7 @@ const Automations = () => {
                                 <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
                                 <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
                                 <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
+                                <option value="SEND_NOTIFICATION">Send Notification</option>
                               </select>
                             </div>
                             <button
@@ -1169,6 +1184,70 @@ const Automations = () => {
                     </div>
                   </div>
                 )}
+
+                {newRule.actionType === 'SEND_NOTIFICATION' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">User to notify</label>
+                      <select
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.actionConfig.userIdToNotify || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, userIdToNotify: e.target.value }
+                        })}
+                      >
+                        <option value="">Select User</option>
+                        {members.map((m) => (
+                          <option key={m.member?.id} value={m.member?.id}>
+                            {m.member?.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Notification Title</label>
+                      <input
+                        type="text"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        placeholder="e.g. New deal created: {{deal.name}}"
+                        value={newRule.actionConfig.title || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, title: e.target.value }
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Notification Content (Optional)</label>
+                      <textarea
+                        rows={2}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        placeholder="e.g. A new deal has been assigned to you."
+                        value={newRule.actionConfig.content || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, content: e.target.value }
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Click Link (Optional)</label>
+                      <input
+                        type="text"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        placeholder="e.g. /account/workspace-slug/deals"
+                        value={newRule.actionConfig.link || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, link: e.target.value }
+                        })}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1253,7 +1332,7 @@ const Automations = () => {
             </div>
           </form>
         </Modal>
-      </Content.Container>
+      </Content>
     </AccountLayout>
   );
 };
