@@ -2,10 +2,21 @@ import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
+import { rateLimit } from '@/lib/server/rateLimit';
+import { log, reportError } from '@/lib/server/logger';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '256kb',
+    },
+  },
+};
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug, dealId } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   if (method !== 'POST') {
     return res.status(405).json({ error: { msg: `${method} method unsupported` } });
@@ -25,8 +36,15 @@ const handler = async (req, res) => {
   }
 
   try {
-    const deal = await prisma.deal.findUnique({
-      where: { id: dealId },
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 30, windowMs: 5 * 60_000, key: `u:${userId}:ai:follow-up` });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'ai_follow_up_rate_limited', requestId, workspaceId: workspace.id, userId });
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    const deal = await prisma.deal.findFirst({
+      where: { id: dealId, workspaceId: workspace.id, deletedAt: null },
       include: {
         contact: true,
         activities: {
@@ -38,10 +56,6 @@ const handler = async (req, res) => {
 
     if (!deal) {
       return res.status(404).json({ error: { msg: 'Deal not found' } });
-    }
-
-    if (deal.workspaceId !== workspace.id) {
-      return res.status(403).json({ error: { msg: 'Access denied' } });
     }
 
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
@@ -94,7 +108,8 @@ const handler = async (req, res) => {
     res.status(200).json({ data: { message } });
 
   } catch (error) {
-    console.error(error);
+    log({ level: 'error', msg: 'ai_follow_up_failed', requestId, workspaceId: workspace?.id, error });
+    reportError(error, { route: '/api/workspace/[workspaceSlug]/deals/[dealId]/follow-up', requestId, workspaceId: workspace?.id });
     res.status(500).json({ error: { msg: 'Unable to generate follow-up' } });
   }
 };

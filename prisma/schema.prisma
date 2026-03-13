@@ -697,6 +697,16 @@ model Plan {
   @@map("plans")
 }
 
+model RateLimitCounter {
+  key       String   @id
+  count     Int      @default(0)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("rate_limit_counters")
+}
+
 enum UserRole {
   USER
   SUPERADMIN

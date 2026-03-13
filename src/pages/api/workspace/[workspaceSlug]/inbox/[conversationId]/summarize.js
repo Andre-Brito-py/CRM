@@ -2,10 +2,38 @@ import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
+import { rateLimit } from '@/lib/server/rateLimit';
+import { log, reportError } from '@/lib/server/logger';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '256kb',
+    },
+  },
+};
+
+const clampText = (value, maxLen) => {
+  const raw = String(value || '');
+  if (raw.length <= maxLen) return raw;
+  return raw.slice(0, maxLen);
+};
+
+const buildTranscript = (messages, contactName) => {
+  const lines = [];
+  for (const msg of messages) {
+    const role = msg.direction === 'OUTBOUND' ? 'Agente' : (contactName || 'Cliente');
+    const content = clampText(msg.content, 700);
+    lines.push(`${role}: ${content}`);
+  }
+  const transcript = lines.join('\n');
+  return clampText(transcript, 12_000);
+};
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug, conversationId } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   if (method !== 'POST') {
     return res.status(405).json({ error: { msg: `${method} method unsupported` } });
@@ -25,8 +53,15 @@ const handler = async (req, res) => {
   }
 
   try {
-    const conversation = await prisma.conversation.findUnique({
-      where: { id: conversationId },
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 20, windowMs: 5 * 60_000, key: `u:${userId}:ai:summarize` });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'ai_summarize_rate_limited', requestId, workspaceId: workspace.id, userId });
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    const conversation = await prisma.conversation.findFirst({
+      where: { id: conversationId, workspaceId: workspace.id },
       include: {
         contact: true,
         messages: {
@@ -44,11 +79,7 @@ const handler = async (req, res) => {
       return res.status(200).json({ data: { summary: 'No messages to summarize yet.' } });
     }
 
-    // Build a readable transcript
-    const transcript = conversation.messages.map(msg => {
-      const role = msg.direction === 'OUTBOUND' ? 'Agente' : (conversation.contact?.name || 'Cliente');
-      return `${role}: ${msg.content}`;
-    }).join('\n');
+    const transcript = buildTranscript(conversation.messages, conversation.contact?.name);
 
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
@@ -97,7 +128,8 @@ const handler = async (req, res) => {
     res.status(200).json({ data: { summary } });
 
   } catch (error) {
-    console.error(error);
+    log({ level: 'error', msg: 'ai_summarize_failed', requestId, workspaceId: workspace?.id, error });
+    reportError(error, { route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/summarize', requestId, workspaceId: workspace?.id });
     res.status(500).json({ error: { msg: 'Unable to generate summary' } });
   }
 };

@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
+import { createPlatformAuditActivity } from '@/prisma/services/activity';
 
 const upsertConfig = async ({ key, value, category }) => {
   return await prisma.systemConfig.upsert({
@@ -38,6 +39,16 @@ export default async function handler(req, res) {
         upsertConfig({ key: 'PLATFORM_FEE_PERCENTAGE', value: percentage, category: 'PAYMENT' }),
         upsertConfig({ key: 'PLATFORM_FEE_FIXED', value: fixed, category: 'PAYMENT' }),
       ]);
+      await createPlatformAuditActivity(
+        session.user.userId || session.user.id,
+        session.user.email,
+        {
+          action: 'REVENUE_SETTINGS_UPDATE',
+          title: 'Revenue settings updated',
+          metadata: { platformFeePercentage: percentage, platformFeeFixed: fixed },
+        },
+        req
+      );
       res.status(200).json({ data: { saved: true } });
     } catch (error) {
       console.error(error);
@@ -48,4 +59,3 @@ export default async function handler(req, res) {
 
   res.status(405).json({ error: { msg: 'Method not supported' } });
 }
-

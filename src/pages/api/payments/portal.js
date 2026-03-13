@@ -2,6 +2,7 @@ import { validateSession } from '@/config/api-validation';
 import getStripe from '@/lib/server/stripe';
 import { getPayment } from '@/prisma/services/customer';
 import { getSystemConfig } from '@/lib/server/config';
+import { log, reportError } from '@/lib/server/logger';
 
 const handler = async (req, res) => {
   if (req.method !== 'POST') {
@@ -9,6 +10,7 @@ const handler = async (req, res) => {
     return;
   }
 
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
   try {
     const session = await validateSession(req, res);
 
@@ -32,7 +34,8 @@ const handler = async (req, res) => {
 
     res.status(200).json({ data: { url: portalSession.url } });
   } catch (error) {
-    console.error(error);
+    log({ level: 'error', msg: 'billing_portal_session_failed', requestId, error });
+    reportError(error, { route: '/api/payments/portal', requestId });
     res.status(500).json({ errors: { error: { msg: 'Unable to create billing portal session' } } });
   }
 };

@@ -39,3 +39,4 @@ yarn-error.log*
 /seed-test-user.js
 /implementation_plan.md
 /manutencao
+/backups/

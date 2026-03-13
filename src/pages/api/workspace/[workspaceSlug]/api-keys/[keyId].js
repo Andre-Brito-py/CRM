@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { deleteApiKey } from '@/prisma/services/api-key';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const session = await getSession({ req });
@@ -18,6 +19,12 @@ const handler = async (req, res) => {
   if (req.method === 'DELETE') {
     const success = await deleteApiKey(workspace.id, keyId);
     if (success) {
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId,
+        { action: 'API_KEY_DELETE', title: 'API key deleted', target: { apiKeyId: keyId } },
+        req
+      );
       return res.status(200).json({ message: 'API Key deleted' });
     } else {
       return res.status(404).json({ error: 'API Key not found' });

@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - staging
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm ci
+      - run: npm run ci
+      - name: Smoke (Next.js)
+        run: |
+          npm start -- -p 3000 &
+          PID=$!
+          for i in {1..30}; do
+            if curl -sSf http://localhost:3000/privacy >/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          curl -sSf http://localhost:3000/privacy >/dev/null
+          curl -sSf http://localhost:3000/terms >/dev/null
+          curl -sSf http://localhost:3000/auth/login >/dev/null
+          kill $PID

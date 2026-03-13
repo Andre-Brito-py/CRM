@@ -1,6 +1,7 @@
 import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
 import { getNpsAnalytics } from '@/prisma/services/nps';
+import { getWorkspace } from '@/prisma/services/workspace';
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
@@ -15,14 +16,9 @@ const handler = async (req, res) => {
   const { workspaceSlug } = req.query;
 
   try {
-    // ── 1. Resolve workspace (only id needed) ──────────────────────────
-    const workspace = await prisma.workspace.findFirst({
-      where: { slug: workspaceSlug, deletedAt: null },
-      select: { id: true },
-    });
-
+    const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, workspaceSlug);
     if (!workspace) {
-      return res.status(404).json({ error: 'Workspace not found' });
+      return res.status(404).json({ error: 'Workspace not found or permission denied' });
     }
 
     const workspaceId = workspace.id;

@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getApiKeys, createApiKey } from '@/prisma/services/api-key';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const session = await getSession({ req });
@@ -26,6 +27,17 @@ const handler = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const apiKey = await createApiKey(workspace.id, name);
+    await createAuditActivity(
+      workspace.id,
+      session.user.userId,
+      {
+        action: 'API_KEY_CREATE',
+        title: 'API key created',
+        target: { apiKeyId: apiKey?.id || null },
+        metadata: { name: apiKey?.name || name },
+      },
+      req
+    );
     return res.status(201).json({ apiKey });
   }
 

@@ -1,8 +1,25 @@
 import prisma from '@/prisma/index';
 import { processAutomation } from '@/prisma/services/automation';
+import { log, reportError } from '@/lib/server/logger';
+import { rateLimit } from '@/lib/server/rateLimit';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+};
 
 export default async function handler(req, res) {
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
   if (req.method === 'GET') {
+    const rl = await rateLimit({ req, limit: 120, windowMs: 60_000 });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'whatsapp_webhook_verify_rate_limited', requestId });
+      return res.status(429).send('Too Many Requests');
+    }
+
     // Webhook Verification
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
@@ -24,10 +41,10 @@ export default async function handler(req, res) {
         const integration = workspace?.integrations[0];
 
         if (integration && integration.credentials?.verifyToken === token) {
-          console.log('WEBHOOK_VERIFIED');
+          log({ level: 'info', msg: 'whatsapp_webhook_verified', requestId, workspaceSlug });
           res.status(200).send(challenge);
         } else {
-          console.error('Webhook verification failed: Invalid token or workspace');
+          log({ level: 'warn', msg: 'whatsapp_webhook_verify_failed', requestId, workspaceSlug });
           res.status(403).json({ error: 'Verification failed' });
         }
       } else {
@@ -37,11 +54,27 @@ export default async function handler(req, res) {
       res.status(400).json({ error: 'Missing parameters' });
     }
   } else if (req.method === 'POST') {
+    const rl = await rateLimit({ req, limit: 600, windowMs: 60_000 });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'whatsapp_webhook_rate_limited', requestId });
+      return res.status(429).send('Too Many Requests');
+    }
+
     // Receive Messages
     const body = req.body;
     const workspaceSlug = req.query['workspace'];
+    if (!workspaceSlug) {
+      return res.status(400).json({ error: 'Missing workspace parameter' });
+    }
 
-    console.log('WhatsApp Webhook Payload:', JSON.stringify(body, null, 2));
+    log({
+      level: 'info',
+      msg: 'whatsapp_webhook_received',
+      requestId,
+      workspaceSlug,
+      hasObject: Boolean(body?.object),
+      entryCount: Array.isArray(body?.entry) ? body.entry.length : 0,
+    });
 
     if (body.object) {
       if (body.entry &&
@@ -73,7 +106,8 @@ export default async function handler(req, res) {
         try {
           await processIncomingMessage(workspaceSlug, from, name, msg_body, msg_type, wamid, timestamp);
         } catch (e) {
-          console.error('Error processing message:', e);
+          log({ level: 'error', msg: 'whatsapp_message_processing_failed', requestId, workspaceSlug, wamid, error: e });
+          reportError(e, { route: '/api/integrations/whatsapp/webhook', requestId, workspaceSlug, wamid });
         }
       }
       res.sendStatus(200);
@@ -164,6 +198,15 @@ async function processIncomingMessage(workspaceSlug, from, name, body, type, wam
       message
     });
   } catch (err) {
-    console.error('Error triggering automation for INCOMING_MESSAGE:', err);
+    log({
+      level: 'error',
+      msg: 'automation_incoming_message_failed',
+      requestId: null,
+      workspaceId: workspace.id,
+      conversationId: conversation.id,
+      messageId: message.id,
+      error: err,
+    });
+    reportError(err, { route: 'automation:INCOMING_MESSAGE', workspaceId: workspace.id, conversationId: conversation.id, messageId: message.id });
   }
 }

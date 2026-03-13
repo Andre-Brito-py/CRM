@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import getStripe from '@/lib/server/stripe';
+import { createPlatformAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
   const session = await getSession({ req });
@@ -66,6 +67,18 @@ export default async function handler(req, res) {
         },
       });
 
+      await createPlatformAuditActivity(
+        session.user.userId || session.user.id,
+        session.user.email,
+        {
+          action: 'PLAN_UPDATE',
+          title: 'Plan updated',
+          target: { planId },
+          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, currency: plan.currency, isActive: plan.isActive },
+        },
+        req
+      );
+
       res.status(200).json({ data: { plan } });
     } catch (error) {
       console.error(error);
@@ -80,6 +93,13 @@ export default async function handler(req, res) {
       await prisma.plan.delete({
         where: { id: planId },
       });
+
+      await createPlatformAuditActivity(
+        session.user.userId || session.user.id,
+        session.user.email,
+        { action: 'PLAN_DELETE', title: 'Plan deleted', target: { planId } },
+        req
+      );
 
       res.status(200).json({ data: { msg: 'Plan deleted successfully' } });
     } catch (error) {

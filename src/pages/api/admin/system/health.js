@@ -20,6 +20,39 @@ export default async function handler(req, res) {
     return;
   }
 
+  const now = new Date();
+  const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+  const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+
+  const [
+    webhookFailedLastHour,
+    webhookPendingRetryDue,
+    automationJobsDue,
+    automationJobsFailedLastDay,
+    automationJobsRunningStuck,
+    paymentsOverdue,
+  ] = await Promise.all([
+    prisma.webhookDelivery.count({
+      where: { status: 'FAILED', createdAt: { gte: hourAgo } },
+    }),
+    prisma.webhookDelivery.count({
+      where: { status: 'PENDING', nextRetryAt: { lte: now } },
+    }),
+    prisma.automationJob.count({
+      where: { status: 'PENDING', runAt: { lte: now } },
+    }),
+    prisma.automationJob.count({
+      where: { status: 'FAILED', updatedAt: { gte: dayAgo } },
+    }),
+    prisma.automationJob.count({
+      where: { status: 'RUNNING', updatedAt: { lt: tenMinutesAgo } },
+    }),
+    prisma.payment.count({
+      where: { deletedAt: null, status: 'PENDING', dueDate: { lt: now } },
+    }),
+  ]);
+
   const start = Date.now();
   let dbStatus = 'disconnected';
   try {
@@ -38,6 +71,20 @@ export default async function handler(req, res) {
     nodeVersion: process.version,
     dbStatus,
     dbLatency,
+    metrics: {
+      webhooks: {
+        failedLastHour: webhookFailedLastHour,
+        pendingRetryDue: webhookPendingRetryDue,
+      },
+      jobs: {
+        due: automationJobsDue,
+        failedLastDay: automationJobsFailedLastDay,
+        runningStuck: automationJobsRunningStuck,
+      },
+      payments: {
+        overdue: paymentsOverdue,
+      },
+    },
     timestamp: new Date().toISOString(),
   };
 

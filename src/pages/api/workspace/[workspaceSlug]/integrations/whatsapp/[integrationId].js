@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
     const session = await getSession({ req });
@@ -55,6 +56,26 @@ export default async function handler(req, res) {
                 },
             });
 
+            await createAuditActivity(
+                workspace.id,
+                session.user.userId || session.user.id,
+                {
+                    action: 'INTEGRATION_UPDATE_WHATSAPP',
+                    title: 'WhatsApp integration updated',
+                    target: { integrationId },
+                    metadata: {
+                        provider: 'WHATSAPP',
+                        name: updatedIntegration.name,
+                        enabled: updatedIntegration.enabled,
+                        phoneNumberIdUpdated: Boolean(phoneNumberId),
+                        accessTokenUpdated: Boolean(accessToken),
+                        verifyTokenUpdated: Boolean(verifyToken),
+                        businessAccountIdUpdated: Boolean(businessAccountId),
+                    },
+                },
+                req
+            );
+
             res.status(200).json({ data: { integration: updatedIntegration } });
         } catch (error) {
             console.error(error);
@@ -65,6 +86,13 @@ export default async function handler(req, res) {
             await prisma.integration.delete({
                 where: { id: integrationId },
             });
+
+            await createAuditActivity(
+                workspace.id,
+                session.user.userId || session.user.id,
+                { action: 'INTEGRATION_DELETE_WHATSAPP', title: 'WhatsApp integration deleted', target: { integrationId } },
+                req
+            );
 
             res.status(200).json({ data: { success: true } });
         } catch (error) {

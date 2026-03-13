@@ -5,6 +5,8 @@ import {
   deleteDomain,
   verifyDomain,
 } from '@/prisma/services/domain';
+import { getWorkspace } from '@/prisma/services/workspace';
+import { createAuditActivity } from '@/prisma/services/activity';
 import { getSystemConfig } from '@/lib/server/config';
 
 const handler = async (req, res) => {
@@ -14,6 +16,7 @@ const handler = async (req, res) => {
     const session = await validateSession(req, res);
     await validateAddDomain(req, res);
     const { domainName } = req.body;
+    const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
@@ -46,6 +49,18 @@ const handler = async (req, res) => {
         verified,
         verification
       );
+      if (workspace?.id) {
+        await createAuditActivity(
+          workspace.id,
+          session.user.userId,
+          {
+            action: 'DOMAIN_CREATE',
+            title: 'Domain created',
+            metadata: { name: domainName, apexName, verified },
+          },
+          req
+        );
+      }
       res.status(200).json({ data: { domain: domainName } });
     } else {
       res
@@ -55,6 +70,7 @@ const handler = async (req, res) => {
   } else if (method === 'PUT') {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
+    const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
@@ -83,6 +99,18 @@ const handler = async (req, res) => {
         domainName,
         response.verified
       );
+      if (workspace?.id) {
+        await createAuditActivity(
+          workspace.id,
+          session.user.userId,
+          {
+            action: 'DOMAIN_VERIFY',
+            title: 'Domain verification updated',
+            metadata: { name: domainName, verified: response.verified },
+          },
+          req
+        );
+      }
       res.status(200).json({ data: { verified: response.verified } });
     } else {
       res
@@ -92,6 +120,7 @@ const handler = async (req, res) => {
   } else if (method === 'DELETE') {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
+    const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
@@ -117,6 +146,14 @@ const handler = async (req, res) => {
       req.query.workspaceSlug,
       domainName
     );
+    if (workspace?.id) {
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId,
+        { action: 'DOMAIN_DELETE', title: 'Domain deleted', metadata: { name: domainName } },
+        req
+      );
+    }
     res.status(200).json({ data: { domain: domainName } });
   } else {
     res

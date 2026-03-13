@@ -2,10 +2,21 @@ import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
+import { rateLimit } from '@/lib/server/rateLimit';
+import { log, reportError } from '@/lib/server/logger';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '256kb',
+    },
+  },
+};
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug, pipelineId } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   if (method !== 'POST') {
     return res.status(405).json({ error: { msg: `${method} method unsupported` } });
@@ -25,8 +36,15 @@ const handler = async (req, res) => {
   }
 
   try {
-    const pipeline = await prisma.pipeline.findUnique({
-      where: { id: pipelineId },
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 15, windowMs: 5 * 60_000, key: `u:${userId}:ai:pipeline-insights` });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'ai_pipeline_insights_rate_limited', requestId, workspaceId: workspace.id, userId });
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    const pipeline = await prisma.pipeline.findFirst({
+      where: { id: pipelineId, workspaceId: workspace.id, deletedAt: null },
       include: {
         stages: {
           orderBy: { order: 'asc' }
@@ -40,6 +58,7 @@ const handler = async (req, res) => {
 
     const deals = await prisma.deal.findMany({
       where: {
+        workspaceId: workspace.id,
         stage: { pipelineId },
         deletedAt: null
       },
@@ -109,7 +128,8 @@ const handler = async (req, res) => {
     res.status(200).json({ data: { insights } });
 
   } catch (error) {
-    console.error(error);
+    log({ level: 'error', msg: 'ai_pipeline_insights_failed', requestId, workspaceId: workspace?.id, error });
+    reportError(error, { route: '/api/workspace/[workspaceSlug]/pipelines/[pipelineId]/insights', requestId, workspaceId: workspace?.id });
     res.status(500).json({ error: { msg: 'Unable to generate insights' } });
   }
 };

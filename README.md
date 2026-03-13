@@ -15,6 +15,7 @@ Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém d
 ## Regras internas (pra eu não me sabotar)
 - Nada de credenciais no código/repo.
 - Tudo que for “admin master” tem que ser auditável e seguro.
+- Tudo que for multi-tenant tem que filtrar por `workspaceId` sempre.
 - Se uma feature não tiver métrica/uso, ela não existe (não investir tempo sem validar).
 - Melhor pequeno e funcionando do que grande e incompleto.
 
@@ -90,6 +91,14 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
 - Monetização por taxa da plataforma (split/fee quando disponível)
 
+## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
+- **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.
+- **Ações auditadas:** super admin (configs/planos/reconciliação), webhooks (criar/rotacionar/deletar segredo), API keys (criar/deletar), integrações (WhatsApp), convites e alterações de workspace (slug/nome/delete).
+- **LGPD por workspace:** endpoints para exportação e remoção.
+  - Export: `GET /api/workspace/:workspaceSlug/privacy/export`
+  - Erase: `POST /api/workspace/:workspaceSlug/privacy/erase`
+- **Hardening multi-tenant:** rotas críticas passaram a checar permissão + filtrar por `workspaceId` (incluindo endpoints de IA como resumo de conversa e insights de pipeline).
+
 ## Plataforma No-Code (o que torna o CRM “adaptável”)
 A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.
 
@@ -138,6 +147,12 @@ Como isso funciona internamente (resumo):
   - Mercado Pago: collector + marketplace_fee.
   - Pagar.me: tentativa de split flat (com fallback se o endpoint não suportar).
 - Correção: listagem de usuários no Super Admin usando sessão server-side.
+
+### 2026-03-13
+- Fase 6 concluída: auditoria, LGPD e isolamento multi-tenant.
+- Auditoria com `AUDIT_*` incluindo request metadata (ip, user-agent, rota, método, request-id).
+- Exportação e remoção de dados por workspace (LGPD) via `/privacy/export` e `/privacy/erase`.
+- Ajustes de isolamento: reforço de `workspaceId` em rotas críticas e endpoints de IA.
 
 ---
 

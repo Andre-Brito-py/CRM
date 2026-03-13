@@ -1,5 +1,6 @@
 import { validateSession } from '@/config/api-validation';
 import { deleteWorkspace, getWorkspace } from '@/prisma/services/workspace';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -22,15 +23,32 @@ const handler = async (req, res) => {
         res.status(404).json({ error: { msg: 'Workspace not found' } });
       }
     } else if (method === 'DELETE') {
-      deleteWorkspace(
+      const workspace = await getWorkspace(
         session.user.userId || session.user.id,
         session.user.email,
         workspaceSlug
-      )
-        .then((slug) => res.status(200).json({ data: { slug } }))
-        .catch((error) =>
-          res.status(404).json({ errors: { error: { msg: error.message } } })
+      );
+
+      if (!workspace) {
+        return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
+      }
+
+      try {
+        const slug = await deleteWorkspace(
+          session.user.userId || session.user.id,
+          session.user.email,
+          workspaceSlug
         );
+        await createAuditActivity(
+          workspace.id,
+          session.user.userId || session.user.id,
+          { action: 'WORKSPACE_DELETE', title: 'Workspace deleted', metadata: { slug } },
+          req
+        );
+        return res.status(200).json({ data: { slug } });
+      } catch (error) {
+        return res.status(404).json({ errors: { error: { msg: error.message } } });
+      }
     } else {
       res
         .status(405)

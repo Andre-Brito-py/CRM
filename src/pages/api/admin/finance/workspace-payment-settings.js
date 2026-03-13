@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
   const session = await requireSuperAdmin(req, res);
@@ -76,6 +77,22 @@ export default async function handler(req, res) {
         select: { id: true, workspaceId: true, providerId: true, providerAccountId: true, platformFeePercentage: true, platformFeeFixed: true, updatedAt: true },
       });
 
+      await createAuditActivity(
+        saved.workspaceId,
+        session.user.userId || session.user.id,
+        {
+          action: 'WORKSPACE_PAYMENT_SETTINGS_UPDATE',
+          title: 'Workspace payment settings updated',
+          target: { workspaceId: saved.workspaceId, providerId: saved.providerId },
+          metadata: {
+            providerAccountId: saved.providerAccountId,
+            platformFeePercentage: saved.platformFeePercentage,
+            platformFeeFixed: saved.platformFeeFixed,
+          },
+        },
+        req
+      );
+
       res.status(200).json({ data: { saved } });
     } catch (error) {
       console.error(error);
@@ -86,4 +103,3 @@ export default async function handler(req, res) {
 
   res.status(405).json({ error: { msg: 'Method not supported' } });
 }
-

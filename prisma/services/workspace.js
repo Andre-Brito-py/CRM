@@ -51,9 +51,119 @@ export const deleteWorkspace = async (id, email, slug) => {
   const workspace = await getOwnWorkspace(id, email, slug);
 
   if (workspace) {
-    await prisma.workspace.update({
-      data: { deletedAt: new Date() },
-      where: { id: workspace.id },
+    const now = new Date();
+    await prisma.$transaction(async (tx) => {
+      const conversations = await tx.conversation.findMany({
+        select: { id: true },
+        where: { workspaceId: workspace.id },
+      });
+      const conversationIds = conversations.map((c) => c.id);
+
+      if (conversationIds.length > 0) {
+        await tx.message.deleteMany({
+          where: { conversationId: { in: conversationIds } },
+        });
+      }
+
+      await tx.webhookDelivery.deleteMany({
+        where: { webhook: { workspaceId: workspace.id } },
+      });
+
+      await Promise.all([
+        tx.webhook.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.apiKey.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.integration.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.workspacePaymentSetting.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.platformSubscription.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.npsResponse.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.npsSurvey.deleteMany({ where: { workspaceId: workspace.id } }),
+        tx.automationJob.deleteMany({ where: { workspaceId: workspace.id } }),
+      ]);
+
+      await Promise.all([
+        tx.conversation.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, externalId: null },
+        }),
+        tx.payment.updateMany({
+          where: { workspaceId: workspace.id },
+          data: {
+            deletedAt: now,
+            description: null,
+            providerPaymentId: null,
+            paymentLink: null,
+            invoiceUrl: null,
+            paymentUrl: null,
+          },
+        }),
+        tx.task.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, title: 'Deleted', content: null },
+        }),
+        tx.deal.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, name: 'Deleted', amount: null, customFields: null },
+        }),
+        tx.contact.updateMany({
+          where: { workspaceId: workspace.id },
+          data: {
+            deletedAt: now,
+            name: 'Deleted',
+            email: null,
+            phone: null,
+            jobTitle: null,
+            asaasCustomerId: null,
+            customFields: null,
+          },
+        }),
+        tx.company.updateMany({
+          where: { workspaceId: workspace.id },
+          data: {
+            deletedAt: now,
+            name: 'Deleted',
+            website: null,
+            industry: null,
+            customFields: null,
+          },
+        }),
+        tx.domain.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now },
+        }),
+        tx.tag.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, name: 'Deleted', color: null },
+        }),
+        tx.pipeline.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, name: 'Deleted' },
+        }),
+        tx.stage.updateMany({
+          where: { pipeline: { workspaceId: workspace.id } },
+          data: { deletedAt: now, name: 'Deleted', color: null },
+        }),
+        tx.messageTemplate.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, name: 'Deleted', content: '' },
+        }),
+        tx.automationRule.updateMany({
+          where: { workspaceId: workspace.id },
+          data: { deletedAt: now, isActive: false, name: 'Deleted', triggerConfig: null, actionConfig: null },
+        }),
+        tx.activity.deleteMany({
+          where: {
+            workspaceId: workspace.id,
+            NOT: { type: { startsWith: 'AUDIT_' } },
+          },
+        }),
+      ]);
+
+      await tx.member.deleteMany({ where: { workspaceId: workspace.id } });
+
+      await tx.workspace.update({
+        data: { deletedAt: now, name: 'Deleted workspace', customFieldDefinitions: null },
+        where: { id: workspace.id },
+      });
     });
     return slug;
   } else {

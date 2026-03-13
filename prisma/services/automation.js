@@ -5,6 +5,23 @@ import { createActivity } from '@/prisma/services/activity';
 import { renderTemplateString } from '@/prisma/services/template';
 import crypto from 'crypto';
 
+const MAX_AUTOMATION_JOB_ATTEMPTS = 5;
+const MAX_WEBHOOK_DELIVERY_ATTEMPTS = 5;
+const computeBackoffMs = ({ attempt, baseMs = 30_000, capMs = 60 * 60_000 }) => {
+  const n = Number(attempt || 1);
+  const exp = Math.max(0, n - 1);
+  const raw = Math.min(capMs, baseMs * Math.pow(2, exp));
+  const jitter = Math.floor(Math.random() * Math.min(10_000, Math.max(250, raw * 0.2)));
+  return raw + jitter;
+};
+
+const computeAutomationIdempotencyKey = ({ ruleId, triggerType, fingerprint }) => {
+  const rule = String(ruleId || '').trim();
+  const trig = String(triggerType || '').trim();
+  const fp = String(fingerprint || '').trim();
+  return `automation:${rule}:${trig}:${fp}`;
+};
+
 export const getAutomationRules = async (workspaceId) => {
   return await prisma.automationRule.findMany({
     where: { workspaceId },
@@ -117,7 +134,7 @@ export const processSlaBreachAutomations = async () => {
       const { triggerConfig, workspaceId } = rule;
       // Default SLA limit is 15 minutes if not specified
       const minutes = triggerConfig?.minutes || 15;
-      
+
       const cutoffDate = new Date();
       cutoffDate.setMinutes(cutoffDate.getMinutes() - minutes);
 
@@ -138,7 +155,11 @@ export const processSlaBreachAutomations = async () => {
           contact: conversation.contact,
           contactId: conversation.contactId,
         };
-        await executeRule(rule, eventData);
+        try {
+          await executeRule(rule, eventData);
+        } catch (error) {
+          console.error(`Error executing SLA rule ${rule.id} for conversation ${conversation.id}:`, error);
+        }
       }
     } catch (error) {
       console.error(`Error executing SLA rule ${rule.id}:`, error);
@@ -200,7 +221,11 @@ const executeInactivityRule = async (rule) => {
         // message: lastMessage // Optional context
       };
 
-      await executeRule(rule, eventData);
+      try {
+        await executeRule(rule, eventData);
+      } catch (error) {
+        console.error(`Error executing inactivity rule ${rule.id} for conversation ${conversation.id}:`, error);
+      }
     }
   }
 };
@@ -217,8 +242,61 @@ const executeRule = async (rule, eventData) => {
   const contactId = eventData?.contactId || eventData?.contact?.id || null;
   const dealId = eventData?.dealId || eventData?.deal?.id || eventData?.id || null;
   const conversationId = eventData?.conversation?.id || null;
+  const stageId = eventData?.stageId || eventData?.deal?.stageId || null;
+  const messageId = eventData?.message?.id || eventData?.message?.externalId || null;
+
+  const fingerprint = [
+    `contact:${contactId || ''}`,
+    `deal:${dealId || ''}`,
+    `conversation:${conversationId || ''}`,
+    `stage:${stageId || ''}`,
+    `message:${messageId || ''}`,
+  ].join('|');
+
+  const idempotencyKey = computeAutomationIdempotencyKey({
+    ruleId: rule.id,
+    triggerType: rule.triggerType,
+    fingerprint,
+  });
+  const idempotencyNeedle = `"idempotencyKey":"${idempotencyKey}"`;
+  const idempotencyWindowMs = 10 * 60_000;
+  const idempotencySince = new Date(Date.now() - idempotencyWindowMs);
+
+  const recentExecution = await prisma.activity.findFirst({
+    where: {
+      workspaceId: rule.workspaceId,
+      type: { in: ['AUTOMATION_EXECUTION_STARTED', 'AUTOMATION_EXECUTED'] },
+      createdAt: { gte: idempotencySince },
+      content: { contains: idempotencyNeedle },
+    },
+    select: { id: true, type: true, createdAt: true },
+  });
+
+  if (recentExecution) {
+    return { executed: false, evaluation, skipped: true, skipReason: 'idempotent' };
+  }
 
   try {
+    await createActivity(rule.workspaceId, null, {
+      type: 'AUTOMATION_EXECUTION_STARTED',
+      title: `Automation execution started: ${rule.name}`,
+      content: safeJsonStringify({
+        idempotencyKey,
+        ruleId: rule.id,
+        triggerType: rule.triggerType,
+        actionType: rule.actionType,
+        event: {
+          contactId,
+          dealId,
+          conversationId,
+          stageId,
+          messageId,
+        },
+      }),
+      contactId,
+      dealId,
+    });
+
     // 2. Execute Action
     await executeAction(rule.workspaceId, rule.triggerType, actionType, actionConfig, eventData, rule?.id);
 
@@ -226,6 +304,7 @@ const executeRule = async (rule, eventData) => {
       type: 'AUTOMATION_EXECUTED',
       title: `Automation executed: ${rule.name}`,
       content: safeJsonStringify({
+        idempotencyKey,
         ruleId: rule.id,
         triggerType: rule.triggerType,
         triggerConfig: rule.triggerConfig,
@@ -236,7 +315,8 @@ const executeRule = async (rule, eventData) => {
           contactId,
           dealId,
           conversationId,
-          stageId: eventData?.stageId || eventData?.deal?.stageId || null,
+          stageId,
+          messageId,
           message: eventData?.message?.content || null,
         },
       }),
@@ -250,6 +330,7 @@ const executeRule = async (rule, eventData) => {
       type: 'AUTOMATION_FAILED',
       title: `Automation failed: ${rule.name}`,
       content: safeJsonStringify({
+        idempotencyKey,
         ruleId: rule.id,
         triggerType: rule.triggerType,
         triggerConfig: rule.triggerConfig,
@@ -263,7 +344,8 @@ const executeRule = async (rule, eventData) => {
           contactId,
           dealId,
           conversationId,
-          stageId: eventData?.stageId || eventData?.deal?.stageId || null,
+          stageId,
+          messageId,
           message: eventData?.message?.content || null,
         },
       }),
@@ -502,6 +584,12 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
 
 export const processDueAutomationJobs = async () => {
   const now = new Date();
+  const stuckBefore = new Date(now.getTime() - 10 * 60_000);
+  const stuckUpdated = await prisma.automationJob.updateMany({
+    where: { status: 'RUNNING', updatedAt: { lt: stuckBefore } },
+    data: { status: 'PENDING', runAt: now, lastError: 'stuck_job_requeued' },
+  });
+
   const jobs = await findDueAutomationJobs(now, 50);
 
   for (const job of jobs) {
@@ -517,7 +605,7 @@ export const processDueAutomationJobs = async () => {
     }
   }
 
-  return { processed: jobs.length };
+  return { processed: jobs.length, requeuedStuck: stuckUpdated.count };
 };
 
 const createAutomationJob = async ({ workspaceId, ruleId, runAt, actionType, actionConfig, eventData }) => {
@@ -623,18 +711,44 @@ const completeAutomationJob = async (id) => {
 const failAutomationJob = async (id, lastError) => {
   const hasModel = Boolean(prisma?.automationJob && typeof prisma.automationJob.update === 'function');
   if (hasModel) {
-    await prisma.automationJob.update({
-      where: { id },
-      data: { status: 'FAILED', lastError },
-    });
+    const job = await prisma.automationJob.findUnique({ where: { id }, select: { attempts: true } });
+    const attempts = Number(job?.attempts || 0);
+    if (attempts > 0 && attempts < MAX_AUTOMATION_JOB_ATTEMPTS) {
+      const delayMs = computeBackoffMs({ attempt: attempts });
+      await prisma.automationJob.update({
+        where: { id },
+        data: { status: 'PENDING', lastError, runAt: new Date(Date.now() + delayMs) },
+      });
+      return;
+    }
+
+    await prisma.automationJob.update({ where: { id }, data: { status: 'FAILED', lastError } });
+    return;
+  }
+
+  const rows = await prisma.$queryRaw`
+    SELECT "attempts"
+    FROM "automation_jobs"
+    WHERE "id" = ${id}
+    LIMIT 1
+  `;
+  const attempts = Number(rows?.[0]?.attempts || 0);
+  if (attempts > 0 && attempts < MAX_AUTOMATION_JOB_ATTEMPTS) {
+    const delayMs = computeBackoffMs({ attempt: attempts });
+    const runAt = new Date(Date.now() + delayMs);
+    await prisma.$executeRaw`
+      UPDATE "automation_jobs"
+      SET "status" = 'PENDING', "lastError" = ${lastError}, "runAt" = ${runAt}, "updatedAt" = NOW()
+      WHERE "id" = ${id}
+    `;
     return;
   }
 
   await prisma.$executeRaw`
-    UPDATE "automation_jobs"
-    SET "status" = 'FAILED', "lastError" = ${lastError}, "updatedAt" = NOW()
-    WHERE "id" = ${id}
-  `;
+      UPDATE "automation_jobs"
+      SET "status" = 'FAILED', "lastError" = ${lastError}, "updatedAt" = NOW()
+      WHERE "id" = ${id}
+    `;
 };
 
 const replaceVariables = (content, eventData) => {
@@ -745,6 +859,7 @@ const executeCallWebhookAction = async (workspaceId, eventType, actionConfig, ev
         payload,
         status: 'PENDING',
         attempts: 1,
+        nextRetryAt: null,
       }
     });
 
@@ -764,23 +879,33 @@ const executeCallWebhookAction = async (workspaceId, eventType, actionConfig, ev
       const responseBody = await response.text();
       const isSuccess = response.ok;
 
-      // Update Delivery Log on success or handled error
+      const attempt = 1;
+      const shouldRetry = !isSuccess && attempt < MAX_WEBHOOK_DELIVERY_ATTEMPTS;
+      const nextRetryAt = shouldRetry ? new Date(Date.now() + computeBackoffMs({ attempt, baseMs: 60_000, capMs: 60 * 60_000 })) : null;
+      const status = isSuccess ? 'SUCCESS' : shouldRetry ? 'PENDING' : 'FAILED';
+
       await prisma.webhookDelivery.update({
         where: { id: delivery.id },
         data: {
-          status: isSuccess ? 'SUCCESS' : 'FAILED',
+          status,
           responseCode: response.status,
-          responseBody: responseBody.substring(0, 500), // Avoid massive logs
+          responseBody: responseBody.substring(0, 500),
+          nextRetryAt,
         }
       });
     } catch (error) {
-      // Update Delivery Log on network error/timeout
+      const attempt = 1;
+      const shouldRetry = attempt < MAX_WEBHOOK_DELIVERY_ATTEMPTS;
+      const nextRetryAt = shouldRetry ? new Date(Date.now() + computeBackoffMs({ attempt, baseMs: 60_000, capMs: 60 * 60_000 })) : null;
+      const status = shouldRetry ? 'PENDING' : 'FAILED';
+
       await prisma.webhookDelivery.update({
         where: { id: delivery.id },
         data: {
-          status: 'FAILED',
+          status,
           responseCode: 0,
           responseBody: error.message || 'Unknown Error',
+          nextRetryAt,
         }
       });
     } finally {
@@ -894,6 +1019,7 @@ const executeAssignToUserAction = async (workspaceId, actionConfig, eventData) =
     console.log(`Assigned conversation ${conversationId} to user ${userId}`);
   } catch (error) {
     console.error('Failed to assign conversation:', error);
+    throw error;
   }
 };
 
@@ -988,5 +1114,6 @@ const executeSendWhatsAppAction = async (workspaceId, actionConfig, eventData) =
 
   } catch (error) {
     console.error('Failed to execute WhatsApp automation:', error);
+    throw error;
   }
 };

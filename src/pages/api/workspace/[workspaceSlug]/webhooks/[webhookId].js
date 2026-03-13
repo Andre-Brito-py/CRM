@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { deleteWebhook, rotateWebhookSecret } from '@/prisma/services/webhook';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const session = await getSession({ req });
@@ -18,6 +19,12 @@ const handler = async (req, res) => {
   if (req.method === 'DELETE') {
     const success = await deleteWebhook(workspace.id, webhookId);
     if (success) {
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId,
+        { action: 'WEBHOOK_DELETE', title: 'Webhook deleted', target: { webhookId } },
+        req
+      );
       return res.status(200).json({ message: 'Webhook deleted' });
     } else {
       return res.status(404).json({ error: 'Webhook not found' });
@@ -32,6 +39,12 @@ const handler = async (req, res) => {
       if (!webhook) {
         return res.status(404).json({ error: 'Webhook not found' });
       }
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId,
+        { action: 'WEBHOOK_ROTATE_SECRET', title: 'Webhook secret rotated', target: { webhookId } },
+        req
+      );
       return res.status(200).json({ webhook });
     }
 

@@ -1,6 +1,16 @@
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { processAutomation } from '@/prisma/services/automation';
+import { log, reportError } from '@/lib/server/logger';
+import { rateLimit } from '@/lib/server/rateLimit';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '1mb',
+    },
+  },
+};
 
 const mapAsaasStatusToLocal = (asaasStatus) => {
   const status = String(asaasStatus || '').toUpperCase();
@@ -18,6 +28,13 @@ const handler = async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).end('Method Not Allowed');
+  }
+
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
+  const rl = await rateLimit({ req, limit: 600, windowMs: 60_000 });
+  if (!rl.ok) {
+    log({ level: 'warn', msg: 'asaas_webhook_rate_limited', requestId });
+    return res.status(429).json({ error: { msg: 'Too Many Requests' } });
   }
 
   const expectedToken = await getSystemConfig('ASAAS_WEBHOOK_TOKEN', process.env.ASAAS_WEBHOOK_TOKEN);
@@ -42,8 +59,8 @@ const handler = async (req, res) => {
       })) ||
       (payment.externalReference
         ? await prisma.payment.findFirst({
-            where: { id: payment.externalReference },
-          })
+          where: { id: payment.externalReference },
+        })
         : null);
 
     if (!existing) {
@@ -70,7 +87,10 @@ const handler = async (req, res) => {
         payment: updated,
         contactId: updated.contactId,
         dealId: updated.dealId,
-      }).catch((err) => console.error('processAutomation PAYMENT_PAID failed:', err));
+      }).catch((err) => {
+        log({ level: 'error', msg: 'automation_payment_paid_failed', requestId, workspaceId: updated.workspaceId, paymentId: updated.id, error: err });
+        reportError(err, { route: 'automation:PAYMENT_PAID', requestId, workspaceId: updated.workspaceId, paymentId: updated.id });
+      });
     }
 
     if (shouldTriggerFailed(existing.status, updated.status)) {
@@ -79,7 +99,10 @@ const handler = async (req, res) => {
         payment: updated,
         contactId: updated.contactId,
         dealId: updated.dealId,
-      }).catch((err) => console.error('processAutomation PAYMENT_FAILED failed:', err));
+      }).catch((err) => {
+        log({ level: 'error', msg: 'automation_payment_failed_failed', requestId, workspaceId: updated.workspaceId, paymentId: updated.id, error: err });
+        reportError(err, { route: 'automation:PAYMENT_FAILED', requestId, workspaceId: updated.workspaceId, paymentId: updated.id });
+      });
     }
 
     await prisma.activity.create({
@@ -95,10 +118,10 @@ const handler = async (req, res) => {
 
     return res.status(200).json({ received: true });
   } catch (error) {
-    console.error('Asaas webhook handler error:', error);
+    log({ level: 'error', msg: 'asaas_webhook_handler_failed', requestId, eventType, paymentId: payment.id, error });
+    reportError(error, { route: '/api/webhooks/asaas', requestId, eventType, paymentId: payment.id });
     return res.status(500).json({ error: { msg: 'Webhook handler failed' } });
   }
 };
 
 export default handler;
-

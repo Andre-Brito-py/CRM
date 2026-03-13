@@ -8,10 +8,13 @@ import { renderTemplateString } from '@/prisma/services/template';
 import { getSystemConfig } from '@/lib/server/config';
 import { calculateFees, getPlatformFeeSettings, getProvider } from '@/lib/server/payment-providers/resolver';
 import { rateLimit } from '@/lib/server/rateLimit';
+import { log, reportError } from '@/lib/server/logger';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   const session = await validateSession(req, res);
   if (!session) return;
@@ -41,13 +44,14 @@ const handler = async (req, res) => {
 
       return res.status(200).json({ data: { payments } });
     } catch (error) {
-      console.error('payments list error:', error);
+      log({ level: 'error', msg: 'payments_list_failed', requestId, workspaceId: workspace.id, error });
+      reportError(error, { route: '/api/workspace/[workspaceSlug]/payments', requestId, workspaceId: workspace.id });
       return res.status(500).json({ error: { msg: 'Unable to fetch payments' } });
     }
   }
 
   if (method === 'POST') {
-    const rl = rateLimit({ req, limit: 120, windowMs: 60_000 });
+    const rl = await rateLimit({ req, limit: 120, windowMs: 60_000 });
     if (!rl.ok) {
       return res.status(429).json({ error: { msg: 'Too Many Requests' } });
     }
@@ -193,12 +197,32 @@ const handler = async (req, res) => {
         },
       });
 
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId || session.user.id,
+        {
+          action: 'PAYMENT_CREATE',
+          title: 'Payment created',
+          target: { paymentId: updated.id, contactId: contact.id, dealId: deal?.id || null },
+          metadata: {
+            amount: parsedValue,
+            billingType,
+            status: updated.status,
+            provider: providerName || null,
+          },
+        },
+        req
+      );
+
       processAutomation(workspace.id, 'PAYMENT_CREATED', {
         paymentId: updated.id,
         payment: updated,
         contactId: contact.id,
         dealId: deal?.id || null,
-      }).catch((err) => console.error('processAutomation PAYMENT_CREATED failed:', err));
+      }).catch((err) => {
+        log({ level: 'error', msg: 'automation_payment_created_failed', requestId, workspaceId: workspace.id, paymentId: updated.id, error: err });
+        reportError(err, { route: 'automation:PAYMENT_CREATED', requestId, workspaceId: workspace.id, paymentId: updated.id });
+      });
 
       if (sendWhatsApp) {
         const phone = contact.phone;
@@ -252,7 +276,8 @@ const handler = async (req, res) => {
 
       return res.status(201).json({ data: { payment: updated }, warnings: warnings.length ? warnings : undefined });
     } catch (error) {
-      console.error('payments create error:', error);
+      log({ level: 'error', msg: 'payments_create_failed', requestId, workspaceId: workspace.id, error });
+      reportError(error, { route: '/api/workspace/[workspaceSlug]/payments', requestId, workspaceId: workspace.id });
       const status = error?.status && Number.isInteger(error.status) ? error.status : 500;
       return res.status(status).json({ error: { msg: error.message || 'Unable to create payment' } });
     }

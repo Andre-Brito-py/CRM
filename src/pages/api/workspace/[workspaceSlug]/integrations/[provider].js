@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const { workspaceSlug, provider } = req.query;
 
   const workspace = await prisma.workspace.findFirst({
-    where: { slug: workspaceSlug },
+    where: { slug: workspaceSlug, deletedAt: null },
     select: { id: true },
   });
 
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     where: {
       workspaceId: workspace.id,
       email: session.user.email,
+      deletedAt: null,
     },
   });
 

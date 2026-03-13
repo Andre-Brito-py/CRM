@@ -1,55 +1,110 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import isEmail from 'validator/lib/isEmail';
 import prisma from '@/prisma/index';
 import { sendMail } from '@/lib/server/mail';
 import { getSystemConfig } from '@/lib/server/config';
+import { log, reportError } from '@/lib/server/logger';
+import { rateLimit } from '@/lib/server/rateLimit';
+
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '64kb',
+        },
+    },
+};
 
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: { msg: `${req.method} method unsupported` } });
     }
 
-    try {
-        const { name, email, password } = req.body;
+    const requestId = String(req.headers['x-request-id'] || '').trim() || null;
+    const successPayload = { message: 'User created successfully. Please check your email to verify your account.' };
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    const jitterMs = (base, spread) => base + crypto.randomInt(0, spread + 1);
+    const hasHoneypot = (body) => {
+        const candidates = ['website', 'url', 'homepage', 'companyWebsite'];
+        for (const key of candidates) {
+            const v = String(body?.[key] ?? '').trim();
+            if (v) return true;
+        }
+        return false;
+    };
+    const rl = await rateLimit({ req, limit: 10, windowMs: 10 * 60_000 });
+    if (!rl.ok) {
+        log({ level: 'warn', msg: 'auth_register_rate_limited', requestId });
+        return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
 
-        if (!name || !email || !password) {
+    try {
+        if (hasHoneypot(req.body || {})) {
+            await sleep(jitterMs(700, 900));
+            log({ level: 'warn', msg: 'auth_register_honeypot_triggered', requestId });
+            return res.status(201).json(successPayload);
+        }
+
+        const { name, email, password } = req.body || {};
+        const normalizedEmail = String(email || '').trim().toLowerCase();
+
+        if (!name || !normalizedEmail || !password) {
+            await sleep(jitterMs(250, 350));
             return res.status(400).json({ error: { msg: 'Please provide all details' } });
         }
 
-        // Checking if user already exists
-        const existingUser = await prisma.user.findUnique({
-            where: { email },
+        if (!isEmail(normalizedEmail)) {
+            await sleep(jitterMs(250, 350));
+            return res.status(400).json({ error: { msg: 'Invalid email' } });
+        }
+
+        if (String(password || '').length < 8) {
+            await sleep(jitterMs(250, 350));
+            return res.status(400).json({ error: { msg: 'Password too short' } });
+        }
+
+        const rlEmail = await rateLimit({ req, limit: 3, windowMs: 60_000, key: `auth:register:email:${normalizedEmail}` });
+        if (!rlEmail.ok) {
+            log({ level: 'warn', msg: 'auth_register_email_rate_limited', requestId });
+            return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+        }
+
+        const existingUser = await prisma.user.findFirst({
+            where: {
+                email: {
+                    equals: normalizedEmail,
+                    mode: 'insensitive',
+                }
+            },
         });
 
         if (existingUser) {
-            return res.status(400).json({ error: { msg: 'A user with this email already exists' } });
+            await sleep(jitterMs(600, 900));
+            log({ level: 'info', msg: 'auth_register_existing_email', requestId });
+            return res.status(201).json(successPayload);
         }
 
-        // Hashing password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Creating User (unverified)
         const user = await prisma.user.create({
             data: {
                 name,
-                email,
+                email: normalizedEmail,
                 password: hashedPassword,
             },
         });
 
-        // Generate Verification Token
         const token = crypto.randomBytes(32).toString('hex');
         await prisma.verificationToken.create({
             data: {
-                identifier: email,
+                identifier: normalizedEmail,
                 token,
                 expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
             },
         });
 
-        // Send Verification Email
         const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
-        const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(email)}`;
+        const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
         await sendMail({
             html: `
@@ -63,12 +118,13 @@ const handler = async (req, res) => {
       `,
             subject: '[Nextacular] Confirm your email address',
             text: `Welcome to Nextacular, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
-            to: email,
+            to: normalizedEmail,
         });
 
-        return res.status(201).json({ message: 'User created successfully. Please check your email to verify your account.' });
+        return res.status(201).json(successPayload);
     } catch (error) {
-        console.error('Registration Error:', error);
+        log({ level: 'error', msg: 'auth_register_failed', requestId, error });
+        reportError(error, { route: '/api/auth/register', requestId });
         return res.status(500).json({ error: { msg: 'Unable to register user' } });
     }
 };

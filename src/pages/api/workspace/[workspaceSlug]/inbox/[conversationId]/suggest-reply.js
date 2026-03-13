@@ -1,10 +1,27 @@
 import { validateSession } from '@/config/api-validation';
 import { getConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { rateLimit } from '@/lib/server/rateLimit';
+import { log, reportError } from '@/lib/server/logger';
+
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '256kb',
+    },
+  },
+};
+
+const clampText = (value, maxLen) => {
+  const raw = String(value || '');
+  if (raw.length <= maxLen) return raw;
+  return raw.slice(0, maxLen);
+};
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug, conversationId } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   if (method !== 'POST') {
     return res.status(405).json({ error: { msg: `${method} method unsupported` } });
@@ -20,6 +37,13 @@ const handler = async (req, res) => {
   }
 
   try {
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 30, windowMs: 5 * 60_000, key: `u:${userId}:ai:suggest-reply` });
+    if (!rl.ok) {
+      log({ level: 'warn', msg: 'ai_suggest_reply_rate_limited', requestId, workspaceId: workspace.id, userId });
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
     const conversation = await getConversation(conversationId);
 
     if (!conversation) {
@@ -42,7 +66,7 @@ const handler = async (req, res) => {
     // OUTBOUND (from us) -> assistant
     const messages = conversation.messages.map(m => ({
       role: m.direction === 'OUTBOUND' ? 'assistant' : 'user',
-      content: m.content
+      content: clampText(m.content, 2000)
     }));
 
     const systemPrompt = `You are a helpful customer support assistant for ${workspace.name}. 
@@ -67,8 +91,7 @@ const handler = async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('OpenAI API Error:', errorData);
+      log({ level: 'error', msg: 'ai_suggest_reply_provider_error', requestId, workspaceId: workspace.id, status: response.status });
       return res.status(500).json({ error: { msg: 'Failed to generate response from AI provider' } });
     }
 
@@ -78,7 +101,8 @@ const handler = async (req, res) => {
     res.status(200).json({ data: { suggestion } });
 
   } catch (error) {
-    console.error(error);
+    log({ level: 'error', msg: 'ai_suggest_reply_failed', requestId, workspaceId: workspace?.id, error });
+    reportError(error, { route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/suggest-reply', requestId, workspaceId: workspace?.id });
     res.status(500).json({ error: { msg: 'Unable to generate response' } });
   }
 };

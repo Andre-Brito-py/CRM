@@ -1,4 +1,4 @@
-const buckets = new Map();
+import prisma from '@/prisma/index';
 
 const getKey = ({ req, key }) => {
   if (key) return String(key);
@@ -10,14 +10,16 @@ const getKey = ({ req, key }) => {
   return String(ip);
 };
 
-export const rateLimit = ({ req, limit = 60, windowMs = 60_000, key }) => {
-  const now = Date.now();
-  const bucketKey = getKey({ req, key });
-  const current = buckets.get(bucketKey) || { count: 0, resetAt: now + windowMs };
+const buckets = new Map();
 
-  if (now > current.resetAt) {
-    buckets.set(bucketKey, { count: 1, resetAt: now + windowMs });
-    return { ok: true, remaining: limit - 1, resetAt: now + windowMs };
+const rateLimitMemory = ({ req, limit = 60, windowMs = 60_000, key }) => {
+  const nowMs = Date.now();
+  const bucketKey = getKey({ req, key });
+  const current = buckets.get(bucketKey) || { count: 0, resetAt: nowMs + windowMs };
+
+  if (nowMs > current.resetAt) {
+    buckets.set(bucketKey, { count: 1, resetAt: nowMs + windowMs });
+    return { ok: true, remaining: limit - 1, resetAt: nowMs + windowMs };
   }
 
   if (current.count >= limit) {
@@ -29,3 +31,37 @@ export const rateLimit = ({ req, limit = 60, windowMs = 60_000, key }) => {
   return { ok: true, remaining: limit - current.count, resetAt: current.resetAt };
 };
 
+const rateLimitPostgres = async ({ req, limit = 60, windowMs = 60_000, key }) => {
+  const bucketKey = getKey({ req, key });
+  const resetAt = new Date(Date.now() + windowMs);
+
+  const rows = await prisma.$queryRaw`
+    INSERT INTO "rate_limit_counters" ("key", "count", "resetAt", "createdAt", "updatedAt")
+    VALUES (${bucketKey}, 1, ${resetAt}, NOW(), NOW())
+    ON CONFLICT ("key") DO UPDATE SET
+      "count" = CASE WHEN "rate_limit_counters"."resetAt" <= NOW() THEN 1 ELSE "rate_limit_counters"."count" + 1 END,
+      "resetAt" = CASE WHEN "rate_limit_counters"."resetAt" <= NOW() THEN EXCLUDED."resetAt" ELSE "rate_limit_counters"."resetAt" END,
+      "updatedAt" = NOW()
+    RETURNING "count", "resetAt"
+  `;
+
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  const count = Number(row?.count || 0);
+  const resetAtMs = new Date(row?.resetAt).getTime();
+  const remaining = Math.max(0, limit - count);
+
+  return { ok: count <= limit, remaining, resetAt: resetAtMs };
+};
+
+export const rateLimit = async ({ req, limit = 60, windowMs = 60_000, key }) => {
+  const store = String(process.env.RATE_LIMIT_STORE || 'postgres').trim().toLowerCase();
+  if (store !== 'postgres') {
+    return rateLimitMemory({ req, limit, windowMs, key });
+  }
+
+  try {
+    return await rateLimitPostgres({ req, limit, windowMs, key });
+  } catch {
+    return rateLimitMemory({ req, limit, windowMs, key });
+  }
+};

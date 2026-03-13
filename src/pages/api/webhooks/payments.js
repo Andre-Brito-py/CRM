@@ -19,6 +19,8 @@ const triggerFromWebhook = (status) => {
   return null;
 };
 
+const normalizePaymentStatus = (status) => String(status || '').trim().toUpperCase();
+
 export default async function handler(req, res) {
   const requestId = ensureRequestId(req, res);
   if (req.method !== 'POST') {
@@ -26,13 +28,17 @@ export default async function handler(req, res) {
     return res.status(405).end('Method Not Allowed');
   }
 
-  const rl = rateLimit({ req, limit: 300, windowMs: 60_000 });
+  const rl = await rateLimit({ req, limit: 300, windowMs: 60_000 });
   if (!rl.ok) {
     log({ level: 'warn', msg: 'payments webhook rate limited', requestId });
     return res.status(429).json({ error: { msg: 'Too Many Requests' } });
   }
 
   const rawBody = await buffer(req);
+  if (rawBody.length > 2_000_000) {
+    log({ level: 'warn', msg: 'payments webhook payload too large', requestId, bytes: rawBody.length });
+    return res.status(413).json({ error: { msg: 'Payload Too Large' } });
+  }
   const parsedBody = (() => {
     try {
       return JSON.parse(rawBody.toString('utf8') || '{}');
@@ -77,17 +83,38 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true });
     }
 
+    const nextStatusRaw = result.status || payment.status;
+    const nextStatus = normalizePaymentStatus(nextStatusRaw);
+    const prevStatus = normalizePaymentStatus(payment.status);
+    const statusChanged = Boolean(nextStatus && nextStatus !== prevStatus);
+
+    const nextProviderPaymentId = payment.providerPaymentId || result.providerPaymentId || null;
+    const providerPaymentIdChanged = Boolean(nextProviderPaymentId && nextProviderPaymentId !== payment.providerPaymentId);
+
+    const nextPaymentLink =
+      payment.paymentLink ||
+      result?.invoiceUrl ||
+      result?.paymentUrl ||
+      payment.invoiceUrl ||
+      payment.paymentUrl ||
+      null;
+    const paymentLinkChanged = Boolean(nextPaymentLink && nextPaymentLink !== payment.paymentLink);
+
+    if (!statusChanged && !providerPaymentIdChanged && !paymentLinkChanged) {
+      return res.status(200).json({ received: true });
+    }
+
     const updated = await prisma.payment.update({
       where: { id: payment.id },
       data: {
-        status: result.status || payment.status,
-        providerPaymentId: payment.providerPaymentId || result.providerPaymentId,
-        paymentLink: payment.paymentLink || payment.invoiceUrl || payment.paymentUrl || null,
+        status: statusChanged ? nextStatus : payment.status,
+        providerPaymentId: nextProviderPaymentId,
+        paymentLink: nextPaymentLink,
       },
     });
 
-    const trigger = triggerFromWebhook(result.status);
-    if (trigger) {
+    const trigger = statusChanged ? triggerFromWebhook(nextStatus) : null;
+    if (trigger && updated?.workspaceId) {
       processAutomation(updated.workspaceId, trigger, {
         paymentId: updated.id,
         payment: updated,
@@ -105,16 +132,18 @@ export default async function handler(req, res) {
       );
     }
 
-    await prisma.activity.create({
-      data: {
-        workspaceId: updated.workspaceId,
-        type: 'PAYMENT_UPDATED',
-        title: `Payment ${updated.status}`,
-        content: updated.paymentLink || updated.paymentUrl || updated.invoiceUrl || undefined,
-        contactId: updated.contactId,
-        dealId: updated.dealId,
-      },
-    });
+    if (statusChanged) {
+      await prisma.activity.create({
+        data: {
+          workspaceId: updated.workspaceId,
+          type: 'PAYMENT_UPDATED',
+          title: `Payment ${updated.status}`,
+          content: updated.paymentLink || updated.paymentUrl || updated.invoiceUrl || undefined,
+          contactId: updated.contactId,
+          dealId: updated.dealId,
+        },
+      });
+    }
 
     return res.status(200).json({ received: true });
   } catch (error) {

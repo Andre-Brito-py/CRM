@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getWebhooks, createWebhook } from '@/prisma/services/webhook';
+import { createAuditActivity } from '@/prisma/services/activity';
 
 const normalizeEvents = (value) => {
   if (Array.isArray(value)) {
@@ -40,6 +41,17 @@ const handler = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     const webhook = await createWebhook(workspace.id, url, normalizeEvents(events));
+    await createAuditActivity(
+      workspace.id,
+      session.user.userId,
+      {
+        action: 'WEBHOOK_CREATE',
+        title: 'Webhook created',
+        target: { webhookId: webhook?.id || null },
+        metadata: { url, events: normalizeEvents(events) },
+      },
+      req
+    );
     return res.status(201).json({ webhook });
   }
 

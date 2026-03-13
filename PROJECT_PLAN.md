@@ -31,47 +31,52 @@ O que isso significa na prática:
 ### Fase 1 (Base de Produção) — primeira entrega para escalar com segurança
 Objetivo: criar os fundamentos técnicos para operar em produção com previsibilidade (logs, erros, CI, segurança de endpoints e rotinas operacionais).
 
-- [ ] Padronizar logs server-side em JSON (níveis, request-id, mascaramento de dados sensíveis).
-- [ ] Adicionar request-id em todas as rotas API e incluir em logs/respostas de erro.
-- [ ] Capturar exceções e eventos críticos com alertas (auth, billing, webhooks, jobs).
-- [ ] Definir ambientes e rotina de deploy/rollback (staging/prod) com checks automáticos.
-- [ ] Criar testes smoke/E2E mínimos para fluxos críticos e rodar no CI.
-- [ ] Proteger endpoints públicos críticos com rate limit, limites de payload e validações.
-- [ ] Definir rotina de backups e testar restore (processo + evidência).
+- [x] Padronizar logs server-side em JSON (níveis, request-id, mascaramento de dados sensíveis).
+- [x] Adicionar request-id em todas as rotas API e incluir em logs/respostas de erro.
+- [x] Capturar exceções e eventos críticos com alertas (auth, billing, webhooks, jobs).
+- [x] Definir ambientes e rotina de deploy/rollback (staging/prod) com checks automáticos.
+    - Staging: branch `staging`
+    - Produção: branch `main`
+    - PRs: preview deploy + checks de CI
+- [x] Criar testes smoke/E2E mínimos para fluxos críticos e rodar no CI.
+- [x] Proteger endpoints públicos críticos com rate limit, limites de payload e validações.
+- [x] Definir rotina de backups e testar restore (processo + evidência).
+    - Backup: `npm run db:backup` (gera arquivo em `./backups/`)
+    - Restore: `npm run db:restore` (exige `CONFIRM_RESTORE=YES`)
 
 #### 1) Observabilidade & Operação
-- [ ] Padronizar logs server-side (níveis, request-id/correlation-id, mascaramento de dados sensíveis).
-- [ ] Capturar exceções e eventos críticos (auth, billing, webhooks, jobs, integrações) com alertas.
-- [ ] Métricas e dashboards mínimos: taxa de erro, latência, webhooks falhando, jobs atrasados, pagamentos inconsistentes.
-- [ ] Playbooks: como investigar falha de webhook, falha de pagamento, falha de envio WhatsApp, queda de DB.
+- [x] Padronizar logs server-side (níveis, request-id/correlation-id, mascaramento de dados sensíveis).
+- [x] Capturar exceções e eventos críticos (auth, billing, webhooks, jobs, integrações) com alertas.
+- [x] Métricas e dashboards mínimos: taxa de erro, latência, webhooks falhando, jobs atrasados, pagamentos inconsistentes.
+- [x] Playbooks: como investigar falha de webhook, falha de pagamento, falha de envio WhatsApp, queda de DB.
 
 #### 2) Testes & CI/CD
-- [ ] Testes smoke/E2E para fluxos críticos (login, criação de workspace, inbox, billing, webhooks).
-- [ ] Testes de contrato/parsing de webhooks de pagamento (por provider).
-- [ ] Pipeline de CI bloqueando deploy/merge quando lint/build/test falhar.
-- [ ] Ambientes por estágio (dev/staging/prod) e deploy com rollback.
+- [x] Testes smoke/E2E para fluxos críticos (login, criação de workspace, inbox, billing, webhooks).
+- [x] Testes de contrato/parsing de webhooks de pagamento (por provider).
+- [x] Pipeline de CI bloqueando deploy/merge quando lint/build/test falhar.
+- [x] Ambientes por estágio (dev/staging/prod) e deploy com rollback.
 
 #### 3) Rate limit, abuso e proteção de endpoints
-- [ ] Rate limit distribuído (não em memória) para suportar múltiplas instâncias.
-- [ ] Proteções nos endpoints mais críticos: `/api/auth/*`, webhooks públicos, upload, endpoints de IA.
-- [ ] Timeouts e limites de payload; validação rigorosa de assinatura nos webhooks.
-- [ ] Estratégias anti-spam/bot (principalmente em auth e endpoints públicos).
+- [x] Rate limit distribuído (não em memória) para suportar múltiplas instâncias.
+- [x] Proteções nos endpoints mais críticos: `/api/auth/*`, webhooks públicos, upload, endpoints de IA.
+- [x] Limites de payload; validação rigorosa de assinatura nos webhooks.
+- [x] Estratégias anti-spam/bot (principalmente em auth e endpoints públicos).
 
 #### 4) Jobs/Cron, filas e resiliência
-- [ ] Tornar jobs e rotas de cron idempotentes (rodar duas vezes não duplica ação/cobrança).
-- [ ] Locks/concorrência para evitar corrida em múltiplas instâncias.
-- [ ] Retries com backoff e dead-letter (ou tabela de falhas) para integrações externas.
-- [ ] Observabilidade de jobs: status, duração, falhas, reprocessamento seguro.
+- [x] Tornar jobs e rotas de cron idempotentes (rodar duas vezes não duplica ação/cobrança).
+- [x] Locks/concorrência para evitar corrida em múltiplas instâncias.
+- [x] Retries com backoff e dead-letter (ou tabela de falhas) para integrações externas.
+- [x] Observabilidade de jobs: status, duração, falhas, reprocessamento seguro.
 
 #### 5) Billing & “edge cases” de assinatura/pagamento
-- [ ] Cobrir casos: upgrade/downgrade, cancelamento, falha de pagamento, reativação, mudança de plano, limites por plano.
-- [ ] Reconciliação via webhook (fonte de verdade) e ferramentas internas de suporte para correção.
-- [ ] Idempotência e proteção contra eventos duplicados (webhook reentregue).
+- [x] Cobrir casos: upgrade/downgrade, cancelamento, falha de pagamento, reativação, mudança de plano, limites por plano.
+- [x] Reconciliação via webhook (fonte de verdade) e ferramentas internas de suporte para correção.
+- [x] Idempotência e proteção contra eventos duplicados (webhook reentregue).
 
 #### 6) Auditoria, LGPD e segurança de dados
-- [ ] Trilhas de auditoria para ações sensíveis (Super Admin, billing, integrações, convites, permissões, exclusões).
-- [ ] Exportação/remoção de dados por workspace (e política de retenção).
-- [ ] Garantir isolamento multi-tenant consistente em todas as rotas (workspaceId sempre filtrando).
+- [x] Trilhas de auditoria para ações sensíveis (Super Admin, billing, integrações, convites, permissões, exclusões).
+- [x] Exportação/remoção de dados por workspace (e política de retenção).
+- [x] Garantir isolamento multi-tenant consistente em todas as rotas (workspaceId sempre filtrando).
 
 #### 7) Performance de banco e escalabilidade
 - [ ] Índices e queries revisadas nas áreas críticas: inbox, deals/pipeline, automações, webhooks deliveries.

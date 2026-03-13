@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
+import { getWorkspace } from '@/prisma/services/workspace';
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
@@ -15,13 +16,9 @@ const handler = async (req, res) => {
   const scope = req.query.scope;
 
   try {
-    const workspace = await prisma.workspace.findFirst({
-      where: { slug: workspaceSlug, deletedAt: null },
-      select: { id: true },
-    });
-
+    const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, workspaceSlug);
     if (!workspace) {
-      return res.status(404).json({ error: 'Workspace not found' });
+      return res.status(404).json({ error: 'Workspace not found or permission denied' });
     }
 
     const workspaceId = workspace.id;
@@ -155,15 +152,15 @@ const handler = async (req, res) => {
     const [users, stages] = await Promise.all([
       uniqueUserIds.length > 0
         ? prisma.user.findMany({
-            where: { id: { in: uniqueUserIds } },
-            select: { id: true, name: true, image: true },
-          })
+          where: { id: { in: uniqueUserIds } },
+          select: { id: true, name: true, image: true },
+        })
         : Promise.resolve([]),
       dealsByStage.length > 0
         ? prisma.stage.findMany({
-            where: { id: { in: dealsByStage.map((s) => s.stageId) } },
-            select: { id: true, name: true, order: true },
-          })
+          where: { id: { in: dealsByStage.map((s) => s.stageId) } },
+          select: { id: true, name: true, order: true },
+        })
         : Promise.resolve([]),
     ]);
 

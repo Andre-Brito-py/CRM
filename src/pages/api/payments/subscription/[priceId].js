@@ -2,9 +2,11 @@ import { validateSession } from '@/config/api-validation';
 import getStripe from '@/lib/server/stripe';
 import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 import { getSystemConfig } from '@/lib/server/config';
+import { log, reportError } from '@/lib/server/logger';
 
 const handler = async (req, res) => {
   const { method } = req;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
 
   if (method === 'POST') {
     try {
@@ -47,7 +49,8 @@ const handler = async (req, res) => {
 
       res.status(200).json({ data: { sessionId: paymentSession.id } });
     } catch (error) {
-      console.error(error);
+      log({ level: 'error', msg: 'subscription_checkout_failed', requestId, error });
+      reportError(error, { route: '/api/payments/subscription/[priceId]', requestId });
       res.status(500).json({ errors: { error: { msg: 'Unable to create subscription checkout session' } } });
     }
   } else {

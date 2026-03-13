@@ -4,10 +4,12 @@ import { getWorkspace } from '@/prisma/services/workspace';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
 import { renderTemplateString } from '@/prisma/services/template';
 import prisma from '@/prisma/index';
+import { log, reportError } from '@/lib/server/logger';
 
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug, conversationId } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
   const session = await validateSession(req, res);
 
   if (!session) return;
@@ -32,7 +34,8 @@ const handler = async (req, res) => {
 
         res.status(200).json({ data: { conversation } });
       } catch (error) {
-        console.error(error);
+        log({ level: 'error', msg: 'conversation_get_failed', requestId, workspaceId: workspace.id, conversationId, error });
+        reportError(error, { route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]', requestId, workspaceId: workspace.id, conversationId });
         res.status(500).json({ error: { msg: 'Unable to fetch conversation' } });
       }
       break;
@@ -53,7 +56,8 @@ const handler = async (req, res) => {
         const updated = await updateConversation(conversationId, { assigneeId });
         res.status(200).json({ data: { conversation: updated } });
       } catch (error) {
-        console.error(error);
+        log({ level: 'error', msg: 'conversation_update_failed', requestId, workspaceId: workspace.id, conversationId, error });
+        reportError(error, { route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]', requestId, workspaceId: workspace.id, conversationId });
         res.status(500).json({ error: { msg: 'Unable to update conversation' } });
       }
       break;
@@ -108,7 +112,8 @@ const handler = async (req, res) => {
             sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, resolvedContent);
             messageStatus = 'SENT';
           } catch (waError) {
-            console.error('Failed to send WhatsApp message:', waError);
+            log({ level: 'error', msg: 'whatsapp_send_failed', requestId, workspaceId: workspace.id, conversationId, error: waError });
+            reportError(waError, { route: 'whatsapp:send', requestId, workspaceId: workspace.id, conversationId });
             messageStatus = 'FAILED';
             // We continue to save the message as FAILED
           }
@@ -125,7 +130,8 @@ const handler = async (req, res) => {
 
         res.status(201).json({ data: { message } });
       } catch (error) {
-        console.error(error);
+        log({ level: 'error', msg: 'message_create_failed', requestId, workspaceId: workspace.id, conversationId, error });
+        reportError(error, { route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]', requestId, workspaceId: workspace.id, conversationId });
         res.status(500).json({ error: { msg: 'Unable to send message' } });
       }
       break;

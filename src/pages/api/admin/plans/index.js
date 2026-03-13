@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import getStripe from '@/lib/server/stripe';
+import { createPlatformAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
   const session = await getSession({ req });
@@ -75,6 +76,18 @@ export default async function handler(req, res) {
           isActive: typeof isActive === 'boolean' ? isActive : true,
         },
       });
+
+      await createPlatformAuditActivity(
+        session.user.userId || session.user.id,
+        session.user.email,
+        {
+          action: 'PLAN_CREATE',
+          title: 'Plan created',
+          target: { planId: plan.id },
+          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, currency: plan.currency, isActive: plan.isActive },
+        },
+        req
+      );
 
       res.status(201).json({ data: { plan } });
     } catch (error) {

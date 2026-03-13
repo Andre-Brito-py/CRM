@@ -2,6 +2,8 @@ import * as Sentry from '@sentry/nextjs';
 
 const hasSentryDsn = () => Boolean(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN);
 
+const SENSITIVE_KEY_RE = /(pass(word)?|secret|token|api[-_]?key|authorization|cookie|set-cookie)/i;
+
 const serializeError = (err) => {
   if (!err) return null;
   if (err instanceof Error) {
@@ -14,18 +16,42 @@ const serializeError = (err) => {
   return { value: String(err) };
 };
 
-const normalizeMeta = (meta) => {
-  const out = {};
-  for (const [key, value] of Object.entries(meta || {})) {
-    if (value === undefined) continue;
-    if (value instanceof Error) {
-      out[key] = serializeError(value);
-      continue;
-    }
-    out[key] = value;
-  }
-  return out;
+const sanitizeString = (value) => {
+  const str = String(value);
+  if (/^\s*bearer\s+/i.test(str)) return 'Bearer [REDACTED]';
+  return str;
 };
+
+const sanitizeValue = (value, keyHint = '', depth = 0) => {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  if (value instanceof Error) return serializeError(value);
+
+  const keyStr = String(keyHint || '');
+  if (keyStr && SENSITIVE_KEY_RE.test(keyStr)) return '[REDACTED]';
+
+  if (typeof value === 'string') return sanitizeString(value);
+  if (typeof value === 'number' || typeof value === 'boolean') return value;
+
+  if (depth >= 5) return '[Truncated]';
+
+  if (Array.isArray(value)) {
+    return value.slice(0, 50).map((v) => sanitizeValue(v, keyHint, depth + 1));
+  }
+
+  if (typeof value === 'object') {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) {
+      if (v === undefined) continue;
+      out[k] = sanitizeValue(v, k, depth + 1);
+    }
+    return out;
+  }
+
+  return sanitizeString(value);
+};
+
+const normalizeMeta = (meta) => sanitizeValue(meta || {}, '', 0);
 
 export const log = ({ level = 'info', msg, ...meta }) => {
   const entry = {
@@ -45,7 +71,14 @@ export const log = ({ level = 'info', msg, ...meta }) => {
 export const reportError = (error, context = {}) => {
   if (!hasSentryDsn()) return;
   try {
-    Sentry.captureException(error, { extra: normalizeMeta(context) });
+    const meta = normalizeMeta(context);
+    Sentry.withScope((scope) => {
+      if (meta?.requestId) scope.setTag('request_id', String(meta.requestId));
+      if (meta?.route) scope.setTag('route', String(meta.route));
+      if (meta?.workspaceId) scope.setTag('workspace_id', String(meta.workspaceId));
+      if (meta?.userId) scope.setUser({ id: String(meta.userId) });
+      scope.setExtras(meta || {});
+      Sentry.captureException(error);
+    });
   } catch {}
 };
-

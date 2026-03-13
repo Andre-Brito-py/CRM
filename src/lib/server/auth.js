@@ -9,6 +9,7 @@ import { html, text } from '@/config/email-templates/signin';
 import { sendMail } from '@/lib/server/mail';
 import { getSystemConfig } from '@/lib/server/config';
 import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -76,26 +77,48 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
         token2fa: { label: "2FA Token", type: "text" }
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Please enter an email and password');
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+        const normalizedEmail = String(credentials.email || '').trim().toLowerCase();
+
+        if (req) {
+          const rlIp = await rateLimit({ req, limit: 60, windowMs: 5 * 60_000 });
+          if (!rlIp.ok) {
+            throw new Error('Too Many Requests');
+          }
+          const rlEmail = await rateLimit({ req, limit: 15, windowMs: 5 * 60_000, key: `auth:login:email:${normalizedEmail}` });
+          if (!rlEmail.ok) {
+            throw new Error('Too Many Requests');
+          }
+        }
+
+        const user = await prisma.user.findFirst({
+          where: {
+            email: {
+              equals: normalizedEmail,
+              mode: 'insensitive',
+            }
+          }
         });
 
         if (!user || !user.password) {
+          await sleep(250);
           throw new Error('No user found or password not set (use magic link to login and set a password)');
         }
 
         const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isPasswordValid) {
+          await sleep(250);
           throw new Error('Invalid password');
         }
 
         if (!user.emailVerified) {
+          await sleep(250);
           throw new Error('Please verify your email address first');
         }
 
@@ -111,6 +134,7 @@ export const authOptions = {
           const isValidToken = authenticator.check(credentials.token2fa, user.twoFactorSecret);
 
           if (!isValidToken) {
+            await sleep(200);
             throw new Error('Invalid 2FA code');
           }
         }
