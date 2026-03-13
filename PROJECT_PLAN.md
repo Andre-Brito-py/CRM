@@ -89,6 +89,50 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 - [x] Ferramentas de suporte: masquerade com audit, reprocessar webhook/job, inspecionar estado de pagamentos.
 - [x] Migração/onboarding: importação, templates/presets, guias e checklist para clientes.
 
+#### 9) Go-live comercial (“vendível”)
+- [x] Limites por plano: impedir convites acima do limite de membros.
+- [x] Limites por plano: aplicar limites claros em webhooks (criação).
+- [x] Limites por plano: aplicar limites claros em automações (criação).
+- [x] Limites por plano: aplicar limites claros em IA (quota + rate limit).
+- [x] Limites por plano: aplicar limites claros em storage/upload.
+- [x] Onboarding comercial: fluxo “primeiro valor” (templates, presets, checklist guiado).
+- [x] Teste de carga: baseline com cenários reais (login, inbox, pipeline, tasks).
+- [x] Infra: Postgres gerenciado com pool de conexões e tuning de índices.
+  - [x] App: suporte a DATABASE_URL_POOLED (PgBouncer/Neon/Supabase pooler).
+  - [x] DB: índices adicionais para contagens e rate limits (migração Prisma).
+- [x] Observabilidade: alertas por SLO (5xx, latência, jobs, webhooks, billing).
+- [x] Segurança: WAF/CDN rules, proteção de bots e hardening de rotas públicas.
+- [x] Operação: runbooks de incidente + rotina de plantão (status, escalonamento).
+- [x] FinOps: custos por workspace (WhatsApp, IA, storage) e limites por plano.
+
+##### Runbooks (operacional)
+- **Severidades**
+  - **SEV1**: sistema indisponível / perda de dados / pagamentos quebrados.
+  - **SEV2**: degradação relevante (latência alta, filas crescendo, webhooks falhando).
+  - **SEV3**: impacto parcial ou workaround disponível.
+- **Rotina de plantão**
+  - Canal único de incidentes + registro de timeline.
+  - Escalonamento: On-call → Tech Lead → Produto/Comercial → Infra (se necessário).
+  - Pós-incidente: RCA com ações e responsável.
+- **Checklist inicial (Triage)**
+  - Confirmar escopo (qual workspace, qual rota, desde quando).
+  - Checar saúde do sistema e alertas.
+  - Checar logs/erros (ex.: Sentry) e correlação por requestId.
+  - Mitigar primeiro (rollback, feature flag/config, reduzir tráfego, rate limit).
+- **Incidente: 5xx / latência alta**
+  - Verificar DB (conexões/pool, queries lentas) e endpoints mais afetados.
+  - Verificar jobs (automation) e reprocessamentos (webhook deliveries).
+  - Mitigação: aumentar pool (via DATABASE_URL_POOLED), reduzir concorrência, bloquear rotas abusadas.
+- **Incidente: webhooks falhando**
+  - Verificar `webhook_deliveries` (PENDING/FAILED), tentativas e `nextRetryAt`.
+  - Mitigação: reprocessar deliveries, pausar webhook específico, validar URL/secret.
+- **Incidente: automações atrasadas**
+  - Verificar `automation_jobs` (PENDING/RUNNING) e jobs “stuck”.
+  - Mitigação: reduzir volume, corrigir regra, reprocessar jobs falhos.
+- **Incidente: billing/pagamentos**
+  - Verificar reconciliação via webhook e estado do `customerPayment`.
+  - Mitigação: idempotência, replay de eventos, correção manual via suporte (com audit).
+
 ## �️ Estrutura de Módulos e Funcionalidades
 
 ### 1. Dashboard ✅

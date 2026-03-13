@@ -1,7 +1,14 @@
+import prisma from '@/prisma/index';
 import { validateSession } from '@/config/api-validation';
 import { createDeal, getDeals, updateDeal } from '@/prisma/services/deal';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { createActivity } from '@/prisma/services/activity';
+
+const parsePositiveInt = (value) => {
+  const n = Number.parseInt(String(value || ''), 10);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  return n;
+};
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -23,8 +30,34 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET':
       try {
-        const deals = await getDeals(workspace.id);
-        res.status(200).json({ data: { deals } });
+        const compact =
+          req.query.compact === '1' || req.query.compact === 'true' || req.query.compact === true;
+
+        const page = parsePositiveInt(req.query.page) || 1;
+        const pageSizeRaw = parsePositiveInt(req.query.pageSize);
+        const pageSizeMax = compact ? 1000 : 200;
+        const pageSize = pageSizeRaw ? Math.min(pageSizeMax, pageSizeRaw) : Math.min(pageSizeMax, 200);
+        const skip = (page - 1) * pageSize;
+
+        const [deals, total] = await Promise.all([
+          getDeals(workspace.id, { take: pageSize, skip, compact }),
+          prisma.deal.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
+        ]);
+
+        const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
+        res.status(200).json({
+          data: {
+            deals,
+            meta: {
+              page,
+              pageSize,
+              total,
+              totalPages,
+              hasMore: page < totalPages,
+              compact,
+            },
+          },
+        });
       } catch (error) {
         res.status(500).json({ error: { msg: 'Unable to fetch deals' } });
       }

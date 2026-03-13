@@ -2,6 +2,9 @@ import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getWebhooks, createWebhook } from '@/prisma/services/webhook';
 import { createAuditActivity } from '@/prisma/services/activity';
+import prisma from '@/prisma/index';
+import { canAddWebhook } from '@/lib/server/subscription';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const normalizeEvents = (value) => {
   if (Array.isArray(value)) {
@@ -24,6 +27,7 @@ const handler = async (req, res) => {
   }
 
   const { workspaceSlug } = req.query;
+  const requestId = String(req.headers['x-request-id'] || '').trim() || null;
   const workspace = await getWorkspace(session.user.userId, session.user.email, workspaceSlug);
 
   if (!workspace) {
@@ -36,10 +40,33 @@ const handler = async (req, res) => {
   }
 
   if (req.method === 'POST') {
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 30, windowMs: 60_000, key: `u:${userId}:webhooks:create:1m` });
+    if (!rl.ok) {
+      return res.status(429).json({ error: { msg: 'Too Many Requests', requestId } });
+    }
+
     const { url, events } = req.body;
     if (!url) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
+
+    const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+    if (!isSuperAdmin) {
+      const currentWebhookCount = await prisma.webhook.count({
+        where: { workspaceId: workspace.id, deletedAt: null, isActive: true },
+      });
+      const isAllowed = await canAddWebhook(workspace.creator?.email, currentWebhookCount);
+      if (!isAllowed) {
+        return res.status(403).json({
+          error: {
+            msg: 'LIMIT_REACHED',
+            details: 'Você atingiu o limite de webhooks do seu plano. Faça um upgrade para adicionar mais.',
+          },
+        });
+      }
+    }
+
     const webhook = await createWebhook(workspace.id, url, normalizeEvents(events));
     await createAuditActivity(
       workspace.id,

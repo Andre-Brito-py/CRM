@@ -145,7 +145,7 @@ const PipelineBoard = ({ pipeline, workspaceSlug }) => {
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex h-full overflow-x-auto pb-8 items-start custom-scrollbar">
+      <div id="pipeline-board" className="flex h-full overflow-x-auto pb-8 items-start custom-scrollbar">
         {stages.map((stage) => (
           <BoardColumn
             key={stage.id}

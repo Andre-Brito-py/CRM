@@ -2,8 +2,11 @@ import {
   validateWorkspaceInvite,
   validateSession,
 } from '@/config/api-validation/index';
+import prisma from '@/prisma/index';
 import { inviteUsers, getWorkspace } from '@/prisma/services/workspace';
 import { createAuditActivity } from '@/prisma/services/activity';
+import { getSubscriptionStatus } from '@/lib/server/subscription';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -13,6 +16,45 @@ const handler = async (req, res) => {
     await validateWorkspaceInvite(req, res);
     const { members } = req.body;
     const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
+    if (!workspace?.id) {
+      return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
+    }
+
+    const userId = session.user.userId || session.user.id;
+    const rl = await rateLimit({ req, limit: 10, windowMs: 60_000, key: `u:${userId}:members:invite:1m` });
+    if (!rl.ok) {
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    const creatorEmail = workspace?.creator?.email || session.user.email;
+    const requestedEmails = Array.isArray(members)
+      ? members.map((m) => String(m?.email || '').trim().toLowerCase()).filter(Boolean)
+      : [];
+    const uniqueEmails = [...new Set(requestedEmails)];
+
+    if (uniqueEmails.length > 0) {
+      const [plan, currentMemberCount, existingCount] = await Promise.all([
+        getSubscriptionStatus(creatorEmail),
+        prisma.member.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
+        prisma.member.count({
+          where: { workspaceId: workspace.id, deletedAt: null, email: { in: uniqueEmails } },
+        }),
+      ]);
+
+      const memberLimit = plan === 'FREE' ? 3 : plan === 'STANDARD' ? 10 : null;
+      const toAdd = Math.max(0, uniqueEmails.length - existingCount);
+
+      if (memberLimit && currentMemberCount + toAdd > memberLimit) {
+        return res.status(403).json({
+          error: {
+            msg: 'LIMIT_REACHED',
+            details:
+              'Você atingiu o limite de membros do seu plano. Faça um upgrade para convidar mais pessoas.',
+          },
+        });
+      }
+    }
+
     await inviteUsers(
       session.user.userId,
       session.user.email,

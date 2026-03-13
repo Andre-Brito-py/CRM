@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PlusIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
@@ -10,8 +11,10 @@ import AddDealModal from '@/sections/pipeline/AddDealModal';
 import Paywall from '@/components/Paywall/index';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const Pipeline = () => {
+  const { t } = useTranslation();
   const { workspace } = useWorkspace();
   const { data, isLoading } = usePipelines(workspace?.slug);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -24,6 +27,33 @@ const Pipeline = () => {
   const pipeline = data?.pipelines?.[0];
 
   const toggleModal = () => setModalOpen(!isModalOpen);
+
+  const pipelineSteps = [
+    {
+      element: '#pipeline-add-deal-btn',
+      popover: {
+        title: t('onboarding.tour.pipeline.step1.title'),
+        description: t('onboarding.tour.pipeline.step1.desc'),
+        position: 'bottom',
+      },
+    },
+    {
+      element: '#pipeline-board',
+      popover: {
+        title: t('onboarding.tour.pipeline.step2.title'),
+        description: t('onboarding.tour.pipeline.step2.desc'),
+        position: 'top',
+      },
+    },
+    {
+      element: '#pipeline-ai-insights-btn',
+      popover: {
+        title: t('onboarding.tour.pipeline.step3.title'),
+        description: t('onboarding.tour.pipeline.step3.desc'),
+        position: 'bottom',
+      },
+    },
+  ];
 
   const generateInsights = async () => {
     if (!pipeline) return;
@@ -46,6 +76,7 @@ const Pipeline = () => {
 
   return (
     <AccountLayout>
+      <OnboardingTour tourId="pipeline-tour" steps={pipelineSteps} />
       <Meta title={`Nextacular - ${workspace?.name} | Pipeline`} />
       <Content.Title
         title="Pipeline"
@@ -62,6 +93,7 @@ const Pipeline = () => {
             {pipeline && (
               <Paywall minPlan="STANDARD" compact>
                 <button
+                  id="pipeline-ai-insights-btn"
                   onClick={generateInsights}
                   disabled={isGeneratingInsights}
                   className="flex items-center justify-center px-5 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all duration-300 shadow-sm shadow-indigo-500/5 group disabled:opacity-50"
@@ -79,6 +111,7 @@ const Pipeline = () => {
             )}
           </div>
           <button
+            id="pipeline-add-deal-btn"
             className="flex items-center justify-center px-8 py-3 text-white bg-zinc-900 rounded-2xl hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/20 active:scale-95 font-bold text-sm"
             onClick={toggleModal}
           >

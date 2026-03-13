@@ -172,6 +172,15 @@ const Workspace = () => {
     fetcher
   );
 
+  const usage = dashboardData?.usage || null;
+  const formatLimit = (value) => (value == null ? 'Ilimitado' : value);
+  const formatBrl = (value) =>
+    new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      maximumFractionDigits: 2,
+    }).format(Number(value) || 0);
+
   const stats = useMemo(() => [
     {
       title: 'Total Contacts',
@@ -257,6 +266,87 @@ const Workspace = () => {
               <StatCard key={item.title} {...item} />
             ))}
           </div>
+
+          {usage && (
+            <div className="premium-card p-8 mb-8">
+              <div className="flex items-center justify-between mb-6 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
+                <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
+                  Uso e limites
+                </h3>
+                <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold rounded-lg uppercase tracking-widest">
+                  Plano {usage.plan}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    Membros
+                  </div>
+                  <div className="mt-2 text-2xl font-executive font-bold text-zinc-900 dark:text-white">
+                    {usage.counts.membersAccepted}/{formatLimit(usage.limits.members)}
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    Pendentes: {usage.counts.membersPending}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    Webhooks
+                  </div>
+                  <div className="mt-2 text-2xl font-executive font-bold text-zinc-900 dark:text-white">
+                    {usage.counts.webhooksActive}/{formatLimit(usage.limits.webhooks)}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    Automações
+                  </div>
+                  <div className="mt-2 text-2xl font-executive font-bold text-zinc-900 dark:text-white">
+                    {usage.counts.automationsActive}/{formatLimit(usage.limits.automations)}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    Integrações WhatsApp
+                  </div>
+                  <div className="mt-2 text-2xl font-executive font-bold text-zinc-900 dark:text-white">
+                    {usage.counts.whatsappIntegrations}/{formatLimit(usage.limits.whatsappIntegrations)}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    WhatsApp (30d)
+                  </div>
+                  <div className="mt-2 text-2xl font-executive font-bold text-zinc-900 dark:text-white">
+                    {usage.counts.whatsappOutbound30d} out / {usage.counts.whatsappInbound30d} in
+                  </div>
+                  <div className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                    Estimativa: {formatBrl(usage.estimatedCosts.whatsappOutbound30d)}
+                  </div>
+                </div>
+
+                <div className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800">
+                  <div className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+                    IA e uploads (24h)
+                  </div>
+                  <div className="mt-2 text-sm text-zinc-600 dark:text-zinc-300 font-bold">
+                    IA: {usage.counts.aiRequests24h}/{usage.limits.aiRequests24h}
+                  </div>
+                  <div className="mt-1 text-sm text-zinc-600 dark:text-zinc-300 font-bold">
+                    Uploads: {usage.counts.uploadRequests24h}/{usage.limits.uploads24h}
+                  </div>
+                  <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    Estimativa: {formatBrl(usage.estimatedCosts.aiRequests24h + usage.estimatedCosts.uploadRequests24h)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="premium-card p-8 lg:col-span-2">

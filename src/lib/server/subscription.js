@@ -63,3 +63,23 @@ export const canAddContact = async (workspaceCreatorEmail, currentContactCount) 
 
     return false;
 };
+
+export const canAddWebhook = async (workspaceCreatorEmail, currentWebhookCount) => {
+    const plan = await getSubscriptionStatus(workspaceCreatorEmail);
+
+    if (plan === 'PREMIUM') return true;
+    if (plan === 'STANDARD' && currentWebhookCount < 10) return true;
+    if (plan === 'FREE' && currentWebhookCount < 1) return true;
+
+    return false;
+};
+
+export const canAddAutomationRule = async (workspaceCreatorEmail, currentAutomationRuleCount) => {
+    const plan = await getSubscriptionStatus(workspaceCreatorEmail);
+
+    if (plan === 'PREMIUM') return true;
+    if (plan === 'STANDARD' && currentAutomationRuleCount < 20) return true;
+    if (plan === 'FREE' && currentAutomationRuleCount < 3) return true;
+
+    return false;
+};

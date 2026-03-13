@@ -63,7 +63,82 @@ export default async function handler(req, res) {
   }
   const dbLatency = Date.now() - start;
 
+  const thresholds = {
+    dbLatencyMs: 500,
+    webhookFailedLastHour: 50,
+    webhookPendingRetryDue: 100,
+    automationJobsDue: 200,
+    automationJobsFailedLastDay: 50,
+    automationJobsRunningStuck: 5,
+    paymentsOverdue: 50,
+  };
+
+  const alerts = [];
+  if (dbStatus !== 'connected') {
+    alerts.push({ key: 'dbStatus', severity: 'critical', value: dbStatus });
+  }
+  if (dbLatency > thresholds.dbLatencyMs) {
+    alerts.push({ key: 'dbLatency', severity: 'warning', value: dbLatency, threshold: thresholds.dbLatencyMs });
+  }
+  if (webhookFailedLastHour > thresholds.webhookFailedLastHour) {
+    alerts.push({
+      key: 'webhooks.failedLastHour',
+      severity: 'warning',
+      value: webhookFailedLastHour,
+      threshold: thresholds.webhookFailedLastHour,
+    });
+  }
+  if (webhookPendingRetryDue > thresholds.webhookPendingRetryDue) {
+    alerts.push({
+      key: 'webhooks.pendingRetryDue',
+      severity: 'warning',
+      value: webhookPendingRetryDue,
+      threshold: thresholds.webhookPendingRetryDue,
+    });
+  }
+  if (automationJobsDue > thresholds.automationJobsDue) {
+    alerts.push({
+      key: 'jobs.due',
+      severity: 'warning',
+      value: automationJobsDue,
+      threshold: thresholds.automationJobsDue,
+    });
+  }
+  if (automationJobsFailedLastDay > thresholds.automationJobsFailedLastDay) {
+    alerts.push({
+      key: 'jobs.failedLastDay',
+      severity: 'warning',
+      value: automationJobsFailedLastDay,
+      threshold: thresholds.automationJobsFailedLastDay,
+    });
+  }
+  if (automationJobsRunningStuck > thresholds.automationJobsRunningStuck) {
+    alerts.push({
+      key: 'jobs.runningStuck',
+      severity: 'critical',
+      value: automationJobsRunningStuck,
+      threshold: thresholds.automationJobsRunningStuck,
+    });
+  }
+  if (paymentsOverdue > thresholds.paymentsOverdue) {
+    alerts.push({
+      key: 'payments.overdue',
+      severity: 'warning',
+      value: paymentsOverdue,
+      threshold: thresholds.paymentsOverdue,
+    });
+  }
+
+  const status = alerts.some((a) => a.severity === 'critical')
+    ? 'down'
+    : alerts.length > 0
+      ? 'degraded'
+      : 'ok';
+
   const health = {
+    status,
+    alerts,
+    thresholds,
     uptime: process.uptime(),
     memory: process.memoryUsage(),
     cpu: os.loadavg(),
@@ -88,5 +163,5 @@ export default async function handler(req, res) {
     timestamp: new Date().toISOString(),
   };
 
-  res.status(200).json({ data: health });
+  res.status(status === 'down' ? 503 : 200).json({ data: health });
 }

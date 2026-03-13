@@ -3,6 +3,7 @@ import { getConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
+import { getSubscriptionStatus } from '@/lib/server/subscription';
 
 export const config = {
   api: {
@@ -38,10 +39,30 @@ const handler = async (req, res) => {
 
   try {
     const userId = session.user.userId || session.user.id;
-    const rl = await rateLimit({ req, limit: 30, windowMs: 5 * 60_000, key: `u:${userId}:ai:suggest-reply` });
-    if (!rl.ok) {
+    const plan = await getSubscriptionStatus(workspace?.creator?.email || session.user.email);
+    const per5Min =
+      plan === 'FREE' ? 10 : plan === 'STANDARD' ? 40 : 200;
+    const perDay =
+      plan === 'FREE' ? 30 : plan === 'STANDARD' ? 250 : 2500;
+
+    const [rlBurst, rlDaily] = await Promise.all([
+      rateLimit({ req, limit: per5Min, windowMs: 5 * 60_000, key: `u:${userId}:ai:suggest-reply:5m` }),
+      rateLimit({ req, limit: perDay, windowMs: 24 * 60 * 60_000, key: `w:${workspace.id}:ai:suggest-reply:day` }),
+    ]);
+
+    if (!rlBurst.ok) {
       log({ level: 'warn', msg: 'ai_suggest_reply_rate_limited', requestId, workspaceId: workspace.id, userId });
       return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    if (!rlDaily.ok) {
+      log({ level: 'warn', msg: 'ai_suggest_reply_quota_exceeded', requestId, workspaceId: workspace.id, userId });
+      return res.status(403).json({
+        error: {
+          msg: 'LIMIT_REACHED',
+          details: 'Você atingiu a cota diária de IA do seu plano. Faça um upgrade para continuar.',
+        },
+      });
     }
 
     const conversation = await getConversation(conversationId);

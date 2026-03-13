@@ -162,6 +162,7 @@ model Member {
   workspace   Workspace        @relation(fields: [workspaceId], references: [id])
 
   @@unique([workspaceId, email])
+  @@index([workspaceId, status, deletedAt])
   @@map("members")
 }
 
@@ -265,6 +266,7 @@ model Integration {
   updatedAt   DateTime  @updatedAt
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@index([workspaceId, provider, enabled])
   @@map("integrations")
 }
 
@@ -502,6 +504,7 @@ model Conversation {
   @@index([workspaceId, status])
   @@index([workspaceId, assigneeId])
   @@index([workspaceId, updatedAt])
+  @@index([workspaceId, platform, deletedAt])
   @@map("conversations")
 }
 
@@ -520,6 +523,7 @@ model AutomationRule {
   workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+  @@index([workspaceId, isActive, deletedAt])
   @@map("automation_rules")
 }
 
@@ -569,6 +573,7 @@ model Webhook {
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   deliveries  WebhookDelivery[]
 
+  @@index([workspaceId, isActive, deletedAt])
   @@map("webhooks")
 }
 
@@ -620,6 +625,7 @@ model Message {
 
   @@index([conversationId])
   @@index([conversationId, createdAt])
+  @@index([conversationId, direction, createdAt])
   @@map("messages")
 }
 
@@ -708,6 +714,7 @@ model RateLimitCounter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([resetAt])
   @@map("rate_limit_counters")
 }
 

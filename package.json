@@ -17,6 +17,7 @@
     "db:restore": "node scripts/db-restore.js",
     "db:backup:check": "node scripts/db-backup.js --check",
     "db:restore:check": "node scripts/db-restore.js --check",
+    "loadtest": "node scripts/loadtest.js",
     "postinstall": "prisma generate"
   },
   "prisma": {

@@ -1,15 +1,12 @@
 import { PrismaClient } from '@prisma/client';
 
-let prisma;
+const globalForPrisma = global;
+const databaseUrl = process.env.DATABASE_URL_POOLED || process.env.DATABASE_URL;
+const prismaClientOptions = databaseUrl ? { datasources: { db: { url: databaseUrl } } } : {};
+const prisma = globalForPrisma.prisma || new PrismaClient(prismaClientOptions);
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
-  }
-
-  prisma = global.prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
 export default prisma;

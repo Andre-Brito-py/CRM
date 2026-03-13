@@ -19,8 +19,8 @@ const TaskDetail = () => {
   const { task, isLoading } = useTask(workspace?.slug, taskId);
   const { mutate } = useSWRConfig();
   const { data: membersData } = useMembers(workspace?.slug);
-  const { data: contactsData } = useContacts(workspace?.slug);
-  const { data: dealsData } = useDeals(workspace?.slug);
+  const { data: contactsData } = useContacts(workspace?.slug, { page: 1, pageSize: 500 });
+  const { deals } = useDeals(workspace?.slug, { page: 1, pageSize: 500, compact: true });
 
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -223,7 +223,7 @@ const TaskDetail = () => {
                   onChange={(e) => setDealId(e.target.value)}
                 >
                   <option value="">Select Deal</option>
-                  {dealsData?.deals?.map((deal) => (
+                  {deals?.map((deal) => (
                     <option key={deal.id} value={deal.id}>
                       {deal.name}
                     </option>

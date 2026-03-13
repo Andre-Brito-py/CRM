@@ -11,7 +11,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
   const { mutate } = useSWRConfig();
   const { data: membersData } = useMembers(slug);
   const { data: contactsData } = useContacts(slug, { page: 1, pageSize: 500 });
-  const { data: dealsData } = useDeals(slug);
+  const { deals } = useDeals(slug, { page: 1, pageSize: 500, compact: true });
 
   const [isSubmitting, setSubmitting] = useState(false);
   const [title, setTitle] = useState('');
@@ -150,7 +150,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
               disabled={!!initialDealId}
             >
               <option value="">Select Deal</option>
-              {dealsData?.deals?.map((deal) => (
+              {deals?.map((deal) => (
                 <option key={deal.id} value={deal.id}>
                   {deal.name}
                 </option>

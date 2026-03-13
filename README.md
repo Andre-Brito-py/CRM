@@ -44,6 +44,7 @@ Arquivo: `.env`
 
 ```env
 DATABASE_URL="postgresql://..."
+DATABASE_URL_POOLED="postgresql://..." # opcional: URL do pooler (PgBouncer/Neon/Supabase)
 NEXTAUTH_SECRET="..."
 EMAIL_FROM="..."
 EMAIL_SERVICE="..."
@@ -58,6 +59,11 @@ ADMIN_EMAIL="..."
 # ASAAS_API_KEY="..."
 # MERCADOPAGO_ACCESS_TOKEN="..."
 # PAGARME_SECRET_KEY="..."
+
+# FinOps (custos unitários para estimativas por workspace)
+# FINOPS_UNIT_COST_WHATSAPP_OUTBOUND="0.03"
+# FINOPS_UNIT_COST_AI_REQUEST="0.01"
+# FINOPS_UNIT_COST_UPLOAD_REQUEST="0.001"
 ```
 
 Produção:
@@ -105,6 +111,15 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - **Reconciliação de pagamentos:** UI no Admin → Payments para inspeção/ação rápida quando o gateway divergir do estado interno.
 - **Incidentes e SLA interno:** registro de incidentes (P0–P3) com prazos de resposta/resolução, ack e resolução, direto no Admin → System.
 - **Onboarding/migração:** checklist operacional e atalhos por workspace (presets, importação, integrações, templates).
+
+## Fase 9 (Go-live comercial “vendível”) — o que mudou
+- **Limites por plano aplicados:** convites/membros, webhooks, automações, IA (quota + rate limit) e upload/storage.
+- **Rate limit distribuído:** contador em Postgres (`rate_limit_counters`) para não depender de memória do node em produção.
+- **Observabilidade:** healthcheck administrativo com `status`, `alerts` e `thresholds` (retorna 503 quando degradado).
+- **FinOps por workspace:** dashboard mostra uso/limites e custo estimado (WhatsApp/IA/uploads).
+- **Infra (Postgres gerenciado):**
+  - App suporta `DATABASE_URL_POOLED` (pooler) como datasource do Prisma.
+  - Migração adiciona índices de performance para consultas típicas (membros, integrações, conversas, webhooks, automações, rate limits).
 
 ## Plataforma No-Code (o que torna o CRM “adaptável”)
 A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.
@@ -161,6 +176,7 @@ Como isso funciona internamente (resumo):
 - Exportação e remoção de dados por workspace (LGPD) via `/privacy/export` e `/privacy/erase`.
 - Ajustes de isolamento: reforço de `workspaceId` em rotas críticas e endpoints de IA.
 - Fase 8 concluída: ferramentas operacionais (masquerade, reprocessos), incidentes/SLA e onboarding.
+- Fase 9 concluída: limites por plano, SLO/alertas, FinOps por workspace e suporte a pooler Postgres.
 
 ---
 

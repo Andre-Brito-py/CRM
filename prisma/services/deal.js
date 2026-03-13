@@ -24,10 +24,26 @@ export const createDeal = async (workspaceId, { name, amount, closeDate, stageId
   return deal;
 };
 
-export const getDeals = async (workspaceId) => {
+export const getDeals = async (workspaceId, options = {}) => {
+  const take = options?.take;
+  const skip = options?.skip;
+  const compact = Boolean(options?.compact);
+
+  if (compact) {
+    return await prisma.deal.findMany({
+      where: { workspaceId },
+      orderBy: { createdAt: 'desc' },
+      take,
+      skip,
+      select: { id: true, name: true },
+    });
+  }
+
   return await prisma.deal.findMany({
     where: { workspaceId },
     orderBy: { createdAt: 'desc' },
+    take,
+    skip,
     include: {
       contact: true,
       company: true,

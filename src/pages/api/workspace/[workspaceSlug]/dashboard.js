@@ -2,6 +2,29 @@ import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
 import { getNpsAnalytics } from '@/prisma/services/nps';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { getSubscriptionStatus } from '@/lib/server/subscription';
+import { getSystemConfig } from '@/lib/server/config';
+
+const parseUnitCost = (raw) => {
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return value;
+};
+
+const getPlanLimits = (plan) => ({
+  members: plan === 'FREE' ? 3 : plan === 'STANDARD' ? 10 : null,
+  webhooks: plan === 'FREE' ? 1 : plan === 'STANDARD' ? 10 : null,
+  automations: plan === 'FREE' ? 3 : plan === 'STANDARD' ? 20 : null,
+  whatsappIntegrations: plan === 'FREE' ? 1 : plan === 'STANDARD' ? 5 : null,
+  contacts: plan === 'FREE' ? 100 : null,
+  aiRequests24h:
+    plan === 'FREE'
+      ? 30 + 15 + 25 + 25 + 6
+      : plan === 'STANDARD'
+        ? 250 + 120 + 200 + 200 + 60
+        : 2500 + 1200 + 2000 + 2000 + 600,
+  uploads24h: plan === 'FREE' ? 30 : plan === 'STANDARD' ? 500 : 5000,
+});
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
@@ -24,6 +47,11 @@ const handler = async (req, res) => {
     const workspaceId = workspace.id;
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const plan = await getSubscriptionStatus(workspace?.creator?.email || session.user.email);
+    const limits = getPlanLimits(plan);
 
     // ── 2. Run ALL queries in parallel with Promise.all ────────────────
     const [
@@ -36,6 +64,18 @@ const handler = async (req, res) => {
       dealsLast6Months,
       upcomingTasks,
       npsAnalytics,
+      membersAcceptedCount,
+      membersPendingCount,
+      webhooksActiveCount,
+      automationRulesActiveCount,
+      whatsappIntegrationsCount,
+      whatsappOutbound30d,
+      whatsappInbound30d,
+      aiRequestsAgg,
+      uploadRequestsAgg,
+      unitCostWhatsAppOutboundRaw,
+      unitCostAiRequestRaw,
+      unitCostUploadRequestRaw,
     ] = await Promise.all([
       // Total contacts
       prisma.contact.count({ where: { workspaceId } }),
@@ -131,6 +171,90 @@ const handler = async (req, res) => {
       }),
 
       getNpsAnalytics(workspaceId, { from: sixMonthsAgo }),
+
+      prisma.member.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          status: 'ACCEPTED',
+        },
+      }),
+
+      prisma.member.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          status: 'PENDING',
+        },
+      }),
+
+      prisma.webhook.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          isActive: true,
+        },
+      }),
+
+      prisma.automationRule.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          isActive: true,
+        },
+      }),
+
+      prisma.integration.count({
+        where: {
+          workspaceId,
+          provider: 'WHATSAPP',
+          enabled: true,
+        },
+      }),
+
+      prisma.message.count({
+        where: {
+          deletedAt: null,
+          direction: 'OUTBOUND',
+          createdAt: { gte: thirtyDaysAgo },
+          conversation: { workspaceId, deletedAt: null, platform: 'WHATSAPP' },
+        },
+      }),
+
+      prisma.message.count({
+        where: {
+          deletedAt: null,
+          direction: 'INBOUND',
+          createdAt: { gte: thirtyDaysAgo },
+          conversation: { workspaceId, deletedAt: null, platform: 'WHATSAPP' },
+        },
+      }),
+
+      prisma.rateLimitCounter.aggregate({
+        _sum: { count: true },
+        where: {
+          key: {
+            startsWith: `w:${workspaceId}:ai:`,
+            endsWith: ':day',
+          },
+          resetAt: { gt: new Date() },
+        },
+      }),
+
+      prisma.rateLimitCounter.aggregate({
+        _sum: { count: true },
+        where: {
+          key: {
+            startsWith: `w:${workspaceId}:upload:`,
+            endsWith: ':day',
+          },
+          resetAt: { gt: new Date() },
+        },
+      }),
+
+      getSystemConfig('FINOPS_UNIT_COST_WHATSAPP_OUTBOUND', process.env.FINOPS_UNIT_COST_WHATSAPP_OUTBOUND || '0'),
+      getSystemConfig('FINOPS_UNIT_COST_AI_REQUEST', process.env.FINOPS_UNIT_COST_AI_REQUEST || '0'),
+      getSystemConfig('FINOPS_UNIT_COST_UPLOAD_REQUEST', process.env.FINOPS_UNIT_COST_UPLOAD_REQUEST || '0'),
     ]);
 
     // ── 3. Process deals chart in JS (already fetched) ─────────────────
@@ -146,6 +270,12 @@ const handler = async (req, res) => {
       }
     });
 
+    const aiRequests24h = Number(aiRequestsAgg?._sum?.count) || 0;
+    const uploadRequests24h = Number(uploadRequestsAgg?._sum?.count) || 0;
+    const unitCostWhatsAppOutbound = parseUnitCost(unitCostWhatsAppOutboundRaw);
+    const unitCostAiRequest = parseUnitCost(unitCostAiRequestRaw);
+    const unitCostUploadRequest = parseUnitCost(unitCostUploadRequestRaw);
+
     res.status(200).json({
       stats: {
         contacts: contactsCount,
@@ -158,6 +288,31 @@ const handler = async (req, res) => {
         paymentsPendingAmount: Number(paymentsPendingResult._sum.value) || 0,
         npsScore: npsAnalytics?.nps_score ?? 0,
         npsResponses: npsAnalytics?.total_responses ?? 0,
+      },
+      usage: {
+        plan,
+        limits,
+        counts: {
+          membersAccepted: membersAcceptedCount,
+          membersPending: membersPendingCount,
+          webhooksActive: webhooksActiveCount,
+          automationsActive: automationRulesActiveCount,
+          whatsappIntegrations: whatsappIntegrationsCount,
+          whatsappOutbound30d,
+          whatsappInbound30d,
+          aiRequests24h,
+          uploadRequests24h,
+        },
+        unitCosts: {
+          whatsappOutbound: unitCostWhatsAppOutbound,
+          aiRequest: unitCostAiRequest,
+          uploadRequest: unitCostUploadRequest,
+        },
+        estimatedCosts: {
+          whatsappOutbound30d: whatsappOutbound30d * unitCostWhatsAppOutbound,
+          aiRequests24h: aiRequests24h * unitCostAiRequest,
+          uploadRequests24h: uploadRequests24h * unitCostUploadRequest,
+        },
       },
       nps: npsAnalytics || null,
       recentActivities,

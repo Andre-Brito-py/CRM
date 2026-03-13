@@ -5,6 +5,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
+import { getSubscriptionStatus } from '@/lib/server/subscription';
 
 export const config = {
   api: {
@@ -19,6 +20,18 @@ const sanitizeFilename = (value) => {
   if (!raw) return null;
   if (raw.length > 180) return null;
   return raw.replace(/[^a-zA-Z0-9.-]/g, '_');
+};
+
+const isAllowedContentType = (value) => {
+  const ct = String(value || '').trim().toLowerCase();
+  if (!ct) return false;
+  if (ct.startsWith('image/')) return true;
+  if (ct === 'application/pdf') return true;
+  if (ct === 'text/csv') return true;
+  if (ct === 'application/vnd.ms-excel') return true;
+  if (ct === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') return true;
+  if (ct === 'text/plain') return true;
+  return false;
 };
 
 const handler = async (req, res) => {
@@ -36,10 +49,31 @@ const handler = async (req, res) => {
   }
 
   if (method === 'POST') {
-    const rl = await rateLimit({ req, limit: 120, windowMs: 60_000 });
-    if (!rl.ok) {
-      log({ level: 'warn', msg: 'upload_presigned_rate_limited', requestId, workspaceId: workspace.id });
+    const userId = session.user.userId || session.user.id;
+    const plan = await getSubscriptionStatus(workspace?.creator?.email || session.user.email);
+    const perMinute =
+      plan === 'FREE' ? 20 : plan === 'STANDARD' ? 60 : 240;
+    const perDay =
+      plan === 'FREE' ? 30 : plan === 'STANDARD' ? 500 : 5000;
+
+    const [rlBurst, rlDaily] = await Promise.all([
+      rateLimit({ req, limit: perMinute, windowMs: 60_000, key: `u:${userId}:upload:presigned:1m` }),
+      rateLimit({ req, limit: perDay, windowMs: 24 * 60 * 60_000, key: `w:${workspace.id}:upload:presigned:day` }),
+    ]);
+
+    if (!rlBurst.ok) {
+      log({ level: 'warn', msg: 'upload_presigned_rate_limited', requestId, workspaceId: workspace.id, userId });
       return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
+    if (!rlDaily.ok) {
+      log({ level: 'warn', msg: 'upload_presigned_quota_exceeded', requestId, workspaceId: workspace.id, userId });
+      return res.status(403).json({
+        error: {
+          msg: 'LIMIT_REACHED',
+          details: 'Você atingiu a cota diária de uploads do seu plano. Faça um upgrade para continuar.',
+        },
+      });
     }
 
     try {
@@ -48,6 +82,10 @@ const handler = async (req, res) => {
 
       if (!safeFilename || !contentType) {
         return res.status(400).json({ error: { msg: 'Filename and content type are required.' } });
+      }
+
+      if (!isAllowedContentType(contentType)) {
+        return res.status(400).json({ error: { msg: 'Unsupported content type.' } });
       }
 
       const [accessKeyId, secretAccessKey, region, bucket] = await Promise.all([
