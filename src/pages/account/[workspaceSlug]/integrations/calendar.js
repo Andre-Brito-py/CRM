@@ -46,7 +46,7 @@ const CalendarIntegration = () => {
 
   return (
     <AccountLayout>
-      <Meta title="Nextacular - Google Calendar Integration" />
+      <Meta title="Closify - Google Calendar Integration" />
       <Content.Title
         title="Google Calendar Integration"
         subtitle="Sync your meetings and events"

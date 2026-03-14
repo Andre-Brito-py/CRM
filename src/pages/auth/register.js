@@ -86,13 +86,13 @@ const Register = ({ plans }) => {
     return (
         <AuthLayout>
             <Meta
-                title="Nextacular - Register"
-                description="Create a new account on Nextacular."
+                title="Closify - Register"
+                description="Create a new account on Closify."
             />
             <div className="flex flex-col items-center justify-center p-5 m-auto space-y-5 rounded shadow-lg md:p-10 md:w-1/3 glass shadow-premium rounded-2xl">
                 <div className="mb-4 text-center">
                     <h1 className="text-3xl font-bold text-gray-900">Create Account</h1>
-                    <p className="mt-2 text-gray-500">Sign up to get started with Nextacular</p>
+                    <p className="mt-2 text-gray-500">Sign up to get started with Closify</p>
                 </div>
 
                 <form className="flex flex-col w-full space-y-4" onSubmit={handleRegister}>

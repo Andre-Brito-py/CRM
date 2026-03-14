@@ -38,7 +38,7 @@ const Tasks = () => {
 
   return (
     <AccountLayout>
-      <Meta title={`Nextacular - ${workspace?.name} | ${t('Tasks')}`} />
+      <Meta title={`Closify - ${workspace?.name} | ${t('Tasks')}`} />
       <OnboardingTour tourId="tasks-tour" steps={taskSteps} />
       <Content.Title
         title={t('Tasks')}

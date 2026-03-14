@@ -394,7 +394,7 @@ const TUTORIAL_CONTENT = {
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Webhooks enviam dados do CRM para sistemas externos (Zapier, Make, seu próprio sistema) sempre que algo acontece. São a ponte entre o Nextacular e qualquer outra ferramenta.
+          Webhooks enviam dados do CRM para sistemas externos (Zapier, Make, seu próprio sistema) sempre que algo acontece. São a ponte entre o Closify e qualquer outra ferramenta.
         </p>
 
         <TutorialImage
@@ -408,7 +408,7 @@ const TUTORIAL_CONTENT = {
           <Step number={2} title='Clique em "+ New Webhook"' desc='Um formulário de criação aparece.' />
           <Step number={3} title='Cole a URL do destino' desc='Ex.: URL do Zapier, Make, seu servidor, ou n8n. A URL deve aceitar requisições POST com JSON.' />
           <Step number={4} title='Selecione os eventos a enviar' desc='• contact.created — Novo contato criado | • deal.stage_changed — Negócio mudou de estágio | • message.received — Mensagem recebida | • task.completed — Tarefa concluída | • * — Envia TODOS os eventos' />
-          <Step number={5} title='Copie o HMAC Secret' desc='Esse segredo serve para validar que os webhooks são legítimos e vieram do Nextacular. Use-o no seu servidor para verificar a assinatura.' />
+          <Step number={5} title='Copie o HMAC Secret' desc='Esse segredo serve para validar que os webhooks são legítimos e vieram do Closify. Use-o no seu servidor para verificar a assinatura.' />
           <Step number={6} title='Salve e teste' desc='Clique em "Save". O primeiro evento real que acontecer disparará o webhook.' />
         </div>
 
@@ -435,7 +435,7 @@ const TUTORIAL_CONTENT = {
         </div>
 
         <TipBox>
-          Para integrar com o Zapier sem programação: crie um Zap com trigger &quot;Webhooks by Zapier → Catch Hook&quot;, copie a URL gerada e cole no Nextacular. Pronto!
+          Para integrar com o Zapier sem programação: crie um Zap com trigger &quot;Webhooks by Zapier → Catch Hook&quot;, copie a URL gerada e cole no Closify. Pronto!
         </TipBox>
       </div>
     ),

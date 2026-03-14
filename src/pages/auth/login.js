@@ -91,11 +91,11 @@ const Login = () => {
 
   return (
     <AuthLayout>
-      <Meta title="Nextacular | Login" description="Sign in to your account." />
+      <Meta title="Closify | Login" description="Sign in to your account." />
       <div className="flex flex-col items-center justify-center p-5 m-auto space-y-5 shadow-premium glass rounded-2xl md:p-10 md:w-1/3">
         <div className="text-center mb-4">
           <Link href="/" className="text-3xl font-bold text-gray-900 tracking-tight">
-            Nextacular
+            Closify
           </Link>
           <p className="mt-2 text-gray-500">Welcome back! Please enter your details.</p>
         </div>

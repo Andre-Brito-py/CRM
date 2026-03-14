@@ -254,7 +254,7 @@ const Templates = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="message-templates-tour" steps={templateSteps} />
-      <Meta title="Nextacular - Templates" />
+      <Meta title="Closify - Templates" />
       <Content.Title
         title="Message Templates"
         subtitle="Manage reusable message templates for WhatsApp"

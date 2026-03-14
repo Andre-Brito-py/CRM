@@ -227,7 +227,7 @@ const ContactDetails = ({ workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Nextacular - ${contact.name}`} />
+      <Meta title={`Closify - ${contact.name}`} />
       <Content.Title
         title={contact.name}
         subtitle={contact.jobTitle || t('contacts.noJobTitle')}

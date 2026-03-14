@@ -4,7 +4,7 @@ import Link from 'next/link';
 const Logo = ({ variant = 'full', className = '', href = '/', forceLight = false }) => {
     const isFull = variant === 'full';
     const src = isFull ? '/images/logo-full.png' : '/images/logo-symbol.png';
-    const alt = 'Nextacular Logo';
+    const alt = 'Closify Logo';
 
     const width = isFull ? 160 : 40;
 

@@ -49,8 +49,8 @@ const handler = async (req, res) => {
         }
 
         // Generate URI for Google Authenticator
-        const userEmail = user.email || 'user@nextacular.com';
-        const otpauth = authenticator.keyuri(userEmail, 'Nextacular', secret);
+        const userEmail = user.email || 'user@closify.com';
+        const otpauth = authenticator.keyuri(userEmail, 'Closify', secret);
 
         // Generate QR Code image data URL
         const qrCodeUrl = await QRCode.toDataURL(otpauth);

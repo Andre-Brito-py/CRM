@@ -95,7 +95,7 @@ const ImportContacts = () => {
   return (
     <AccountLayout>
       <Head>
-        <title>Import Contacts | Nextacular</title>
+        <title>Import Contacts | Closify</title>
       </Head>
       <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Import Contacts</h1>

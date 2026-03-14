@@ -234,7 +234,7 @@ const DealDetails = ({ workspace }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="deal-details-tour" steps={dealSteps} />
-      <Meta title={`${deal.name} | Nextacular`} />
+      <Meta title={`${deal.name} | Closify`} />
       <Content>
         <Content.Title
           title={deal.name}

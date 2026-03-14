@@ -15,7 +15,7 @@ const testimonials = [
     color: "from-emerald-400 to-teal-600"
   },
   {
-    quote: "Mudar para o Nextacular CRM duplicou nossa capacidade de follow-up. Conseguimos ver exatamente qual cliente está 'frio' pra reaquecer com automações de disparo rápido.",
+    quote: "Mudar para o Closify CRM duplicou nossa capacidade de follow-up. Conseguimos ver exatamente qual cliente está 'frio' pra reaquecer com automações de disparo rápido.",
     author: "Mariano Silva",
     role: "Founding Partner, StartLabs",
     color: "from-orange-500 to-rose-600"
@@ -38,7 +38,7 @@ const Testimonial = () => {
           <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 text-sm font-medium text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20">
             {t("landing.testimonial.badge", "100% de Aprovação")}
           </div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-white mb-6">Equipes de vendas inteiras estão mudando para o Nextacular</h2>
+          <h2 className="text-4xl font-extrabold tracking-tight text-white mb-6">Equipes de vendas inteiras estão mudando para o Closify</h2>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

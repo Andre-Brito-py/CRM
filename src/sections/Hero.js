@@ -229,7 +229,7 @@ const Hero = () => {
                  <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
                  <div className="ml-4 flex-1 flex">
                    <div className="mx-auto bg-[#0a0a0b] rounded-md px-4 py-1 text-xs text-zinc-500 tracking-wider">
-                     acme-corp.nextacular.com
+                     acme-corp.closify.com
                    </div>
                  </div>
                </div>
@@ -239,7 +239,7 @@ const Hero = () => {
                  {/* This img accesses our puppeteer-generated image */}
                  <img
                     src="/images/mockups/dashboard.png"
-                    alt="Nextacular Dashboard View"
+                    alt="Closify Dashboard View"
                     className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.02]"
                  />
                  

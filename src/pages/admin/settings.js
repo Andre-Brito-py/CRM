@@ -383,7 +383,7 @@ const AdminSettings = () => {
 
   return (
     <AdminLayout>
-      <Meta title="Nextacular - Admin Settings" />
+      <Meta title="Closify - Admin Settings" />
       <Content.Title
         title="Configurações de API"
         subtitle="Chaves e integrações em runtime (sem re-deploy)"

@@ -12,7 +12,7 @@ const asaasRequest = async (path, { method = 'GET', query, body } = {}) => {
   if (!apiKey) throw new Error('Asaas API key is missing');
 
   const baseUrl = await getAsaasBaseUrl();
-  const userAgent = await getSystemConfig('ASAAS_USER_AGENT', process.env.ASAAS_USER_AGENT || 'Nextacular');
+  const userAgent = await getSystemConfig('ASAAS_USER_AGENT', process.env.ASAAS_USER_AGENT || 'Closify');
 
   const url = new URL(`${baseUrl}${path}`);
   if (query) {

@@ -125,7 +125,7 @@ const WebFormBuilder = ({ show, toggle, form }) => {
                   >
                     {STANDARD_MAPPINGS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
                   </select>
-                  <p className="text-[10px] text-gray-500 mt-1">If "Custom Field" is selected, the label is used as key.</p>
+                  <p className="text-[10px] text-gray-500 mt-1">If &quot;Custom Field&quot; is selected, the label is used as key.</p>
                 </div>
                 <div className="flex items-center pt-5">
                   <input

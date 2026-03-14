@@ -158,7 +158,7 @@ const Settings = ({ user }) => {
 
   return (
     <AccountLayout>
-      <Meta title="Nextacular - Account Settings" />
+      <Meta title="Closify - Account Settings" />
       <Content.Title
         title={t("settings.header.title")}
         subtitle={t("settings.header.description")}

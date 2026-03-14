@@ -36,8 +36,8 @@ module.exports = withSentryConfig(
   moduleExports,
   {
     silent: true,
-    org: process.env.SENTRY_ORG || "nextacular",
-    project: process.env.SENTRY_PROJECT || "nextacular",
+    org: process.env.SENTRY_ORG || "closify",
+    project: process.env.SENTRY_PROJECT || "closify",
   },
   {
     widenClientFileUpload: true,

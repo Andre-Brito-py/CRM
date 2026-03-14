@@ -46,7 +46,7 @@ const GmailIntegration = () => {
 
   return (
     <AccountLayout>
-      <Meta title="Nextacular - Gmail Integration" />
+      <Meta title="Closify - Gmail Integration" />
       <Content.Title
         title="Gmail Integration"
         subtitle="Connect your Gmail account to sync emails and contacts"

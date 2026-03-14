@@ -89,9 +89,9 @@ const handler = async (req, res) => {
           method: 'POST',
           headers: {
             'content-type': 'application/json',
-            'x-nextacular-event': payload.event,
-            'x-nextacular-timestamp': timestamp,
-            'x-nextacular-signature': `sha256=${signature}`,
+            'x-closify-event': payload.event,
+            'x-closify-timestamp': timestamp,
+            'x-closify-signature': `sha256=${signature}`,
           },
           body: rawBody,
           signal: controller.signal,

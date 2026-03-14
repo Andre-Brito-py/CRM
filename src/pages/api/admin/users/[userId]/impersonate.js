@@ -71,8 +71,8 @@ export default async function handler(req, res) {
       const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
       res.setHeader('Set-Cookie', [
         `${cookieName}=${jwt}; Path=/; HttpOnly; SameSite=Lax${secure}`,
-        `nextacular_impersonation=${impersonationToken}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly; SameSite=Lax${secure}`,
-        `nextacular_impersonating=1; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`,
+        `closify_impersonation=${impersonationToken}; Path=/; Max-Age=${maxAgeSeconds}; HttpOnly; SameSite=Lax${secure}`,
+        `closify_impersonating=1; Path=/; Max-Age=${maxAgeSeconds}; SameSite=Lax${secure}`,
       ]);
 
       await createPlatformAuditActivity(

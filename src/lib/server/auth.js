@@ -173,7 +173,7 @@ export const authOptions = {
         const emailFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
         await sendMail({
           html: html({ email, url, from: emailFrom }),
-          subject: `[Nextacular] Sign in to ${host}`,
+          subject: `[Closify] Sign in to ${host}`,
           text: text({ email, url, from: emailFrom }),
           to: email,
         });

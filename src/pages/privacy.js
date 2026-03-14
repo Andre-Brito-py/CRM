@@ -3,7 +3,7 @@ import { LandingLayout } from '@/layouts/index';
 import { Footer } from '@/sections/index';
 
 const PrivacyPolicy = () => {
-  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Nextacular CRM';
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Closify CRM';
   const privacyEmail =
     process.env.NEXT_PUBLIC_PRIVACY_EMAIL ||
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
@@ -14,8 +14,8 @@ const PrivacyPolicy = () => {
   return (
     <LandingLayout>
       <Meta
-        title="Política de Privacidade - Nextacular CRM"
-        description="Política de Privacidade da plataforma Nextacular CRM."
+        title="Política de Privacidade - Closify CRM"
+        description="Política de Privacidade da plataforma Closify CRM."
       />
       <main className="max-w-4xl mx-auto px-6 py-20 text-gray-800">
         <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>

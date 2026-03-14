@@ -120,7 +120,7 @@ const TaskDetail = () => {
 
   return (
     <AccountLayout>
-      <Meta title={`Nextacular - ${workspace?.name} | ${data.task.title}`} />
+      <Meta title={`Closify - ${workspace?.name} | ${data.task.title}`} />
       <Content.Title
         title="Task Details"
         subtitle="View and update task information"

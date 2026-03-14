@@ -6,7 +6,7 @@ const html = ({ email, url, from }) => {
     <p>Alternatively, you can copy this link and open via browser: ${url}</p>
     <p>If you did not request this email you can safely ignore it.</p>
     <p>In case you need any assistance, just hit reply.</p>
-    <p>Cheers,<br />${from || 'Nextacular'}</p>
+    <p>Cheers,<br />${from || 'Closify'}</p>
 </body>
 `;
 };
@@ -22,7 +22,7 @@ If you did not request this email you can safely ignore it.
 In case you need any assistance, just hit reply.
 
 Cheers,
-${from || 'Nextacular'}
+${from || 'Closify'}
 `;
 };
 

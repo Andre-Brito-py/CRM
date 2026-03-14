@@ -31,7 +31,7 @@ const Companies = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="companies-tour" steps={companySteps} />
-      <Meta title={`Nextacular - ${workspace?.name} | Companies`} />
+      <Meta title={`Closify - ${workspace?.name} | Companies`} />
       <Content.Title
         title={t('Companies')}
         subtitle="Manage business accounts and organizations"

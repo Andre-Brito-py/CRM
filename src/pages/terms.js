@@ -11,7 +11,7 @@ const TermsOfUse = () => {
   const { status, data: session, update } = useSession();
   const [isAccepting, setAcceptingState] = useState(false);
   const companyName =
-    process.env.NEXT_PUBLIC_COMPANY_NAME || 'Nextacular CRM';
+    process.env.NEXT_PUBLIC_COMPANY_NAME || 'Closify CRM';
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@example.com';
   const termsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
@@ -54,8 +54,8 @@ const TermsOfUse = () => {
   return (
     <LandingLayout>
       <Meta
-        title="Termos de Uso - Nextacular CRM"
-        description="Termos de Uso da plataforma Nextacular CRM."
+        title="Termos de Uso - Closify CRM"
+        description="Termos de Uso da plataforma Closify CRM."
       />
       <main className="max-w-4xl mx-auto px-6 py-20 text-gray-800">
         {mustAcceptTerms && (

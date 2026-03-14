@@ -77,7 +77,7 @@ const Pipeline = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="pipeline-tour" steps={pipelineSteps} />
-      <Meta title={`Nextacular - ${workspace?.name} | Pipeline`} />
+      <Meta title={`Closify - ${workspace?.name} | Pipeline`} />
       <Content.Title
         title="Pipeline"
         subtitle="Orchestrate your sales funnel with precision"

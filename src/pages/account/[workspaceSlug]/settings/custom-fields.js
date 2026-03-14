@@ -81,7 +81,7 @@ const CustomFields = ({ workspace }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="custom-fields-tour" steps={customFieldsSteps} />
-      <Meta title={`Nextacular - ${workspace.name} | Custom Fields`} />
+      <Meta title={`Closify - ${workspace.name} | Custom Fields`} />
       <Content.Title
         title="Custom Fields"
         subtitle="Define custom fields for your contacts and deals"

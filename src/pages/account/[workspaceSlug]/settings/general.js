@@ -98,7 +98,7 @@ const General = ({ isTeamOwner, workspace }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="settings-tour" steps={settingsSteps} />
-      <Meta title={`Nextacular - ${workspace.name} | Settings`} />
+      <Meta title={`Closify - ${workspace.name} | Settings`} />
       <div id="settings-general-content">
       <Content.Title
         title={t("settings.workspace.information")}

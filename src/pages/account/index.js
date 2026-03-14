@@ -66,7 +66,7 @@ const Welcome = () => {
 
   return (
     <AccountLayout>
-      <Meta title="Nextacular - Dashboard" />
+      <Meta title="Closify - Dashboard" />
       <div className="flex flex-col gap-10">
         <section>
           <div className="mb-8">

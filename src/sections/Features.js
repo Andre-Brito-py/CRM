@@ -19,7 +19,7 @@ const getFeatures = (t) => [
   },
   {
     name: t("landing.features.item3.title", 'Poder de No-code & Workflow Engine'),
-    description: t("landing.features.item3.desc", 'Crie regras, fluxos, gatilhos de e-mail e campos personalizados para o seu nicho sem escrever nenhuma linha de código. Nextacular se molda 100% à sua operação.'),
+    description: t("landing.features.item3.desc", 'Crie regras, fluxos, gatilhos de e-mail e campos personalizados para o seu nicho sem escrever nenhuma linha de código. Closify se molda 100% à sua operação.'),
     icon: ChartBarSquareIcon,
   },
 ];
@@ -57,7 +57,7 @@ const Features = () => {
           className="flex flex-col items-center text-center max-w-3xl"
         >
           <div className="inline-flex items-center px-4 py-1.5 mb-6 text-sm font-medium text-indigo-400 bg-indigo-500/10 rounded-full border border-indigo-500/20">
-            {t("landing.features.badge", "Why Nextacular CRM")}
+            {t("landing.features.badge", "Why Closify CRM")}
           </div>
           <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
             {t("landing.features.title", "Stop losing deals to slow responses.")}
@@ -113,7 +113,7 @@ const Features = () => {
                    <div className="w-3 h-3 rounded-full bg-zinc-700"></div>
                    <div className="w-3 h-3 rounded-full bg-zinc-700"></div>
                  </div>
-                 <div className="text-xs text-zinc-500 font-medium tracking-wide uppercase">Nextacular Omnichannel Inbox</div>
+                 <div className="text-xs text-zinc-500 font-medium tracking-wide uppercase">Closify Omnichannel Inbox</div>
                  <div className="w-12"></div>
                </div>
                

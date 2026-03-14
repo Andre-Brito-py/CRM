@@ -93,7 +93,7 @@ const SecuritySettings = () => {
 
     return (
         <AccountLayout>
-            <Meta title={`Nextacular - ${t('security.title')}`} />
+            <Meta title={`Closify - ${t('security.title')}`} />
             <Content.Title title={t('security.title')} subtitle={t('security.subtitle')} />
             <Content.Divider />
             <Content.Container>

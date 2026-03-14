@@ -16,7 +16,7 @@ const Footer = () => {
           </nav>
         </footer>
         <p className="py-5 text-center text-gray-400 text-sm">
-          &copy; {new Date().getFullYear()} Nextacular CRM. Elevating your business.
+          &copy; {new Date().getFullYear()} Closify CRM. Elevating your business.
         </p>
       </div>
     </div>

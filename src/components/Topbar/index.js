@@ -127,7 +127,7 @@ const Topbar = ({ menu, staticMenu }) => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const cookie = document.cookie || '';
-    setIsImpersonating(cookie.includes('nextacular_impersonating=1'));
+    setIsImpersonating(cookie.includes('closify_impersonating=1'));
   }, []);
 
   // Sync workspace from URL slug if not set

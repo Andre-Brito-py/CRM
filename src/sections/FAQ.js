@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 const faqs = [
   {
-    question: "Como funciona a Inteligência Artificial no Nextacular CRM?",
+    question: "Como funciona a Inteligência Artificial no Closify CRM?",
     answer: "Nossa IA analisa todo o histórico de conversas e o contexto da sua empresa para sugerir respostas baseadas em gatilhos de vendas. Ela também resume longas reuniões e sinaliza quais negócios (Deals) estão com probabilidade de sucesso (Pipeline Insights) e quais precisam de follow-up urgente.",
   },
   {
@@ -14,11 +14,11 @@ const faqs = [
   },
   {
     question: "O que significa 'criar ferramentas No-code' internamente?",
-    answer: "O Nextacular permite que você crie campos personalizados (Custom Fields) ilimitados, formulários dinâmicos de captura (Webhooks) e defina réguas de automação complexas de disparo sem escrever uma única linha de código. Você adapta o CRM ao seu processo, e não o contrário.",
+    answer: "O Closify permite que você crie campos personalizados (Custom Fields) ilimitados, formulários dinâmicos de captura (Webhooks) e defina réguas de automação complexas de disparo sem escrever uma única linha de código. Você adapta o CRM ao seu processo, e não o contrário.",
   },
   {
     question: "Existe limite de contatos ou usuários?",
-    answer: "A arquitetura do Nextacular foi validada para alta performance, suportando volumes altíssimos. Os limites mensais variam APENAS de acordo com o plano contratado da nuvem ou os pacotes Premium da empresa que forneceu o CRM para você. Contate o Suporte para limites de Enterprise.",
+    answer: "A arquitetura do Closify foi validada para alta performance, suportando volumes altíssimos. Os limites mensais variam APENAS de acordo com o plano contratado da nuvem ou os pacotes Premium da empresa que forneceu o CRM para você. Contate o Suporte para limites de Enterprise.",
   },
   {
     question: "Como migro meus contatos de outro CRM (ex: Pipedrive ou HubSpot)?",

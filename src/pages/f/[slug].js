@@ -159,7 +159,7 @@ export default function PublicWebForm() {
           </div>
         </form>
         <div className="mt-8 text-center text-xs text-gray-400">
-          Powered by Nextacular
+          Powered by Closify
         </div>
       </div>
     </div>

@@ -464,7 +464,7 @@ const Automations = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="automations-tour" steps={automationSteps} />
-      <Meta title={`Nextacular - ${workspace?.name} | ${t('Automations')}`} />
+      <Meta title={`Closify - ${workspace?.name} | ${t('Automations')}`} />
       <Content title={t('Automations')} subtitle={t('automations.subtitle')}>
         <div className="flex justify-end mb-5">
           <button

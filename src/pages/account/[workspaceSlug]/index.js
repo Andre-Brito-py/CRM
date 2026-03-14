@@ -262,7 +262,7 @@ const Workspace = () => {
     workspace && (
       <AccountLayout>
         <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} />
-        <Meta title={`Nextacular - ${workspace.name} | Dashboard`} />
+        <Meta title={`Closify - ${workspace.name} | Dashboard`} />
         <Content.Title
           title={workspace.name}
           subtitle="Workspace Analytics and Performance"

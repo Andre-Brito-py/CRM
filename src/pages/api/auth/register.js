@@ -121,15 +121,15 @@ const handler = async (req, res) => {
         await sendMail({
             html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-          <h2>Welcome to Nextacular, ${name}!</h2>
+          <h2>Welcome to Closify, ${name}!</h2>
           <p>Please click the button below to verify your email address and activate your account.</p>
           <a href="${verificationUrl}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #14b8a6; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email</a>
           <p>Or paste this link into your browser:<br/><a href="${verificationUrl}">${verificationUrl}</a></p>
           <p>This link expires in 24 hours.</p>
         </div>
       `,
-            subject: '[Nextacular] Confirm your email address',
-            text: `Welcome to Nextacular, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
+            subject: '[Closify] Confirm your email address',
+            text: `Welcome to Closify, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
             to: normalizedEmail,
         });
 

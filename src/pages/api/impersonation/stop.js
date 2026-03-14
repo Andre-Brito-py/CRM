@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: { msg: 'Unauthorized' } });
   }
 
-  const parsed = parseImpersonationCookie(req.cookies?.nextacular_impersonation, secret);
+  const parsed = parseImpersonationCookie(req.cookies?.closify_impersonation, secret);
   if (!parsed) {
     return res.status(400).json({ error: { msg: 'Not impersonating' } });
   }
@@ -69,8 +69,8 @@ export default async function handler(req, res) {
 
   res.setHeader('Set-Cookie', [
     `${cookieName}=${jwt}; Path=/; HttpOnly; SameSite=Lax${secure}`,
-    `nextacular_impersonation=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`,
-    `nextacular_impersonating=; Path=/; Max-Age=0; SameSite=Lax${secure}`,
+    `closify_impersonation=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax${secure}`,
+    `closify_impersonating=; Path=/; Max-Age=0; SameSite=Lax${secure}`,
   ]);
 
   await createPlatformAuditActivity(

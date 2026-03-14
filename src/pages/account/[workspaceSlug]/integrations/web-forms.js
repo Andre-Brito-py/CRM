@@ -266,7 +266,7 @@ const WebForms = () => {
                     value={newForm.stageId}
                     onChange={(e) => setNewForm({ ...newForm, stageId: e.target.value })}
                   >
-                    <option value="">- Don't attach to a Deal -</option>
+                    <option value="">- Don&apos;t attach to a Deal -</option>
                     {allStages.map((stage) => (
                       <option key={stage.id} value={stage.id}>
                         {stage.name}
