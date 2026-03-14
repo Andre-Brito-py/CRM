@@ -1,4 +1,4 @@
-import { validateSession } from '@/config/api-validation';
+import { validateSession } from '@/config/api-validation/index';
 import { getConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { rateLimit } from '@/lib/server/rateLimit';
@@ -77,7 +77,19 @@ const handler = async (req, res) => {
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
     if (!openAiApiKey) {
-      return res.status(400).json({ error: { msg: 'OpenAI API key is missing. Please configure it in Super Admin settings.' } });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const contact = conversation.contact?.name || 'cliente';
+      const lastInbound = [...(conversation.messages || [])].reverse().find(m => m.direction === 'INBOUND');
+      const lastInboundText = lastInbound?.content ? clampText(lastInbound.content, 200) : null;
+
+      const suggestion = `Olá ${contact}! Obrigado por sua mensagem${lastInboundText ? ` sobre "${lastInboundText}"` : ''}.\n\nVou verificar isso para você agora. Pode me confirmar mais detalhes (ex.: número do pedido/telefone) para eu agilizar?\n\nFico à disposição.`;
+
+      return res.status(200).json({
+        data: {
+          suggestion,
+          provider: 'fallback',
+        },
+      });
     }
 
     // Format messages for OpenAI

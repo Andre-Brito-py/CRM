@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
-import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
 import { useTranslation } from 'react-i18next';
 import Paywall from '@/components/Paywall';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -20,12 +21,16 @@ const ChatWindow = ({
   onMessageChange,
   onGenerateResponse,
   isGeneratingAI,
+  onSummarizeConversation,
+  isSummarizingAI,
   onBack
 }) => {
   const { t } = useTranslation();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateContent, setNewTemplateContent] = useState('');
+  const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
+  const [summaryText, setSummaryText] = useState('');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -51,6 +56,15 @@ const ChatWindow = ({
       setNewTemplateName('');
       setNewTemplateContent('');
       setIsTemplateModalOpen(false);
+    }
+  };
+
+  const handleSummarize = async () => {
+    if (!onSummarizeConversation) return;
+    const summary = await onSummarizeConversation();
+    if (summary) {
+      setSummaryText(summary);
+      setIsSummaryModalOpen(true);
     }
   };
 
@@ -173,29 +187,51 @@ const ChatWindow = ({
       {/* Input */}
       <div className="p-4 bg-white border-t border-gray-200">
         <form onSubmit={handleSend} className="flex space-x-4">
-          <Paywall 
-            minPlan="PREMIUM" 
+          <Paywall
+            minPlan="PREMIUM"
             fallback={
-              <button
-                type="button"
-                disabled
-                className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
-                title={t('paywall.title')}
-              >
-                <SparklesIcon className="w-5 h-5" />
-              </button>
+              <div className="flex space-x-2">
+                <button
+                  type="button"
+                  disabled
+                  className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                  title={t('paywall.title')}
+                >
+                  <SparklesIcon className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  disabled
+                  className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                  title={t('paywall.title')}
+                >
+                  <DocumentTextIcon className="w-5 h-5" />
+                </button>
+              </div>
             }
           >
-            <button
-              id="ai-suggest-btn"
-              type="button"
-              onClick={onGenerateResponse}
-              disabled={isGeneratingAI}
-              className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-              title={t('inbox.ai.generate')}
-            >
-              <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'text-blue-500 animate-pulse' : ''}`} />
-            </button>
+            <div className="flex space-x-2">
+              <button
+                id="ai-suggest-btn"
+                type="button"
+                onClick={onGenerateResponse}
+                disabled={isGeneratingAI}
+                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                title={t('inbox.ai.generate')}
+              >
+                <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'text-blue-500 animate-pulse' : ''}`} />
+              </button>
+              <button
+                id="ai-summarize-btn"
+                type="button"
+                onClick={handleSummarize}
+                disabled={isSummarizingAI}
+                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                title={t('inbox.ai.summarize')}
+              >
+                <DocumentTextIcon className={`w-5 h-5 ${isSummarizingAI ? 'text-blue-500 animate-pulse' : ''}`} />
+              </button>
+            </div>
           </Paywall>
 
           <div className="relative">
@@ -349,6 +385,69 @@ const ChatWindow = ({
                     >
                       {t('common.action.create')}
                     </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={isSummaryModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsSummaryModalOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    {t('inbox.ai.summaryTitle')}
+                  </Dialog.Title>
+                  <div className="mt-4">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded-lg p-4 max-h-[60vh] overflow-auto">
+                      {summaryText}
+                    </pre>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsSummaryModalOpen(false)}
+                    >
+                      {t('common.action.cancel')}
+                    </button>
+                    <CopyToClipboard text={summaryText}>
+                      <button
+                        type="button"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        disabled={!summaryText}
+                      >
+                        {t('common.action.copy')}
+                      </button>
+                    </CopyToClipboard>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

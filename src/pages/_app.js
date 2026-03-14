@@ -5,12 +5,14 @@ import { ThemeProvider } from 'next-themes';
 import ReactGA from 'react-ga';
 import TopBarProgress from 'react-topbar-progress-indicator';
 import { SWRConfig } from 'swr';
+import useSWR from 'swr';
 import i18n from "i18next";
 import { useTranslation, initReactI18next } from "react-i18next";
 
 import progressBarConfig from '@/config/progress-bar/index';
 import swrConfig from '@/config/swr/index';
 import WorkspaceProvider from '@/providers/workspace';
+import fetcher from '@/lib/client/fetcher';
 
 import '@/styles/globals.css';
 let enData = require('../messages/en.json');
@@ -99,9 +101,37 @@ if (!i18n.isInitialized) {
 const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
   const [gaReady, setGaReady] = useState(false);
+  const [maintenanceDismissed, setMaintenanceDismissed] = useState(false);
   useTranslation();
   const router = useRouter();
   const swrOptions = swrConfig();
+
+  const isTruthy = (value) => {
+    const v = String(value || '').trim().toLowerCase();
+    return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+  };
+
+  const { data: maintenanceConfig } = useSWR(
+    '/api/public-config?keys=MAINTENANCE_ENABLED,MAINTENANCE_MESSAGE,MAINTENANCE_EXPECTED_AT',
+    fetcher,
+    { refreshInterval: 60000 }
+  );
+
+  const maintenance = maintenanceConfig?.data?.config || {};
+  const maintenanceEnabled = isTruthy(maintenance.MAINTENANCE_ENABLED);
+  const maintenanceMessage = String(maintenance.MAINTENANCE_MESSAGE || '').trim() || 'Sistema em manutenção';
+  const maintenanceExpectedAt = maintenance.MAINTENANCE_EXPECTED_AT
+    ? String(maintenance.MAINTENANCE_EXPECTED_AT).trim()
+    : null;
+
+  const maintenanceExpectedLabel = (() => {
+    if (!maintenanceExpectedAt) return null;
+    const parsed = new Date(maintenanceExpectedAt);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toLocaleString();
+    const candidate = new Date(maintenanceExpectedAt.replace(' ', 'T'));
+    if (!Number.isNaN(candidate.getTime())) return candidate.toLocaleString();
+    return maintenanceExpectedAt;
+  })();
 
   Router.events.on('routeChangeStart', () => setProgress(true));
   Router.events.on('routeChangeComplete', () => setProgress(false));
@@ -185,6 +215,27 @@ const App = ({ Component, pageProps }) => {
         <ThemeProvider attribute="class">
           <WorkspaceProvider>
             {progress && <TopBarProgress />}
+            {maintenanceEnabled && !maintenanceDismissed && (
+              <div className="w-full bg-amber-50 border-b border-amber-200 text-amber-900">
+                <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 md:px-8 flex items-start justify-between gap-4">
+                  <div className="text-sm">
+                    <span className="font-semibold">{maintenanceMessage}</span>
+                    {maintenanceExpectedLabel ? (
+                      <span className="ml-2 text-amber-800">
+                        Previsão de retorno: {maintenanceExpectedLabel}
+                      </span>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setMaintenanceDismissed(true)}
+                    className="text-xs font-semibold text-amber-900/80 hover:text-amber-900"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              </div>
+            )}
             <Component {...pageProps} />
           </WorkspaceProvider>
         </ThemeProvider>

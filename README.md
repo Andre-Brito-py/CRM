@@ -93,6 +93,7 @@ Chaves comuns:
 
 Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
+- Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
 
 ## Coisas que já estão no produto (resumo curto)
 - Workspaces (multi-tenant)
@@ -100,6 +101,7 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Contatos/empresas + atividades
 - Inbox omnichannel (WhatsApp)
 - Login (magic link + senha) + 2FA
+- Inbox: resumo de conversa com IA (sob demanda)
 - Paywall por plano e painel de super admin
 - Customer Satisfaction (NPS): páginas + gráficos com animação
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
@@ -108,6 +110,7 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Cupons e promoções (Stripe) gerenciados pelo Super Admin
 - Limites dinâmicos por plano (IA, automações, membros) com enforcement real
 - Tours de onboarding interativos por tela (com persistência "apenas uma vez")
+- Aviso global “Sistema em manutenção” configurável no Super Admin (com previsão de retorno)
 
 ## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
 - **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.
@@ -205,6 +208,12 @@ Como isso funciona internamente (resumo):
 - Tours de onboarding expandidos para todas as telas principais (contatos, empresas, pipeline, inbox, tarefas, automações, analytics, settings, campos personalizados, equipe, templates, billing, NPS, detalhes do negócio).
 - Corrigido bug onde tours repetiam ou exibiam mensagens vazias (persistência + traduções PT/EN corrigidas).
 - Preset "Restaurante" adicionado ao setup em 1 clique.
+
+### 2026-03-14
+- Inbox: botão “Resumir conversa” (IA) abrindo modal com opção de copiar.
+- IA: `suggest-reply` com fallback quando `OPENAI_API_KEY` não estiver configurada.
+- Modo manutenção: banner global configurável via Super Admin e chaves públicas via `/api/public-config`.
+- CI: ajuste no workflow para evitar falha no smoke test quando variáveis mínimas não estiverem presentes.
 
 ---
 

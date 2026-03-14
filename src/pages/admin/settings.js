@@ -98,6 +98,14 @@ const CATALOG = [
     items: [{ key: 'GOOGLE_ANALYTICS_ID', category: 'INTEGRATIONS', label: 'Google Analytics ID', secret: false, public: true }],
   },
   {
+    title: 'Manutenção',
+    items: [
+      { key: 'MAINTENANCE_ENABLED', category: 'GENERAL', label: 'Sistema em manutenção (true/false)', secret: false, public: true },
+      { key: 'MAINTENANCE_MESSAGE', category: 'GENERAL', label: 'Mensagem para usuários', secret: false, public: true },
+      { key: 'MAINTENANCE_EXPECTED_AT', category: 'GENERAL', label: 'Previsão de retorno (ISO: 2026-03-14T23:00:00Z)', secret: false, public: true },
+    ],
+  },
+  {
     title: 'Geral',
     items: [{ key: 'APP_URL', category: 'GENERAL', label: 'App URL', secret: false }],
   },

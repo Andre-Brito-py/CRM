@@ -35,6 +35,7 @@ const Inbox = () => {
   const [searchText, setSearchText] = useState('');
   const [messageText, setMessageText] = useState('');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [isSummarizingAI, setIsSummarizingAI] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const locale = useMemo(() => {
@@ -141,6 +142,31 @@ const Inbox = () => {
       toast.error(t('inbox.ai.failed'));
     } finally {
       setIsGeneratingAI(false);
+    }
+  };
+
+  const handleSummarizeConversation = async () => {
+    if (!selectedConversation) return null;
+
+    setIsSummarizingAI(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/summarize`, {
+        method: 'POST',
+      });
+
+      if (response.data?.summary) {
+        toast.success(t('inbox.ai.summaryGenerated'));
+        return response.data.summary;
+      }
+
+      toast.error(t('inbox.ai.summaryFailed'));
+      return null;
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.ai.summaryFailed'));
+      return null;
+    } finally {
+      setIsSummarizingAI(false);
     }
   };
 
@@ -289,11 +315,11 @@ const Inbox = () => {
               ) : null}
             </div>
           </Card>
-          
+
           {(conversationsData === undefined && !!workspaceSlug) ? (
             <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg border border-gray-200">
-               <div className="w-12 h-12 border-4 border-zinc-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
-               <p className="text-zinc-500 font-medium tracking-wide italic">Synchronizing communications...</p>
+              <div className="w-12 h-12 border-4 border-zinc-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+              <p className="text-zinc-500 font-medium tracking-wide italic">Synchronizing communications...</p>
             </div>
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200">
@@ -324,6 +350,8 @@ const Inbox = () => {
                   onMessageChange={setMessageText}
                   onGenerateResponse={handleGenerateResponse}
                   isGeneratingAI={isGeneratingAI}
+                  onSummarizeConversation={handleSummarizeConversation}
+                  isSummarizingAI={isSummarizingAI}
                   onBack={() => setSelectedId(null)}
                 />
               </div>

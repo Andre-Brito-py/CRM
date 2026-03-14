@@ -1,4 +1,4 @@
-import { validateSession } from '@/config/api-validation';
+import { validateSession } from '@/config/api-validation/index';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';

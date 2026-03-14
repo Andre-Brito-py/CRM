@@ -3,6 +3,22 @@ import prisma from '@/prisma/index';
 import getStripe from '@/lib/server/stripe';
 import { createPlatformAuditActivity } from '@/prisma/services/activity';
 
+const normalizeInterval = (value) => {
+  const v = String(value || '').trim().toLowerCase();
+  if (v === 'year' || v === 'annual' || v === 'yearly') return 'year';
+  return 'month';
+};
+
+const normalizeCurrency = (value) => String(value || 'USD').trim().toUpperCase();
+
+const toCents = (value) => Math.max(0, Math.round(Number(value || 0) * 100));
+
+const normalizePlanType = (value) => {
+  const t = String(value || '').trim().toUpperCase();
+  if (t === 'FREE' || t === 'STANDARD' || t === 'PREMIUM') return t;
+  return null;
+};
+
 export default async function handler(req, res) {
   const session = await getSession({ req });
 
@@ -39,9 +55,11 @@ export default async function handler(req, res) {
     const { name, slug, price, interval, currency, features, stripePriceId, description, isActive } = req.body;
 
     try {
-      let syncedPrice = price;
-      let syncedCurrency = currency;
-      let syncedInterval = interval;
+      const desiredType = normalizePlanType(slug);
+      let syncedPrice = Number(price || 0);
+      let syncedCurrency = normalizeCurrency(currency);
+      let syncedInterval = normalizeInterval(interval);
+      let finalStripePriceId = stripePriceId || null;
 
       if (stripePriceId) {
         let stripePrice = null;
@@ -59,8 +77,46 @@ export default async function handler(req, res) {
         }
 
         syncedPrice = Number(stripePrice.unit_amount || 0) / 100;
-        syncedCurrency = (stripePrice.currency || currency || 'USD').toUpperCase();
+        syncedCurrency = normalizeCurrency(stripePrice.currency || currency || 'USD');
         syncedInterval = stripePrice.recurring.interval;
+        finalStripePriceId = stripePriceId;
+        if (desiredType && stripePrice?.product) {
+          try {
+            const stripe = await getStripe();
+            await stripe.products.update(stripePrice.product, {
+              name: String(name || 'Plano'),
+              metadata: { type: desiredType },
+            });
+          } catch { }
+        }
+      } else if (toCents(syncedPrice) > 0) {
+        if (!desiredType) {
+          res.status(400).json({ error: { msg: 'Slug inválido. Use FREE, STANDARD ou PREMIUM.' } });
+          return;
+        }
+
+        let stripe = null;
+        try {
+          stripe = await getStripe();
+        } catch (error) {
+          res.status(400).json({ error: { msg: 'Stripe não configurado para criar preço automaticamente' } });
+          return;
+        }
+
+        const type = String(slug || '').trim().toUpperCase();
+        const product = await stripe.products.create({
+          name: String(name || 'Plano'),
+          metadata: { type: desiredType },
+        });
+
+        const created = await stripe.prices.create({
+          unit_amount: toCents(syncedPrice),
+          currency: String(syncedCurrency).toLowerCase(),
+          recurring: { interval: syncedInterval },
+          product: product.id,
+        });
+
+        finalStripePriceId = created.id;
       }
 
       const plan = await prisma.plan.create({
@@ -71,7 +127,7 @@ export default async function handler(req, res) {
           interval: syncedInterval,
           currency: syncedCurrency,
           features,
-          stripePriceId,
+          stripePriceId: finalStripePriceId,
           description,
           isActive: typeof isActive === 'boolean' ? isActive : true,
         },
