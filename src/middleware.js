@@ -29,6 +29,7 @@ export default function middleware(req) {
   const appHostname = new URL(appUrl).hostname;
 
   const currentHost = hostnameWithoutPort.replace(`.${appHostname}`, '');
+  const site = currentHost.trim().toLowerCase();
 
   if (pathname.startsWith(`/_sites`)) {
     return new Response(null, { status: 404 });
@@ -41,8 +42,12 @@ export default function middleware(req) {
       return res;
     }
 
+    if (!/^[a-z0-9-]{1,63}$/.test(site)) {
+      return new Response(null, { status: 404 });
+    }
+
     const url = req.nextUrl.clone();
-    url.pathname = `/_sites/${currentHost}${pathname}`;
+    url.pathname = `/_sites/${site}${pathname}`;
     const res = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
     res.headers.set('x-request-id', requestId);
     return res;

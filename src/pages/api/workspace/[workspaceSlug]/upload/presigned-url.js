@@ -25,6 +25,7 @@ const sanitizeFilename = (value) => {
 const isAllowedContentType = (value) => {
   const ct = String(value || '').trim().toLowerCase();
   if (!ct) return false;
+  if (ct === 'image/svg+xml') return false;
   if (ct.startsWith('image/')) return true;
   if (ct === 'application/pdf') return true;
   if (ct === 'text/csv') return true;

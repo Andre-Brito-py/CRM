@@ -18,6 +18,71 @@ import {
   AcademicCapIcon,
 } from '@heroicons/react/24/outline';
 
+const sanitizeHelpHtml = (input) => {
+  const raw = String(input || '');
+
+  const stripDangerous = (html) => {
+    let out = String(html || '');
+    out = out.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*>[\s\S]*?<\s*\/\s*\1\s*>/gi, '');
+    out = out.replace(/<\s*(script|style|iframe|object|embed|link|meta)\b[^>]*\/\s*>/gi, '');
+    out = out.replace(/\son\w+\s*=\s*(["']).*?\1/gi, '');
+    out = out.replace(/\son\w+\s*=\s*[^\s>]+/gi, '');
+    out = out.replace(/\shref\s*=\s*(["'])\s*javascript:[\s\S]*?\1/gi, ' href="#"');
+    out = out.replace(/\ssrc\s*=\s*(["'])\s*javascript:[\s\S]*?\1/gi, '');
+    return out;
+  };
+
+  const allowlistTags = new Set(['a', 'b', 'strong', 'em', 'i', 'u', 'p', 'br', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'pre', 'code']);
+
+  const sanitizeHref = (href) => {
+    const value = String(href || '').trim();
+    if (!value) return '#';
+    if (value.startsWith('#')) return value;
+    if (value.startsWith('/')) return value;
+    if (value.startsWith('mailto:')) return value;
+    if (value.startsWith('https://') || value.startsWith('http://')) return value;
+    return '#';
+  };
+
+  const html = stripDangerous(raw);
+
+  if (typeof DOMParser === 'undefined') {
+    return html;
+  }
+
+  const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
+  const root = doc.body.firstChild;
+  if (!root) return '';
+
+  const nodes = Array.from(root.querySelectorAll('*'));
+  for (const el of nodes) {
+    const tag = el.tagName.toLowerCase();
+    if (!allowlistTags.has(tag)) {
+      el.replaceWith(doc.createTextNode(el.textContent || ''));
+      continue;
+    }
+
+    const originalHref = tag === 'a' ? el.getAttribute('href') : null;
+    const originalTarget = tag === 'a' ? el.getAttribute('target') : null;
+
+    const attrs = Array.from(el.attributes || []);
+    for (const attr of attrs) {
+      el.removeAttribute(attr.name);
+    }
+
+    if (tag === 'a') {
+      const href = sanitizeHref(originalHref);
+      el.setAttribute('href', href);
+      if (originalTarget === '_blank') {
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener noreferrer');
+      }
+    }
+  }
+
+  return root.innerHTML;
+};
+
 /* ─── Static help categories (content from i18n) ───────────────────── */
 const HELP_CATEGORIES = [
   { key: 'crm', icon: PhoneIcon },
@@ -615,7 +680,7 @@ const HelpModal = ({ isOpen, toggle }) => {
 
               <div
                 className="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-zinc-400"
-                dangerouslySetInnerHTML={{ __html: t(`help.category.${activeCategory}.content`) }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHelpHtml(t(`help.category.${activeCategory}.content`)) }}
               />
 
               <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 text-center">
