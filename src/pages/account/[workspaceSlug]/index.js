@@ -413,7 +413,7 @@ const Workspace = () => {
             </div>
 
             <div className="space-y-8 lg:col-span-1">
-              <motion.div {...motionIn} transition={{ ...motionIn.transition, delay: 0.06 }} className="premium-card p-8">
+              <div className="premium-card p-8">
                 <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
                   <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
                     NPS
@@ -485,7 +485,7 @@ const Workspace = () => {
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
-              </motion.div>
+              </div>
 
               <div className="premium-card p-8 group">
                 <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white mb-2 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
