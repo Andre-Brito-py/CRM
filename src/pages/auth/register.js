@@ -226,7 +226,21 @@ export const getServerSideProps = async () => {
 
     try {
         const plans = await getAllPlans();
-        return { props: { plans: plans || [] } };
+        const safePlans = (plans || []).map((plan) => ({
+            id: plan.id,
+            name: plan.name,
+            slug: plan.slug,
+            description: plan.description ?? null,
+            price: plan.price,
+            currency: plan.currency,
+            interval: plan.interval,
+            stripePriceId: plan.stripePriceId ?? null,
+            features: plan.features ?? null,
+            isActive: Boolean(plan.isActive),
+            createdAt: plan.createdAt ? new Date(plan.createdAt).toISOString() : null,
+            updatedAt: plan.updatedAt ? new Date(plan.updatedAt).toISOString() : null,
+        }));
+        return { props: { plans: safePlans } };
     } catch (error) {
         return { props: { plans: [] } };
     }

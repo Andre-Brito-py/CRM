@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Modal from '@/components/Modal/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
@@ -28,7 +28,6 @@ const WebFormBuilder = ({ show, toggle, form }) => {
 
   // When form changes, reset the config (if same component instance is reused)
   // Actually handled by React if key changes, but safe to sync
-  import { useEffect } from 'react';
   useEffect(() => {
     setConfig(form?.config || []);
   }, [form]);
@@ -95,7 +94,7 @@ const WebFormBuilder = ({ show, toggle, form }) => {
               >
                 <TrashIcon className="w-5 h-5" />
               </button>
-              
+
               <div className="grid grid-cols-2 gap-3 pr-8">
                 <div>
                   <label className="block text-xs font-medium text-gray-700">Label</label>

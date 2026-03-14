@@ -1,6 +1,6 @@
 {
-  "name": "Nextacular CRM",
-  "short_name": "Nextacular",
+  "name": "Closify CRM",
+  "short_name": "Closify",
   "description": "A powerful SaaS CRM for your business",
   "start_url": "/",
   "display": "standalone",
