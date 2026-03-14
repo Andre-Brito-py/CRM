@@ -16,6 +16,15 @@ import {
   CreditCardIcon,
   UsersIcon,
   AcademicCapIcon,
+  DocumentTextIcon,
+  SparklesIcon,
+  ChatBubbleBottomCenterTextIcon,
+  GlobeAltIcon,
+  BuildingOfficeIcon,
+  BeakerIcon,
+  BriefcaseIcon,
+  WrenchScrewdriverIcon,
+  CakeIcon,
 } from '@heroicons/react/24/outline';
 
 const sanitizeHelpHtml = (input) => {
@@ -132,7 +141,9 @@ const TutorialImage = ({ src, alt, caption }) => (
 /* ─── Tutorial content (rich JSX) ──────────────────────────────────── */
 const TUTORIAL_CONTENT = {
   crm: {
-    title: '👥 Tutorial: CRM Básico (Contatos e Empresas)',
+    icon: UsersIcon,
+    title: 'CRM Básico',
+    subtitle: 'Contatos e Empresas',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -152,7 +163,9 @@ const TUTORIAL_CONTENT = {
   },
 
   pipelines: {
-    title: '📊 Tutorial: Gestão de Funis (Pipelines & Deals)',
+    icon: RectangleStackIcon,
+    title: 'Gestão de Funis',
+    subtitle: 'Pipelines & Deals',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -173,7 +186,9 @@ const TUTORIAL_CONTENT = {
   },
 
   inbox: {
-    title: '💬 Tutorial: Caixa de Entrada (Inbox) Omnichannel',
+    icon: InboxIcon,
+    title: 'Caixa de Entrada',
+    subtitle: 'Inbox Omnichannel',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -190,7 +205,9 @@ const TUTORIAL_CONTENT = {
   },
 
   custom_fields: {
-    title: '🎛️ Tutorial: Campos Personalizados',
+    icon: Cog6ToothIcon,
+    title: 'Campos Personalizados',
+    subtitle: 'Custom Fields',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -222,7 +239,9 @@ const TUTORIAL_CONTENT = {
   },
 
   automations: {
-    title: '⚡ Tutorial: Automações & Workflows',
+    icon: BoltIcon,
+    title: 'Automações & Workflows',
+    subtitle: 'Regras de Negócio',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -265,7 +284,9 @@ const TUTORIAL_CONTENT = {
   },
 
   templates: {
-    title: '📝 Tutorial: Templates de Mensagem',
+    icon: DocumentTextIcon,
+    title: 'Templates de Mensagem',
+    subtitle: 'Respostas Rápidas',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -316,7 +337,9 @@ const TUTORIAL_CONTENT = {
   },
 
   presets: {
-    title: '🚀 Tutorial: Setups em 1-Clique (Presets)',
+    icon: RocketLaunchIcon,
+    title: 'Setups em 1-Clique',
+    subtitle: 'Presets e Indústrias',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -336,18 +359,20 @@ const TUTORIAL_CONTENT = {
 
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: '🏠', name: 'Imobiliária', desc: 'Pipeline: Captação → Visita → Proposta → Fechamento. Campos: Tipo de Imóvel, Valor Avaliado, Tamanho (m²).' },
-            { icon: '🏥', name: 'Clínica Médica', desc: 'Pipeline: Agendamento → Consulta → Retorno. Campos: Convênio, Data Nascimento, Prontuário.' },
-            { icon: '💼', name: 'Agência Digital', desc: 'Pipeline: Proposta → Onboarding → Recorrência. Campos: Pacote Contratado, MRR, Data renovação.' },
-            { icon: '🔧', name: 'Assistência Técnica', desc: 'Pipeline: Orçamento → Aprovação → Execução → Entrega. Campos: Equipamento, Nº Série, Garantia.' },
-            { icon: '🍽️', name: 'Restaurante', desc: 'Pipeline: Solicitação → Orçamento → Reserva Confirmada. Campos: Nº Pessoas, Data Evento, Restrições.' },
-          ].map((p) => (
+            { icon: BuildingOfficeIcon, name: 'Imobiliária', desc: 'Pipeline: Captação → Visita → Proposta → Fechamento. Campos: Tipo de Imóvel, Valor Avaliado, Tamanho (m²).' },
+            { icon: BeakerIcon, name: 'Clínica Médica', desc: 'Pipeline: Agendamento → Consulta → Retorno. Campos: Convênio, Data Nascimento, Prontuário.' },
+            { icon: BriefcaseIcon, name: 'Agência Digital', desc: 'Pipeline: Proposta → Onboarding → Recorrência. Campos: Pacote Contratado, MRR, Data renovação.' },
+            { icon: WrenchScrewdriverIcon, name: 'Assistência Técnica', desc: 'Pipeline: Orçamento → Aprovação → Execução → Entrega. Campos: Equipamento, Nº Série, Garantia.' },
+            { icon: CakeIcon, name: 'Restaurante', desc: 'Pipeline: Solicitação → Orçamento → Reserva Confirmada. Campos: Nº Pessoas, Data Evento, Restrições.' },
+          ].map((p) => {
+            const Icon = p.icon;
+            return (
             <div key={p.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
-              <div className="text-lg mb-1">{p.icon}</div>
+              <div className="text-blue-600 dark:text-blue-400 mb-2"><Icon className="w-6 h-6" /></div>
               <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mb-1">{p.name}</p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{p.desc}</p>
             </div>
-          ))}
+          )})}
         </div>
 
         <div className="space-y-4 mt-2">
@@ -363,7 +388,9 @@ const TUTORIAL_CONTENT = {
   },
 
   webhooks: {
-    title: '🔗 Tutorial: Integrações & Webhooks',
+    icon: PuzzlePieceIcon,
+    title: 'Integrações & Webhooks',
+    subtitle: 'Conectividade',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -415,7 +442,9 @@ const TUTORIAL_CONTENT = {
   },
 
   ai_insights: {
-    title: '🤖 Tutorial: Insights de IA (Pipeline)',
+    icon: SparklesIcon,
+    title: 'Insights de IA',
+    subtitle: 'Relatórios do Pipeline',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -447,7 +476,9 @@ const TUTORIAL_CONTENT = {
   },
 
   ai_summary: {
-    title: '💬 Tutorial: Resumo IA de Conversa',
+    icon: ChatBubbleBottomCenterTextIcon,
+    title: 'Resumo IA de Conversa',
+    subtitle: 'Copiloto de Atendimento',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -456,7 +487,7 @@ const TUTORIAL_CONTENT = {
 
         <div className="space-y-4">
           <Step number={1} title='Acesse a Inbox e abra uma conversa' desc='Clique em qualquer conversa na lista lateral.' />
-          <Step number={2} title='Clique no botão &quot;Resumo IA&quot; (ícone ✨) no cabeçalho' desc='O botão aparece no topo direito da janela de chat, ao lado do seletor de responsável.' />
+          <Step number={2} title='Clique no botão "Resumo IA" (ícone ✨) no cabeçalho' desc='O botão aparece no topo direito da janela de chat, ao lado do seletor de responsável.' />
           <Step number={3} title='Aguarde 2-3 segundos' desc='O botão mostra "Gerando..." enquanto a IA processa. O sistema analisa as últimas 50 mensagens.' />
           <Step number={4} title='Leia o painel azul de resumo' desc='O resumo aparece em destaque abaixo do cabeçalho, com:' />
         </div>
@@ -488,8 +519,42 @@ const TUTORIAL_CONTENT = {
     ),
   },
 
+  web_forms: {
+    icon: GlobeAltIcon,
+    title: 'Formulários Web',
+    subtitle: 'Form Builder',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Os Formulários Web (Web Forms) permitem criar páginas estáticas e linkáveis que capturam leads e os enviam diretamente para o seu CRM, criando Contatos e Negócios automaticamente.
+        </p>
+
+        <div className="space-y-4">
+          <Step number={1} title='Acesse a área de Web Forms' desc='No menu superior da plataforma ou na lateral do Workspace, clique em "Web Forms".' />
+          <Step number={2} title='Crie o seu formulário' desc='Clique em "Create Web Form", dê um nome ao formulário e defina a URL pública (slug). Ex: /f/meu-novo-form' />
+          <Step number={3} title='Vincule a um Funil (Opcional)' desc='Configure em qual Estágio do Pipeline o sistema deve criar o Negócio, e até defina Tags aplicadas automaticamente para quem preencher o form.' />
+          <Step number={4} title='Construa seu formulário (Campos)' desc='No cartão do form recém-criado, clique no botão azul (ícone de Lápis) para editar as perguntas. Você decide se é texto curto, telefone, campo obrigatório e para onde os dados vão no Perfil do Contato.' />
+          <Step number={5} title='Compartilhe a Página Pública' desc='Clique no ícone de "Olho" ou copie o link para divulgá-lo. Visitantes verão uma página atraente carregando suas perguntas.' />
+        </div>
+
+        <div className="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-700/40 rounded-xl space-y-2">
+          <p className="text-xs font-bold text-blue-700 dark:text-blue-400">🔥 Como Funciona a Captura de Leads?</p>
+          <p className="text-xs text-blue-700 dark:text-blue-500 leading-relaxed">
+            Se o visitante preencher um email ou telefone que já existe na base, o <b>Contato é atualizado</b> sem duplicatas. Uma <b>Nota</b> será registrada na timeline do Contato, e o <b>Deal</b> surgirá no Kanban como mágica!
+          </p>
+        </div>
+
+        <TipBox>
+          Campos mapeados para (Custom Field) aparecerão perfeitamente na listagem de dados adicionais do seu contato! Combine isso com Automações para notificar o corretor/vendedor pelo Slack!
+        </TipBox>
+      </div>
+    ),
+  },
+
   tasks: {
-    title: '✅ Tutorial: Gestão de Tarefas (Tasks)',
+    icon: CheckCircleIcon,
+    title: 'Gestão de Tarefas',
+    subtitle: 'Tasks e Lembretes',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -506,7 +571,9 @@ const TUTORIAL_CONTENT = {
   },
 
   analytics: {
-    title: '📈 Tutorial: Relatórios (Analytics)',
+    icon: ChartBarIcon,
+    title: 'Relatórios',
+    subtitle: 'Analytics e Métricas',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -525,7 +592,9 @@ const TUTORIAL_CONTENT = {
   },
 
   team: {
-    title: '🤝 Tutorial: Minha Equipe',
+    icon: UsersIcon,
+    title: 'Minha Equipe',
+    subtitle: 'Cargos e Permissões',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -545,7 +614,9 @@ const TUTORIAL_CONTENT = {
   },
 
   billing: {
-    title: '💳 Tutorial: Assinaturas e Bilhetagem',
+    icon: CreditCardIcon,
+    title: 'Assinaturas',
+    subtitle: 'Billing e Faturas',
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
@@ -577,9 +648,12 @@ const HelpModal = ({ isOpen, toggle }) => {
     t(`help.category.${cat.key}.title`).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredTutorials = TUTORIAL_KEYS.filter((key) =>
-    TUTORIAL_CONTENT[key].title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTutorials = TUTORIAL_KEYS.filter((key) => {
+    const tut = TUTORIAL_CONTENT[key];
+    const term = searchQuery.toLowerCase();
+    return (tut.title?.toLowerCase() || '').includes(term) || 
+           (tut.subtitle?.toLowerCase() || '').includes(term);
+  });
 
   return (
     <Modal show={isOpen} title={mode === 'tutorials' ? '📚 Tutoriais No-Code' : t('help.modal.title')} toggle={toggle} size="large">
@@ -642,19 +716,25 @@ const HelpModal = ({ isOpen, toggle }) => {
             {mode === 'tutorials' && filteredTutorials.map((key) => {
               const tut = TUTORIAL_CONTENT[key];
               const isActive = activeTutorial === key;
+              const Icon = tut.icon || AcademicCapIcon;
               return (
                 <button
                   key={key}
                   onClick={() => setActiveTutorial(key)}
-                  className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all text-left ${isActive
+                  className={`flex items-start gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all text-left ${isActive
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
                     : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  {tut.title.split(':')[0]}
-                  <span className={`text-xs leading-tight ${isActive ? 'text-blue-100' : 'text-zinc-500'}`}>
-                    {tut.title.split(':')[1]?.trim()}
-                  </span>
+                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${isActive ? 'text-blue-200' : 'text-gray-400 dark:text-zinc-500'}`} />
+                  <div className="flex flex-col">
+                    <span>{tut.title}</span>
+                    {tut.subtitle && (
+                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-blue-100' : 'text-zinc-500'}`}>
+                        {tut.subtitle}
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
@@ -697,9 +777,20 @@ const HelpModal = ({ isOpen, toggle }) => {
 
           {mode === 'tutorials' && (
             <div className="max-w-2xl mx-auto animate-in fade-in slide-in-from-right-4 duration-300">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-                {TUTORIAL_CONTENT[activeTutorial]?.title}
-              </h2>
+              <div className="flex items-center gap-3 mb-6">
+                {(() => {
+                  const Icon = TUTORIAL_CONTENT[activeTutorial]?.icon;
+                  if (!Icon) return null;
+                  return (
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  );
+                })()}
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  {`Tutorial: ${TUTORIAL_CONTENT[activeTutorial]?.title}`}
+                </h2>
+              </div>
               {TUTORIAL_CONTENT[activeTutorial]?.render()}
               <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 text-center">
                 <p className="text-xs text-gray-400 dark:text-zinc-500">{t('help.footer.text')}</p>

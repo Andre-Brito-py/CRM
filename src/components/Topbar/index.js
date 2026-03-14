@@ -60,6 +60,7 @@ const ITEM_ICONS = {
   'Contacts': PhoneIcon,
   'Companies': BuildingOffice2Icon,
   'Tasks': CheckCircleIcon,
+  'Web Forms': DocumentTextIcon,
   'common.label.integrations': PuzzlePieceIcon,
   'Automations': BoltIcon,
   'Analytics': ChartBarIcon,

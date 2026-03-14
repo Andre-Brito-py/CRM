@@ -22,65 +22,72 @@ const PrivacyPolicy = () => {
         <p className="mb-1">Versão: {privacyVersion}</p>
         <p className="mb-8">Última atualização: {lastUpdated}</p>
         
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Controladora e Contato</h2>
-        <p className="mb-4">
-          Esta Política descreve como {companyName} trata dados pessoais no contexto do uso da plataforma. Para dúvidas, solicitações e
-          exercício de direitos, entre em contato pelo e-mail: <span className="font-bold">{privacyEmail}</span>.
-        </p>
+        <section className="prose prose-blue max-w-none text-gray-600">
+          <p className="mb-4 text-lg font-medium text-gray-800">
+            A privacidade e a estruturação segura dos dados no ambiente B2B são um pilar de integridade operacional do <strong>{companyName}</strong>.
+            Garantimos o pleno atendimento da Lei Geral de Proteção de Dados (LGPD - nº 13.709/2018) e em sintonia com os requerimentos de regulações
+            internacionais afins, como o GDPR.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">2. Dados que Coletamos</h2>
-        <p className="mb-4">
-          Podemos coletar:
-        </p>
-        <ul className="list-disc pl-6 mb-4 space-y-2">
-          <li>Dados de cadastro (nome, e-mail, credenciais e preferências).</li>
-          <li>Dados de cobrança e assinatura (status do plano, identificadores de pagamento e histórico).</li>
-          <li>Dados operacionais do CRM inseridos pelo usuário (contatos, empresas, negócios, tarefas e mensagens).</li>
-          <li>Dados técnicos (logs, endereço IP, identificadores de dispositivo e métricas de uso para segurança e performance).</li>
-        </ul>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">1. Natureza de Atuação Sistêmica (Controlador e Operador)</h2>
+          <p className="mb-4">
+            Dentro de uma estrutura sistêmica SaaS e B2B, atuamos preponderantemente enquanto <strong>Operadora de Dados</strong> das informações relativas
+            aos &quot;Titulares&quot; (ex.: clientes e leads da <em>sua</em> empresa). No que tange as informações que coletamos organicamente de VOCÊ (como CNPJ da Conta, Assinante e Administradores do sistema),
+            o <strong>{companyName}</strong> atua enquanto <strong>Controladora</strong>. 
+          </p>
+          <p className="mb-4">
+            A Controladora final de dados de Contatos criados dentro das lógicas da plataforma será sempre o próprio Cliente Assinante.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">3. Finalidades e Bases Legais</h2>
-        <p className="mb-4">
-          Tratamos dados pessoais para prestar e aprimorar o serviço, operar recursos contratados, garantir segurança, cumprir obrigações legais e
-          viabilizar cobrança. As bases legais podem incluir execução de contrato, cumprimento de obrigação legal/regulatória, legítimo interesse e,
-          quando aplicável, consentimento.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">2. Quais Dados Tratamos</h2>
+          <p className="mb-4">
+            No decurso de nosso contrato comercial B2B, tratamos sob tutela legal as seguintes frentes:
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li><strong>Dados Contratuais e da Conta:</strong> Nome, Razão Social, E-mails Administrativos, credenciais cifradas e métricas de pagamento de subscrições ativas via gateway Stripe.</li>
+            <li><strong>Dados de Utilização e Logs (Auditoria):</strong> Rastreamentos de sistema (IP, device info, browser) para atestar segurança primária aos endpoints e gerar relatórios protetivos para que clientes auditem os acessos de sua &quot;Team&quot;.</li>
+            <li><strong>Dados do Inquilino (Tenant Data):</strong> E-mails, mensagens da Inbox Omnichannel, campos de pipeline, anotações de leads (Dados de Terceiros que injetam em nosso escopo de Operador).</li>
+          </ul>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">4. Compartilhamento e Operadores</h2>
-        <p className="mb-4">
-          Não vendemos dados pessoais. Podemos compartilhar dados com fornecedores (operadores) estritamente para operar a plataforma, por exemplo:
-          processamento de pagamentos, disparo de e-mails, hospedagem, armazenamento, analytics e integrações solicitadas (como WhatsApp/Meta e IA).
-          Esses fornecedores devem tratar os dados conforme nossas instruções e com medidas de segurança adequadas.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">3. Finalidades e Base Legal do Tratamento</h2>
+          <p className="mb-4">
+            O tratamento de todos estes dados possui fito restrito na <strong>Execução Regular de Contrato e Cumprimento de Obrigação Regulatória</strong>:
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li>Hospedar as lógicas e disponibilizar a Plataforma (Contrato).</li>
+            <li>Atrair automação e processos de Inteligência Artificial para inferências estatísticas restritas ao escopo fechado do seu próprio Workspace (para prever receitas e resumir históricos de chat, a pedido explícito das features contratadas).</li>
+            <li>Garantir faturamentos em consonância com as regulações tributárias brasileiras de conformidade.</li>
+          </ul>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">5. Transferências Internacionais</h2>
-        <p className="mb-4">
-          Alguns fornecedores podem operar fora do Brasil. Quando houver transferência internacional, adotamos salvaguardas apropriadas, conforme
-          legislação aplicável, buscando garantir um nível de proteção adequado.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">4. Compartilhamento Comercial (Sub-Operadores Táticos)</h2>
+          <p className="mb-4">
+            Nunca e sob nenhuma circunstância comercializamos base de dados confidenciais a terceiros (&quot;Data Brokers&quot;). Para garantir a estabilidade
+            da Nuvem que suporta o maquinário de processos paralelos, os dados repousam fisicamente em Sub-Operadores restritos de primeira linha
+            (ex: Amazon Web Services AWS, MongoDB Atlas Database, Vercel / Cloudflare para computação de borda, e OpenAI nas pontuações de insights de IA).
+            Esses fornecedores retêm conformidade máxima SOC-2 e ISO 27001.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">6. Retenção e Exclusão</h2>
-        <p className="mb-4">
-          Mantemos dados pelo tempo necessário para cumprir as finalidades desta Política e obrigações legais/regulatórias. Você pode solicitar
-          exportação e remoção de dados conforme os recursos disponibilizados na plataforma e/ou pelo canal de contato.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">5. Segurança Computacional</h2>
+          <p className="mb-4">
+            Todos os bancos de dados que abrigam multi-inquilinato (multi-tenant) repousam sob criptografia ativa &quot;At-Rest&quot; e transitáveis sobre TLS 1.3 (In-Transit).
+            Os tokens sensíveis como os Webhooks HMAC e Chaves de Integração (API Keys) de sua titularidade ficam guardados através de &quot;Cipher Algorithms&quot; de salt aleatório.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">7. Direitos do Titular</h2>
-        <p className="mb-4">
-          Conforme a LGPD, você pode solicitar confirmação de tratamento, acesso, correção, anonimização, bloqueio, eliminação, portabilidade e
-          informações sobre compartilhamentos. Para exercer direitos, utilize <span className="font-bold">{privacyEmail}</span>.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">6. A Portabilidade e Retenção (Exclusão Regulatória)</h2>
+          <p className="mb-4">
+            Obedecendo estritamente ao Artº. 18 da LGPD, nossos clientes têm à disposição botões sistêmicos para <strong>Portabilidade Formato Estruturado (JSON)</strong>
+            de seus Workspaces de modo soberano na tela de Configurações Avançadas. Esgotada a resilição dos contratos ou caso de uma supressão
+            explícita em conta, o Time Limit destrutivo dos hard-disks entra em vigor limpando todas cópias de rotina do disco (purge delay back-up procedure)
+            em no máximo 30 à 60 dias das rotinas de deleção.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">8. Segurança</h2>
-        <p className="mb-4">
-          Adotamos medidas técnicas e organizacionais razoáveis para proteger dados pessoais contra acessos não autorizados, perda, alteração e
-          destruição. Nenhuma medida é absoluta, e recomendamos boas práticas de segurança no uso de credenciais e integrações.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">9. Atualizações desta Política</h2>
-        <p className="mb-4">
-          Esta Política pode ser atualizada periodicamente. A versão vigente estará sempre disponível nesta página, com indicação de versão e data.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">7. Encarregado de Dados (DPO) e Fale Conosco</h2>
+          <p className="mb-4">
+            Você ou Titulares atrelados a seu serviço (seus leads) que tiverem dúvidas atinentes devem remetê-las ao Encarregado de Proteção
+            pelo meio oficial de comunicações jurídicas em <span className="font-bold">{privacyEmail}</span>. Respostas regimentais às interpelações
+            de titulares respeitarão rigorosamente a janela normativa brasileira legal aplicável.
+          </p>
+        </section>
       </main>
       <Footer />
     </LandingLayout>

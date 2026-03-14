@@ -32,6 +32,11 @@ const menu = (workspaceId) => [
         moduleKey: 'tasks',
       },
       {
+        name: 'Web Forms',
+        path: `/account/${workspaceId}/integrations/web-forms`,
+        moduleKey: 'webforms',
+      },
+      {
         name: 'common.label.integrations',
         path: `/account/${workspaceId}/integrations`,
         moduleKey: 'integrations',

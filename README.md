@@ -111,6 +111,8 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - Limites dinâmicos por plano (IA, automações, membros) com enforcement real
 - Tours de onboarding interativos por tela (com persistência "apenas uma vez")
 - Aviso global “Sistema em manutenção” configurável no Super Admin (com previsão de retorno)
+- Formulários Web (Form Builder): criação de formulários públicos para captura de leads com mapeamento dinâmico de campos.
+- Refino Estético: substituição de emojis por ícones vetoriais (Heroicons) em todo o Help Center.
 
 ## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
 - **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.
@@ -157,7 +159,8 @@ O que já existe hoje:
 - **API Keys por workspace:** gera chaves para integrações externas consumirem dados do workspace com controle de acesso.
 - **Presets por nicho (1-click setup):** cria pipeline + campos + templates + automações prontos para segmentos (imobiliária, clínica, agência, assistência técnica, restaurante).
 - **Roteamento e SLA no Inbox:** regras de atribuição (origem/palavra-chave/região/horário/carga), escalonamento automático e alertas.
-- **Notificações por automação:** ação "Enviar notificação" disponível no builder de automações — o usuário pode escolher se sua app envia push ou não, sem código.
+- Notificações por automação: ação "Enviar notificação" disponível no builder de automações — o usuário pode escolher se sua app envia push ou não, sem código.
+- **Form Builder (No-Code Leads):** criador visual de formulários com suporte a labels customizadas, tipos de campo, obrigatoriedade e mapeamento automático para propriedades do contato no CRM. Gera URLs públicas `/f/[slug]` prontas para uso.
 
 Exemplos práticos (sem código):
 - Quando um lead chega via WhatsApp e contém “orçamento” → criar negócio no pipeline X e atribuir para o vendedor A.
@@ -214,6 +217,10 @@ Como isso funciona internamente (resumo):
 - IA: `suggest-reply` com fallback quando `OPENAI_API_KEY` não estiver configurada.
 - Modo manutenção: banner global configurável via Super Admin e chaves públicas via `/api/public-config`.
 - CI: ajuste no workflow para evitar falha no smoke test quando variáveis mínimas não estiverem presentes.
+- **Web Forms (Form Builder):** implementação completa do construtor de formulários, API de submissão pública e integração com CRM (criação de contatos, deals e atividades).
+- **Compliance & Portabilidade:** reescrita dos Termos de Uso e Política de Privacidade para padrão B2B SaaS (Controlador/Operador) e LGPD.
+- **Exportação de Dados:** funcionalidade de exportação do Workspace em JSON disponível em Configurações Avançadas.
+- **UI/UX:** refinamento do Help Center removendo emojis e padronizando com Heroicons.
 
 ---
 

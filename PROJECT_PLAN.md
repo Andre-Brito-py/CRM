@@ -117,7 +117,7 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 - [x] Validar configuração LIVE: produtos, preços e moedas (STANDARD/PREMIUM).
   - [x] Criar endpoint de verificação automatizada: `/api/admin/stripe/validate`.
   - [x] Proteger a rota `/api/setup-plans` (apenas SUPERADMIN).
-- [ ] Validar webhooks no LIVE com eventos reais (retries + idempotência).
+- [x] Validar webhooks no LIVE com eventos reais (retries + idempotência).
   - [x] Validar secret via auto-teste de assinatura (no endpoint de verificação).
   - [x] Persistir eventos recebidos (idempotência/auditoria): `stripe_events`.
   - [x] Validar endpoint LIVE (URL + eventos obrigatórios) no endpoint de verificação.

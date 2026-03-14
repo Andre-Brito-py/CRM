@@ -13,6 +13,7 @@ import { useWorkspace } from '@/providers/workspace';
 import { getSession } from 'next-auth/react';
 import { getWorkspace, isWorkspaceCreator } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 const Advanced = ({ isCreator, workspace }) => {
   const { setWorkspace, workspace: workspaceFromContext } = useWorkspace();
@@ -55,6 +56,12 @@ const Advanced = ({ isCreator, workspace }) => {
     });
   };
 
+  const handleExportData = () => {
+    if (!currentWorkspace?.slug) return;
+    toast.success('Preparando dados para exportação. O download iniciará em breve.', { duration: 4000 });
+    window.location.href = `/api/workspace/${currentWorkspace.slug}/export`;
+  };
+
   const toggleModal = () => {
     setVerifyWorkspace('');
     setModalState(!showModal);
@@ -69,6 +76,25 @@ const Advanced = ({ isCreator, workspace }) => {
       />
       <Content.Divider />
       <Content.Container>
+        <Card className="mb-8 border-gray-200 dark:border-zinc-700">
+          <Card.Body
+            title="Exportar Dados (LGPD/GDPR)"
+            subtitle="Baixe uma cópia completa de todos os dados gerados neste Workspace em formato JSON estruturado."
+          />
+          <Card.Footer className="bg-gray-50 dark:bg-zinc-800/50 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+            <small className="text-gray-500 max-w-xl leading-relaxed">
+              O arquivo conterá todos os Leads, Negócios (Deals), Tarefas, e configurações de funil. Pode levar alguns segundos para compilar os dados. Mantenha os dados baixados de seus clientes seguros.
+            </small>
+            <Button
+              className="text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
+              onClick={handleExportData}
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+              <span>Exportar Dados (JSON)</span>
+            </Button>
+          </Card.Footer>
+        </Card>
+
         <Card danger>
           <Card.Body
             title={t("settings.workspace.delete")}

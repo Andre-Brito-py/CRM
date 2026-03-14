@@ -79,102 +79,88 @@ const TermsOfUse = () => {
         <p className="mb-1">Versão: {termsVersion}</p>
         <p className="mb-8">Última atualização: {lastUpdated}</p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Aceite</h2>
-        <p className="mb-4">
-          Ao criar uma conta, acessar ou utilizar a plataforma {companyName} (&quot;Plataforma&quot;), você declara ter lido,
-          compreendido e aceito estes Termos de Uso (&quot;Termos&quot;). Se você não concordar com estes Termos, não utilize
-          a Plataforma.
-        </p>
+        <section className="prose prose-blue max-w-none text-gray-600">
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">1. Introdução e Aceite</h2>
+          <p className="mb-4">
+            Estes Termos de Uso (&quot;Termos&quot;) representam um acordo legal vinculativo entre você, a empresa ou entidade
+            que representa (&quot;Cliente&quot; ou &quot;Usuário&quot;) e a <strong>{companyName}</strong>. 
+            Ao criar uma conta, acessar ou utilizar a nossa plataforma de software como serviço (SaaS), API e serviços correlatos 
+            (&quot;Plataforma&quot;), você declara possuir capacidade legal (ou poderes de representação de sua empresa) e 
+            aceita incondicionalmente estes Termos e a nossa Política de Privacidade.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">2. Quem Somos e Contato</h2>
-        <p className="mb-4">
-          A Plataforma é operada por {companyName}. Para suporte e solicitações, utilize: <span className="font-bold">{supportEmail}</span>.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">2. Descrição e Provisão do Serviço</h2>
+          <p className="mb-4">
+            O <strong>{companyName}</strong> é uma plataforma B2B que fornece ferramentas de CRM, gestão de funis de venda, 
+            automações (workflows), relatórios analíticos, caixas de entrada omnichannel (suporte) e formulários de captura de leads.
+          </p>
+          <p className="mb-4">
+            <strong>2.1 Disponibilidade:</strong> Nós nos esforçamos para oferecer um SLA (Service Level Agreement) de disponibilidade
+            técnica comercialmente razoável, porém não oferecemos garantia absoluta de disponibilidade. Ocasionalmente, haverá
+            manutenções programadas que serão comunicadas previamente na medida do possível.
+          </p>
+          <p className="mb-4">
+            <strong>2.2 Modificações:</strong> Nós reservamos o direito de aprimorar, adicionar, remover ou descontinuar
+            recursos da Plataforma sem aviso prévio para refletir a evolução tecnológica da ferramenta.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">3. Descrição do Serviço</h2>
-        <p className="mb-4">
-          A Plataforma oferece ferramentas de CRM, funil de vendas, automações e recursos de comunicação omnichannel, incluindo integrações com
-          serviços de terceiros. Recursos e limites podem variar conforme o plano contratado.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">3. Uso Aceitável (Acceptable Use Policy)</h2>
+          <p className="mb-4">
+            Ao utilizar a Plataforma, você concorda expressamente em <strong>não</strong>:
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li>Utilizar os serviços para fins ilícitos, fraudulentos ou para armazenamento de dados proibidos pela legislação (como dados de pedofilia, apologia ao crime, terrorismo, etc).</li>
+            <li>Praticar envios massivos de mensagens não solicitadas (SPAM) ou violar as políticas Anti-Spam (CAN-SPAM) e diretrizes de parceiros integrados, como a API do WhatsApp (Meta).</li>
+            <li>Tentar realizar engenharia reversa, &quot;scrapping&quot; abusivo da nossa estrutura ou tentar contornar limitações tecnológicas ou financeiras impostas pelos planos.</li>
+            <li>Compartilhar acessos (logins e senhas). Cada usuário deve possuir uma credencial nominal e intransferível no Workspace.</li>
+          </ul>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">4. Cadastro e Conta</h2>
-        <p className="mb-4">
-          Você deve fornecer informações verdadeiras e atualizadas e manter a confidencialidade de suas credenciais. Você é responsável por todas
-          as atividades realizadas sob sua conta e por garantir que o uso da Plataforma ocorra em conformidade com a legislação aplicável.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">4. Dados e Compliance (LGPD e GDPR)</h2>
+          <p className="mb-4">
+            Nos moldes da <strong>Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018)</strong> e da <strong>GDPR</strong>, 
+            é fundamental estabelecer os papéis legais das partes envolvidas:
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li><strong>Você (Cliente) atua como Controlador:</strong> É sua responsabilidade garantir a licitude dos dados (leads, contatos de clientes) que você insere na Plataforma. Você deve assegurar que obteve consentimento, legítimo interesse ou outra base legal válida para processar os dados dessas pessoas dentro do nosso CRM.</li>
+            <li><strong>{companyName} atua como Operadora:</strong> Nossa função restringe-se ao processamento tecnológico, hospedagem e estrutura sistêmica dos dados guiados por você, não consumindo seus leads de forma independente para finalidades próprias.</li>
+          </ul>
+          <p className="mb-4">
+            <strong>4.1 Notificações e Incidentes:</strong> Caso ocorra qualquer suspeita técnica de vazamentos, as partes concordam
+            em notificar-se mutuamente em prazos razoáveis para cooperarem junto às Agências Reguladoras de Proteção de Dados (ANPD).
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">5. Planos, Pagamentos e Faturamento</h2>
-        <p className="mb-4">
-          Planos pagos são cobrados de forma recorrente e antecipada, conforme periodicidade indicada no momento da contratação. A contratação pode
-          exigir a inclusão de um método de pagamento válido (ex.: cartão de crédito). Promoções, cupons e condições especiais podem ser aplicadas
-          conforme regras vigentes.
-        </p>
-        <p className="mb-4">
-          O processamento de pagamentos e a gestão de assinatura podem ser realizados por provedor terceirizado (ex.: Stripe), sujeito também aos termos
-          do respectivo provedor. Podemos disponibilizar um portal de cobrança para que você gerencie método de pagamento, cancelamento e alterações.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">5. Comercial, Faturamento e Planos</h2>
+          <p className="mb-4">
+            O uso profissional da Plataforma requer a assinatura de Planos Pagos de forma pré-paga e automática.
+          </p>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li><strong>Cobranças:</strong> Os valores correspondentes à sua licença SaaS serão faturados periodicamente (mensalmente ou anualmente) e processados pelo provedor Stripe. Impostos cabíveis serão emitidos nas Notas Fiscais correspondentes.</li>
+            <li><strong>Upgrade/Downgrade:</strong> Migrações de planos são imediatas. Downgrades mantêm a franquia e os recursos do plano antigo até o último dia vigente do ciclo atual de faturamento. Extensões (&quot;add-ons&quot;) de inteligência artificial requerem crédito em conta sob demanda, ou compra de pacotes adicionais.</li>
+            <li><strong>Inadimplência:</strong> O não pagamento até a data de vencimento poderá acarretar bloqueio sistêmico com carência limitada de acesso (&quot;Grace Period&quot;), e após 60 (sessenta) dias, o espaço hospedado bem como todos os dados, regras e fluxos poderão entrar em purga técnica definitiva (exclusão).</li>
+          </ul>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">6. Mudança de Plano (Upgrade e Downgrade)</h2>
-        <p className="mb-4">
-          Você pode solicitar a alteração do seu plano a qualquer momento. Em upgrades, a alteração pode ocorrer imediatamente. Em downgrades (mudança
-          para um plano inferior), você mantém os recursos e limites do plano superior até a próxima data de cobrança (tipicamente em até 30 dias),
-          quando a alteração passa a valer e o valor cobrado será ajustado.
-        </p>
-        <p className="mb-4">
-          Em upgrades, podem existir cobranças proporcionais (prorrata) para refletir o tempo restante do ciclo atual, conforme regras do provedor de
-          pagamento e configurações aplicáveis.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">6. Limitação de Responsabilidade</h2>
+          <p className="mb-4 text-sm bg-gray-50 border-l-4 border-gray-300 p-4">
+            Na máxima extensão permitida por lei, o <strong>{companyName}</strong> NÃO responderá por: (a) lucros cessantes ou prejuízos indiretos pela sua impossibilidade momentânea de fechar negócios por indisponibilidade técnica da máquina; (b) dados inseridos ou corrompidos por operadores na sua conta do Workspace; e (c) quebra das políticas da API Oficial do Whatsapp com o Meta que resultem ao banimento de seus números telefônicos - tendo em vista que o conteúdo enviado por seus agentes comerciais não está sob nosso escrutínio prévio.
+            Nossa responsabilidade civil decorrente deste contrato nunca será superior aos valores que você nos pagou para hospedar a licença durante os últimos 6 (seis) meses faturados.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">6.1 Cancelamento, Reembolsos e Impostos</h2>
-        <p className="mb-4">
-          Você pode solicitar o cancelamento a qualquer momento. Salvo disposição legal obrigatória em sentido diverso, o cancelamento normalmente passa
-          a valer ao final do período já pago, e não há reembolso automático de valores já cobrados. Impostos podem ser aplicáveis conforme sua
-          localidade e informações de cobrança fornecidas, podendo constar em faturas e recibos.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">7. Rescisão e Exportação de Dados (Exit Strategy)</h2>
+          <p className="mb-4">
+            O Cliente poderá rescindir a assinatura a qualquer tempo cessando os faturamentos seguintes a partir da rescisão pelo Painel de Custos (Billing).
+            Considerando a legislação de Portabilidade de Dados, o Cliente terá os mecanismos em &quot;Advanced Settings&quot; para <strong>exportar a integralidade de seus dados da plataforma (via JSON)</strong> antes do bloqueio definitivo da conta se assim desejar.
+          </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">7. Uso Aceitável</h2>
-        <p className="mb-4">
-          É proibido utilizar a Plataforma para fins ilícitos, enviar spam, explorar vulnerabilidades, ou violar políticas de terceiros (por exemplo,
-          políticas do WhatsApp/Meta, e regras de provedores de e-mail). Podemos aplicar limitações técnicas, suspender recursos ou contas e cooperar com
-          autoridades quando necessário.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">8. Dados e Privacidade</h2>
-        <p className="mb-4" id="privacidade">
-          Ao utilizar a Plataforma, você pode inserir dados pessoais de terceiros (por exemplo, contatos). Você se compromete a possuir base legal para
-          o tratamento desses dados e a utilizá-los de forma responsável. A Plataforma pode adotar medidas técnicas para segurança e conformidade, e poderá
-          restringir acessos em caso de uso indevido.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">9. Propriedade Intelectual</h2>
-        <p className="mb-4">
-          A Plataforma, suas marcas, design e código são protegidos por direitos de propriedade intelectual. Estes Termos não concedem licença ou cessão
-          além do direito limitado de uso conforme o plano contratado e estes Termos.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">10. Suspensão e Encerramento</h2>
-        <p className="mb-4">
-          Podemos suspender ou encerrar o acesso à Plataforma em caso de violação destes Termos, fraude, tentativa de abuso, ou por exigência legal. Você
-          pode encerrar o uso a qualquer momento, observadas as condições de pagamento aplicáveis ao seu plano.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">11. Limitação de Responsabilidade</h2>
-        <p className="mb-4">
-          Na extensão máxima permitida pela lei, {companyName} não será responsável por danos indiretos, lucros cessantes, perda de dados ou interrupções
-          decorrentes do uso da Plataforma, inclusive quando causados por falhas de terceiros, integrações, provedores de infraestrutura ou serviços externos.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">12. Alterações destes Termos</h2>
-        <p className="mb-4">
-          Podemos atualizar estes Termos periodicamente. A versão vigente estará sempre disponível nesta página. Alterações relevantes podem ser comunicadas
-          por meios razoáveis, e o uso continuado da Plataforma após a atualização pode indicar aceitação.
-        </p>
-
-        <h2 className="text-2xl font-semibold mt-8 mb-4">13. Lei Aplicável e Foro</h2>
-        <p className="mb-4">
-          Estes Termos são regidos pelas leis aplicáveis do Brasil. Fica eleito o foro competente para dirimir eventuais controvérsias, salvo disposições
-          legais obrigatórias em sentido diverso.
-        </p>
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">8. Disposições Finais</h2>
+          <p className="mb-4">
+            <strong>Foro:</strong> Fica eleito o foro da sede do {companyName} no Brasil, com exclusão de qualquer outro, por mais privilegiado que seja,
+            para dirimir quaisquer litígios ou omissões relativas à interpretação destes Termos.
+          </p>
+          <p className="mb-4">
+            <strong>Alterações:</strong> O {companyName} garante o envio via e-mail e exibirá notificações em tela quando atualizações materiais a estes
+            contratos de termos de uso ocorrerem.
+          </p>
+        </section>
       </main>
       <Footer />
     </LandingLayout>

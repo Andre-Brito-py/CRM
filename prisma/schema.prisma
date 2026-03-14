@@ -30,20 +30,20 @@ model Account {
 }
 
 model CustomerPayment {
-  id               String           @id @default(cuid())
-  paymentId        String           @unique
-  customerId       String           @unique
-  email            String?          @unique
-  subscriptionType SubscriptionType @default(FREE)
-  providerSubscriptionId String?
-  currentPeriodEnd DateTime?
+  id                      String            @id @default(cuid())
+  paymentId               String            @unique
+  customerId              String            @unique
+  email                   String?           @unique
+  subscriptionType        SubscriptionType  @default(FREE)
+  providerSubscriptionId  String?
+  currentPeriodEnd        DateTime?
   pendingSubscriptionType SubscriptionType?
-  pendingEffectiveAt DateTime?
-  pendingStripePriceId String?
-  createdAt        DateTime?        @default(now())
-  deletedAt        DateTime?
-  updatedAt        DateTime?        @updatedAt
-  customer         User             @relation(fields: [customerId], references: [id])
+  pendingEffectiveAt      DateTime?
+  pendingStripePriceId    String?
+  createdAt               DateTime?         @default(now())
+  deletedAt               DateTime?
+  updatedAt               DateTime?         @updatedAt
+  customer                User              @relation(fields: [customerId], references: [id])
 
   @@map("customerPayments")
 }
@@ -73,10 +73,10 @@ model PaymentProvider {
   createdAt   DateTime              @default(now())
   updatedAt   DateTime              @updatedAt
 
-  credentials PaymentProviderCredential[]
+  credentials       PaymentProviderCredential[]
   workspaceSettings WorkspacePaymentSetting[]
-  payments    Payment[]
-  subscriptions PlatformSubscription[]
+  payments          Payment[]
+  subscriptions     PlatformSubscription[]
 
   @@map("payment_providers")
 }
@@ -91,14 +91,14 @@ model PaymentProviderCredential {
   createdAt     DateTime                   @default(now())
   updatedAt     DateTime                   @updatedAt
 
-  provider      PaymentProvider            @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  provider PaymentProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@unique([providerId, environment])
   @@map("payment_provider_credentials")
 }
 
 model WorkspacePaymentSetting {
-  id                   String   @id @default(uuid())
+  id                    String   @id @default(uuid())
   workspaceId           String   @unique
   providerId            String
   providerAccountId     String?
@@ -107,7 +107,7 @@ model WorkspacePaymentSetting {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   provider  PaymentProvider @relation(fields: [providerId], references: [id])
 
   @@index([providerId])
@@ -115,18 +115,18 @@ model WorkspacePaymentSetting {
 }
 
 model PlatformSubscription {
-  id                     String   @id @default(uuid())
-  workspaceId             String   @unique
-  planId                  String
-  providerId              String
-  providerSubscriptionId  String?
-  status                  String   @default("ACTIVE")
-  nextBillingDate         DateTime?
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                     String    @id @default(uuid())
+  workspaceId            String    @unique
+  planId                 String
+  providerId             String
+  providerSubscriptionId String?
+  status                 String    @default("ACTIVE")
+  nextBillingDate        DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  plan      Plan      @relation(fields: [planId], references: [id])
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  plan      Plan            @relation(fields: [planId], references: [id])
   provider  PaymentProvider @relation(fields: [providerId], references: [id])
 
   @@index([planId])
@@ -182,37 +182,37 @@ model Session {
 }
 
 model User {
-  id               String           @id @default(cuid())
-  userCode         String           @unique @default(cuid())
-  name             String?
-  email            String?          @unique
-  emailVerified    DateTime?
-  image            String?
-  createdAt        DateTime?        @default(now())
-  deletedAt        DateTime?
-  updatedAt        DateTime?        @updatedAt
-  role             UserRole         @default(USER)
-  suspended        Boolean          @default(false)
-  password         String?
-  twoFactorEnabled Boolean          @default(false)
-  twoFactorSecret  String?
-  onboardingStatus Json?            @default("{}")
-  termsVersion     String?
-  termsAcceptedAt  DateTime?
-  accounts         Account[]
-  activities       Activity[]
-  customerPayment  CustomerPayment?
-  fiscalProfile    FiscalProfile?
-  fiscalDocuments  FiscalDocument[]
-  domains          Domain[]
-  membership       Member[]         @relation("membership")
-  invitedMembers   Member[]         @relation("inviter")
-  sessions         Session[]
-  assignedConversations Conversation[] @relation("conversationAssignee")
-  assignedDeals   Deal[]         @relation("dealAssignee")
-  assignedTasks    Task[]
-  notifications    Notification[]
-  createdWorkspace Workspace[]
+  id                    String           @id @default(cuid())
+  userCode              String           @unique @default(cuid())
+  name                  String?
+  email                 String?          @unique
+  emailVerified         DateTime?
+  image                 String?
+  createdAt             DateTime?        @default(now())
+  deletedAt             DateTime?
+  updatedAt             DateTime?        @updatedAt
+  role                  UserRole         @default(USER)
+  suspended             Boolean          @default(false)
+  password              String?
+  twoFactorEnabled      Boolean          @default(false)
+  twoFactorSecret       String?
+  onboardingStatus      Json?            @default("{}")
+  termsVersion          String?
+  termsAcceptedAt       DateTime?
+  accounts              Account[]
+  activities            Activity[]
+  customerPayment       CustomerPayment?
+  fiscalProfile         FiscalProfile?
+  fiscalDocuments       FiscalDocument[]
+  domains               Domain[]
+  membership            Member[]         @relation("membership")
+  invitedMembers        Member[]         @relation("inviter")
+  sessions              Session[]
+  assignedConversations Conversation[]   @relation("conversationAssignee")
+  assignedDeals         Deal[]           @relation("dealAssignee")
+  assignedTasks         Task[]
+  notifications         Notification[]
+  createdWorkspace      Workspace[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -227,17 +227,17 @@ enum StripeEventStatus {
 }
 
 model StripeEvent {
-  id             String           @id
-  type           String
-  livemode       Boolean
+  id              String            @id
+  type            String
+  livemode        Boolean
   stripeCreatedAt DateTime?
-  receivedAt     DateTime         @default(now())
-  processedAt    DateTime?
-  status         StripeEventStatus @default(received)
-  requestId      String?
-  dataObjectId   String?
-  dataObjectType String?
-  error          String?
+  receivedAt      DateTime          @default(now())
+  processedAt     DateTime?
+  status          StripeEventStatus @default(received)
+  requestId       String?
+  dataObjectId    String?
+  dataObjectType  String?
+  error           String?
 
   @@index([livemode, type, receivedAt])
   @@map("stripe_events")
@@ -281,26 +281,26 @@ model FiscalIssuer {
 }
 
 model FiscalProfile {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  issuerId       String?
-  documentType   String
-  document       String
-  name           String
-  email          String?
-  phone          String?
-  cep            String?
-  uf             String?
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  issuerId        String?
+  documentType    String
+  document        String
+  name            String
+  email           String?
+  phone           String?
+  cep             String?
+  uf              String?
   codigoMunicipio Int?
-  logradouro     String?
-  numero         String?
-  complemento    String?
-  bairro         String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  logradouro      String?
+  numero          String?
+  complemento     String?
+  bairro          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  issuer    FiscalIssuer? @relation(fields: [issuerId], references: [id])
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issuer    FiscalIssuer?    @relation(fields: [issuerId], references: [id])
   documents FiscalDocument[]
 
   @@index([issuerId])
@@ -308,27 +308,27 @@ model FiscalProfile {
 }
 
 model FiscalDocument {
-  id               String              @id @default(cuid())
-  type             FiscalDocumentType  @default(nfse)
-  provider         FiscalProvider      @default(focusnfe)
-  status           FiscalDocumentStatus @default(pending)
-  reference        String              @unique
-  stripeInvoiceId  String?             @unique
-  stripeCustomerId String?
-  userId           String?
-  fiscalProfileId  String?
-  issuerId         String?
-  amount           Decimal?            @db.Decimal(10, 2)
-  currency         String?
-  issuedAt         DateTime?
-  providerStatus   String?
+  id                 String               @id @default(cuid())
+  type               FiscalDocumentType   @default(nfse)
+  provider           FiscalProvider       @default(focusnfe)
+  status             FiscalDocumentStatus @default(pending)
+  reference          String               @unique
+  stripeInvoiceId    String?              @unique
+  stripeCustomerId   String?
+  userId             String?
+  fiscalProfileId    String?
+  issuerId           String?
+  amount             Decimal?             @db.Decimal(10, 2)
+  currency           String?
+  issuedAt           DateTime?
+  providerStatus     String?
   providerDocumentId String?
-  providerUrl      String?
-  error            String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  providerUrl        String?
+  error              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
 
-  user          User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user          User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
   fiscalProfile FiscalProfile? @relation(fields: [fiscalProfileId], references: [id], onDelete: SetNull)
   issuer        FiscalIssuer?  @relation(fields: [issuerId], references: [id], onDelete: SetNull)
 
@@ -347,15 +347,15 @@ model VerificationToken {
 }
 
 model Workspace {
-  id                     String         @id @default(cuid())
-  workspaceCode          String         @unique @default(cuid())
-  inviteCode             String         @unique @default(cuid())
+  id                     String                   @id @default(cuid())
+  workspaceCode          String                   @unique @default(cuid())
+  inviteCode             String                   @unique @default(cuid())
   creatorId              String
   name                   String
   slug                   String
-  createdAt              DateTime?      @default(now())
+  createdAt              DateTime?                @default(now())
   deletedAt              DateTime?
-  updatedAt              DateTime?      @updatedAt
+  updatedAt              DateTime?                @updatedAt
   customFieldDefinitions Json?
   activities             Activity[]
   apiKeys                ApiKey[]
@@ -379,7 +379,8 @@ model Workspace {
   tasks                  Task[]
   notifications          Notification[]
   webhooks               Webhook[]
-  creator                User           @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  webForms               WebForm[]
+  creator                User                     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
   @@map("workspaces")
@@ -401,27 +402,27 @@ model Integration {
 }
 
 model Contact {
-  id            String         @id @default(cuid())
-  workspaceId   String
-  companyId     String?
-  name          String
-  email         String?
-  phone         String?
+  id              String         @id @default(cuid())
+  workspaceId     String
+  companyId       String?
+  name            String
+  email           String?
+  phone           String?
   asaasCustomerId String?
-  jobTitle      String?
-  customFields  Json?
-  createdAt     DateTime?      @default(now())
-  updatedAt     DateTime?      @updatedAt
-  deletedAt     DateTime?
-  activities    Activity[]
-  company       Company?       @relation(fields: [companyId], references: [id])
-  workspace     Workspace      @relation(fields: [workspaceId], references: [id])
-  conversations Conversation[]
-  deals         Deal[]
-  npsResponses  NpsResponse[]
-  payments      Payment[]
-  tags          Tag[]
-  tasks         Task[]
+  jobTitle        String?
+  customFields    Json?
+  createdAt       DateTime?      @default(now())
+  updatedAt       DateTime?      @updatedAt
+  deletedAt       DateTime?
+  activities      Activity[]
+  company         Company?       @relation(fields: [companyId], references: [id])
+  workspace       Workspace      @relation(fields: [workspaceId], references: [id])
+  conversations   Conversation[]
+  deals           Deal[]
+  npsResponses    NpsResponse[]
+  payments        Payment[]
+  tags            Tag[]
+  tasks           Task[]
 
   @@index([workspaceId])
   @@index([workspaceId, createdAt])
@@ -438,24 +439,25 @@ model Tag {
   deletedAt   DateTime?
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contacts    Contact[]
+  webForms    WebForm[]
 
   @@index([workspaceId])
   @@map("tags")
 }
 
 model Company {
-  id          String    @id @default(cuid())
-  workspaceId String
-  name        String
-  website     String?
-  industry    String?
+  id           String    @id @default(cuid())
+  workspaceId  String
+  name         String
+  website      String?
+  industry     String?
   customFields Json?
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
-  deletedAt   DateTime?
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
-  contacts    Contact[]
-  deals       Deal[]
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+  deletedAt    DateTime?
+  workspace    Workspace @relation(fields: [workspaceId], references: [id])
+  contacts     Contact[]
+  deals        Deal[]
 
   @@index([workspaceId])
   @@map("companies")
@@ -470,6 +472,7 @@ model Pipeline {
   deletedAt   DateTime?
   workspace   Workspace @relation(fields: [workspaceId], references: [id])
   stages      Stage[]
+  webForms    WebForm[]
 
   @@index([workspaceId])
   @@map("pipelines")
@@ -486,34 +489,35 @@ model Stage {
   deletedAt  DateTime?
   deals      Deal[]
   pipeline   Pipeline  @relation(fields: [pipelineId], references: [id])
+  webForms   WebForm[]
 
   @@index([pipelineId])
   @@map("stages")
 }
 
 model Deal {
-  id          String     @id @default(cuid())
-  workspaceId String
-  contactId   String?
-  companyId   String?
-  stageId     String
-  name        String
-  amount      Decimal?   @db.Decimal(10, 2)
-  closeDate   DateTime?
+  id           String     @id @default(cuid())
+  workspaceId  String
+  contactId    String?
+  companyId    String?
+  stageId      String
+  name         String
+  amount       Decimal?   @db.Decimal(10, 2)
+  closeDate    DateTime?
   customFields Json?
-  priority    String?    @default("MEDIUM")
-  assigneeId  String?
-  createdAt   DateTime?  @default(now())
-  updatedAt   DateTime?  @updatedAt
-  deletedAt   DateTime?
-  activities  Activity[]
-  payments    Payment[]
-  assignee    User?      @relation("dealAssignee", fields: [assigneeId], references: [id])
-  company     Company?   @relation(fields: [companyId], references: [id])
-  contact     Contact?   @relation(fields: [contactId], references: [id])
-  stage       Stage      @relation(fields: [stageId], references: [id])
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
-  tasks       Task[]
+  priority     String?    @default("MEDIUM")
+  assigneeId   String?
+  createdAt    DateTime?  @default(now())
+  updatedAt    DateTime?  @updatedAt
+  deletedAt    DateTime?
+  activities   Activity[]
+  payments     Payment[]
+  assignee     User?      @relation("dealAssignee", fields: [assigneeId], references: [id])
+  company      Company?   @relation(fields: [companyId], references: [id])
+  contact      Contact?   @relation(fields: [contactId], references: [id])
+  stage        Stage      @relation(fields: [stageId], references: [id])
+  workspace    Workspace  @relation(fields: [workspaceId], references: [id])
+  tasks        Task[]
 
   @@index([workspaceId])
   @@index([workspaceId, stageId])
@@ -548,10 +552,10 @@ model Payment {
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
 
-  workspace         Workspace @relation(fields: [workspaceId], references: [id])
-  contact           Contact?  @relation(fields: [contactId], references: [id])
-  deal              Deal?     @relation(fields: [dealId], references: [id])
-  provider          PaymentProvider? @relation(fields: [providerId], references: [id])
+  workspace Workspace        @relation(fields: [workspaceId], references: [id])
+  contact   Contact?         @relation(fields: [contactId], references: [id])
+  deal      Deal?            @relation(fields: [dealId], references: [id])
+  provider  PaymentProvider? @relation(fields: [providerId], references: [id])
 
   @@index([workspaceId])
   @@index([workspaceId, contactId])
@@ -583,8 +587,8 @@ model NpsSurvey {
   createdAt   DateTime             @default(now())
   updatedAt   DateTime             @updatedAt
 
-  workspace   Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  responses   NpsResponse[]
+  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  responses NpsResponse[]
 
   @@index([workspaceId])
   @@index([workspaceId, createdAt])
@@ -592,42 +596,42 @@ model NpsSurvey {
 }
 
 model NpsResponse {
-  id             String           @id @default(uuid())
+  id             String            @id @default(uuid())
   workspaceId    String
   surveyId       String
   contactId      String
   score          Int
-  feedbackText   String?          @db.Text
+  feedbackText   String?           @db.Text
   classification NpsClassification
-  createdAt      DateTime         @default(now())
+  createdAt      DateTime          @default(now())
 
-  workspace      Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  survey         NpsSurvey        @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-  contact        Contact          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  survey    NpsSurvey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  contact   Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
 
+  @@unique([surveyId, contactId])
   @@index([workspaceId])
   @@index([workspaceId, surveyId])
   @@index([workspaceId, contactId])
   @@index([workspaceId, classification])
   @@index([workspaceId, createdAt])
-  @@unique([surveyId, contactId])
   @@map("nps_responses")
 }
 
 model Conversation {
-  id          String    @id @default(cuid())
+  id          String             @id @default(cuid())
   workspaceId String
   contactId   String?
   assigneeId  String?
-  platform    String    @default("WHATSAPP")
+  platform    String             @default("WHATSAPP")
   externalId  String?
   status      ConversationStatus @default(OPEN)
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
+  createdAt   DateTime?          @default(now())
+  updatedAt   DateTime?          @updatedAt
   deletedAt   DateTime?
-  assignee    User?     @relation("conversationAssignee", fields: [assigneeId], references: [id])
-  contact     Contact?  @relation(fields: [contactId], references: [id])
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  assignee    User?              @relation("conversationAssignee", fields: [assigneeId], references: [id])
+  contact     Contact?           @relation(fields: [contactId], references: [id])
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id])
   messages    Message[]
 
   @@index([workspaceId])
@@ -639,18 +643,18 @@ model Conversation {
 }
 
 model AutomationRule {
-  id           String    @id @default(cuid())
+  id            String    @id @default(cuid())
   workspaceId   String
-  name         String
-  triggerType  String
+  name          String
+  triggerType   String
   triggerConfig Json?
-  actionType   String
-  actionConfig Json?
-  isActive     Boolean   @default(true)
-  createdAt    DateTime? @default(now())
-  updatedAt    DateTime? @updatedAt
-  deletedAt    DateTime?
-  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actionType    String
+  actionConfig  Json?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime? @default(now())
+  updatedAt     DateTime? @updatedAt
+  deletedAt     DateTime?
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
   @@index([workspaceId, isActive, deletedAt])
@@ -658,19 +662,19 @@ model AutomationRule {
 }
 
 model AutomationJob {
-  id         String    @id @default(cuid())
-  workspaceId String
-  ruleId     String?
-  status     String    @default("PENDING")
-  runAt      DateTime
-  attempts   Int       @default(0)
-  lastError  String?
-  actionType String
+  id           String    @id @default(cuid())
+  workspaceId  String
+  ruleId       String?
+  status       String    @default("PENDING")
+  runAt        DateTime
+  attempts     Int       @default(0)
+  lastError    String?
+  actionType   String
   actionConfig Json?
-  eventData  Json?
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @updatedAt
-  workspace  Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  eventData    Json?
+  createdAt    DateTime? @default(now())
+  updatedAt    DateTime? @updatedAt
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, status, runAt])
   @@map("automation_jobs")
@@ -691,16 +695,16 @@ model MessageTemplate {
 }
 
 model Webhook {
-  id          String    @id @default(cuid())
+  id          String            @id @default(cuid())
   workspaceId String
   url         String
   events      Json
   secret      String
-  isActive    Boolean   @default(true)
-  createdAt   DateTime? @default(now())
-  updatedAt   DateTime? @updatedAt
+  isActive    Boolean           @default(true)
+  createdAt   DateTime?         @default(now())
+  updatedAt   DateTime?         @updatedAt
   deletedAt   DateTime?
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace   Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   deliveries  WebhookDelivery[]
 
   @@index([workspaceId, isActive, deletedAt])
@@ -708,18 +712,18 @@ model Webhook {
 }
 
 model WebhookDelivery {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   webhookId    String
   event        String
   payload      Json?
   responseCode Int?
   responseBody String?
-  status       String   @default("PENDING") // PENDING, SUCCESS, FAILED
-  attempts     Int      @default(0)
+  status       String    @default("PENDING") // PENDING, SUCCESS, FAILED
+  attempts     Int       @default(0)
   nextRetryAt  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  webhook      Webhook  @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  webhook      Webhook   @relation(fields: [webhookId], references: [id], onDelete: Cascade)
 
   @@index([webhookId, status])
   @@index([status, nextRetryAt, attempts])
@@ -820,18 +824,18 @@ model SystemConfig {
 }
 
 model Plan {
-  id            String   @id @default(cuid())
+  id            String                 @id @default(cuid())
   name          String
-  slug          String   @unique
+  slug          String                 @unique
   description   String?
   price         Float
-  currency      String   @default("USD")
-  interval      String   @default("month")
+  currency      String                 @default("USD")
+  interval      String                 @default("month")
   stripePriceId String?
   features      Json?
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  isActive      Boolean                @default(true)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
   subscriptions PlatformSubscription[]
 
   @@map("plans")
@@ -852,8 +856,8 @@ model Coupon {
   id               String   @id @default(cuid())
   name             String
   stripeCouponId   String?  @unique
-  amountOff        Float?   // Fixed amount discount
-  percentOff       Float?   // Percentage discount
+  amountOff        Float? // Fixed amount discount
+  percentOff       Float? // Percentage discount
   currency         String   @default("USD")
   duration         String   @default("once") // once, forever, repeating
   durationInMonths Int?
@@ -863,24 +867,24 @@ model Coupon {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  promotionCodes   PromotionCode[]
+  promotionCodes PromotionCode[]
 
   @@map("coupons")
 }
 
 model PromotionCode {
-  id              String   @id @default(cuid())
-  code            String   @unique
-  couponId        String
-  stripePromoId   String?  @unique
-  maxRedemptions  Int?
-  timesRedeemed   Int      @default(0)
-  expiresAt       DateTime?
-  isActive        Boolean  @default(true)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String    @id @default(cuid())
+  code           String    @unique
+  couponId       String
+  stripePromoId  String?   @unique
+  maxRedemptions Int?
+  timesRedeemed  Int       @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  coupon          Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  coupon Coupon @relation(fields: [couponId], references: [id], onDelete: Cascade)
 
   @@index([couponId])
   @@map("promotion_codes")
@@ -917,10 +921,10 @@ enum ConversationStatus {
 model Notification {
   id          String    @id @default(cuid())
   workspaceId String
-  userId      String    // The recipient of the notification
+  userId      String // The recipient of the notification
   title       String
   content     String?
-  link        String?   // Optional URL to redirect when clicked
+  link        String? // Optional URL to redirect when clicked
   isRead      Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -931,4 +935,30 @@ model Notification {
   @@index([userId, isRead])
   @@index([userId, createdAt])
   @@map("notifications")
+}
+
+model WebForm {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  name           String
+  slug           String    @unique
+  isActive       Boolean   @default(true)
+  submitText     String    @default("Submit")
+  successMessage String    @default("Thank you! Application submitted.")
+  config         Json      @default("[]")
+  pipelineId     String?
+  stageId        String?
+  tagId          String?
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @updatedAt
+  deletedAt      DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  pipeline  Pipeline? @relation(fields: [pipelineId], references: [id])
+  stage     Stage?    @relation(fields: [stageId], references: [id])
+  tag       Tag?      @relation(fields: [tagId], references: [id])
+
+  @@index([workspaceId])
+  @@index([workspaceId, slug])
+  @@map("web_forms")
 }
