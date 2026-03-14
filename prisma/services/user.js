@@ -14,6 +14,22 @@ export const getUser = async (id) =>
       email: true,
       name: true,
       userCode: true,
+      fiscalProfile: {
+        select: {
+          documentType: true,
+          document: true,
+          name: true,
+          email: true,
+          phone: true,
+          cep: true,
+          uf: true,
+          codigoMunicipio: true,
+          logradouro: true,
+          numero: true,
+          complemento: true,
+          bairro: true,
+        },
+      },
     },
     where: { id },
   });

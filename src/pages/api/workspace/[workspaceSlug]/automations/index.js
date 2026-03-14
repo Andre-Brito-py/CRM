@@ -2,7 +2,7 @@ import { validateSession } from '@/config/api-validation';
 import { getAutomationRules, createAutomationRule, deleteAutomationRule } from '@/prisma/services/automation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
-import { canAddAutomationRule } from '@/lib/server/subscription';
+import { canAddAutomationRule, isModuleAllowed } from '@/lib/server/subscription';
 import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
@@ -17,6 +17,13 @@ const handler = async (req, res) => {
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
   }
+
+  // Verifica se o módulo de automações está habilitado no plano
+  const moduleOk = await isModuleAllowed(workspace.id, 'automations');
+  if (!moduleOk) {
+    return res.status(403).json({ error: { msg: 'Automations module is not available in your current plan. Please upgrade.' } });
+  }
+
 
   switch (method) {
     case 'GET':

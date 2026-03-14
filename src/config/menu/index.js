@@ -9,51 +9,63 @@ const menu = (workspaceId) => [
       {
         name: 'Inbox',
         path: `/account/${workspaceId}/inbox`,
+        moduleKey: 'inbox',
       },
       {
         name: 'Pipeline',
         path: `/account/${workspaceId}/pipeline`,
+        moduleKey: 'pipeline',
       },
       {
         name: 'Contacts',
         path: `/account/${workspaceId}/contacts`,
+        moduleKey: 'contacts',
       },
       {
         name: 'Companies',
         path: `/account/${workspaceId}/companies`,
+        moduleKey: 'companies',
       },
       {
         name: 'Tasks',
         path: `/account/${workspaceId}/tasks`,
+        moduleKey: 'tasks',
       },
       {
         name: 'common.label.integrations',
         path: `/account/${workspaceId}/integrations`,
+        moduleKey: 'integrations',
       },
       {
         name: 'Automations',
         path: `/account/${workspaceId}/automations`,
+        moduleKey: 'automations',
       },
       {
         name: 'Analytics',
         path: `/account/${workspaceId}/analytics`,
+        moduleKey: 'analytics',
       },
     ],
   },
   {
     name: 'Customer Satisfaction',
+    moduleKey: 'nps',
     menuItems: [
       {
         name: 'NPS Surveys',
         path: `/account/${workspaceId}/customer-satisfaction/nps-surveys`,
+        moduleKey: 'nps',
       },
       {
         name: 'NPS Responses',
         path: `/account/${workspaceId}/customer-satisfaction/responses`,
+        moduleKey: 'nps',
       },
       {
         name: 'NPS Analytics',
         path: `/account/${workspaceId}/customer-satisfaction/analytics`,
+        moduleKey: 'nps',
       },
     ],
   },
@@ -75,10 +87,12 @@ const menu = (workspaceId) => [
       {
         name: 'Custom Fields',
         path: `/account/${workspaceId}/settings/custom-fields`,
+        moduleKey: 'custom_fields',
       },
       {
         name: 'Message Templates',
         path: `/account/${workspaceId}/settings/templates`,
+        moduleKey: 'templates',
       },
       {
         name: 'settings.advanced',

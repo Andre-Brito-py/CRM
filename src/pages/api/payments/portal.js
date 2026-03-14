@@ -26,10 +26,16 @@ const handler = async (req, res) => {
       return;
     }
 
+    const configuration = await getSystemConfig(
+      'STRIPE_BILLING_PORTAL_CONFIGURATION_ID',
+      process.env.STRIPE_BILLING_PORTAL_CONFIGURATION_ID
+    );
+
     const stripe = await getStripe();
     const portalSession = await stripe.billingPortal.sessions.create({
       customer: customerPayment.paymentId,
       return_url: `${appUrl}/account/billing`,
+      configuration: configuration || undefined,
     });
 
     res.status(200).json({ data: { url: portalSession.url } });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import formatDistance from 'date-fns/formatDistance';
 import Link from 'next/link';
 import { getSession, useSession } from 'next-auth/react';
@@ -24,6 +24,7 @@ const Billing = ({ invoices, products }) => {
   const { data: session } = useSession();
   const [isSubmitting, setSubmittingState] = useState(false);
   const [showModal, setModalVisibility] = useState(false);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   const billingSteps = [
     {
@@ -91,13 +92,58 @@ const Billing = ({ invoices, products }) => {
           toast.error(response.errors[error].msg)
         );
       } else {
-        (async () => redirectToCheckout(response.data.sessionId))();
+        if (response?.data?.sessionId) {
+          (async () => redirectToCheckout(response.data.sessionId))();
+          return;
+        }
+
+        const action = response?.data?.action || null;
+        if (action === 'scheduled') {
+          const effectiveAt = response?.data?.pending?.effectiveAt
+            ? new Date(response.data.pending.effectiveAt)
+            : null;
+          const dateLabel = effectiveAt
+            ? effectiveAt.toLocaleDateString()
+            : 'próxima cobrança';
+          toast.success(
+            `Downgrade agendado. Você mantém seu plano atual até ${dateLabel}.`
+          );
+          setSubscriptionStatus(response.data);
+          return;
+        }
+
+        if (action === 'updated') {
+          toast.success('Plano atualizado com sucesso.');
+          setSubscriptionStatus(response.data);
+          return;
+        }
+
+        toast.success('Solicitação processada.');
       }
     });
   };
 
   const toggleModal = () => setModalVisibility(!showModal);
   const currentSubscription = session?.user?.subscription || 'FREE';
+
+  useEffect(() => {
+    let mounted = true;
+    api('/api/payments/subscription/status', { method: 'GET' })
+      .then((response) => {
+        if (!mounted) return;
+        if (response?.data) setSubscriptionStatus(response.data);
+      })
+      .catch(() => { });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const pendingDowngrade = subscriptionStatus?.pending || null;
+  const pendingEffectiveAt = pendingDowngrade?.effectiveAt
+    ? new Date(pendingDowngrade.effectiveAt)
+    : null;
 
   return (
     <AccountLayout>
@@ -116,27 +162,43 @@ const Billing = ({ invoices, products }) => {
               title="Premium Subscription"
               subtitle={`Current status: ${currentSubscription}`}
             >
-            <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
-              <p className="text-sm">
-                Professional and Enterprise accounts unlock the full power of Nextacular.
-                Manage unlimited contacts, advanced pipelines, and team collaboration
-                with our executive suite.
-              </p>
-            </div>
-          </Card.Body>
-          <Card.Footer>
-            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Secure Stripe Payment</span>
-            <Button
-              id="manage-plan-btn"
-              className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-8"
-              disabled={isSubmitting}
-              onClick={toggleModal}
-            >
-              Manage Plan
-            </Button>
-          </Card.Footer>
-        </Card>
-      </div>
+              <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
+                <p className="text-sm">
+                  Professional and Enterprise accounts unlock the full power of Nextacular.
+                  Manage unlimited contacts, advanced pipelines, and team collaboration
+                  with our executive suite.
+                </p>
+              </div>
+              {pendingDowngrade && (
+                <div className="mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
+                  <div className="text-sm font-bold">
+                    Mudança de plano agendada
+                  </div>
+                  <div className="text-sm mt-1">
+                    Seu plano será alterado para <span className="font-bold">{pendingDowngrade.subscriptionType}</span>
+                    {pendingEffectiveAt ? (
+                      <> em <span className="font-bold">{pendingEffectiveAt.toLocaleDateString()}</span></>
+                    ) : (
+                      <> na próxima cobrança</>
+                    )}
+                    . Até lá, você mantém os recursos do seu plano atual.
+                  </div>
+                </div>
+              )}
+            </Card.Body>
+            <Card.Footer>
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Secure Stripe Payment</span>
+              <Button
+                id="manage-plan-btn"
+                className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-8"
+                disabled={isSubmitting}
+                onClick={toggleModal}
+              >
+                Manage Plan
+              </Button>
+            </Card.Footer>
+          </Card>
+        </div>
         <Modal
           show={showModal}
           title="Upgrade Subscription"
@@ -145,6 +207,22 @@ const Billing = ({ invoices, products }) => {
           <div className="space-y-0 text-sm text-gray-600">
             <p>You are currently under the {currentSubscription} plan</p>
           </div>
+          {pendingDowngrade && (
+            <div className="mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
+              <div className="text-sm font-bold">
+                Downgrade já agendado
+              </div>
+              <div className="text-sm mt-1">
+                O plano muda para <span className="font-bold">{pendingDowngrade.subscriptionType}</span>
+                {pendingEffectiveAt ? (
+                  <> em <span className="font-bold">{pendingEffectiveAt.toLocaleDateString()}</span></>
+                ) : (
+                  <> na próxima cobrança</>
+                )}
+                . Até lá, você mantém os recursos do plano atual.
+              </div>
+            </div>
+          )}
           <div className="mt-4">
             <Button
               className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-6"
@@ -178,7 +256,7 @@ const Billing = ({ invoices, products }) => {
                     {isSubmitting
                       ? 'Redirecting...'
                       : product.prices.id
-                        ? `Upgrade to ${product.name}`
+                        ? `Change to ${product.name}`
                         : 'Unavailable'}
                   </Button>
                 </Card.Footer>

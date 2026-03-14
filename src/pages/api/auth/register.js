@@ -6,6 +6,8 @@ import { sendMail } from '@/lib/server/mail';
 import { getSystemConfig } from '@/lib/server/config';
 import { log, reportError } from '@/lib/server/logger';
 import { rateLimit } from '@/lib/server/rateLimit';
+import getStripe from '@/lib/server/stripe';
+import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 
 export const config = {
     api: {
@@ -22,6 +24,7 @@ const handler = async (req, res) => {
 
     const requestId = String(req.headers['x-request-id'] || '').trim() || null;
     const successPayload = { message: 'User created successfully. Please check your email to verify your account.' };
+    const termsVersion = process.env.TERMS_VERSION || process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const jitterMs = (base, spread) => base + crypto.randomInt(0, spread + 1);
     const hasHoneypot = (body) => {
@@ -46,11 +49,18 @@ const handler = async (req, res) => {
         }
 
         const { name, email, password } = req.body || {};
+        const termsAccepted = req.body?.termsAccepted === true;
+        const planPriceId = req.body?.planPriceId ? String(req.body.planPriceId) : null;
         const normalizedEmail = String(email || '').trim().toLowerCase();
 
         if (!name || !normalizedEmail || !password) {
             await sleep(jitterMs(250, 350));
             return res.status(400).json({ error: { msg: 'Please provide all details' } });
+        }
+
+        if (!termsAccepted) {
+            await sleep(jitterMs(250, 350));
+            return res.status(400).json({ error: { msg: 'You must accept the Terms of Use' } });
         }
 
         if (!isEmail(normalizedEmail)) {
@@ -91,6 +101,8 @@ const handler = async (req, res) => {
                 name,
                 email: normalizedEmail,
                 password: hashedPassword,
+                termsVersion,
+                termsAcceptedAt: new Date(),
             },
         });
 
@@ -121,7 +133,71 @@ const handler = async (req, res) => {
             to: normalizedEmail,
         });
 
-        return res.status(201).json(successPayload);
+        const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+        if (!planPriceId || !paymentsSecretKey) {
+            return res.status(201).json(successPayload);
+        }
+
+        let customerPayment = await getPayment(normalizedEmail);
+        if (!customerPayment) {
+            await createPaymentAccount(normalizedEmail, user.id);
+            customerPayment = await getPayment(normalizedEmail);
+        }
+
+        if (!customerPayment?.paymentId) {
+            return res.status(201).json(successPayload);
+        }
+
+        const automaticTax = await getSystemConfig('STRIPE_AUTOMATIC_TAX', process.env.STRIPE_AUTOMATIC_TAX);
+        const taxIdCollection = await getSystemConfig('STRIPE_TAX_ID_COLLECTION', process.env.STRIPE_TAX_ID_COLLECTION);
+        const billingAddressCollection = await getSystemConfig(
+            'STRIPE_BILLING_ADDRESS_COLLECTION',
+            process.env.STRIPE_BILLING_ADDRESS_COLLECTION
+        );
+        const isTruthy = (value) => {
+            const v = String(value || '').trim().toLowerCase();
+            return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+        };
+        const automaticTaxEnabled = isTruthy(automaticTax);
+        const taxIdCollectionEnabled = isTruthy(taxIdCollection);
+        const normalizedBillingAddressCollection = ['auto', 'required'].includes(
+            String(billingAddressCollection || '').trim().toLowerCase()
+        )
+            ? String(billingAddressCollection).trim().toLowerCase()
+            : null;
+
+        const stripe = await getStripe();
+        const price = await stripe.prices.retrieve(planPriceId);
+        const product = await stripe.products.retrieve(price.product);
+
+        const paymentSession = await stripe.checkout.sessions.create({
+            customer: customerPayment.paymentId,
+            mode: 'subscription',
+            payment_method_types: ['card'],
+            payment_method_collection: 'always',
+            line_items: [{ price: price.id, quantity: 1 }],
+            allow_promotion_codes: true,
+            billing_address_collection: automaticTaxEnabled ? 'required' : (normalizedBillingAddressCollection || undefined),
+            automatic_tax: automaticTaxEnabled ? { enabled: true } : undefined,
+            tax_id_collection: taxIdCollectionEnabled ? { enabled: true } : undefined,
+            customer_update: {
+                name: 'auto',
+                address: 'auto',
+            },
+            success_url: `${appUrl}/auth/login?paid=success`,
+            cancel_url: `${appUrl}/auth/register?paid=cancelled`,
+            metadata: {
+                customerId: customerPayment.customerId,
+                type: product?.metadata?.type || 'STANDARD',
+                automaticTax: automaticTaxEnabled ? 'true' : 'false',
+                taxIdCollection: taxIdCollectionEnabled ? 'true' : 'false',
+            },
+        });
+
+        return res.status(201).json({
+            ...successPayload,
+            data: { sessionId: paymentSession.id },
+        });
     } catch (error) {
         log({ level: 'error', msg: 'auth_register_failed', requestId, error });
         reportError(error, { route: '/api/auth/register', requestId });

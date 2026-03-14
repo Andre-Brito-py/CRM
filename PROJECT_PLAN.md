@@ -105,6 +105,36 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 - [x] Operação: runbooks de incidente + rotina de plantão (status, escalonamento).
 - [x] FinOps: custos por workspace (WhatsApp, IA, storage) e limites por plano.
 
+#### 10) Legal & Compliance comercial (venda)
+- [x] Publicar Termos de Uso em `/terms` com versão e data de atualização.
+- [x] Registrar aceite de termos no usuário (versão + timestamp).
+- [x] Bloquear acesso à conta até aceitar os termos vigentes (inclui usuários antigos).
+- [x] Publicar Política de Privacidade em `/privacy`.
+- [x] Revisar Política de Privacidade (PT-BR/LGPD) e fixar versão/data (sem data dinâmica).
+- [x] Incluir `/terms` e `/privacy` no sitemap e garantir links públicos visíveis.
+
+#### 11) Stripe em produção (checklist de venda)
+- [x] Validar configuração LIVE: produtos, preços e moedas (STANDARD/PREMIUM).
+  - [x] Criar endpoint de verificação automatizada: `/api/admin/stripe/validate`.
+  - [x] Proteger a rota `/api/setup-plans` (apenas SUPERADMIN).
+- [ ] Validar webhooks no LIVE com eventos reais (retries + idempotência).
+  - [x] Validar secret via auto-teste de assinatura (no endpoint de verificação).
+  - [x] Persistir eventos recebidos (idempotência/auditoria): `stripe_events`.
+  - [x] Validar endpoint LIVE (URL + eventos obrigatórios) no endpoint de verificação.
+- [x] Configurar Billing Portal (upgrade/downgrade/cancelamento) no Stripe Dashboard.
+  - [x] Portal na aplicação: `/api/payments/portal` com `configuration` opcional.
+  - [x] Setup automatizado (admin): `/api/admin/stripe/billing-portal-setup`.
+- [x] Definir política de cancelamento, reembolso e cobrança proporcional (se houver) nos Termos.
+- [x] Definir impostos/NF (se aplicável) e refletir no checkout/recibos.
+  - [x] Preparar Checkout (assinatura) com `automatic_tax` e `tax_id_collection` por configuração.
+  - [x] Propagar dados para recibos/faturas via `customer_update` (nome/endereço).
+
+#### 11.1) Nota Fiscal (NFS-e) opcional
+- [x] Persistir documentos fiscais emitidos e status: `fiscal_documents`.
+- [x] Permitir salvar dados fiscais do usuário (CPF/CNPJ e endereço) em “Configurações”.
+- [x] Integrar emissão automática em pagamentos aprovados (webhook `invoice.paid`/`invoice.payment_succeeded`).
+- [ ] Configurar emitentes por localidade (município/UF) via System Config e/ou múltiplos emitentes.
+
 ##### Runbooks (operacional)
 - **Severidades**
   - **SEV1**: sistema indisponível / perda de dados / pagamentos quebrados.

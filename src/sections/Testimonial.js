@@ -27,13 +27,13 @@ const Testimonial = () => {
   return (
     <div className="w-full py-32 bg-[#0a0a0b] relative overflow-hidden">
       <div className="absolute top-[20%] left-[20%] w-[30%] h-[30%] bg-indigo-600/10 rounded-full blur-[120px]" />
-      
+
       <div className="relative flex flex-col items-center px-6 mx-auto sm:px-8 max-w-7xl">
         <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true, margin: "-50px" }}
-           className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          className="text-center mb-16"
         >
           <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 text-sm font-medium text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20">
             {t("landing.testimonial.badge", "100% de Aprovação")}
@@ -43,7 +43,7 @@ const Testimonial = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {testimonials.map((testi, i) => (
-            <motion.div 
+            <motion.div
               key={i}
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}
@@ -52,11 +52,11 @@ const Testimonial = () => {
               className="relative px-8 py-12 bg-zinc-900/40 border border-white/5 rounded-[2rem] hover:border-white/10 transition-colors backdrop-blur-sm flex flex-col justify-between"
             >
               <div className="absolute -top-4 -left-4 text-8xl text-indigo-500/10 font-serif leading-none">&ldquo;</div>
-              
+
               <h3 className="relative z-10 text-lg md:text-xl font-medium leading-relaxed text-zinc-300 mb-10">
-                "{testi.quote}"
+                &ldquo;{testi.quote}&rdquo;
               </h3>
-              
+
               <div className="relative z-10 flex items-center space-x-4 mt-auto">
                 <div className={`w-12 h-12 bg-gradient-to-br ${testi.color} rounded-full shadow-lg border-2 border-[#0a0a0b]`} />
                 <div>

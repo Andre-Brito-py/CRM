@@ -1,5 +1,42 @@
 import prisma from '@/prisma/index';
 
+// -----------------------------------------------------------------
+// Módulos padrão para planos legados (sem features.allowedModules)
+// -----------------------------------------------------------------
+const DEFAULT_FREE_MODULES = {
+    inbox: true,
+    pipeline: true,
+    contacts: true,
+    companies: true,
+    deals: true,
+    tasks: true,
+    automations: false,
+    analytics: false,
+    nps: false,
+    ai_assistant: false,
+    custom_fields: false,
+    templates: true,
+    integrations: false,
+    payments: false,
+};
+
+const ALL_MODULES_ENABLED = {
+    inbox: true,
+    pipeline: true,
+    contacts: true,
+    companies: true,
+    deals: true,
+    tasks: true,
+    automations: true,
+    analytics: true,
+    nps: true,
+    ai_assistant: true,
+    custom_fields: true,
+    templates: true,
+    integrations: true,
+    payments: true,
+};
+
 /**
  * Retorna o status da assinatura de um usuário (FREE, STANDARD, PREMIUM)
  */
@@ -20,6 +57,7 @@ export const getSubscriptionStatus = async (email) => {
 
 /**
  * Retorna os limites dinâmicos de um workspace baseados no plano.
+ * Agora inclui `allowedModules`, `freeTrialDays` e `trialExpiresAt`.
  */
 export const getWorkspaceLimits = async (workspaceId) => {
     // 1. Tenta buscar a assinatura do sistema (PlatformSubscription)
@@ -30,25 +68,45 @@ export const getWorkspaceLimits = async (workspaceId) => {
 
     if (subscription?.plan?.features) {
         const f = subscription.plan.features;
+        const freeTrialDays = f.freeTrialDays || 0;
+        
+        // Calcula expiração do trial com base na data de criação da subscription
+        let trialExpiresAt = null;
+        if (freeTrialDays > 0) {
+            const created = new Date(subscription.createdAt);
+            trialExpiresAt = new Date(created.getTime() + freeTrialDays * 24 * 60 * 60 * 1000);
+        }
+
         return {
             members: f.maxUsers || null,
-            webhooks: f.maxWebhooks || f.maxUsers || null, // fallback razoável
+            webhooks: f.maxWebhooks || f.maxUsers || null,
             automations: f.maxAutomations || null,
             whatsappIntegrations: f.maxWhatsApp || 5,
             contacts: f.maxContacts || null,
             aiRequests24h: f.maxAiRequests24h || 100,
             uploads24h: f.maxUploads24h || 50,
-            plan: subscription.plan.name
+            plan: subscription.plan.name,
+            allowedModules: f.allowedModules || ALL_MODULES_ENABLED,
+            freeTrialDays,
+            trialExpiresAt,
         };
     }
 
     // 2. Fallback para lógica legada (SubscriptionType no User/CustomerPayment)
     const workspace = await prisma.workspace.findUnique({
         where: { id: workspaceId },
-        select: { creator: { select: { email: true } } }
+        select: { creator: { select: { email: true } }, createdAt: true }
     });
     
     const planType = await getSubscriptionStatus(workspace?.creator?.email);
+
+    // Calcula trial para planos free legados (14 dias padrão)
+    const legacyTrialDays = planType === 'FREE' ? 14 : 0;
+    let trialExpiresAt = null;
+    if (legacyTrialDays > 0 && workspace?.createdAt) {
+        const created = new Date(workspace.createdAt);
+        trialExpiresAt = new Date(created.getTime() + legacyTrialDays * 24 * 60 * 60 * 1000);
+    }
     
     // Valores Legados Hardcoded
     return {
@@ -59,7 +117,58 @@ export const getWorkspaceLimits = async (workspaceId) => {
         contacts: planType === 'FREE' ? 100 : null,
         aiRequests24h: planType === 'FREE' ? 100 : planType === 'STANDARD' ? 1000 : 10000,
         uploads24h: planType === 'FREE' ? 30 : planType === 'STANDARD' ? 500 : 5000,
-        plan: planType
+        plan: planType,
+        allowedModules: planType === 'FREE' ? DEFAULT_FREE_MODULES : ALL_MODULES_ENABLED,
+        freeTrialDays: legacyTrialDays,
+        trialExpiresAt,
+    };
+};
+
+// -----------------------------------------------------------------
+// Verificação de módulo permitido
+// -----------------------------------------------------------------
+/**
+ * Verifica se um módulo está habilitado para o workspace.
+ * @param {string} workspaceId
+ * @param {string} moduleName - ex: 'automations', 'ai_assistant', 'nps'
+ * @returns {Promise<boolean>}
+ */
+export const isModuleAllowed = async (workspaceId, moduleName) => {
+    const limits = await getWorkspaceLimits(workspaceId);
+    const modules = limits.allowedModules || ALL_MODULES_ENABLED;
+    // Se o módulo não existe na lista, permite por padrão (backward compat)
+    return modules[moduleName] !== false;
+};
+
+// -----------------------------------------------------------------
+// Verificação de trial expirado
+// -----------------------------------------------------------------
+/**
+ * Verifica se o período de trial gratuito expirou.
+ * Retorna { expired, daysLeft, trialExpiresAt }
+ */
+export const getTrialStatus = async (workspaceId) => {
+    const limits = await getWorkspaceLimits(workspaceId);
+    
+    if (!limits.freeTrialDays || limits.freeTrialDays <= 0) {
+        return { expired: false, daysLeft: null, trialExpiresAt: null, hasTrial: false };
+    }
+
+    const now = new Date();
+    const expiresAt = limits.trialExpiresAt ? new Date(limits.trialExpiresAt) : null;
+    
+    if (!expiresAt) {
+        return { expired: false, daysLeft: null, trialExpiresAt: null, hasTrial: false };
+    }
+
+    const diff = expiresAt.getTime() - now.getTime();
+    const daysLeft = Math.max(0, Math.ceil(diff / (24 * 60 * 60 * 1000)));
+    
+    return {
+        expired: diff <= 0,
+        daysLeft,
+        trialExpiresAt: expiresAt.toISOString(),
+        hasTrial: true,
     };
 };
 

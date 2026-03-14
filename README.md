@@ -64,6 +64,14 @@ ADMIN_EMAIL="..."
 # FINOPS_UNIT_COST_WHATSAPP_OUTBOUND="0.03"
 # FINOPS_UNIT_COST_AI_REQUEST="0.01"
 # FINOPS_UNIT_COST_UPLOAD_REQUEST="0.001"
+
+# NFS-e (opcional)
+# NFSE_ENABLED="false"
+# FOCUS_NFE_API_KEY="..."
+# FOCUS_NFE_ENVIRONMENT="homologacao"
+# FOCUS_NFE_NFSE_ENDPOINT="nfsen"
+# NFSE_CODIGO_TRIBUTACAO_NACIONAL_ISS="..."
+# NFSE_CODIGO_NBS="..."
 ```
 
 Produção:
@@ -124,6 +132,14 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - **Infra (Postgres gerenciado):**
   - App suporta `DATABASE_URL_POOLED` (pooler) como datasource do Prisma.
   - Migração adiciona índices de performance para consultas típicas (membros, integrações, conversas, webhooks, automações, rate limits).
+
+## Fase 11 (Stripe em produção) — o que mudou
+- **Validação automatizada (SUPERADMIN):** `GET /api/admin/stripe/validate` verifica modo LIVE/TEST, Billing Portal, endpoint de webhook (URL + eventos obrigatórios), e consistência de planos (Price/Product no Stripe).
+- **Auditoria + idempotência de webhooks:** persistência por `event.id` em `stripe_events` com status (`received/processing/processed/failed`) e lock para evitar duplicação.
+- **Observação de eventos LIVE:** Admin → Settings mostra “Eventos LIVE (últimas 24h)” com contagem, eventos faltantes e status.
+- **Replay 2x (idempotência):** no mesmo card, é possível reenviar um `evt_...` duas vezes e detectar automaticamente se houve duplicação.
+  - API: `POST /api/admin/stripe/validate` com `{ "eventId": "evt_...", "times": 2 }`
+- **NFS-e (opcional):** emissão automática atrelada ao `invoice.paid`/`invoice.payment_succeeded` quando `NFSE_ENABLED=true`, com gestão de emitentes no painel de Super Admin.
 
 ## Plataforma No-Code (o que torna o CRM “adaptável”)
 A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.

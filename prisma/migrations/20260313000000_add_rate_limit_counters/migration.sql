@@ -1,5 +1,5 @@
 -- CreateTable
-CREATE TABLE "rate_limit_counters" (
+CREATE TABLE IF NOT EXISTS "rate_limit_counters" (
     "key" TEXT NOT NULL,
     "count" INTEGER NOT NULL DEFAULT 0,
     "resetAt" TIMESTAMP(3) NOT NULL,
@@ -8,4 +8,3 @@ CREATE TABLE "rate_limit_counters" (
 
     CONSTRAINT "rate_limit_counters_pkey" PRIMARY KEY ("key")
 );
-

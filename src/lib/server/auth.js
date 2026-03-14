@@ -23,33 +23,53 @@ export const authOptions = {
         session.user.email = token.email || null;
         session.user.twoFactorEnabled = token.twoFactorEnabled || false;
         session.user.subscription = token.subscription || null;
+        session.user.termsVersion = token.termsVersion || null;
+        session.user.termsAcceptedAt = token.termsAcceptedAt || null;
       }
       return session;
     },
     jwt: async ({ token, user }) => {
+      const userId = user?.id || token?.id || null;
+      if (!userId) return token;
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
+      }
 
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { role: true, twoFactorEnabled: true, email: true },
-        });
+      const requiredTermsVersion =
+        process.env.TERMS_VERSION || process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
+      const shouldRefresh =
+        Boolean(user) ||
+        !token.role ||
+        !token.email ||
+        !token.termsAcceptedAt ||
+        token.termsVersion !== requiredTermsVersion;
 
-        if (dbUser) {
-          token.role = dbUser.role;
-          token.twoFactorEnabled = dbUser.twoFactorEnabled;
+      if (!shouldRefresh) return token;
 
-          if (dbUser.role === 'SUPERADMIN') {
-            token.subscription = 'PREMIUM';
-          } else {
-            const customerPayment = await getPayment(dbUser.email);
-            if (customerPayment) {
-              token.subscription = customerPayment.subscriptionType;
-            }
-          }
+      const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, twoFactorEnabled: true, email: true, termsVersion: true, termsAcceptedAt: true },
+      });
+
+      if (!dbUser) return token;
+
+      token.role = dbUser.role;
+      token.email = dbUser.email;
+      token.twoFactorEnabled = dbUser.twoFactorEnabled;
+      token.termsVersion = dbUser.termsVersion || null;
+      token.termsAcceptedAt = dbUser.termsAcceptedAt ? new Date(dbUser.termsAcceptedAt).toISOString() : null;
+
+      if (dbUser.role === 'SUPERADMIN') {
+        token.subscription = 'PREMIUM';
+      } else if (user || !token.subscription) {
+        const customerPayment = await getPayment(dbUser.email);
+        if (customerPayment) {
+          token.subscription = customerPayment.subscriptionType;
         }
       }
+
       return token;
     }
   },

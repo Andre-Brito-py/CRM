@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   CurrencyDollarIcon,
   UserGroupIcon,

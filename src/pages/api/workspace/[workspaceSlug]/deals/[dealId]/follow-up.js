@@ -4,7 +4,7 @@ import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
-import { getWorkspaceLimits } from '@/lib/server/subscription';
+import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 
 export const config = {
   api: {
@@ -34,6 +34,11 @@ const handler = async (req, res) => {
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
+  }
+
+  const aiEnabled = await isModuleAllowed(workspace.id, 'ai_assistant');
+  if (!aiEnabled) {
+    return res.status(403).json({ error: { msg: 'AI Assistant module is not available in your current plan.' } });
   }
 
   try {

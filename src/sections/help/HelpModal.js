@@ -80,7 +80,7 @@ const TUTORIAL_CONTENT = {
           <Step number={4} title='Gerencie o Histórico' desc='Ao clicar no nome de um Contato na lista, um perfil completo se abre. Lá você pode adicionar Notas, criar Tarefas, enviar Mensagens de WhatsApp e ver os Negócios (Deals) associados à pessoa.' />
         </div>
         <TipBox>
-          Você pode importar Contatos em lote a partir de uma planilha CSV! Basta clicar em "Upload CSV" na tela de Contatos e mapear as colunas desejadas.
+          Você pode importar Contatos em lote a partir de uma planilha CSV! Basta clicar em &quot;Upload CSV&quot; na tela de Contatos e mapear as colunas desejadas.
         </TipBox>
       </div>
     ),
@@ -101,7 +101,7 @@ const TUTORIAL_CONTENT = {
           <Step number={5} title='Crie ou edite funis' desc='Você pode ter diversos funis operando ao mesmo tempo. Vá em Configurações → Pipelines para criar funis e editar as cores das colunas.' />
         </div>
         <TipBox>
-          Preencha o valor (R$) dos seus cards no Funil. Nossa Inteligência Artificial ("AI Insights") usa esses valores para gerar projeções de faturamento.
+          Preencha o valor (R$) dos seus cards no Funil. Nossa Inteligência Artificial (&quot;AI Insights&quot;) usa esses valores para gerar projeções de faturamento.
         </TipBox>
       </div>
     ),
@@ -473,7 +473,7 @@ const TUTORIAL_CONTENT = {
           <Step number={4} title='Acompanhe o Aceite' desc='Eles receberão um convite e também uma notificação. Se a conta ainda não for do sistema, eles precisarão criar uma senha.' />
         </div>
         <TipBox>
-          Evite dar cargos "Owner / Admin" para agentes temporários de atendimento. Utilize os papéis (Roles) com sabedoria!
+          Evite dar cargos &quot;Owner / Admin&quot; para agentes temporários de atendimento. Utilize os papéis (Roles) com sabedoria!
         </TipBox>
       </div>
     ),
@@ -564,8 +564,8 @@ const HelpModal = ({ isOpen, toggle }) => {
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${isActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                      : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                    : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
@@ -582,8 +582,8 @@ const HelpModal = ({ isOpen, toggle }) => {
                   key={key}
                   onClick={() => setActiveTutorial(key)}
                   className={`flex items-center gap-2 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all text-left ${isActive
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
-                      : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                    : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
                   {tut.title.split(':')[0]}

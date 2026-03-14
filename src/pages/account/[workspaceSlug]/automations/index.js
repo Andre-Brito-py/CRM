@@ -43,6 +43,25 @@ const Automations = () => {
     actionConfig: { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
   });
 
+  const automationSteps = [
+    {
+      element: '#create-rule-btn',
+      popover: {
+        title: t('onboarding.tour.automations.step1.title', 'Crie uma automação'),
+        description: t('onboarding.tour.automations.step1.desc', 'Clique aqui para criar uma regra de automação.'),
+        position: 'left',
+      }
+    },
+    {
+      element: '#automations-list',
+      popover: {
+        title: t('onboarding.tour.automations.step2.title', 'Lista de automações'),
+        description: t('onboarding.tour.automations.step2.desc', 'Aqui você vê e gerencia suas regras.'),
+        position: 'top',
+      }
+    }
+  ];
+
   // Fetch Data
   const { data: automationsData } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/automations` : null
@@ -474,7 +493,7 @@ const Automations = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div id="automations-list" className="grid grid-cols-1 gap-4">
             {automations.map((rule) => (
               <Card key={rule.id}>
                 <Card.Body>

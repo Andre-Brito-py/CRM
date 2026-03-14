@@ -73,7 +73,13 @@ const handler = async (req, res) => {
 
           await prisma.customerPayment.updateMany({
             where: { paymentId: stripeCustomerId },
-            data: { subscriptionType: type },
+            data: {
+              subscriptionType: type,
+              providerSubscriptionId: session?.subscription ? String(session.subscription) : null,
+              pendingSubscriptionType: null,
+              pendingEffectiveAt: null,
+              pendingStripePriceId: null,
+            },
           });
         }
         break;
@@ -84,11 +90,21 @@ const handler = async (req, res) => {
         const subscription = event.data.object;
         const stripeCustomerId = subscription.customer;
         const status = subscription.status;
+        const currentPeriodEnd = subscription?.current_period_end
+          ? new Date(Number(subscription.current_period_end) * 1000)
+          : null;
 
         if (shouldDowngradeFromStripeStatus(status)) {
           await prisma.customerPayment.updateMany({
             where: { paymentId: stripeCustomerId },
-            data: { subscriptionType: 'FREE' },
+            data: {
+              subscriptionType: 'FREE',
+              providerSubscriptionId: subscription?.id ? String(subscription.id) : null,
+              currentPeriodEnd,
+              pendingSubscriptionType: null,
+              pendingEffectiveAt: null,
+              pendingStripePriceId: null,
+            },
           });
           break;
         }
@@ -100,7 +116,16 @@ const handler = async (req, res) => {
 
           await prisma.customerPayment.updateMany({
             where: { paymentId: stripeCustomerId },
-            data: { subscriptionType: type },
+            data: {
+              subscriptionType: type,
+              providerSubscriptionId: subscription?.id ? String(subscription.id) : null,
+              currentPeriodEnd,
+            },
+          });
+
+          await prisma.customerPayment.updateMany({
+            where: { paymentId: stripeCustomerId, pendingSubscriptionType: type },
+            data: { pendingSubscriptionType: null, pendingEffectiveAt: null, pendingStripePriceId: null },
           });
         }
 
@@ -120,7 +145,14 @@ const handler = async (req, res) => {
         if (shouldDowngradeFromStripeStatus(status)) {
           await prisma.customerPayment.updateMany({
             where: { paymentId: stripeCustomerId },
-            data: { subscriptionType: 'FREE' },
+            data: {
+              subscriptionType: 'FREE',
+              providerSubscriptionId: null,
+              currentPeriodEnd: null,
+              pendingSubscriptionType: null,
+              pendingEffectiveAt: null,
+              pendingStripePriceId: null,
+            },
           });
           break;
         }
@@ -130,7 +162,18 @@ const handler = async (req, res) => {
           if (!type) break;
           await prisma.customerPayment.updateMany({
             where: { paymentId: stripeCustomerId },
-            data: { subscriptionType: type },
+            data: {
+              subscriptionType: type,
+              providerSubscriptionId: subscription?.id ? String(subscription.id) : null,
+              currentPeriodEnd: subscription?.current_period_end
+                ? new Date(Number(subscription.current_period_end) * 1000)
+                : null,
+            },
+          });
+
+          await prisma.customerPayment.updateMany({
+            where: { paymentId: stripeCustomerId, pendingSubscriptionType: type },
+            data: { pendingSubscriptionType: null, pendingEffectiveAt: null, pendingStripePriceId: null },
           });
         }
         break;
@@ -144,7 +187,14 @@ const handler = async (req, res) => {
 
         await prisma.customerPayment.updateMany({
           where: { paymentId: stripeCustomerId },
-          data: { subscriptionType: 'FREE' },
+          data: {
+            subscriptionType: 'FREE',
+            providerSubscriptionId: null,
+            currentPeriodEnd: null,
+            pendingSubscriptionType: null,
+            pendingEffectiveAt: null,
+            pendingStripePriceId: null,
+          },
         });
         break;
       }

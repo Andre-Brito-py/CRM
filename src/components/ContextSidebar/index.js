@@ -62,7 +62,6 @@ const ITEM_ICONS = {
   'common.label.security': UserCircleIcon,
 };
 
-const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];
 
 /**
  * ContextSidebar – narrow left panel that shows:
@@ -74,7 +73,7 @@ const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];
  *  - sectionLabel: string label of the active section
  *  - visible: boolean – whether to show the sub-items (workspace selector always shows)
  */
-const ContextSidebar = ({ items = [], sectionLabel = '', visible = true }) => {
+const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowedModules = {} }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const { data: session } = useSession();
@@ -85,11 +84,14 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true }) => {
   const [isSubmitting, setSubmittingState] = useState(false);
 
   const validName = name.length > 0 && name.length <= 16;
-  const userSubscription = session?.user?.subscription || 'FREE';
   const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
 
-  const isLocked = (itemName) =>
-    PREMIUM_FEATURES.includes(itemName) && userSubscription === 'FREE' && !isSuperAdmin;
+  // Módulo bloqueado se tem moduleKey e está desabilitado no plano
+  const isLocked = (item) => {
+    if (isSuperAdmin) return false;
+    if (!item.moduleKey) return false;
+    return allowedModules[item.moduleKey] === false;
+  };
 
   const handleWorkspaceChange = (ws) => {
     setWorkspace(ws);
@@ -193,7 +195,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true }) => {
             {/* Items */}
             <nav className="flex flex-col px-3 space-y-0.5 flex-1 pb-8 overflow-y-auto">
               {items.map((item, idx) => {
-                const locked = isLocked(item.name);
+                const locked = isLocked(item);
                 const active = router.asPath === item.path;
                 const Icon = ITEM_ICONS[item.name] || CogIcon;
 

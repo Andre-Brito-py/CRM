@@ -1,7 +1,7 @@
 const Sitemap = () => {};
 
 export const getServerSideProps = async ({ res }) => {
-  const publicPages = ['index', 'auth/login'];
+  const publicPages = ['index', 'auth/login', 'auth/register', 'terms', 'privacy'];
   const staticPages = publicPages.map(
     (staticPagePath) =>
       `${process.env.APP_URL}${

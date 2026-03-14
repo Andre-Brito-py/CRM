@@ -1,4 +1,5 @@
 import Logo from '@/components/Logo';
+import Link from 'next/link';
 
 const Footer = () => {
   return (
@@ -10,8 +11,8 @@ const Footer = () => {
             <a className="hover:text-blue-600 transition-colors">About</a>
             <a className="hover:text-blue-600 transition-colors">Showcase</a>
             <a className="hover:text-blue-600 transition-colors">Community</a>
-            <a className="hover:text-blue-600 transition-colors">Privacy</a>
-            <a className="hover:text-blue-600 transition-colors">Terms</a>
+            <Link href="/privacy" className="hover:text-blue-600 transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-blue-600 transition-colors">Terms</Link>
           </nav>
         </footer>
         <p className="py-5 text-center text-gray-400 text-sm">

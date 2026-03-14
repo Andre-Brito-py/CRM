@@ -102,7 +102,7 @@ const Templates = () => {
   ];
 
   const { data, mutate } = useSWR(workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox/templates` : null, api);
-  const templates = data?.data?.templates || [];
+  const templates = data?.data?.templates;
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -153,7 +153,7 @@ const Templates = () => {
 
   const handleDuplicate = async (template) => {
     const parsed = parseTemplateName(template?.name);
-    const versionedName = getNextVersionedName(templates, {
+    const versionedName = getNextVersionedName(Array.isArray(templates) ? templates : [], {
       lang: parsed.lang,
       folder: parsed.folder,
       baseName: parsed.baseName,
@@ -200,7 +200,7 @@ const Templates = () => {
   };
 
   const templateRows = useMemo(() => {
-    return templates.map((t) => ({ ...t, parsed: parseTemplateName(t.name) }));
+    return (Array.isArray(templates) ? templates : []).map((t) => ({ ...t, parsed: parseTemplateName(t.name) }));
   }, [templates]);
 
   const folders = useMemo(() => {
@@ -303,65 +303,65 @@ const Templates = () => {
         <div id="templates-list-container">
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
-            {filteredTemplates.length === 0 && (
-              <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
-                No templates found. Create one to get started.
-              </li>
-            )}
-            {groupedTemplates.map((group) => (
-              <li key={group.folder || '__root__'} className="bg-gray-50">
-                <div className="px-4 py-3 sm:px-6 text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  {group.folder ? group.folder : 'No folder'}
-                </div>
-                <ul className="divide-y divide-gray-200 bg-white">
-                  {group.items.map((template) => (
-                    <li key={template.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <h3 className="text-lg font-medium text-gray-900 truncate">{template.parsed.displayName}</h3>
-                            <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                              {template.parsed.lang.toUpperCase()}
-                            </span>
+              {filteredTemplates.length === 0 && (
+                <li className="px-4 py-4 sm:px-6 text-center text-gray-500">
+                  No templates found. Create one to get started.
+                </li>
+              )}
+              {groupedTemplates.map((group) => (
+                <li key={group.folder || '__root__'} className="bg-gray-50">
+                  <div className="px-4 py-3 sm:px-6 text-xs font-semibold text-gray-600 uppercase tracking-wide">
+                    {group.folder ? group.folder : 'No folder'}
+                  </div>
+                  <ul className="divide-y divide-gray-200 bg-white">
+                    {group.items.map((template) => (
+                      <li key={template.id} className="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <h3 className="text-lg font-medium text-gray-900 truncate">{template.parsed.displayName}</h3>
+                              <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                {template.parsed.lang.toUpperCase()}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-sm text-gray-500 truncate">{template.content}</p>
                           </div>
-                          <p className="mt-1 text-sm text-gray-500 truncate">{template.content}</p>
+                          <div className="flex items-center space-x-2 shrink-0">
+                            <button
+                              onClick={() => handleDuplicate(template)}
+                              disabled={isSubmitting}
+                              className="p-2 text-gray-400 hover:text-gray-500 disabled:opacity-50"
+                              title="Duplicate"
+                              type="button"
+                            >
+                              <DocumentDuplicateIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => openModal(template)}
+                              className="p-2 text-gray-400 hover:text-gray-500"
+                              title="Edit"
+                              type="button"
+                            >
+                              <PencilIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(template.id)}
+                              className="p-2 text-red-400 hover:text-red-500"
+                              title="Delete"
+                              type="button"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2 shrink-0">
-                          <button
-                            onClick={() => handleDuplicate(template)}
-                            disabled={isSubmitting}
-                            className="p-2 text-gray-400 hover:text-gray-500 disabled:opacity-50"
-                            title="Duplicate"
-                            type="button"
-                          >
-                            <DocumentDuplicateIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => openModal(template)}
-                            className="p-2 text-gray-400 hover:text-gray-500"
-                            title="Edit"
-                            type="button"
-                          >
-                            <PencilIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(template.id)}
-                            className="p-2 text-red-400 hover:text-red-500"
-                            title="Delete"
-                            type="button"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
-      </div>
 
         <Modal show={isModalOpen} toggle={closeModal} title={currentTemplate ? 'Edit Template' : 'New Template'}>
           <form onSubmit={handleSave} className="space-y-4 w-full" key={currentTemplate?.id || 'new'}>

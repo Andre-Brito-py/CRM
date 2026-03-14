@@ -8,8 +8,10 @@ import Link from 'next/link';
 import useContacts from '@/hooks/data/useContacts';
 import { useWorkspace } from '@/providers/workspace';
 import AddContactModal from '@/sections/contacts/AddContactModal';
+import { useTranslation } from 'react-i18next';
 
 const Contacts = () => {
+  const { t } = useTranslation();
   const { workspace } = useWorkspace();
   const [page, setPage] = useState(1);
   const pageSize = 25;

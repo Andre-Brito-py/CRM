@@ -6,15 +6,20 @@ import toast from 'react-hot-toast';
 import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { AuthLayout } from '@/layouts/index';
+import { redirectToCheckout } from '@/lib/client/stripe';
+import { getAllPlans } from '@/prisma/services/plan';
+import { getSystemConfig } from '@/lib/server/config';
 
-const Register = () => {
+const Register = ({ plans }) => {
     const router = useRouter();
     const [isSubmitting, setSubmittingState] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        planPriceId: '',
+        termsAccepted: false,
     });
 
     const handleInputChange = (e) => {
@@ -31,6 +36,12 @@ const Register = () => {
             return;
         }
 
+        if (!formData.termsAccepted) {
+            toast.error('Você precisa aceitar os Termos de Uso');
+            setSubmittingState(false);
+            return;
+        }
+
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
@@ -38,16 +49,30 @@ const Register = () => {
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password
+                    password: formData.password,
+                    termsAccepted: true,
+                    planPriceId: formData.planPriceId || null,
                 }),
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                toast.success(data.message || 'Registration successful. Please verify your email.');
+                toast.success(data.message || 'Cadastro realizado. Verifique seu e-mail para ativar a conta.');
                 // router.push('/auth/login?registered=true');
-                setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+                setFormData({
+                    name: '',
+                    email: '',
+                    password: '',
+                    confirmPassword: '',
+                    planPriceId: '',
+                    termsAccepted: false,
+                });
+
+                if (data?.data?.sessionId) {
+                    (async () => redirectToCheckout(data.data.sessionId))();
+                    return;
+                }
             } else {
                 toast.error(data?.error?.msg || 'An error occurred while registering');
             }
@@ -128,6 +153,47 @@ const Register = () => {
                         />
                     </div>
 
+                    <div className="flex flex-col space-y-1">
+                        <label className="text-sm font-semibold text-gray-700" htmlFor="planPriceId">Plano</label>
+                        <select
+                            className="px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand-500"
+                            name="planPriceId"
+                            id="planPriceId"
+                            value={formData.planPriceId}
+                            onChange={handleInputChange}
+                        >
+                            <option value="">Gratuito (FREE)</option>
+                            {(plans || [])
+                                .filter((p) => Boolean(p?.stripePriceId))
+                                .map((plan) => (
+                                    <option key={plan.id} value={plan.stripePriceId}>
+                                        {plan.name} ({plan.interval}) — {plan.currency} {plan.price}
+                                    </option>
+                                ))}
+                        </select>
+                        <p className="text-xs text-gray-500">
+                            Ao selecionar um plano pago, será solicitado um cartão para cobrança recorrente.
+                        </p>
+                    </div>
+
+                    <label className="flex items-start gap-2 text-sm text-gray-700">
+                        <input
+                            type="checkbox"
+                            name="termsAccepted"
+                            checked={formData.termsAccepted}
+                            onChange={(e) => setFormData({ ...formData, termsAccepted: e.target.checked })}
+                            className="mt-1"
+                            required
+                        />
+                        <span>
+                            Eu li e aceito os{' '}
+                            <Link href="/terms" className="font-semibold text-brand-600 hover:text-brand-500" target="_blank">
+                                Termos de Uso
+                            </Link>
+                            .
+                        </span>
+                    </label>
+
                     <Button
                         className="w-full justify-center bg-brand-600 hover:bg-brand-700 text-white"
                         disabled={isSubmitting}
@@ -151,3 +217,17 @@ const Register = () => {
 };
 
 export default Register;
+
+export const getServerSideProps = async () => {
+    const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+    if (!paymentsSecretKey) {
+        return { props: { plans: [] } };
+    }
+
+    try {
+        const plans = await getAllPlans();
+        return { props: { plans: plans || [] } };
+    } catch (error) {
+        return { props: { plans: [] } };
+    }
+};

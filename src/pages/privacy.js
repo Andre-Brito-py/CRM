@@ -3,50 +3,83 @@ import { LandingLayout } from '@/layouts/index';
 import { Footer } from '@/sections/index';
 
 const PrivacyPolicy = () => {
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Nextacular CRM';
+  const privacyEmail =
+    process.env.NEXT_PUBLIC_PRIVACY_EMAIL ||
+    process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
+    'privacy@example.com';
+  const privacyVersion = '2026-03-13';
+  const lastUpdated = '13/03/2026';
+
   return (
     <LandingLayout>
       <Meta
-        title="Privacy Policy - Nextacular CRM"
-        description="Privacy Policy for Nextacular CRM services."
+        title="Política de Privacidade - Nextacular CRM"
+        description="Política de Privacidade da plataforma Nextacular CRM."
       />
       <main className="max-w-4xl mx-auto px-6 py-20 text-gray-800">
-        <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
-        <p className="mb-4">Last Updated: {new Date().toLocaleDateString()}</p>
+        <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>
+        <p className="mb-1">Versão: {privacyVersion}</p>
+        <p className="mb-8">Última atualização: {lastUpdated}</p>
         
-        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Information We Collect</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">1. Controladora e Contato</h2>
         <p className="mb-4">
-          We collect information you provide directly to us when you create an account, such as your name, email address, and billing information. We also collect data regarding your customers and interactions (e.g., WhatsApp messages) as part of our core CRM functionality.
+          Esta Política descreve como {companyName} trata dados pessoais no contexto do uso da plataforma. Para dúvidas, solicitações e
+          exercício de direitos, entre em contato pelo e-mail: <span className="font-bold">{privacyEmail}</span>.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">2. How We Use Your Information</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">2. Dados que Coletamos</h2>
         <p className="mb-4">
-          The information we collect is used to:
+          Podemos coletar:
         </p>
         <ul className="list-disc pl-6 mb-4 space-y-2">
-          <li>Provide, maintain, and improve our Service.</li>
-          <li>Process transactions and send related information, including receipts and invoices.</li>
-          <li>Send administrative messages, security alerts, and technical notices.</li>
-          <li>Facilitate interactions with third-party APIs (e.g., OpenAI, Meta Graph API) as requested by your usage of the platform.</li>
+          <li>Dados de cadastro (nome, e-mail, credenciais e preferências).</li>
+          <li>Dados de cobrança e assinatura (status do plano, identificadores de pagamento e histórico).</li>
+          <li>Dados operacionais do CRM inseridos pelo usuário (contatos, empresas, negócios, tarefas e mensagens).</li>
+          <li>Dados técnicos (logs, endereço IP, identificadores de dispositivo e métricas de uso para segurança e performance).</li>
         </ul>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">3. Data Sharing and Subprocessors</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">3. Finalidades e Bases Legais</h2>
         <p className="mb-4">
-          We do not sell your personal data. We may share data with trusted third-party service providers (Subprocessors) to help us operate our business, such as payment gateways (Stripe), email providers, and cloud hosting infrastructure. These partners are required to use the data only for the provision of services to us in a manner consistent with this Privacy Policy.
+          Tratamos dados pessoais para prestar e aprimorar o serviço, operar recursos contratados, garantir segurança, cumprir obrigações legais e
+          viabilizar cobrança. As bases legais podem incluir execução de contrato, cumprimento de obrigação legal/regulatória, legítimo interesse e,
+          quando aplicável, consentimento.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">4. Security</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">4. Compartilhamento e Operadores</h2>
         <p className="mb-4">
-          We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction.
+          Não vendemos dados pessoais. Podemos compartilhar dados com fornecedores (operadores) estritamente para operar a plataforma, por exemplo:
+          processamento de pagamentos, disparo de e-mails, hospedagem, armazenamento, analytics e integrações solicitadas (como WhatsApp/Meta e IA).
+          Esses fornecedores devem tratar os dados conforme nossas instruções e com medidas de segurança adequadas.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">5. Your Rights</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">5. Transferências Internacionais</h2>
         <p className="mb-4">
-          Depending on your location (e.g., GDPR, CCPA, LGPD), you may have the right to request access, correction, or deletion of your personal data. You can exercise these rights by contacting our support team or managing your account settings.
+          Alguns fornecedores podem operar fora do Brasil. Quando houver transferência internacional, adotamos salvaguardas apropriadas, conforme
+          legislação aplicável, buscando garantir um nível de proteção adequado.
         </p>
 
-        <h2 className="text-2xl font-semibold mt-8 mb-4">6. Contact Us</h2>
+        <h2 className="text-2xl font-semibold mt-8 mb-4">6. Retenção e Exclusão</h2>
         <p className="mb-4">
-          If you have any questions about this Privacy Policy, please contact us at privacy@nextacular-crm.com.
+          Mantemos dados pelo tempo necessário para cumprir as finalidades desta Política e obrigações legais/regulatórias. Você pode solicitar
+          exportação e remoção de dados conforme os recursos disponibilizados na plataforma e/ou pelo canal de contato.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-4">7. Direitos do Titular</h2>
+        <p className="mb-4">
+          Conforme a LGPD, você pode solicitar confirmação de tratamento, acesso, correção, anonimização, bloqueio, eliminação, portabilidade e
+          informações sobre compartilhamentos. Para exercer direitos, utilize <span className="font-bold">{privacyEmail}</span>.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-4">8. Segurança</h2>
+        <p className="mb-4">
+          Adotamos medidas técnicas e organizacionais razoáveis para proteger dados pessoais contra acessos não autorizados, perda, alteração e
+          destruição. Nenhuma medida é absoluta, e recomendamos boas práticas de segurança no uso de credenciais e integrações.
+        </p>
+
+        <h2 className="text-2xl font-semibold mt-8 mb-4">9. Atualizações desta Política</h2>
+        <p className="mb-4">
+          Esta Política pode ser atualizada periodicamente. A versão vigente estará sempre disponível nesta página, com indicação de versão e data.
         </p>
       </main>
       <Footer />

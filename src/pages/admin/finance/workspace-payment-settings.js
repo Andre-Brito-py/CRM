@@ -18,10 +18,10 @@ const WorkspacePaymentSettings = () => {
 
   const isLoading = !data && !error;
   const workspaces = data?.data?.workspaces || [];
-  const providers = data?.data?.providers || [];
+  const providers = data?.data?.providers;
 
   const providerOptions = useMemo(() => {
-    return providers
+    return (Array.isArray(providers) ? providers : [])
       .slice()
       .sort((a, b) => String(a.displayName || '').localeCompare(String(b.displayName || '')))
       .map((p) => ({

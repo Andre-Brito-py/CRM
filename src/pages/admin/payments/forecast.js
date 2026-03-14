@@ -32,12 +32,12 @@ const Forecast = () => {
 
   const { data, error } = useSWR(session ? `/api/admin/payments/forecast?${query}` : null, fetcher);
   const summary = data?.data?.summary || null;
-  const series = data?.data?.series || [];
+  const series = data?.data?.series;
   const isLoading = !data && !error;
 
   const chartData = useMemo(
     () =>
-      series.map((p) => ({
+      (Array.isArray(series) ? series : []).map((p) => ({
         date: p.date,
         total: Number(p.total || 0),
         count: Number(p.count || 0),

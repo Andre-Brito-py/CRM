@@ -1,8 +1,14 @@
 import prisma from '@/prisma/index';
+import { validateSession } from '@/config/api-validation';
 
 const handler = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
+  }
+
+  const session = await validateSession(req, res);
+  if (!session || session.user?.role !== 'SUPERADMIN') {
+    return res.status(403).json({ error: { msg: 'Forbidden' } });
   }
 
   const plansToCreate = [

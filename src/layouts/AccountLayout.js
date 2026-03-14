@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -10,17 +11,29 @@ import menu from '@/config/menu/index';
 import sidebarMenu from '@/config/menu/sidebar-static';
 import { useWorkspace } from '@/providers/workspace';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
+import usePlanFeatures from '@/hooks/data/usePlanFeatures';
 
 const staticMenu = sidebarMenu();
 
 const AccountLayout = ({ children }) => {
-  const { status } = useSession();
+  const { status, data: session } = useSession();
   const { t } = useTranslation();
   const router = useRouter();
   const { workspace } = useWorkspace();
 
+  const requiredTermsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
   const currentSlug = workspace?.slug || router.query.workspaceSlug;
   const workspaceMenu = currentSlug ? menu(currentSlug) : [];
+  const { allowedModules, trial } = usePlanFeatures();
+
+  // Filtra seções inteiras do menu cujo módulo está desabilitado
+  const filteredMenu = workspaceMenu.map(section => {
+    // Se a seção inteira tem moduleKey desabilitado, remove (mas mantém para superadmin)
+    return {
+      ...section,
+      menuItems: section.menuItems, // Itens individuais filtrados no ContextSidebar via isLocked
+    };
+  });
 
   // Determine active context sidebar section from current path
   const activeSection = useMemo(() => {
@@ -84,12 +97,48 @@ const AccountLayout = ({ children }) => {
     }
   }, [status, router]);
 
+  useEffect(() => {
+    if (status !== 'authenticated') return;
+    const acceptedAt = session?.user?.termsAcceptedAt || null;
+    const acceptedVersion = session?.user?.termsVersion || null;
+    if (!acceptedAt || acceptedVersion !== requiredTermsVersion) {
+      const next = encodeURIComponent(router.asPath || '/account');
+      router.replace(`/terms?next=${next}`);
+    }
+  }, [status, session?.user?.termsAcceptedAt, session?.user?.termsVersion, requiredTermsVersion, router]);
+
   if (status === 'loading') return <></>;
 
   return (
     <main className="relative flex flex-col w-screen h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
       {/* Top navigation bar */}
-      <Topbar menu={workspaceMenu} staticMenu={staticMenu} />
+      <Topbar menu={filteredMenu} staticMenu={staticMenu} />
+
+      {/* Trial banner */}
+      {trial.hasTrial && (
+        <div className={`flex items-center justify-center gap-3 px-4 py-2 text-sm font-medium ${trial.expired
+          ? 'bg-red-600 text-white'
+          : trial.daysLeft <= 3
+            ? 'bg-amber-500 text-white'
+            : 'bg-amber-100 text-amber-800'
+          }`}>
+          {trial.expired ? (
+            <>
+              <span>⚠️ Seu período de teste expirou.</span>
+              <Link href="/account/billing" className="underline font-bold hover:opacity-80">
+                Fazer upgrade agora
+              </Link>
+            </>
+          ) : (
+            <>
+              <span>⏳ {trial.daysLeft} {trial.daysLeft === 1 ? 'dia restante' : 'dias restantes'} no período de teste.</span>
+              <Link href="/account/billing" className="underline font-bold hover:opacity-80">
+                Ver planos
+              </Link>
+            </>
+          )}
+        </div>
+      )}
 
       <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} active={!workspace} />
 
@@ -107,6 +156,7 @@ const AccountLayout = ({ children }) => {
           items={activeSection?.items || []}
           sectionLabel={activeSection?.label || ''}
           visible={!!activeSection && activeSection.items?.length > 0}
+          allowedModules={allowedModules}
         />
 
         {/* Main content area */}

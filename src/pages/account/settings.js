@@ -22,6 +22,21 @@ const Settings = ({ user }) => {
   const [showModal, setModalState] = useState(false);
   const [userCode] = useState(user.userCode);
   const [verifyEmail, setVerifyEmail] = useState('');
+  const fiscalProfile = user.fiscalProfile || null;
+  const [fiscalDocumentType, setFiscalDocumentType] = useState(fiscalProfile?.documentType || 'CPF');
+  const [fiscalDocument, setFiscalDocument] = useState(fiscalProfile?.document || '');
+  const [fiscalName, setFiscalName] = useState(fiscalProfile?.name || user.name || '');
+  const [fiscalEmail, setFiscalEmail] = useState(fiscalProfile?.email || user.email || '');
+  const [fiscalPhone, setFiscalPhone] = useState(fiscalProfile?.phone || '');
+  const [fiscalCep, setFiscalCep] = useState(fiscalProfile?.cep || '');
+  const [fiscalUf, setFiscalUf] = useState(fiscalProfile?.uf || '');
+  const [fiscalCodigoMunicipio, setFiscalCodigoMunicipio] = useState(
+    fiscalProfile?.codigoMunicipio ? String(fiscalProfile.codigoMunicipio) : ''
+  );
+  const [fiscalLogradouro, setFiscalLogradouro] = useState(fiscalProfile?.logradouro || '');
+  const [fiscalNumero, setFiscalNumero] = useState(fiscalProfile?.numero || '');
+  const [fiscalComplemento, setFiscalComplemento] = useState(fiscalProfile?.complemento || '');
+  const [fiscalBairro, setFiscalBairro] = useState(fiscalProfile?.bairro || '');
   const validName = name.length > 0 && name.length <= 32;
   const validEmail = isEmail(email);
   const { t, i18n } = useTranslation();
@@ -72,6 +87,42 @@ const Settings = ({ user }) => {
           setTimeout(() => signOut({ callbackUrl: '/auth/login' }), 2000);
         }
       });
+    }
+  };
+
+  const saveFiscalProfile = async (event) => {
+    event.preventDefault();
+    setSubmittingState(true);
+    try {
+      const response = await api('/api/user/fiscal-profile', {
+        method: 'PUT',
+        body: {
+          documentType: fiscalDocumentType,
+          document: fiscalDocument,
+          name: fiscalName,
+          email: fiscalEmail,
+          phone: fiscalPhone,
+          cep: fiscalCep,
+          uf: fiscalUf,
+          codigoMunicipio: fiscalCodigoMunicipio,
+          logradouro: fiscalLogradouro,
+          numero: fiscalNumero,
+          complemento: fiscalComplemento,
+          bairro: fiscalBairro,
+        },
+      });
+
+      if (response?.errors) {
+        Object.keys(response.errors).forEach((error) => toast.error(response.errors[error].msg));
+        return;
+      }
+
+      toast.success('Dados fiscais salvos.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Falha ao salvar dados fiscais.');
+    } finally {
+      setSubmittingState(false);
     }
   };
 
@@ -141,7 +192,7 @@ const Settings = ({ user }) => {
             </Card.Footer>
           </form>
         </Card>
-        
+
         <Card>
           <form>
             <Card.Body
@@ -170,6 +221,176 @@ const Settings = ({ user }) => {
         </Card>
 
         <Card>
+          <form>
+            <Card.Body
+              title="Dados fiscais (para Nota Fiscal)"
+              subtitle="Usado para emissão de NFS-e quando aplicável"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:w-2/3">
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Tipo de documento
+                  </label>
+                  <select
+                    className="appearance-none w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-bold text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all cursor-pointer"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalDocumentType(e.target.value)}
+                    value={fiscalDocumentType}
+                  >
+                    <option value="CPF">CPF</option>
+                    <option value="CNPJ">CNPJ</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    CPF/CNPJ
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalDocument(e.target.value)}
+                    type="text"
+                    value={fiscalDocument}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Nome/Razão Social
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalName(e.target.value)}
+                    type="text"
+                    value={fiscalName}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    E-mail
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalEmail(e.target.value)}
+                    type="email"
+                    value={fiscalEmail}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Telefone
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalPhone(e.target.value)}
+                    type="text"
+                    value={fiscalPhone}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    UF
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalUf(e.target.value)}
+                    type="text"
+                    value={fiscalUf}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Código do Município (IBGE)
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalCodigoMunicipio(e.target.value)}
+                    type="text"
+                    value={fiscalCodigoMunicipio}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    CEP
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalCep(e.target.value)}
+                    type="text"
+                    value={fiscalCep}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Logradouro
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalLogradouro(e.target.value)}
+                    type="text"
+                    value={fiscalLogradouro}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Número
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalNumero(e.target.value)}
+                    type="text"
+                    value={fiscalNumero}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Bairro
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalBairro(e.target.value)}
+                    type="text"
+                    value={fiscalBairro}
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-bold text-zinc-400 uppercase tracking-widest px-1 mb-2">
+                    Complemento
+                  </label>
+                  <input
+                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400"
+                    disabled={isSubmitting}
+                    onChange={(e) => setFiscalComplemento(e.target.value)}
+                    type="text"
+                    value={fiscalComplemento}
+                  />
+                </div>
+              </div>
+            </Card.Body>
+            <Card.Footer>
+              <small className="font-medium text-zinc-400">
+                Necessário para emissão automática de NFS-e.
+              </small>
+              <Button
+                className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 disabled:bg-zinc-200"
+                disabled={isSubmitting}
+                onClick={saveFiscalProfile}
+              >
+                Salvar
+              </Button>
+            </Card.Footer>
+          </form>
+        </Card>
+
+        <Card>
           <Card.Body
             title={t("settings.profile.personal.account.id")}
             subtitle={t("settings.profile.personal.account.message")}
@@ -178,7 +399,7 @@ const Settings = ({ user }) => {
               <span className="overflow-x-auto text-zinc-600 dark:text-zinc-300 select-all font-bold tracking-tight">{userCode}</span>
               <CopyToClipboard onCopy={copyToClipboard} text={userCode}>
                 <button className="p-2 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 shadow-sm border-white/0 group">
-                   <DocumentDuplicateIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
+                  <DocumentDuplicateIcon className="w-5 h-5 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
                 </button>
               </CopyToClipboard>
             </div>
@@ -238,37 +459,37 @@ const Settings = ({ user }) => {
             title="Deactivate Personal Account"
             toggle={toggleModal}
           >
-             <div className="p-8 space-y-6">
-                <p className="text-zinc-600 font-medium">
-                  {t("settings.account.action.deactive.label")}
+            <div className="p-8 space-y-6">
+              <p className="text-zinc-600 font-medium">
+                {t("settings.account.action.deactive.label")}
+              </p>
+              <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                <p className="text-sm text-red-600 font-bold flex items-center gap-2">
+                  <span className="text-lg">⚠️</span> {t("settings.account.deactive.message")}
                 </p>
-                <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
-                  <p className="text-sm text-red-600 font-bold flex items-center gap-2">
-                    <span className="text-lg">⚠️</span> {t("settings.account.deactive.message")}
-                  </p>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <label className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-2">
-                    Enter <span className="text-zinc-900 dark:text-white">{user.email}</span> to continue:
-                  </label>
-                  <input
-                    className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-red-500/30 transition-all"
-                    disabled={isSubmitting}
-                    onChange={handleVerifyEmailChange}
-                    type="email"
-                    value={verifyEmail}
-                  />
-                </div>
-                <div className="pt-4">
-                  <Button
-                    className="w-full text-white bg-red-600 hover:bg-red-700 py-4 shadow-xl shadow-red-500/20"
-                    disabled={!verifiedEmail || isSubmitting}
-                    onClick={deactivateAccount}
-                  >
-                    <span className="font-bold">{t("settings.account.action.deactive.label")}</span>
-                  </Button>
-                </div>
-             </div>
+              </div>
+              <div className="flex flex-col gap-3">
+                <label className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest px-2">
+                  Enter <span className="text-zinc-900 dark:text-white">{user.email}</span> to continue:
+                </label>
+                <input
+                  className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:bg-white dark:focus:bg-zinc-800 focus:border-red-500/30 transition-all"
+                  disabled={isSubmitting}
+                  onChange={handleVerifyEmailChange}
+                  type="email"
+                  value={verifyEmail}
+                />
+              </div>
+              <div className="pt-4">
+                <Button
+                  className="w-full text-white bg-red-600 hover:bg-red-700 py-4 shadow-xl shadow-red-500/20"
+                  disabled={!verifiedEmail || isSubmitting}
+                  onClick={deactivateAccount}
+                >
+                  <span className="font-bold">{t("settings.account.action.deactive.label")}</span>
+                </Button>
+              </div>
+            </div>
           </Modal>
         </Card>
       </Content.Container>
@@ -304,7 +525,27 @@ export const getServerSideProps = async (context) => {
       const prisma = (await import('@/prisma/index')).default;
       user = await prisma.user.findUnique({
         where: { email: userEmail },
-        select: { email: true, name: true, userCode: true },
+        select: {
+          email: true,
+          name: true,
+          userCode: true,
+          fiscalProfile: {
+            select: {
+              documentType: true,
+              document: true,
+              name: true,
+              email: true,
+              phone: true,
+              cep: true,
+              uf: true,
+              codigoMunicipio: true,
+              logradouro: true,
+              numero: true,
+              complemento: true,
+              bairro: true,
+            },
+          },
+        },
       });
     }
 
@@ -316,6 +557,7 @@ export const getServerSideProps = async (context) => {
             email: userEmail || '',
             name: session?.user?.name || '',
             userCode: '',
+            fiscalProfile: null,
           },
         },
       };
@@ -327,6 +569,7 @@ export const getServerSideProps = async (context) => {
           email: user.email || '',
           name: user.name || '',
           userCode: user.userCode || '',
+          fiscalProfile: user.fiscalProfile || null,
         },
       },
     };
@@ -339,6 +582,7 @@ export const getServerSideProps = async (context) => {
           email: userEmail || '',
           name: session?.user?.name || '',
           userCode: '',
+          fiscalProfile: null,
         },
       },
     };
