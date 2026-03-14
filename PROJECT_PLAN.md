@@ -128,6 +128,7 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 - [x] Definir impostos/NF (se aplicável) e refletir no checkout/recibos.
   - [x] Preparar Checkout (assinatura) com `automatic_tax` e `tax_id_collection` por configuração.
   - [x] Propagar dados para recibos/faturas via `customer_update` (nome/endereço).
+- [x] Exigir cartão no cadastro (inclusive plano FREE) via Checkout (setup).
 
 #### 11.1) Nota Fiscal (NFS-e) opcional
 - [x] Persistir documentos fiscais emitidos e status: `fiscal_documents`.
@@ -216,6 +217,7 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
         - [x] Quando um negócio muda de estágio → enviar mensagem ou atribuir usuário.
         - [x] Quando chega mensagem com palavra-chave → enviar mensagem ou atribuir.
         - [x] Quando um cliente não responde em X dias → enviar follow-up.
+        - [x] Enviar email (Email Marketing) com templates e variáveis.
 - **Tasks & Reminders:**
     - [x] Sistema de tarefas (Título, Data de vencimento, Responsável, Status).
     - [x] Associação de tarefas a Contatos e Negócios.
@@ -225,12 +227,13 @@ Objetivo: criar os fundamentos técnicos para operar em produção com previsibi
 *Funcionalidades para aumentar produtividade.*
 - **Integração Base:**
     - [x] Conectar API da OpenAI via System Config.
+    - [x] Definir e configurar cota de tokens de IA por plano (Admin).
 - **Assistente de Resposta:**
     - [x] Geração dinâmica de sugestões de resposta para clientes no Inbox.
-    - [ ] Resumo inteligente de histório de conversas.
+    - [x] Resumo inteligente de histório de conversas.
 - **Vendas Inteligentes:**
-    - [ ] Análise de pipeline de vendas com insights automáticos.
-    - [ ] Recomendações de próximos passos para vendedores.
+    - [x] Análise de pipeline de vendas com insights automáticos.
+    - [x] Recomendações de próximos passos para vendedores.
 
 ### 5.5 Premium Visual Overhaul & Gating 🚧
 *Melhorias de design e paywall.*

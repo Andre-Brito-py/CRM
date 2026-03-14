@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PlusIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import Content from '@/components/Content/index';
@@ -22,11 +22,20 @@ const Pipeline = () => {
   // AI Insights
   const [aiInsights, setAiInsights] = useState(null);
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
 
   // For MVP we only use the first pipeline
   const pipeline = data?.pipelines?.[0];
 
   const toggleModal = () => setModalOpen(!isModalOpen);
+
+  useEffect(() => {
+    if (!workspace?.slug) return;
+    try {
+      const v = localStorage.getItem(`aiOverageOptIn:${workspace.slug}`);
+      setAiOverageOptIn(v === 'true');
+    } catch { }
+  }, [workspace?.slug]);
 
   const pipelineSteps = [
     {
@@ -61,8 +70,49 @@ const Pipeline = () => {
     try {
       const response = await api(`/api/workspace/${workspace?.slug}/pipelines/${pipeline.id}/insights`, {
         method: 'POST',
+        headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
       });
+
+      if (response.status >= 400 || response.error) {
+        const msg = response?.error?.msg || '';
+        const overage = response?.error?.overage;
+        if (msg === 'LIMIT_REACHED' && overage?.enabled) {
+          const price = overage?.pricePer1M ? Number(overage.pricePer1M) : null;
+          const confirmation = window.confirm(
+            t('inbox.ai.overagePrompt', { price: price != null ? String(price) : '' })
+          );
+          if (confirmation) {
+            try {
+              localStorage.setItem(`aiOverageOptIn:${workspace.slug}`, 'true');
+            } catch { }
+            setAiOverageOptIn(true);
+            const retry = await api(`/api/workspace/${workspace?.slug}/pipelines/${pipeline.id}/insights`, {
+              method: 'POST',
+              headers: { 'x-ai-overage': 'true' },
+            });
+            if (retry.data?.insights) {
+              if (retry.data?.quota?.tokens?.warn) {
+                const r = retry.data?.quota?.tokens?.remaining;
+                const l = retry.data?.quota?.tokens?.limit;
+                toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+              }
+              setAiInsights(retry.data.insights);
+              toast.success('Insights generated!');
+              return;
+            }
+          }
+        }
+
+        toast.error(response?.error?.details || 'Failed to generate insights');
+        return;
+      }
+
       if (response.data?.insights) {
+        if (response.data?.quota?.tokens?.warn) {
+          const r = response.data?.quota?.tokens?.remaining;
+          const l = response.data?.quota?.tokens?.limit;
+          toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+        }
         setAiInsights(response.data.insights);
         toast.success('Insights generated!');
       }

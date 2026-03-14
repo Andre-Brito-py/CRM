@@ -84,6 +84,8 @@ const handler = async (req, res) => {
           const session = event.data.object;
           if (session.mode === 'subscription') {
             await handleSubscriptionCreated({ requestId, session });
+          } else if (session.mode === 'setup') {
+            await handleSetupCompleted({ requestId, session });
           }
           break;
         case 'customer.subscription.created':
@@ -164,6 +166,27 @@ async function handleSubscriptionCreated({ requestId, session }) {
     });
     log({ level: 'info', msg: 'stripe_subscription_created', requestId, customerId, subscriptionType: type });
   }
+}
+
+async function handleSetupCompleted({ requestId, session }) {
+  const customerId = session.customer ? String(session.customer) : null;
+  const setupIntentId = session.setup_intent ? String(session.setup_intent) : null;
+  const purpose = String(session?.metadata?.purpose || '').trim().toLowerCase() || null;
+
+  if (!customerId || !setupIntentId) return;
+  if (purpose !== 'signup_setup') return;
+
+  const stripe = await getStripe();
+  const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+  const paymentMethodId = setupIntent?.payment_method ? String(setupIntent.payment_method) : null;
+
+  if (!paymentMethodId) return;
+
+  await stripe.customers.update(customerId, {
+    invoice_settings: { default_payment_method: paymentMethodId },
+  });
+
+  log({ level: 'info', msg: 'stripe_setup_completed', requestId, customerId });
 }
 
 async function handleSubscriptionUpdated({ requestId, subscription }) {

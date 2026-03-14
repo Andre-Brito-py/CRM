@@ -18,12 +18,15 @@ import Modal from '@/components/Modal/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { useTranslation } from 'react-i18next';
+import usePlanFeatures from '@/hooks/data/usePlanFeatures';
 
 const Automations = () => {
   const { t } = useTranslation();
   const router = useRouter();
   const { workspaceSlug } = router.query;
   const { workspace } = useWorkspace();
+  const { allowedModules } = usePlanFeatures();
+  const emailMarketingEnabled = allowedModules?.email_marketing !== false;
 
   // State for modal and form
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,7 +43,7 @@ const Automations = () => {
     triggerType: 'DEAL_STAGE_CHANGED',
     triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', operator: 'AND', hours: { start: null, end: null } },
     actionType: 'SEND_WHATSAPP',
-    actionConfig: { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
+    actionConfig: { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
   });
 
   const automationSteps = [
@@ -108,7 +111,7 @@ const Automations = () => {
         triggerType: 'DEAL_STAGE_CHANGED',
         triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', operator: 'AND', hours: { start: null, end: null } },
         actionType: 'SEND_WHATSAPP',
-        actionConfig: { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' }
+        actionConfig: { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' }
       });
     }
   };
@@ -200,6 +203,11 @@ const Automations = () => {
       return;
     }
 
+    if (newRule.actionType === 'SEND_EMAIL' && (!newRule.actionConfig.subject || !newRule.actionConfig.body)) {
+      toast.error(t('automations.validation.emailRequired'));
+      return;
+    }
+
     if (newRule.actionType === 'ASSIGN_TO_USER' && !newRule.actionConfig.userId) {
       toast.error(t('automations.validation.userRequired'));
       return;
@@ -243,6 +251,11 @@ const Automations = () => {
 
         if (type === 'SEND_WHATSAPP' && !cfg.templateId) {
           toast.error(t('automations.validation.templateRequired'));
+          return;
+        }
+
+        if (type === 'SEND_EMAIL' && (!cfg.subject || !cfg.body)) {
+          toast.error(t('automations.validation.emailRequired'));
           return;
         }
 
@@ -783,8 +796,9 @@ const Automations = () => {
                     value={newRule.actionType}
                     onChange={(e) => {
                       const next = e.target.value;
-                      const base = { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
+                      const base = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
                       if (next === 'SEND_WHATSAPP') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                      else if (next === 'SEND_EMAIL') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'ASSIGN_TO_USER') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'CREATE_TASK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'CALL_WEBHOOK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
@@ -804,6 +818,9 @@ const Automations = () => {
                     }}
                   >
                     <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
+                    {emailMarketingEnabled && (
+                      <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
+                    )}
                     <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
                     <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
                     <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
@@ -828,8 +845,9 @@ const Automations = () => {
                       };
 
                       const setActionType = (nextType) => {
-                        const nextConfigBase = { templateId: '', userId: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
+                        const nextConfigBase = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
                         if (nextType === 'SEND_WHATSAPP') setAction({ type: nextType, config: { templateId: '' } });
+                        else if (nextType === 'SEND_EMAIL') setAction({ type: nextType, config: { subject: '', body: '', from: '' } });
                         else if (nextType === 'ASSIGN_TO_USER') setAction({ type: nextType, config: { userId: '' } });
                         else if (nextType === 'CREATE_TASK') setAction({ type: nextType, config: { title: '', content: '', dueInDays: 0, assigneeId: '' } });
                         else if (nextType === 'CALL_WEBHOOK') setAction({ type: nextType, config: { eventName: '' } });
@@ -850,6 +868,9 @@ const Automations = () => {
                                 onChange={(e) => setActionType(e.target.value)}
                               >
                                 <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
+                                {emailMarketingEnabled && (
+                                  <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
+                                )}
                                 <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
                                 <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
                                 <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
@@ -899,6 +920,68 @@ const Automations = () => {
                                 ))}
                               </select>
                             </div>
+                          )}
+
+                          {type === 'SEND_EMAIL' && (
+                            <>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailTemplate')}</label>
+                                <select
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  value={config.templateId || ''}
+                                  onChange={(e) => {
+                                    const templateId = e.target.value;
+                                    const tpl = templates.find((x) => x.id === templateId);
+                                    setAction({
+                                      config: {
+                                        ...config,
+                                        templateId,
+                                        body: tpl?.content ?? (config.body || ''),
+                                      },
+                                    });
+                                  }}
+                                >
+                                  <option value="">{t('automations.action.selectTemplate')}</option>
+                                  {templates.map((template) => (
+                                    <option key={template.id} value={template.id}>
+                                      {template.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject')}</label>
+                                <input
+                                  type="text"
+                                  required
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  value={config.subject || ''}
+                                  onChange={(e) => setAction({ config: { ...config, subject: e.target.value } })}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody')}</label>
+                                <textarea
+                                  rows={5}
+                                  required
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  value={config.body || ''}
+                                  onChange={(e) => setAction({ config: { ...config, body: e.target.value } })}
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailFrom')}</label>
+                                <input
+                                  type="email"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  value={config.from || ''}
+                                  onChange={(e) => setAction({ config: { ...config, from: e.target.value } })}
+                                />
+                              </div>
+                            </>
                           )}
 
                           {type === 'ASSIGN_TO_USER' && (
@@ -1056,6 +1139,78 @@ const Automations = () => {
                       ))}
                     </select>
                   </div>
+                )}
+
+                {newRule.actionType === 'SEND_EMAIL' && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailTemplate')}</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        value={newRule.actionConfig.templateId || ''}
+                        onChange={(e) => {
+                          const templateId = e.target.value;
+                          const tpl = templates.find((x) => x.id === templateId);
+                          setNewRule({
+                            ...newRule,
+                            actionConfig: {
+                              ...newRule.actionConfig,
+                              templateId,
+                              body: tpl?.content ?? (newRule.actionConfig.body || ''),
+                            },
+                          });
+                        }}
+                      >
+                        <option value="">{t('automations.action.selectTemplate')}</option>
+                        {templates.map((template) => (
+                          <option key={template.id} value={template.id}>
+                            {template.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject')}</label>
+                      <input
+                        type="text"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        value={newRule.actionConfig.subject || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, subject: e.target.value }
+                        })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody')}</label>
+                      <textarea
+                        rows={5}
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        value={newRule.actionConfig.body || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, body: e.target.value }
+                        })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailFrom')}</label>
+                      <input
+                        type="email"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        value={newRule.actionConfig.from || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, from: e.target.value }
+                        })}
+                      />
+                    </div>
+                  </>
                 )}
 
                 {newRule.actionType === 'ASSIGN_TO_USER' && (

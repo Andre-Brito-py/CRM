@@ -12,34 +12,42 @@ const getKey = ({ req, key }) => {
 
 const buckets = new Map();
 
-const rateLimitMemory = ({ req, limit = 60, windowMs = 60_000, key }) => {
+const normalizeIncrement = (increment) => {
+  const n = Number(increment);
+  if (!Number.isFinite(n) || n <= 0) return 1;
+  return Math.floor(n);
+};
+
+const rateLimitMemory = ({ req, limit = 60, windowMs = 60_000, key, increment = 1 }) => {
   const nowMs = Date.now();
   const bucketKey = getKey({ req, key });
+  const inc = normalizeIncrement(increment);
   const current = buckets.get(bucketKey) || { count: 0, resetAt: nowMs + windowMs };
 
   if (nowMs > current.resetAt) {
-    buckets.set(bucketKey, { count: 1, resetAt: nowMs + windowMs });
-    return { ok: true, remaining: limit - 1, resetAt: nowMs + windowMs };
+    buckets.set(bucketKey, { count: inc, resetAt: nowMs + windowMs });
+    return { ok: inc <= limit, remaining: Math.max(0, limit - inc), resetAt: nowMs + windowMs };
   }
 
   if (current.count >= limit) {
     return { ok: false, remaining: 0, resetAt: current.resetAt };
   }
 
-  current.count += 1;
+  current.count += inc;
   buckets.set(bucketKey, current);
   return { ok: true, remaining: limit - current.count, resetAt: current.resetAt };
 };
 
-const rateLimitPostgres = async ({ req, limit = 60, windowMs = 60_000, key }) => {
+const rateLimitPostgres = async ({ req, limit = 60, windowMs = 60_000, key, increment = 1 }) => {
   const bucketKey = getKey({ req, key });
   const resetAt = new Date(Date.now() + windowMs);
+  const inc = normalizeIncrement(increment);
 
   const rows = await prisma.$queryRaw`
     INSERT INTO "rate_limit_counters" ("key", "count", "resetAt", "createdAt", "updatedAt")
-    VALUES (${bucketKey}, 1, ${resetAt}, NOW(), NOW())
+    VALUES (${bucketKey}, ${inc}, ${resetAt}, NOW(), NOW())
     ON CONFLICT ("key") DO UPDATE SET
-      "count" = CASE WHEN "rate_limit_counters"."resetAt" <= NOW() THEN 1 ELSE "rate_limit_counters"."count" + 1 END,
+      "count" = CASE WHEN "rate_limit_counters"."resetAt" <= NOW() THEN ${inc} ELSE "rate_limit_counters"."count" + ${inc} END,
       "resetAt" = CASE WHEN "rate_limit_counters"."resetAt" <= NOW() THEN EXCLUDED."resetAt" ELSE "rate_limit_counters"."resetAt" END,
       "updatedAt" = NOW()
     RETURNING "count", "resetAt"
@@ -53,15 +61,15 @@ const rateLimitPostgres = async ({ req, limit = 60, windowMs = 60_000, key }) =>
   return { ok: count <= limit, remaining, resetAt: resetAtMs };
 };
 
-export const rateLimit = async ({ req, limit = 60, windowMs = 60_000, key }) => {
+export const rateLimit = async ({ req, limit = 60, windowMs = 60_000, key, increment = 1 }) => {
   const store = String(process.env.RATE_LIMIT_STORE || 'postgres').trim().toLowerCase();
   if (store !== 'postgres') {
-    return rateLimitMemory({ req, limit, windowMs, key });
+    return rateLimitMemory({ req, limit, windowMs, key, increment });
   }
 
   try {
-    return await rateLimitPostgres({ req, limit, windowMs, key });
+    return await rateLimitPostgres({ req, limit, windowMs, key, increment });
   } catch {
-    return rateLimitMemory({ req, limit, windowMs, key });
+    return rateLimitMemory({ req, limit, windowMs, key, increment });
   }
 };

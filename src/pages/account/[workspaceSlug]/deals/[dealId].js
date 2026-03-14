@@ -83,14 +83,56 @@ const DealDetails = ({ workspace }) => {
   const [isGeneratingNextStep, setIsGeneratingNextStep] = useState(false);
   const [aiFollowUp, setAiFollowUp] = useState(null);
   const [isGeneratingFollowUp, setIsGeneratingFollowUp] = useState(false);
+  const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
 
   const generateNextStep = async () => {
     setIsGeneratingNextStep(true);
     try {
       const response = await api(`/api/workspace/${workspaceSlug}/deals/${dealId}/next-steps`, {
         method: 'POST',
+        headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
       });
+
+      if (response.status >= 400 || response.error) {
+        const msg = response?.error?.msg || '';
+        const overage = response?.error?.overage;
+        if (msg === 'LIMIT_REACHED' && overage?.enabled) {
+          const price = overage?.pricePer1M ? Number(overage.pricePer1M) : null;
+          const confirmation = window.confirm(
+            t('inbox.ai.overagePrompt', { price: price != null ? String(price) : '' })
+          );
+          if (confirmation) {
+            try {
+              localStorage.setItem(`aiOverageOptIn:${workspaceSlug}`, 'true');
+            } catch { }
+            setAiOverageOptIn(true);
+            const retry = await api(`/api/workspace/${workspaceSlug}/deals/${dealId}/next-steps`, {
+              method: 'POST',
+              headers: { 'x-ai-overage': 'true' },
+            });
+            if (retry.data?.recommendation) {
+              if (retry.data?.quota?.tokens?.warn) {
+                const r = retry.data?.quota?.tokens?.remaining;
+                const l = retry.data?.quota?.tokens?.limit;
+                toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+              }
+              setAiNextStep(retry.data.recommendation);
+              toast.success('Recommendation generated!');
+              return;
+            }
+          }
+        }
+
+        toast.error(response?.error?.details || 'Failed to generate recommendation');
+        return;
+      }
+
       if (response.data?.recommendation) {
+        if (response.data?.quota?.tokens?.warn) {
+          const r = response.data?.quota?.tokens?.remaining;
+          const l = response.data?.quota?.tokens?.limit;
+          toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+        }
         setAiNextStep(response.data.recommendation);
         toast.success('Recommendation generated!');
       }
@@ -106,8 +148,49 @@ const DealDetails = ({ workspace }) => {
     try {
       const response = await api(`/api/workspace/${workspaceSlug}/deals/${dealId}/follow-up`, {
         method: 'POST',
+        headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
       });
+
+      if (response.status >= 400 || response.error) {
+        const msg = response?.error?.msg || '';
+        const overage = response?.error?.overage;
+        if (msg === 'LIMIT_REACHED' && overage?.enabled) {
+          const price = overage?.pricePer1M ? Number(overage.pricePer1M) : null;
+          const confirmation = window.confirm(
+            t('inbox.ai.overagePrompt', { price: price != null ? String(price) : '' })
+          );
+          if (confirmation) {
+            try {
+              localStorage.setItem(`aiOverageOptIn:${workspaceSlug}`, 'true');
+            } catch { }
+            setAiOverageOptIn(true);
+            const retry = await api(`/api/workspace/${workspaceSlug}/deals/${dealId}/follow-up`, {
+              method: 'POST',
+              headers: { 'x-ai-overage': 'true' },
+            });
+            if (retry.data?.message) {
+              if (retry.data?.quota?.tokens?.warn) {
+                const r = retry.data?.quota?.tokens?.remaining;
+                const l = retry.data?.quota?.tokens?.limit;
+                toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+              }
+              setAiFollowUp(retry.data.message);
+              toast.success('Follow-up message generated!');
+              return;
+            }
+          }
+        }
+
+        toast.error(response?.error?.details || 'Failed to generate follow-up');
+        return;
+      }
+
       if (response.data?.message) {
+        if (response.data?.quota?.tokens?.warn) {
+          const r = response.data?.quota?.tokens?.remaining;
+          const l = response.data?.quota?.tokens?.limit;
+          toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+        }
         setAiFollowUp(response.data.message);
         toast.success('Follow-up message generated!');
       }
@@ -123,6 +206,14 @@ const DealDetails = ({ workspace }) => {
       setWorkspace(workspace);
     }
   }, [workspace, setWorkspace]);
+
+  useEffect(() => {
+    if (!workspaceSlug) return;
+    try {
+      const v = localStorage.getItem(`aiOverageOptIn:${workspaceSlug}`);
+      setAiOverageOptIn(v === 'true');
+    } catch { }
+  }, [workspaceSlug]);
 
   const { data: paymentsData, mutate: mutatePayments } = useSWR(
     workspaceSlug && dealId ? `/api/workspace/${workspaceSlug}/payments?dealId=${dealId}` : null,

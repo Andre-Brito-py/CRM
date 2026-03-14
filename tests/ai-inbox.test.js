@@ -16,6 +16,7 @@ jest.mock('@/lib/server/rateLimit', () => ({
 
 jest.mock('@/lib/server/subscription', () => ({
   getWorkspaceLimits: jest.fn(),
+  isModuleAllowed: jest.fn(),
 }));
 
 jest.mock('@/lib/server/config', () => ({
@@ -35,7 +36,7 @@ import { validateSession } from '@/config/api-validation/index';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getConversation } from '@/prisma/services/conversation';
 import { rateLimit } from '@/lib/server/rateLimit';
-import { getWorkspaceLimits } from '@/lib/server/subscription';
+import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 import { getSystemConfig } from '@/lib/server/config';
 import prisma from '@/prisma/index';
 
@@ -64,6 +65,7 @@ describe('AI Inbox endpoints', () => {
     jest.clearAllMocks();
     rateLimit.mockResolvedValue({ ok: true });
     getWorkspaceLimits.mockResolvedValue({ aiRequests24h: 15 });
+    isModuleAllowed.mockResolvedValue(true);
     validateSession.mockResolvedValue({
       user: { id: 'u_1', userId: 'u_1', email: 'agent@example.com', name: 'Agente' },
     });

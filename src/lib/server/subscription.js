@@ -14,6 +14,7 @@ const DEFAULT_FREE_MODULES = {
     analytics: false,
     nps: false,
     ai_assistant: false,
+    email_marketing: false,
     custom_fields: false,
     templates: true,
     integrations: false,
@@ -31,6 +32,7 @@ const ALL_MODULES_ENABLED = {
     analytics: true,
     nps: true,
     ai_assistant: true,
+    email_marketing: true,
     custom_fields: true,
     templates: true,
     integrations: true,
@@ -69,7 +71,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
     if (subscription?.plan?.features) {
         const f = subscription.plan.features;
         const freeTrialDays = f.freeTrialDays || 0;
-        
+
         // Calcula expiração do trial com base na data de criação da subscription
         let trialExpiresAt = null;
         if (freeTrialDays > 0) {
@@ -84,6 +86,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
             whatsappIntegrations: f.maxWhatsApp || 5,
             contacts: f.maxContacts || null,
             aiRequests24h: f.maxAiRequests24h || 100,
+            aiTokens24h: f.maxAiTokens24h || 30000,
             uploads24h: f.maxUploads24h || 50,
             plan: subscription.plan.name,
             allowedModules: f.allowedModules || ALL_MODULES_ENABLED,
@@ -97,7 +100,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         where: { id: workspaceId },
         select: { creator: { select: { email: true } }, createdAt: true }
     });
-    
+
     const planType = await getSubscriptionStatus(workspace?.creator?.email);
 
     // Calcula trial para planos free legados (14 dias padrão)
@@ -107,7 +110,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         const created = new Date(workspace.createdAt);
         trialExpiresAt = new Date(created.getTime() + legacyTrialDays * 24 * 60 * 60 * 1000);
     }
-    
+
     // Valores Legados Hardcoded
     return {
         members: planType === 'FREE' ? 3 : planType === 'STANDARD' ? 10 : null,
@@ -116,6 +119,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         whatsappIntegrations: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 5 : null,
         contacts: planType === 'FREE' ? 100 : null,
         aiRequests24h: planType === 'FREE' ? 100 : planType === 'STANDARD' ? 1000 : 10000,
+        aiTokens24h: planType === 'FREE' ? 30000 : planType === 'STANDARD' ? 300000 : 1000000,
         uploads24h: planType === 'FREE' ? 30 : planType === 'STANDARD' ? 500 : 5000,
         plan: planType,
         allowedModules: planType === 'FREE' ? DEFAULT_FREE_MODULES : ALL_MODULES_ENABLED,
@@ -149,21 +153,21 @@ export const isModuleAllowed = async (workspaceId, moduleName) => {
  */
 export const getTrialStatus = async (workspaceId) => {
     const limits = await getWorkspaceLimits(workspaceId);
-    
+
     if (!limits.freeTrialDays || limits.freeTrialDays <= 0) {
         return { expired: false, daysLeft: null, trialExpiresAt: null, hasTrial: false };
     }
 
     const now = new Date();
     const expiresAt = limits.trialExpiresAt ? new Date(limits.trialExpiresAt) : null;
-    
+
     if (!expiresAt) {
         return { expired: false, daysLeft: null, trialExpiresAt: null, hasTrial: false };
     }
 
     const diff = expiresAt.getTime() - now.getTime();
     const daysLeft = Math.max(0, Math.ceil(diff / (24 * 60 * 60 * 1000)));
-    
+
     return {
         expired: diff <= 0,
         daysLeft,

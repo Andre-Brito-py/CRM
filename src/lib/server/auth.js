@@ -10,6 +10,7 @@ import { sendMail } from '@/lib/server/mail';
 import { getSystemConfig } from '@/lib/server/config';
 import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 import { rateLimit } from '@/lib/server/rateLimit';
+import getStripe from '@/lib/server/stripe';
 
 export const authOptions = {
   adapter: PrismaAdapter(prisma),
@@ -104,6 +105,10 @@ export const authOptions = {
 
         const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         const normalizedEmail = String(credentials.email || '').trim().toLowerCase();
+        const isTruthy = (value) => {
+          const v = String(value || '').trim().toLowerCase();
+          return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+        };
 
         if (req) {
           const rlIp = await rateLimit({ req, limit: 60, windowMs: 5 * 60_000 });
@@ -156,6 +161,37 @@ export const authOptions = {
           if (!isValidToken) {
             await sleep(200);
             throw new Error('Invalid 2FA code');
+          }
+        }
+
+        const requireCardOnSignup = isTruthy(
+          await getSystemConfig(
+            'PAYMENTS_REQUIRE_CARD_ON_SIGNUP',
+            process.env.PAYMENTS_REQUIRE_CARD_ON_SIGNUP ?? 'true'
+          )
+        );
+        if (requireCardOnSignup && user.role !== 'SUPERADMIN') {
+          const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+          if (paymentsSecretKey) {
+            let customerPayment = await getPayment(user.email);
+            if (!customerPayment) {
+              await createPaymentAccount(user.email, user.id);
+              customerPayment = await getPayment(user.email);
+            }
+            if (!customerPayment?.paymentId) {
+              throw new Error('PAYMENT_METHOD_REQUIRED');
+            }
+
+            const stripe = await getStripe();
+            const paymentMethods = await stripe.paymentMethods.list({
+              customer: customerPayment.paymentId,
+              type: 'card',
+              limit: 1,
+            });
+            const hasCard = Array.isArray(paymentMethods?.data) && paymentMethods.data.length > 0;
+            if (!hasCard) {
+              throw new Error('PAYMENT_METHOD_REQUIRED');
+            }
           }
         }
 

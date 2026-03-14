@@ -37,6 +37,7 @@ const Inbox = () => {
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [isSummarizingAI, setIsSummarizingAI] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
 
   const locale = useMemo(() => {
     const base = (i18n?.language || 'en').split('-')[0];
@@ -70,6 +71,15 @@ const Inbox = () => {
   );
 
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    if (!workspaceSlug) return;
+    try {
+      const v = localStorage.getItem(`aiOverageOptIn:${workspaceSlug}`);
+      setAiOverageOptIn(v === 'true');
+    } catch { }
+  }, [mounted, workspaceSlug]);
 
   const conversations = useMemo(() => conversationsData?.data?.conversations || [], [conversationsData]);
   const members = useMemo(() => membersData?.data?.members || [], [membersData]);
@@ -131,10 +141,50 @@ const Inbox = () => {
     try {
       const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/suggest-reply`, {
         method: 'POST',
+        headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
       });
+
+      if (response.status >= 400 || response.error) {
+        const msg = response?.error?.msg || '';
+        const overage = response?.error?.overage;
+        if (msg === 'LIMIT_REACHED' && overage?.enabled) {
+          const price = overage?.pricePer1M ? Number(overage.pricePer1M) : null;
+          const confirmation = window.confirm(
+            t('inbox.ai.overagePrompt', { price: price != null ? String(price) : '' })
+          );
+          if (confirmation) {
+            try {
+              localStorage.setItem(`aiOverageOptIn:${workspaceSlug}`, 'true');
+            } catch { }
+            setAiOverageOptIn(true);
+            const retry = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/suggest-reply`, {
+              method: 'POST',
+              headers: { 'x-ai-overage': 'true' },
+            });
+            if (retry.data?.suggestion) {
+              setMessageText(retry.data.suggestion);
+              if (retry.data?.quota?.tokens?.warn) {
+                const r = retry.data?.quota?.tokens?.remaining;
+                const l = retry.data?.quota?.tokens?.limit;
+                toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+              }
+              toast.success(t('inbox.ai.generated'));
+              return;
+            }
+          }
+        }
+
+        toast.error(response?.error?.details || t('inbox.ai.failed'));
+        return;
+      }
 
       if (response.data?.suggestion) {
         setMessageText(response.data.suggestion);
+        if (response.data?.quota?.tokens?.warn) {
+          const r = response.data?.quota?.tokens?.remaining;
+          const l = response.data?.quota?.tokens?.limit;
+          toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+        }
         toast.success(t('inbox.ai.generated'));
       }
     } catch (error) {
@@ -152,9 +202,48 @@ const Inbox = () => {
     try {
       const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/summarize`, {
         method: 'POST',
+        headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
       });
 
+      if (response.status >= 400 || response.error) {
+        const msg = response?.error?.msg || '';
+        const overage = response?.error?.overage;
+        if (msg === 'LIMIT_REACHED' && overage?.enabled) {
+          const price = overage?.pricePer1M ? Number(overage.pricePer1M) : null;
+          const confirmation = window.confirm(
+            t('inbox.ai.overagePrompt', { price: price != null ? String(price) : '' })
+          );
+          if (confirmation) {
+            try {
+              localStorage.setItem(`aiOverageOptIn:${workspaceSlug}`, 'true');
+            } catch { }
+            setAiOverageOptIn(true);
+            const retry = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/summarize`, {
+              method: 'POST',
+              headers: { 'x-ai-overage': 'true' },
+            });
+            if (retry.data?.summary) {
+              if (retry.data?.quota?.tokens?.warn) {
+                const r = retry.data?.quota?.tokens?.remaining;
+                const l = retry.data?.quota?.tokens?.limit;
+                toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+              }
+              toast.success(t('inbox.ai.summaryGenerated'));
+              return retry.data.summary;
+            }
+          }
+        }
+
+        toast.error(response?.error?.details || t('inbox.ai.summaryFailed'));
+        return null;
+      }
+
       if (response.data?.summary) {
+        if (response.data?.quota?.tokens?.warn) {
+          const r = response.data?.quota?.tokens?.remaining;
+          const l = response.data?.quota?.tokens?.limit;
+          toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
+        }
         toast.success(t('inbox.ai.summaryGenerated'));
         return response.data.summary;
       }

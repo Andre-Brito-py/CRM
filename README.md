@@ -95,6 +95,22 @@ Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
 - Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
 
+## IA (cota + overage)
+O uso de IA é controlado por:
+- **Cota do plano (tokens/24h)**: limite diário por workspace (ex.: `aiTokens24h` no plano).
+- **Overage opcional (tokens/24h)**: quando a cota do plano termina, o cliente pode continuar usando IA com cobrança extra (se habilitado).
+
+Configurações do overage (Super Admin → Settings → IA):
+- `AI_QUOTA_WARN_PERCENT` (ex.: `80`)
+- `AI_OVERAGE_ENABLED` (`true/false`)
+- `AI_OVERAGE_REQUIRE_OPTIN` (`true/false`)
+- `AI_OVERAGE_PRICE_PER_1M_TOKENS` (ex.: `4.00`)
+- `AI_OVERAGE_MAX_TOKENS_24H` (ex.: `200000`)
+
+Comportamento:
+- Quando a API retorna `LIMIT_REACHED` com `overage.enabled=true`, a UI pode pedir confirmação e reenviar a chamada com header `x-ai-overage: true`.
+- Em overage, é criado um `invoice_item` no Stripe do cliente (customer do workspace owner) com o valor proporcional ao total de tokens retornado pelo provedor.
+
 ## Coisas que já estão no produto (resumo curto)
 - Workspaces (multi-tenant)
 - Deals + pipeline kanban

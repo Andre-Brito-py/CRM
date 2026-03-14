@@ -27,6 +27,17 @@ const handler = async (req, res) => {
     const termsVersion = process.env.TERMS_VERSION || process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const jitterMs = (base, spread) => base + crypto.randomInt(0, spread + 1);
+    const isTruthy = (value) => {
+        const v = String(value || '').trim().toLowerCase();
+        return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+    };
+    const parsePaymentMethodTypes = (raw) => {
+        const tokens = String(raw || '')
+            .split(',')
+            .map((t) => String(t || '').trim())
+            .filter(Boolean);
+        return tokens.length > 0 ? tokens : ['card'];
+    };
     const hasHoneypot = (body) => {
         const candidates = ['website', 'url', 'homepage', 'companyWebsite'];
         for (const key of candidates) {
@@ -133,8 +144,20 @@ const handler = async (req, res) => {
             to: normalizedEmail,
         });
 
+        const requireCardOnSignup = isTruthy(
+            await getSystemConfig(
+                'PAYMENTS_REQUIRE_CARD_ON_SIGNUP',
+                process.env.PAYMENTS_REQUIRE_CARD_ON_SIGNUP ?? 'true'
+            )
+        );
         const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
-        if (!planPriceId || !paymentsSecretKey) {
+        if (requireCardOnSignup && !paymentsSecretKey) {
+            return res.status(500).json({ error: { msg: 'Payments are not configured' } });
+        }
+        if (!planPriceId && !requireCardOnSignup) {
+            return res.status(201).json(successPayload);
+        }
+        if (!paymentsSecretKey && !planPriceId) {
             return res.status(201).json(successPayload);
         }
 
@@ -154,10 +177,6 @@ const handler = async (req, res) => {
             'STRIPE_BILLING_ADDRESS_COLLECTION',
             process.env.STRIPE_BILLING_ADDRESS_COLLECTION
         );
-        const isTruthy = (value) => {
-            const v = String(value || '').trim().toLowerCase();
-            return v === 'true' || v === '1' || v === 'yes' || v === 'on';
-        };
         const automaticTaxEnabled = isTruthy(automaticTax);
         const taxIdCollectionEnabled = isTruthy(taxIdCollection);
         const normalizedBillingAddressCollection = ['auto', 'required'].includes(
@@ -166,33 +185,62 @@ const handler = async (req, res) => {
             ? String(billingAddressCollection).trim().toLowerCase()
             : null;
 
-        const stripe = await getStripe();
-        const price = await stripe.prices.retrieve(planPriceId);
-        const product = await stripe.products.retrieve(price.product);
+        const configuredPaymentMethodTypes = await getSystemConfig(
+            'STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES',
+            process.env.STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES
+        );
+        const paymentMethodTypes = parsePaymentMethodTypes(configuredPaymentMethodTypes);
 
-        const paymentSession = await stripe.checkout.sessions.create({
-            customer: customerPayment.paymentId,
-            mode: 'subscription',
-            payment_method_types: ['card'],
-            payment_method_collection: 'always',
-            line_items: [{ price: price.id, quantity: 1 }],
-            allow_promotion_codes: true,
-            billing_address_collection: automaticTaxEnabled ? 'required' : (normalizedBillingAddressCollection || undefined),
-            automatic_tax: automaticTaxEnabled ? { enabled: true } : undefined,
-            tax_id_collection: taxIdCollectionEnabled ? { enabled: true } : undefined,
-            customer_update: {
-                name: 'auto',
-                address: 'auto',
-            },
-            success_url: `${appUrl}/auth/login?paid=success`,
-            cancel_url: `${appUrl}/auth/register?paid=cancelled`,
-            metadata: {
-                customerId: customerPayment.customerId,
-                type: product?.metadata?.type || 'STANDARD',
-                automaticTax: automaticTaxEnabled ? 'true' : 'false',
-                taxIdCollection: taxIdCollectionEnabled ? 'true' : 'false',
-            },
-        });
+        const stripe = await getStripe();
+        const paymentSession = planPriceId
+            ? await (async () => {
+                const price = await stripe.prices.retrieve(planPriceId);
+                const product = await stripe.products.retrieve(price.product);
+                return await stripe.checkout.sessions.create({
+                    customer: customerPayment.paymentId,
+                    mode: 'subscription',
+                    payment_method_types: paymentMethodTypes,
+                    payment_method_collection: 'always',
+                    line_items: [{ price: price.id, quantity: 1 }],
+                    allow_promotion_codes: true,
+                    billing_address_collection: automaticTaxEnabled ? 'required' : (normalizedBillingAddressCollection || undefined),
+                    automatic_tax: automaticTaxEnabled ? { enabled: true } : undefined,
+                    tax_id_collection: taxIdCollectionEnabled ? { enabled: true } : undefined,
+                    customer_update: {
+                        name: 'auto',
+                        address: 'auto',
+                    },
+                    success_url: `${appUrl}/auth/login?paid=success`,
+                    cancel_url: `${appUrl}/auth/register?paid=cancelled`,
+                    metadata: {
+                        customerId: customerPayment.customerId,
+                        type: product?.metadata?.type || 'STANDARD',
+                        automaticTax: automaticTaxEnabled ? 'true' : 'false',
+                        taxIdCollection: taxIdCollectionEnabled ? 'true' : 'false',
+                    },
+                });
+            })()
+            : await stripe.checkout.sessions.create({
+                customer: customerPayment.paymentId,
+                mode: 'setup',
+                payment_method_types: paymentMethodTypes,
+                customer_update: {
+                    name: 'auto',
+                    address: 'auto',
+                },
+                success_url: `${appUrl}/auth/login?setup=success`,
+                cancel_url: `${appUrl}/auth/register?setup=cancelled`,
+                metadata: {
+                    customerId: customerPayment.customerId,
+                    purpose: 'signup_setup',
+                },
+                setup_intent_data: {
+                    metadata: {
+                        customerId: customerPayment.customerId,
+                        purpose: 'signup_setup',
+                    },
+                },
+            });
 
         return res.status(201).json({
             ...successPayload,

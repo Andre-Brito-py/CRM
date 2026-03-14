@@ -9,6 +9,7 @@ import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { AuthLayout } from '@/layouts/index';
 import { useTranslation } from "react-i18next";
+import { redirectToCheckout } from '@/lib/client/stripe';
 
 const Login = () => {
   const { status } = useSession();
@@ -42,16 +43,39 @@ const Login = () => {
       token2fa: token2fa || undefined
     });
 
-    setSubmittingState(false);
-
     if (result.error) {
       if (result.error === '2FA_REQUIRED') {
+        setSubmittingState(false);
         setStep('2FA');
         toast('Two-Factor Authentication required', { icon: '🔐' });
+      } else if (result.error === 'PAYMENT_METHOD_REQUIRED') {
+        try {
+          const resp = await fetch('/api/auth/payment-method-session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+          });
+          const json = await resp.json().catch(() => ({}));
+          if (!resp.ok) {
+            throw new Error(json?.error?.msg || 'Unable to start card setup');
+          }
+          const sessionId = json?.data?.sessionId;
+          if (!sessionId) {
+            throw new Error('Unable to start card setup');
+          }
+          toast('Você precisa cadastrar um cartão para continuar.', { icon: '💳' });
+          await redirectToCheckout(sessionId);
+        } catch (e) {
+          toast.error(e?.message || 'Unable to start card setup');
+        } finally {
+          setSubmittingState(false);
+        }
       } else {
+        setSubmittingState(false);
         toast.error(result.error);
       }
     } else {
+      setSubmittingState(false);
       router.push('/account');
     }
   };

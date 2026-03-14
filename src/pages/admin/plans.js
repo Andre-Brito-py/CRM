@@ -24,6 +24,7 @@ const AVAILABLE_MODULES = [
   { key: 'analytics', label: 'Analytics / Relatórios' },
   { key: 'nps', label: 'Satisfação do Cliente (NPS)' },
   { key: 'ai_assistant', label: 'Assistente de IA' },
+  { key: 'email_marketing', label: 'Email Marketing' },
   { key: 'custom_fields', label: 'Campos Personalizados' },
   { key: 'templates', label: 'Templates de Mensagem' },
   { key: 'integrations', label: 'Integrações (Webhooks, APIs)' },
@@ -38,6 +39,9 @@ AVAILABLE_MODULES.forEach(m => { DEFAULT_MODULES[m.key] = true; });
 // -----------------------------------------------------------------
 const PlanModal = ({ show, toggle, plan, onSave }) => {
   const existingModules = plan?.features?.allowedModules || DEFAULT_MODULES;
+  const defaultAiTokens24h =
+    plan?.features?.maxAiTokens24h ??
+    (plan?.features?.maxAiRequests24h ? Number(plan.features.maxAiRequests24h) * 2500 : 30000);
 
   const [formData, setFormData] = useState({
     name: plan?.name || '',
@@ -51,6 +55,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     maxContacts: plan?.features?.maxContacts ?? 1000,
     maxAutomations: plan?.features?.maxAutomations ?? 10,
     maxAiRequests24h: plan?.features?.maxAiRequests24h ?? 50,
+    maxAiTokens24h: defaultAiTokens24h,
     maxUploads24h: plan?.features?.maxUploads24h ?? 30,
     freeTrialDays: plan?.features?.freeTrialDays ?? 0,
     isActive: plan ? plan.isActive : true,
@@ -94,6 +99,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         maxContacts: Number(formData.maxContacts) || 1000,
         maxAutomations: Number(formData.maxAutomations) || 10,
         maxAiRequests24h: Number(formData.maxAiRequests24h) || 50,
+        maxAiTokens24h: Number(formData.maxAiTokens24h) || 30000,
         maxUploads24h: Number(formData.maxUploads24h) || 30,
         freeTrialDays: Number(formData.freeTrialDays) || 0,
         allowedModules,
@@ -199,6 +205,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
               { name: 'maxContacts', label: 'Max Contacts' },
               { name: 'maxAutomations', label: 'Max Automations' },
               { name: 'maxAiRequests24h', label: 'Max IA Requests (24h)' },
+              { name: 'maxAiTokens24h', label: 'Max IA Tokens (24h)' },
               { name: 'maxUploads24h', label: 'Max Uploads (24h)' },
             ].map(({ name, label }) => (
               <div key={name}>
@@ -228,19 +235,16 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <div className="grid grid-cols-2 gap-2">
             {AVAILABLE_MODULES.map(mod => (
               <label key={mod.key}
-                className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${
-                  allowedModules[mod.key]
-                    ? 'bg-green-50 border-green-200 hover:bg-green-100'
-                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                }`}>
+                className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors ${allowedModules[mod.key]
+                  ? 'bg-green-50 border-green-200 hover:bg-green-100'
+                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                  }`}>
                 <div
                   onClick={() => toggleModule(mod.key)}
-                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out ${
-                    allowedModules[mod.key] ? 'bg-green-500' : 'bg-gray-300'
-                  }`}>
-                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out mt-0.5 ${
-                    allowedModules[mod.key] ? 'translate-x-4 ml-0.5' : 'translate-x-0.5'
-                  }`} />
+                  className={`relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out ${allowedModules[mod.key] ? 'bg-green-500' : 'bg-gray-300'
+                    }`}>
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out mt-0.5 ${allowedModules[mod.key] ? 'translate-x-4 ml-0.5' : 'translate-x-0.5'
+                    }`} />
                 </div>
                 <span className={`text-sm font-medium ${allowedModules[mod.key] ? 'text-green-800' : 'text-gray-500'}`}>
                   {mod.label}
@@ -382,9 +386,8 @@ const Plans = () => {
                           {AVAILABLE_MODULES.map(mod => {
                             const enabled = plan?.features?.allowedModules?.[mod.key] !== false;
                             return (
-                              <span key={mod.key} className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${
-                                enabled ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-400 line-through'
-                              }`}>
+                              <span key={mod.key} className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${enabled ? 'bg-green-100 text-green-700' : 'bg-red-50 text-red-400 line-through'
+                                }`}>
                                 {mod.label}
                               </span>
                             );

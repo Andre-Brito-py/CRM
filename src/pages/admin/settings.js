@@ -27,6 +27,8 @@ const CATALOG = [
       { key: 'STRIPE_TAX_ID_COLLECTION', category: 'PAYMENT', label: 'Stripe Tax ID Collection (true/false)', secret: false },
       { key: 'STRIPE_BILLING_ADDRESS_COLLECTION', category: 'PAYMENT', label: 'Stripe Billing Address (auto/required)', secret: false },
       { key: 'STRIPE_BILLING_PORTAL_CONFIGURATION_ID', category: 'PAYMENT', label: 'Stripe Billing Portal Configuration ID', secret: false },
+      { key: 'PAYMENTS_REQUIRE_CARD_ON_SIGNUP', category: 'PAYMENT', label: 'Exigir cartão no cadastro (true/false)', secret: false },
+      { key: 'STRIPE_CHECKOUT_PAYMENT_METHOD_TYPES', category: 'PAYMENT', label: 'Stripe Checkout payment_method_types (csv)', secret: false },
     ],
   },
   {
@@ -42,7 +44,14 @@ const CATALOG = [
   },
   {
     title: 'IA',
-    items: [{ key: 'OPENAI_API_KEY', category: 'AI', label: 'OpenAI API Key', secret: true }],
+    items: [
+      { key: 'OPENAI_API_KEY', category: 'AI', label: 'OpenAI API Key', secret: true },
+      { key: 'AI_QUOTA_WARN_PERCENT', category: 'AI', label: 'Aviso de cota (percentual, ex: 80)', secret: false, public: false },
+      { key: 'AI_OVERAGE_ENABLED', category: 'AI', label: 'Permitir overage (true/false)', secret: false, public: false },
+      { key: 'AI_OVERAGE_REQUIRE_OPTIN', category: 'AI', label: 'Exigir opt-in do cliente (true/false)', secret: false, public: false },
+      { key: 'AI_OVERAGE_PRICE_PER_1M_TOKENS', category: 'AI', label: 'Preço do overage (por 1M tokens, ex: 4.00)', secret: false, public: false },
+      { key: 'AI_OVERAGE_MAX_TOKENS_24H', category: 'AI', label: 'Teto do overage (tokens/24h, ex: 200000)', secret: false, public: false },
+    ],
   },
   {
     title: 'Email',

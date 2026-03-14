@@ -1,5 +1,7 @@
 import prisma from '@/prisma/index';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
+import { sendMail } from '@/lib/server/mail';
+import { isModuleAllowed } from '@/lib/server/subscription';
 import { createMessage, createConversation } from '@/prisma/services/conversation';
 import { createActivity } from '@/prisma/services/activity';
 import { renderTemplateString } from '@/prisma/services/template';
@@ -494,6 +496,21 @@ export const simulateAutomationRule = async (workspaceId, rule, eventData) => {
     preview.message = await renderTemplateString(workspaceId, messageContent, { ...eventData });
   }
 
+  if (actionType === 'SEND_EMAIL') {
+    preview.subject = actionConfig?.subject ? await renderTemplateString(workspaceId, actionConfig.subject, { ...eventData }) : '';
+    let rawBody = actionConfig?.body || '';
+    const templateId = actionConfig?.templateId ? String(actionConfig.templateId).trim() : '';
+    if (templateId) {
+      const template = await prisma.messageTemplate.findFirst({
+        where: { id: templateId, workspaceId },
+        select: { content: true },
+      });
+      if (template?.content) rawBody = template.content;
+    }
+    preview.body = rawBody ? await renderTemplateString(workspaceId, rawBody, { ...eventData }) : '';
+    preview.from = actionConfig?.from || null;
+  }
+
   if (actionType === 'CREATE_TASK') {
     preview.title = await renderTemplateString(workspaceId, actionConfig?.title || '', { ...eventData });
     preview.content = actionConfig?.content ? await renderTemplateString(workspaceId, actionConfig.content, { ...eventData }) : null;
@@ -567,6 +584,9 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
   switch (actionType) {
     case 'SEND_WHATSAPP':
       await executeSendWhatsAppAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'SEND_EMAIL':
+      await executeSendEmailAction(workspaceId, actionConfig, eventData);
       break;
     case 'ASSIGN_TO_USER':
       await executeAssignToUserAction(workspaceId, actionConfig, eventData);
@@ -1125,6 +1145,58 @@ const executeSendWhatsAppAction = async (workspaceId, actionConfig, eventData) =
     console.error('Failed to execute WhatsApp automation:', error);
     throw error;
   }
+};
+
+const executeSendEmailAction = async (workspaceId, actionConfig, eventData) => {
+  const enabled = await isModuleAllowed(workspaceId, 'email_marketing');
+  if (!enabled) {
+    throw new Error('EMAIL_MARKETING_MODULE_DISABLED');
+  }
+
+  const subjectTemplate = String(actionConfig?.subject || '').trim();
+  let bodyTemplate = String(actionConfig?.body || '').trim();
+  const from = actionConfig?.from ? String(actionConfig.from).trim() : null;
+
+  const templateId = actionConfig?.templateId ? String(actionConfig.templateId).trim() : '';
+  if (templateId) {
+    const template = await prisma.messageTemplate.findFirst({
+      where: { id: templateId, workspaceId },
+      select: { content: true },
+    });
+    if (template?.content) {
+      bodyTemplate = String(template.content || '').trim();
+    }
+  }
+
+  if (!subjectTemplate || !bodyTemplate) return;
+
+  let contactId = eventData?.contactId || eventData?.contact?.id || null;
+  let contactEmail = eventData?.contact?.email || null;
+
+  if ((!contactEmail || !contactId) && contactId) {
+    const contact = await prisma.contact.findFirst({
+      where: { id: contactId, workspaceId },
+      select: { id: true, email: true },
+    });
+    contactEmail = contact?.email || null;
+    contactId = contact?.id || contactId;
+  }
+
+  if (!contactEmail) return;
+
+  const subject = await renderTemplateString(workspaceId, subjectTemplate, eventData);
+  const body = await renderTemplateString(workspaceId, bodyTemplate, eventData);
+
+  if (!subject || !body) return;
+
+  const html = `<div style="white-space:pre-wrap">${body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
+  await sendMail({
+    to: contactEmail,
+    from: from || undefined,
+    subject,
+    text: body,
+    html,
+  });
 };
 
 const executeSendNotificationAction = async (workspaceId, actionConfig, eventData) => {

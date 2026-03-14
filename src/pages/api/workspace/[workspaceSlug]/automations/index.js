@@ -51,6 +51,20 @@ const handler = async (req, res) => {
           return res.status(400).json({ error: { msg: 'Missing required fields' } });
         }
 
+        const requiresEmailMarketing = (() => {
+          if (actionType === 'SEND_EMAIL') return true;
+          if (actionType !== 'MULTI_ACTIONS') return false;
+          const actions = Array.isArray(actionConfig?.actions) ? actionConfig.actions : [];
+          return actions.some((a) => a?.type === 'SEND_EMAIL');
+        })();
+
+        if (requiresEmailMarketing) {
+          const emailOk = await isModuleAllowed(workspace.id, 'email_marketing');
+          if (!emailOk) {
+            return res.status(403).json({ error: { msg: 'Email Marketing module is not available in your current plan. Please upgrade.' } });
+          }
+        }
+
         const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
         if (!isSuperAdmin) {
           const currentAutomationRuleCount = await prisma.automationRule.count({

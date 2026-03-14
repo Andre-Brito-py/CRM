@@ -41,6 +41,7 @@ export default async function handler(req, res) {
           contacts: limits.contacts,
           automations: limits.automations,
           aiRequests24h: limits.aiRequests24h,
+          aiTokens24h: limits.aiTokens24h,
         },
       },
     });
