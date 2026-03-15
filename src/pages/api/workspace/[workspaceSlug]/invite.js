@@ -1,11 +1,9 @@
-import {
-  validateWorkspaceInvite,
-  validateSession,
-} from '@/config/api-validation/index';
+import { InvitationStatus } from '@prisma/client';
+import { validateWorkspaceInvite, validateSession } from '@/config/api-validation/index';
 import prisma from '@/prisma/index';
 import { inviteUsers, getWorkspace } from '@/prisma/services/workspace';
 import { createAuditActivity } from '@/prisma/services/activity';
-import { canAddWorkspaceMembers } from '@/lib/server/subscription';
+import { canAddPendingInvites, canAddWorkspaceMembers } from '@/lib/server/subscription';
 import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
@@ -14,7 +12,7 @@ const handler = async (req, res) => {
   if (method === 'POST') {
     const session = await validateSession(req, res);
     if (!session) return;
-    
+
     await validateWorkspaceInvite(req, res);
     const { members } = req.body;
     const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
@@ -34,25 +32,49 @@ const handler = async (req, res) => {
     const uniqueEmails = [...new Set(requestedEmails)];
 
     if (uniqueEmails.length > 0) {
-      const [currentMemberCount, existingCount] = await Promise.all([
-        prisma.member.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
+      const [currentAcceptedCount, currentPendingCount, existingCount] = await Promise.all([
+        prisma.member.count({
+          where: {
+            workspaceId: workspace.id,
+            deletedAt: null,
+            status: InvitationStatus.ACCEPTED,
+          },
+        }),
+        prisma.member.count({
+          where: {
+            workspaceId: workspace.id,
+            deletedAt: null,
+            status: InvitationStatus.PENDING,
+          },
+        }),
         prisma.member.count({
           where: { workspaceId: workspace.id, deletedAt: null, email: { in: uniqueEmails } },
         }),
       ]);
 
-      const [isAllowed, toAdd] = await (async () => {
+      const [isSeatAllowed, isInviteAllowed, toAdd] = await (async () => {
         const toAdd = Math.max(0, uniqueEmails.length - existingCount);
-        const allowed = await canAddWorkspaceMembers(workspace.id, currentMemberCount + toAdd);
-        return [allowed, toAdd];
+        const seatAllowed = await canAddWorkspaceMembers(workspace.id, currentAcceptedCount + toAdd);
+        const inviteAllowed = await canAddPendingInvites(workspace.id, currentPendingCount + toAdd);
+        return [seatAllowed, inviteAllowed, toAdd];
       })();
 
-      if (!isAllowed) {
+      if (!isSeatAllowed) {
         return res.status(403).json({
           error: {
             msg: 'LIMIT_REACHED',
             details:
               'Você atingiu o limite de membros do seu plano. Faça um upgrade para convidar mais pessoas.',
+          },
+        });
+      }
+
+      if (!isInviteAllowed) {
+        return res.status(403).json({
+          error: {
+            msg: 'INVITE_LIMIT_REACHED',
+            details:
+              'Você atingiu o limite de convites pendentes do seu plano. Aguarde aceite/cancele convites ou faça um upgrade.',
           },
         });
       }

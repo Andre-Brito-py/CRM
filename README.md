@@ -170,6 +170,7 @@ Comportamento:
 - Inbox (Email): sugestão de resposta com IA
 - Automações: gatilho `EMAIL_SENT` (envio de email pelo inbox)
 - Paywall por plano e painel de super admin
+- Assentos por plano (membros aceitos) + limite de convites pendentes (anti-spam)
 - Customer Satisfaction (NPS): páginas + gráficos com animação
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
 - Monetização por taxa da plataforma (split/fee quando disponível)
@@ -199,6 +200,13 @@ Comportamento:
 
 ## Fase 9 (Go-live comercial “vendível”) — o que mudou
 - **Limites por plano aplicados:** convites/membros, webhooks, automações, IA (quota + rate limit) e upload/storage.
+- **Assentos (usuários) por plano (comportamento comercial):**
+  - O que conta como “usuário”: `Member` com `status=ACCEPTED` no workspace (assento ativo).
+  - Convites pendentes (`status=PENDING`) não consomem assento, mas têm limite próprio por plano (anti-spam).
+  - Enforcement:
+    - convidar: valida `maxUsers` (assentos) e `maxPendingInvites` (pendentes)
+    - aceitar/entrar via link: valida `maxUsers` antes de virar `ACCEPTED`
+  - Administração (Super Admin → Plans): `features.maxUsers` e `features.maxPendingInvites` são editáveis por plano. Valor `0` significa ilimitado.
 - **Rate limit distribuído:** contador em Postgres (`rate_limit_counters`) para não depender de memória do node em produção.
 - **Observabilidade:** healthcheck administrativo com `status`, `alerts` e `thresholds` (retorna 503 quando degradado).
 - **FinOps por workspace:** dashboard mostra uso/limites e custo estimado (WhatsApp/IA/uploads).

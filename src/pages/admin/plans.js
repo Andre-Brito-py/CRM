@@ -52,6 +52,11 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     interval: plan?.interval || 'month',
     stripePriceId: plan?.stripePriceId || '',
     maxUsers: plan?.features?.maxUsers ?? 5,
+    maxPendingInvites:
+      plan?.features?.maxPendingInvites ??
+      (typeof plan?.features?.maxUsers === 'number'
+        ? Math.max(20, plan.features.maxUsers * 5)
+        : 50),
     maxContacts: plan?.features?.maxContacts ?? 1000,
     maxAutomations: plan?.features?.maxAutomations ?? 10,
     maxAiRequests24h: plan?.features?.maxAiRequests24h ?? 50,
@@ -94,8 +99,16 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     setIsSubmitting(true);
 
     try {
+      const normalizeLimit = (value, fallback) => {
+        const n = Number(value);
+        if (!Number.isFinite(n)) return fallback;
+        if (n <= 0) return null;
+        return n;
+      };
+
       const features = {
-        maxUsers: Number(formData.maxUsers) || 5,
+        maxUsers: normalizeLimit(formData.maxUsers, 5),
+        maxPendingInvites: normalizeLimit(formData.maxPendingInvites, 50),
         maxContacts: Number(formData.maxContacts) || 1000,
         maxAutomations: Number(formData.maxAutomations) || 10,
         maxAiRequests24h: Number(formData.maxAiRequests24h) || 50,
@@ -202,6 +215,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               { name: 'maxUsers', label: 'Max Users' },
+              { name: 'maxPendingInvites', label: 'Max Pending Invites' },
               { name: 'maxContacts', label: 'Max Contacts' },
               { name: 'maxAutomations', label: 'Max Automations' },
               { name: 'maxAiRequests24h', label: 'Max IA Requests (24h)' },

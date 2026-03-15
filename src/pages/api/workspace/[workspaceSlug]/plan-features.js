@@ -38,6 +38,7 @@ export default async function handler(req, res) {
         trial: trialStatus,
         limits: {
           members: limits.members,
+          pendingInvites: limits.pendingInvites,
           contacts: limits.contacts,
           automations: limits.automations,
           aiRequests24h: limits.aiRequests24h,

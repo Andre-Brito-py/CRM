@@ -70,6 +70,18 @@ export const getWorkspaceLimits = async (workspaceId) => {
 
     if (subscription?.plan?.features) {
         const f = subscription.plan.features;
+        const membersLimit =
+            typeof f.maxUsers === 'number'
+                ? f.maxUsers
+                : f.maxUsers === null
+                    ? null
+                    : null;
+        const pendingInvitesLimit =
+            typeof f.maxPendingInvites === 'number'
+                ? f.maxPendingInvites
+                : typeof membersLimit === 'number'
+                    ? Math.max(20, membersLimit * 5)
+                    : null;
         const freeTrialDays = f.freeTrialDays || 0;
 
         // Calcula expiração do trial com base na data de criação da subscription
@@ -80,7 +92,8 @@ export const getWorkspaceLimits = async (workspaceId) => {
         }
 
         return {
-            members: f.maxUsers || null,
+            members: membersLimit,
+            pendingInvites: pendingInvitesLimit,
             webhooks: f.maxWebhooks || f.maxUsers || null,
             automations: f.maxAutomations || null,
             whatsappIntegrations: f.maxWhatsApp || 5,
@@ -114,6 +127,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
     // Valores Legados Hardcoded
     return {
         members: planType === 'FREE' ? 3 : planType === 'STANDARD' ? 10 : null,
+        pendingInvites: planType === 'FREE' ? 10 : planType === 'STANDARD' ? 50 : null,
         webhooks: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 10 : null,
         automations: planType === 'FREE' ? 3 : planType === 'STANDARD' ? 20 : null,
         whatsappIntegrations: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 5 : null,
@@ -189,7 +203,13 @@ export const hasStandardAccess = async (email) => {
 export const canAddWorkspaceMembers = async (workspaceId, currentMemberCount) => {
     const limits = await getWorkspaceLimits(workspaceId);
     if (limits.members === null) return true;
-    return currentMemberCount < limits.members;
+    return currentMemberCount <= limits.members;
+};
+
+export const canAddPendingInvites = async (workspaceId, pendingInvitesCount) => {
+    const limits = await getWorkspaceLimits(workspaceId);
+    if (limits.pendingInvites === null) return true;
+    return pendingInvitesCount <= limits.pendingInvites;
 };
 
 /**
