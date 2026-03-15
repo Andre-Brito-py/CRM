@@ -8,9 +8,8 @@ import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { redirectToCheckout } from '@/lib/client/stripe';
 import { getAllPlans } from '@/prisma/services/plan';
-import { getSystemConfig } from '@/lib/server/config';
 
-const Register = ({ plans }) => {
+const Register = ({ plans, initialPlanSlug }) => {
     const router = useRouter();
     const [isSubmitting, setSubmittingState] = useState(false);
     const [isRedirecting, setRedirectingState] = useState(false);
@@ -20,7 +19,7 @@ const Register = ({ plans }) => {
         email: '',
         password: '',
         confirmPassword: '',
-        planPriceId: '',
+        planSlug: initialPlanSlug || '',
         termsAccepted: false,
         twoFactorEnabled: false
     });
@@ -39,6 +38,19 @@ const Register = ({ plans }) => {
         })();
     }, []);
 
+    useEffect(() => {
+        if (!router.isReady) return;
+        const raw = router.query?.plan;
+        const normalized = String(Array.isArray(raw) ? raw[0] : raw || '')
+            .trim()
+            .toUpperCase();
+        if (!normalized) return;
+        setFormData((prev) => {
+            if (prev.planSlug === normalized) return prev;
+            return { ...prev, planSlug: normalized };
+        });
+    }, [router.isReady, router.query?.plan]);
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
@@ -47,6 +59,10 @@ const Register = ({ plans }) => {
     const handleRegister = async (event) => {
         event.preventDefault();
         setSubmittingState(true);
+
+        const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
+        const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
+        const planPriceId = selectedPlan?.stripePriceId ? String(selectedPlan.stripePriceId) : null;
 
         if (formData.password !== formData.confirmPassword) {
             toast.error('Passwords do not match');
@@ -69,7 +85,7 @@ const Register = ({ plans }) => {
                     email: formData.email,
                     password: formData.password,
                     termsAccepted: true,
-                    planPriceId: formData.planPriceId || null,
+                    planPriceId,
                     twoFactorEnabled: formData.twoFactorEnabled
                 }),
             });
@@ -90,7 +106,7 @@ const Register = ({ plans }) => {
                     email: '',
                     password: '',
                     confirmPassword: '',
-                    planPriceId: '',
+                    planSlug: '',
                     termsAccepted: false,
                     twoFactorEnabled: false
                 });
@@ -114,6 +130,10 @@ const Register = ({ plans }) => {
     const signInWithSocial = (socialId) => {
         signIn(socialId, { callbackUrl: '/account' });
     };
+
+    const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
+    const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
+    const isPaidPlan = selectedPlan ? Number(selectedPlan.price) > 0 : false;
 
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-white overflow-hidden">
@@ -279,20 +299,22 @@ const Register = ({ plans }) => {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="planPriceId">Plano selecionado</label>
+                            <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="planSlug">Plano selecionado</label>
                             <div className="relative">
                                 <select
                                     className="w-full px-4 py-4 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner appearance-none font-semibold text-gray-700"
-                                    name="planPriceId"
-                                    id="planPriceId"
-                                    value={formData.planPriceId}
+                                    name="planSlug"
+                                    id="planSlug"
+                                    value={formData.planSlug}
                                     onChange={handleInputChange}
                                 >
                                     <option value="">Plano Free</option>
                                     {(plans || [])
-                                        .filter((p) => Boolean(p?.stripePriceId))
+                                        .filter((p) => Boolean(p?.isActive))
+                                        .filter((p) => String(p?.slug || '').toUpperCase() !== 'FREE')
+                                        .sort((a, b) => Number(a.price) - Number(b.price))
                                         .map((plan) => (
-                                            <option key={plan.id} value={plan.stripePriceId}>
+                                            <option key={plan.id} value={String(plan.slug || '').toUpperCase()}>
                                                 {plan.name} — {plan.currency} {plan.price}/{plan.interval === 'month' ? 'mês' : 'ano'}
                                             </option>
                                         ))}
@@ -350,7 +372,7 @@ const Register = ({ plans }) => {
                             disabled={isSubmitting}
                             type="submit"
                         >
-                            {isSubmitting ? 'Processando cadastro...' : (formData.planPriceId ? 'Assinar e Criar minha conta' : 'Criar minha conta gratuita')}
+                            {isSubmitting ? 'Processando cadastro...' : (isPaidPlan ? 'Assinar e Criar minha conta' : 'Criar minha conta gratuita')}
                         </Button>
                     </form>
 
@@ -370,11 +392,12 @@ const Register = ({ plans }) => {
 
 export default Register;
 
-export const getServerSideProps = async () => {
-    const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
-    if (!paymentsSecretKey) {
-        return { props: { plans: [] } };
-    }
+export const getServerSideProps = async (context) => {
+    const rawPlan = context?.query?.plan;
+    const normalizedPlan = String(Array.isArray(rawPlan) ? rawPlan[0] : rawPlan || '')
+        .trim()
+        .toUpperCase();
+    const initialPlanSlug = ['FREE', 'STANDARD', 'PREMIUM'].includes(normalizedPlan) ? normalizedPlan : '';
 
     try {
         const plans = await getAllPlans();
@@ -390,8 +413,8 @@ export const getServerSideProps = async () => {
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),
         }));
-        return { props: { plans: safePlans } };
+        return { props: { plans: safePlans, initialPlanSlug } };
     } catch (error) {
-        return { props: { plans: [] } };
+        return { props: { plans: [], initialPlanSlug } };
     }
 };

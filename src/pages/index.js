@@ -12,6 +12,36 @@ import {
 } from '@/sections/index';
 import { getAllPlans } from '@/prisma/services/plan';
 
+const DEFAULT_PRODUCTS = [
+  {
+    name: 'Starter',
+    slug: 'FREE',
+    description: 'Perfect for solo entrepreneurs and small side projects.',
+    price: 0,
+    currency: 'BRL',
+    interval: 'month',
+    features: ['1 WhatsApp Number', '100 Contacts', 'Basic Support'],
+  },
+  {
+    name: 'Standard',
+    slug: 'STANDARD',
+    description: 'Perfect for growing teams and serious businesses.',
+    price: 149,
+    currency: 'BRL',
+    interval: 'month',
+    features: ['5 WhatsApp Numbers', 'Unlimited Contacts', 'Basic Analytics', 'Priority Support'],
+  },
+  {
+    name: 'Premium',
+    slug: 'PREMIUM',
+    description: 'Unlimited possibilities for large organizations and enterprises.',
+    price: 399,
+    currency: 'BRL',
+    interval: 'month',
+    features: ['Unlimited WhatsApp Numbers', 'Advanced Analytics', 'AI Reply Suggestions', '24/7 Phone Support'],
+  },
+];
+
 const Home = ({ products }) => {
   return (
     <LandingLayout>
@@ -48,6 +78,10 @@ export const getStaticProps = async () => {
       .sort((a, b) => a.price - b.price);
   } catch (e) {
     products = [];
+  }
+
+  if (!products?.length) {
+    products = DEFAULT_PRODUCTS;
   }
 
   return {

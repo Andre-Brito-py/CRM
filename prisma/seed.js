@@ -54,6 +54,75 @@ const main = async () => {
     });
   }
 
+  await prisma.plan.upsert({
+    where: { slug: 'FREE' },
+    create: {
+      name: 'Starter',
+      slug: 'FREE',
+      description: 'Perfect for solo entrepreneurs and small side projects.',
+      price: 0,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['1 WhatsApp Number', '100 Contacts', 'Basic Support'],
+      isActive: true,
+    },
+    update: {
+      name: 'Starter',
+      description: 'Perfect for solo entrepreneurs and small side projects.',
+      price: 0,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['1 WhatsApp Number', '100 Contacts', 'Basic Support'],
+      isActive: true,
+    },
+  });
+
+  await prisma.plan.upsert({
+    where: { slug: 'STANDARD' },
+    create: {
+      name: 'Standard',
+      slug: 'STANDARD',
+      description: 'Perfect for growing teams and serious businesses.',
+      price: 149,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['5 WhatsApp Numbers', 'Unlimited Contacts', 'Basic Analytics'],
+      isActive: true,
+    },
+    update: {
+      name: 'Standard',
+      description: 'Perfect for growing teams and serious businesses.',
+      price: 149,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['5 WhatsApp Numbers', 'Unlimited Contacts', 'Basic Analytics'],
+      isActive: true,
+    },
+  });
+
+  await prisma.plan.upsert({
+    where: { slug: 'PREMIUM' },
+    create: {
+      name: 'Premium',
+      slug: 'PREMIUM',
+      description: 'Unlimited possibilities for large organizations and enterprises.',
+      price: 399,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['Unlimited WhatsApp Numbers', 'Advanced Analytics', 'AI Reply Suggestions', '24/7 Phone Support'],
+      isActive: true,
+    },
+    update: {
+      name: 'Premium',
+      description: 'Unlimited possibilities for large organizations and enterprises.',
+      price: 399,
+      currency: 'BRL',
+      interval: 'month',
+      features: ['Unlimited WhatsApp Numbers', 'Advanced Analytics', 'AI Reply Suggestions', '24/7 Phone Support'],
+      isActive: true,
+    },
+  });
+
   console.info(safeUser);
 };
 

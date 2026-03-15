@@ -185,32 +185,40 @@ export const getInvitation = async (inviteCode) =>
     },
   });
 
-export const getOwnWorkspace = async (id, email, slug) =>
-  await prisma.workspace.findFirst({
+export const getOwnWorkspace = async (id, email, slug) => {
+  if (!slug) return null;
+
+  const or = [];
+  if (id) or.push({ id });
+  if (email) {
+    or.push({
+      members: {
+        some: {
+          deletedAt: null,
+          teamRole: TeamRole.OWNER,
+          email,
+        },
+      },
+    });
+  }
+
+  if (or.length === 0) return null;
+
+  return await prisma.workspace.findFirst({
     select: {
       id: true,
       inviteCode: true,
       name: true,
     },
     where: {
-      OR: [
-        { id },
-        {
-          members: {
-            some: {
-              deletedAt: null,
-              teamRole: TeamRole.OWNER,
-              email,
-            },
-          },
-        },
-      ],
+      OR: or,
       AND: {
         deletedAt: null,
         slug,
       },
     },
   });
+};
 
 export const getSiteWorkspace = async (slug, customDomain) =>
   await prisma.workspace.findFirst({
@@ -238,8 +246,25 @@ export const getSiteWorkspace = async (slug, customDomain) =>
     },
   });
 
-export const getWorkspace = async (id, email, slug) =>
-  await prisma.workspace.findFirst({
+export const getWorkspace = async (id, email, slug) => {
+  if (!slug) return null;
+
+  const or = [];
+  if (id) or.push({ id });
+  if (email) {
+    or.push({
+      members: {
+        some: {
+          email,
+          deletedAt: null,
+        },
+      },
+    });
+  }
+
+  if (or.length === 0) return null;
+
+  return await prisma.workspace.findFirst({
     select: {
       id: true,
       creatorId: true,
@@ -258,26 +283,33 @@ export const getWorkspace = async (id, email, slug) =>
       },
     },
     where: {
-      OR: [
-        { id },
-        {
-          members: {
-            some: {
-              email,
-              deletedAt: null,
-            },
-          },
-        },
-      ],
+      OR: or,
       AND: {
         deletedAt: null,
         slug,
       },
     },
   });
+};
 
-export const getWorkspaces = async (id, email) =>
-  await prisma.workspace.findMany({
+export const getWorkspaces = async (id, email) => {
+  const or = [];
+  if (id) or.push({ id });
+  if (email) {
+    or.push({
+      members: {
+        some: {
+          email,
+          deletedAt: null,
+          status: InvitationStatus.ACCEPTED,
+        },
+      },
+    });
+  }
+
+  if (or.length === 0) return [];
+
+  return await prisma.workspace.findMany({
     select: {
       createdAt: true,
       creator: {
@@ -306,21 +338,11 @@ export const getWorkspaces = async (id, email) =>
       workspaceCode: true,
     },
     where: {
-      OR: [
-        { id },
-        {
-          members: {
-            some: {
-              email,
-              deletedAt: null,
-              status: InvitationStatus.ACCEPTED,
-            },
-          },
-        },
-      ],
+      OR: or,
       AND: { deletedAt: null },
     },
   });
+};
 
 export const getWorkspacePaths = async () => {
   const [workspaces, domains] = await Promise.all([

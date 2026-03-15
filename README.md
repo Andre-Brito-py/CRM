@@ -17,6 +17,9 @@ Como ela é montada hoje:
 - Página: `src/pages/index.js` (SSG com revalidate, buscando planos no banco para o bloco de preços)
 - Layout: `LandingLayout`
 - Seções: `src/sections/*` (`Hero`, `Features`, `Pricing`, `Testimonial`, `FAQ`, `CallToAction`, `Footer`)
+- UX de planos:
+  - O botão de um plano no pricing leva para `/auth/register?plan=SLUG` para pré-selecionar o plano no cadastro
+  - O badge “Mais popular” fica no plano intermediário (`STANDARD` / Padrão)
 
 Páginas públicas úteis:
 - `/demo` (demonstração)
@@ -43,6 +46,8 @@ npm run dev
 
 Se a porta 3000 estiver ocupada, o Next sobe em outra (3001/3002…). Conferir o log do terminal.
 Em dev, evite fixar `NEXTAUTH_URL` no `.env`, porque isso pode causar “tela branca” quando o Next mudar de porta automaticamente.
+
+O seed cria/atualiza os planos base no banco (FREE/STANDARD/PREMIUM) com os mesmos valores da landing.
 
 Se o Prisma reclamar de drift/migration em ambiente local, priorizar consistência do dev:
 
@@ -117,6 +122,11 @@ Chaves comuns:
 Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
 - Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
+
+Stripe (cadastro/assinatura):
+- Para planos pagos funcionarem no cadastro, é necessário:
+  - `PAYMENTS_SECRET_KEY` (server-side) e `STRIPE_PUBLISHABLE_KEY` (client-side, via SystemConfig ou env)
+  - `stripePriceId` configurado no plano (Super Admin → Plans)
 
 Observações:
 - Secrets cadastrados no painel (ex.: `GOOGLE_CLIENT_SECRET`, `OPENAI_API_KEY`, tokens/chaves de pagamento) são persistidos criptografados na tabela `SystemConfig`.
