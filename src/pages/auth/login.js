@@ -97,7 +97,9 @@ const Login = () => {
   };
 
   const signInWithSocial = (socialId) => {
-    signIn(socialId);
+    const raw = router.query?.callbackUrl;
+    const callbackUrl = typeof raw === 'string' && raw.startsWith('/') ? raw : '/account';
+    signIn(socialId, { callbackUrl });
   };
 
   useEffect(() => {
@@ -258,7 +260,7 @@ const Login = () => {
                   disabled={status === 'loading'}
                   onClick={() => signInWithSocial(provider.id)}
                 >
-                  Continue with {provider.name}
+                  Continuar com {provider.name}
                 </button>
               ))}
             </div>

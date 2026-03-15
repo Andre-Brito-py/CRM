@@ -109,6 +109,24 @@ const Webhooks = () => {
       <Content.Container>
         <Card>
           <Card.Body title="Your Webhooks" subtitle="Events will be sent to these URLs">
+            <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
+              <div className="font-semibold">Zapier</div>
+              <div className="mt-1 text-indigo-800">
+                Use um <span className="font-mono">Catch Hook</span> do Zapier para receber eventos do Closify e conectar com apps externos.
+              </div>
+              <div className="mt-3">
+                <Button
+                  onClick={() => {
+                    setNewEventsText('*');
+                    setIsAdding(true);
+                  }}
+                  className="bg-indigo-600 text-white hover:bg-indigo-700"
+                >
+                  Conectar Zapier
+                </Button>
+              </div>
+            </div>
+
             <div className="mt-4">
               {data?.webhooks?.length > 0 ? (
                 <div className="space-y-4">

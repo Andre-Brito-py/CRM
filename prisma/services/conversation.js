@@ -156,8 +156,8 @@ export const createMessage = async (conversationId, { direction, type, content, 
     data: { updatedAt: new Date() },
   });
 
-  // Notify assignee if message is INCOMING
-  if (direction === 'INCOMING') {
+  // Notify assignee if message is INBOUND/INCOMING
+  if (direction === 'INBOUND' || direction === 'INCOMING') {
     const conversation = await prisma.conversation.findUnique({
       where: { id: conversationId },
       select: { workspaceId: true, assigneeId: true, workspace: { select: { slug: true } } }

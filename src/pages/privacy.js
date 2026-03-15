@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
         <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>
         <p className="mb-1">Versão: {privacyVersion}</p>
         <p className="mb-8">Última atualização: {lastUpdated}</p>
-        
+
         <section className="prose prose-blue max-w-none text-gray-600">
           <p className="mb-4 text-lg font-medium text-gray-800">
             A privacidade e a estruturação segura dos dados no ambiente B2B são um pilar de integridade operacional do <strong>{companyName}</strong>.
@@ -33,7 +33,7 @@ const PrivacyPolicy = () => {
           <p className="mb-4">
             Dentro de uma estrutura sistêmica SaaS e B2B, atuamos preponderantemente enquanto <strong>Operadora de Dados</strong> das informações relativas
             aos &quot;Titulares&quot; (ex.: clientes e leads da <em>sua</em> empresa). No que tange as informações que coletamos organicamente de VOCÊ (como CNPJ da Conta, Assinante e Administradores do sistema),
-            o <strong>{companyName}</strong> atua enquanto <strong>Controladora</strong>. 
+            o <strong>{companyName}</strong> atua enquanto <strong>Controladora</strong>.
           </p>
           <p className="mb-4">
             A Controladora final de dados de Contatos criados dentro das lógicas da plataforma será sempre o próprio Cliente Assinante.
@@ -86,6 +86,98 @@ const PrivacyPolicy = () => {
             Você ou Titulares atrelados a seu serviço (seus leads) que tiverem dúvidas atinentes devem remetê-las ao Encarregado de Proteção
             pelo meio oficial de comunicações jurídicas em <span className="font-bold">{privacyEmail}</span>. Respostas regimentais às interpelações
             de titulares respeitarão rigorosamente a janela normativa brasileira legal aplicável.
+          </p>
+
+          <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">8. Política de Cookies e Tecnologias Semelhantes</h2>
+          <p className="mb-4">
+            Esta seção descreve como o <strong>{companyName}</strong> utiliza cookies e tecnologias semelhantes (por exemplo, armazenamento local do navegador)
+            para permitir funcionalidades essenciais, prover segurança, lembrar preferências e, quando configurado, medir desempenho e uso da plataforma.
+          </p>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">8.1. O que são cookies</h3>
+          <p className="mb-4">
+            Cookies são pequenos arquivos de texto armazenados no seu navegador quando você visita um site. Eles podem ser <strong>de sessão</strong> (expiram
+            ao fechar o navegador) ou <strong>persistentes</strong> (expiram após um período definido ou quando removidos manualmente).
+          </p>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">8.2. Por que usamos cookies</h3>
+          <ul className="list-disc pl-6 mb-4 space-y-2">
+            <li><strong>Essenciais e segurança:</strong> autenticação, integridade de sessão, prevenção de abuso e proteção contra fraudes.</li>
+            <li><strong>Preferências:</strong> lembrar idioma e configurações básicas de experiência.</li>
+            <li><strong>Medição e desempenho (quando habilitado):</strong> entender navegação e performance para melhoria contínua.</li>
+          </ul>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">8.3. Cookies que podemos utilizar</h3>
+          <p className="mb-4">
+            A lista abaixo descreve categorias e exemplos de cookies. Alguns nomes e atributos podem variar conforme ambiente (por exemplo, produção vs. desenvolvimento)
+            e mecanismos de segurança do navegador.
+          </p>
+
+          <div className="overflow-x-auto mb-4">
+            <table className="w-full text-left border border-gray-200 border-collapse">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="p-3 border border-gray-200">Categoria</th>
+                  <th className="p-3 border border-gray-200">Exemplos</th>
+                  <th className="p-3 border border-gray-200">Finalidade</th>
+                  <th className="p-3 border border-gray-200">Retenção típica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="p-3 border border-gray-200 font-medium">Essenciais</td>
+                  <td className="p-3 border border-gray-200">
+                    cookies de sessão do login (ex.: <code>next-auth.session-token</code> / <code>__Secure-next-auth.session-token</code>)
+                  </td>
+                  <td className="p-3 border border-gray-200">
+                    Manter a sessão autenticada e permitir acesso seguro às áreas restritas.
+                  </td>
+                  <td className="p-3 border border-gray-200">Sessão ou conforme expiração do token</td>
+                </tr>
+                <tr>
+                  <td className="p-3 border border-gray-200 font-medium">Preferências</td>
+                  <td className="p-3 border border-gray-200"><code>language</code></td>
+                  <td className="p-3 border border-gray-200">Lembrar o idioma selecionado pelo usuário.</td>
+                  <td className="p-3 border border-gray-200">Até 12 meses</td>
+                </tr>
+                <tr>
+                  <td className="p-3 border border-gray-200 font-medium">Admin/Suporte (quando aplicável)</td>
+                  <td className="p-3 border border-gray-200">
+                    <code>closify_impersonation</code>, <code>closify_impersonating</code>
+                  </td>
+                  <td className="p-3 border border-gray-200">
+                    Suportar rotinas de suporte/masquerade do Super Admin com trilha de auditoria.
+                  </td>
+                  <td className="p-3 border border-gray-200">Sessão ou janela configurada</td>
+                </tr>
+                <tr>
+                  <td className="p-3 border border-gray-200 font-medium">Medição/Analytics (opcional)</td>
+                  <td className="p-3 border border-gray-200">
+                    cookies do Google Analytics (por exemplo, <code>_ga</code>, <code>_gid</code>), quando habilitado
+                  </td>
+                  <td className="p-3 border border-gray-200">
+                    Medir uso e performance para aprimoramento do produto.
+                  </td>
+                  <td className="p-3 border border-gray-200">Conforme políticas do provedor e/ou configuração</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">8.4. Base legal e escolhas do usuário</h3>
+          <p className="mb-4">
+            Cookies essenciais são necessários para o funcionamento e segurança da plataforma e, por isso, normalmente se apoiam em bases legais como
+            <strong> execução de contrato</strong> e/ou <strong>legítimo interesse</strong>, observados os princípios da LGPD. Cookies de medição/analytics,
+            quando utilizados, podem ser tratados conforme a base legal apropriada ao contexto e jurisdição aplicável.
+          </p>
+          <p className="mb-4">
+            Você pode gerenciar cookies nas configurações do seu navegador (bloquear, permitir por site, apagar cookies existentes). Se você bloquear cookies essenciais,
+            algumas funcionalidades podem deixar de funcionar.
+          </p>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2 text-gray-900">8.5. Alterações desta seção</h3>
+          <p className="mb-4">
+            Podemos atualizar esta seção para refletir mudanças técnicas, legais ou operacionais. Publicaremos a versão revisada nesta página com data de atualização.
           </p>
         </section>
       </main>

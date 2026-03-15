@@ -65,6 +65,11 @@ const Inbox = () => {
     api
   );
 
+  const { data: paymentProductsData } = useSWR(
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/payment-products?active=true` : null,
+    api
+  );
+
   const { data: whatsappAnalytics } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/analytics?scope=whatsapp` : null,
     api
@@ -84,6 +89,7 @@ const Inbox = () => {
   const conversations = useMemo(() => conversationsData?.data?.conversations || [], [conversationsData]);
   const members = useMemo(() => membersData?.data?.members || [], [membersData]);
   const templates = useMemo(() => templatesData?.data?.templates || [], [templatesData]);
+  const paymentProducts = useMemo(() => paymentProductsData?.data?.products || [], [paymentProductsData]);
 
   const messageTotals = whatsappAnalytics?.messageTotals || { inbound: 0, outbound: 0, total: 0 };
 
@@ -296,7 +302,7 @@ const Inbox = () => {
         body: JSON.stringify({
           content,
           direction: 'OUTBOUND',
-          type: 'TEXT',
+          type: selectedConversation.platform === 'EMAIL' ? 'EMAIL' : 'TEXT',
         }),
       });
       // Revalidate to get the real message ID and status
@@ -435,6 +441,8 @@ const Inbox = () => {
                   members={members}
                   onAssign={handleAssign}
                   templates={templates}
+                  paymentProducts={paymentProducts}
+                  workspaceSlug={workspaceSlug}
                   messageText={messageText}
                   onMessageChange={setMessageText}
                   onGenerateResponse={handleGenerateResponse}

@@ -5,6 +5,7 @@ import { createAuditActivity } from '@/prisma/services/activity';
 import prisma from '@/prisma/index';
 import { canAddWebhook } from '@/lib/server/subscription';
 import { rateLimit } from '@/lib/server/rateLimit';
+import { getSystemConfig } from '@/lib/server/config';
 
 const normalizeEvents = (value) => {
   if (Array.isArray(value)) {
@@ -18,6 +19,27 @@ const normalizeEvents = (value) => {
     return events.length > 0 ? events : ['*'];
   }
   return ['*'];
+};
+
+const parseBool = (value, fallback = false) => {
+  const raw = String(value ?? '').trim().toLowerCase();
+  if (raw === 'true' || raw === '1' || raw === 'yes' || raw === 'y') return true;
+  if (raw === 'false' || raw === '0' || raw === 'no' || raw === 'n') return false;
+  return fallback;
+};
+
+const parseCsv = (value) => {
+  const raw = String(value ?? '').trim();
+  if (!raw) return [];
+  return raw
+    .split(',')
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean);
+};
+
+const getUrlHost = (value) => {
+  const u = new URL(String(value || ''));
+  return String(u.hostname || '').toLowerCase();
 };
 
 const handler = async (req, res) => {
@@ -49,6 +71,35 @@ const handler = async (req, res) => {
     const { url, events } = req.body;
     if (!url) {
       return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    let parsedHost = null;
+    try {
+      const u = new URL(String(url));
+      const protocol = String(u.protocol || '').toLowerCase();
+      if (protocol !== 'http:' && protocol !== 'https:') {
+        return res.status(400).json({ error: { msg: 'Invalid URL protocol' } });
+      }
+      parsedHost = getUrlHost(url);
+    } catch {
+      return res.status(400).json({ error: { msg: 'Invalid URL' } });
+    }
+
+    const isZapierHook = parsedHost?.endsWith('zapier.com');
+    if (isZapierHook) {
+      const [enabledRaw, allowedHostsRaw] = await Promise.all([
+        getSystemConfig('ZAPIER_ENABLED', 'false'),
+        getSystemConfig('ZAPIER_ALLOWED_HOSTS', 'hooks.zapier.com'),
+      ]);
+      const enabled = parseBool(enabledRaw, false);
+      const allowedHosts = parseCsv(allowedHostsRaw);
+      const hostAllowed = allowedHosts.length === 0 || allowedHosts.some((h) => parsedHost === h || parsedHost.endsWith(`.${h}`));
+      if (!hostAllowed) {
+        return res.status(400).json({ error: { msg: 'Zapier host not allowed' } });
+      }
+      if (!enabled) {
+        return res.status(403).json({ error: { msg: 'Zapier is disabled by the platform administrator' } });
+      }
     }
 
     const isSuperAdmin = session?.user?.role === 'SUPERADMIN';

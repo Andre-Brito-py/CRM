@@ -14,7 +14,7 @@ export const getTransporter = async () => {
   return nodemailer.createTransport(emailConfig);
 };
 
-export const sendMail = async ({ from, html, subject, text, to }) => {
+export const sendMail = async ({ from, headers, html, subject, text, to }) => {
   const defaultFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
   const data = {
     from: from ?? defaultFrom,
@@ -22,12 +22,14 @@ export const sendMail = async ({ from, html, subject, text, to }) => {
     subject,
     text,
     html,
+    headers: headers || undefined,
   };
 
   if (process.env.NODE_ENV === 'production') {
     const transporter = await getTransporter();
-    await transporter.sendMail(data);
+    return await transporter.sendMail(data);
   } else {
     console.log(data);
+    return { messageId: null, accepted: [], rejected: [] };
   }
 };

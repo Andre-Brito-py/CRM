@@ -26,6 +26,13 @@ const Integrations = () => {
       bgColor: 'bg-green-500',
     },
     {
+      name: 'Email Inbox',
+      description: 'Receive and reply to emails from the Inbox.',
+      href: `/account/${workspaceSlug}/integrations/email`,
+      icon: EnvelopeIcon,
+      bgColor: 'bg-sky-600',
+    },
+    {
       name: 'Webhooks',
       description: 'Receive real-time events from your workspace.',
       href: `/account/${workspaceSlug}/integrations/webhooks`,

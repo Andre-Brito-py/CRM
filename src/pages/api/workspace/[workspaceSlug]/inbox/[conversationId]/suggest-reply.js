@@ -198,9 +198,15 @@ const handler = async (req, res) => {
       content: clampText(m.content, 2000)
     }));
 
-    const systemPrompt = `You are a helpful customer support assistant for ${workspace.name}. 
-    Your goal is to help the customer with their inquiries in a professional, friendly, and concise manner.
-    Draft a response to the last message from the user. Do not include placeholders like "[Your Name]".`;
+    const isEmail = String(conversation?.platform || '').toUpperCase() === 'EMAIL';
+    const systemPrompt = isEmail
+      ? `Você é um agente de suporte do ${workspace.name} respondendo por EMAIL.
+Escreva uma resposta profissional, cordial e objetiva para a última mensagem do cliente.
+Retorne apenas o corpo do email (sem "Assunto:", sem assinatura com placeholders).
+Use parágrafos curtos e linguagem clara. Não use Markdown.`
+      : `You are a helpful customer support assistant for ${workspace.name}.
+Your goal is to help the customer with their inquiries in a professional, friendly, and concise manner.
+Draft a response to the last message from the user. Do not include placeholders like "[Your Name]".`;
 
     const overageSettings = await getAiOverageSettings();
     let quota = null;

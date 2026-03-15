@@ -897,9 +897,9 @@ const executeCallWebhookAction = async (workspaceId, eventType, actionConfig, ev
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-nextacular-event': payload.event,
-          'x-nextacular-timestamp': timestamp,
-          'x-nextacular-signature': `sha256=${signature}`,
+          'x-closify-event': payload.event,
+          'x-closify-timestamp': timestamp,
+          'x-closify-signature': `sha256=${signature}`,
         },
         body: rawBody,
         signal: controller.signal,
@@ -1190,13 +1190,48 @@ const executeSendEmailAction = async (workspaceId, actionConfig, eventData) => {
   if (!subject || !body) return;
 
   const html = `<div style="white-space:pre-wrap">${body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>`;
-  await sendMail({
+  const info = await sendMail({
     to: contactEmail,
     from: from || undefined,
     subject,
     text: body,
     html,
   });
+
+  try {
+    const content = `Assunto: ${subject}\n\n${body}`;
+    let conversation = eventData?.conversation || null;
+
+    if (!conversation || String(conversation.platform || '') !== 'EMAIL') {
+      conversation = await prisma.conversation.findFirst({
+        where: {
+          workspaceId,
+          contactId,
+          platform: 'EMAIL',
+          deletedAt: null,
+        },
+        orderBy: { updatedAt: 'desc' },
+      });
+    }
+
+    if (!conversation) {
+      conversation = await createConversation(workspaceId, {
+        contactId,
+        platform: 'EMAIL',
+        externalId: contactEmail,
+      });
+    }
+
+    await createMessage(conversation.id, {
+      direction: 'OUTBOUND',
+      type: 'EMAIL',
+      content,
+      status: 'SENT',
+      externalId: info?.messageId ? String(info.messageId) : null,
+    });
+  } catch (error) {
+    console.error('Failed to log email automation message:', error);
+  }
 };
 
 const executeSendNotificationAction = async (workspaceId, actionConfig, eventData) => {

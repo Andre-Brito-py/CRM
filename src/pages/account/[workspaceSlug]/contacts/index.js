@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { PlusIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowUpTrayIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -65,6 +65,16 @@ const Contacts = () => {
             <ArrowUpTrayIcon className="w-5 h-5 mr-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
             Import CSV
           </Link>
+          <a
+            href={workspace?.slug ? `/api/workspace/${workspace.slug}/export?format=csv&entity=contacts` : '#'}
+            className="flex items-center justify-center px-6 py-3 text-zinc-600 bg-white border border-zinc-200 rounded-2xl hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-300 shadow-sm font-medium text-sm group disabled:opacity-50"
+            onClick={(e) => {
+              if (!workspace?.slug) e.preventDefault();
+            }}
+          >
+            <ArrowDownTrayIcon className="w-5 h-5 mr-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+            Export CSV
+          </a>
           <button
             className="flex items-center justify-center px-8 py-3 text-white bg-zinc-900 rounded-2xl hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/20 active:scale-95 font-bold text-sm"
             onClick={toggleModal}

@@ -1,4 +1,4 @@
-const api = async (url, options) => {
+const api = async (url, options = {}) => {
   const { body, headers, ...opts } = options;
   const fetchOptions = {
     headers: {

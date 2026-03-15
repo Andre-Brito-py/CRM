@@ -78,6 +78,8 @@ const handler = async (req, res) => {
     // ── Full analytics scope: ALL queries in parallel ─────────────────
     const oneYearAgo = new Date();
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
     const wonStageNames = ['Fechado', 'Closed', 'Won'];
 
@@ -88,6 +90,11 @@ const handler = async (req, res) => {
       salesTrendRows,
       sourceRows,
       avgClosingRows,
+      pipelineRevenueRows,
+      totalDealsCount,
+      wonDealsCount,
+      totalDealsCount90d,
+      wonDealsCount90d,
     ] = await Promise.all([
       // 1. Sales by assignee (won deals)
       prisma.deal.groupBy({
@@ -155,6 +162,39 @@ const handler = async (req, res) => {
           AND d."createdAt" IS NOT NULL
           AND lower(s."name") IN (${WON_STAGE_NAMES_LOWER[0]}, ${WON_STAGE_NAMES_LOWER[1]}, ${WON_STAGE_NAMES_LOWER[2]})
       `,
+
+      // 7. Revenue by pipeline (won revenue + deal counts)
+      prisma.$queryRaw`
+        SELECT
+          p."id" AS pipeline_id,
+          p."name" AS pipeline_name,
+          COALESCE(SUM(CASE WHEN lower(s."name") IN (${WON_STAGE_NAMES_LOWER[0]}, ${WON_STAGE_NAMES_LOWER[1]}, ${WON_STAGE_NAMES_LOWER[2]}) THEN COALESCE(d."amount", 0) ELSE 0 END), 0) AS revenue,
+          COALESCE(SUM(CASE WHEN lower(s."name") IN (${WON_STAGE_NAMES_LOWER[0]}, ${WON_STAGE_NAMES_LOWER[1]}, ${WON_STAGE_NAMES_LOWER[2]}) THEN 1 ELSE 0 END), 0)::int AS won_count,
+          COUNT(d."id")::int AS deals_count
+        FROM "pipelines" p
+        LEFT JOIN "stages" s ON s."pipelineId" = p."id"
+        LEFT JOIN "deals" d ON d."stageId" = s."id" AND d."deletedAt" IS NULL
+        WHERE
+          p."workspaceId" = ${workspaceId}
+          AND p."deletedAt" IS NULL
+        GROUP BY 1, 2
+        ORDER BY revenue DESC
+      `,
+
+      // 8. Conversion rate (all time)
+      prisma.deal.count({ where: { workspaceId, deletedAt: null } }),
+      prisma.deal.count({ where: { workspaceId, deletedAt: null, stage: { name: { in: wonStageNames } } } }),
+
+      // 9. Conversion rate (last 90 days by createdAt)
+      prisma.deal.count({ where: { workspaceId, deletedAt: null, createdAt: { gte: ninetyDaysAgo } } }),
+      prisma.deal.count({
+        where: {
+          workspaceId,
+          deletedAt: null,
+          createdAt: { gte: ninetyDaysAgo },
+          stage: { name: { in: wonStageNames } },
+        },
+      }),
     ]);
 
     // ── Enrich user data in ONE batch query ───────────────────────────
@@ -242,6 +282,30 @@ const handler = async (req, res) => {
 
     const avgClosingTime = Math.round(Number(avgClosingRows?.[0]?.avg_days) || 0);
 
+    const pipelineRevenue = (pipelineRevenueRows || [])
+      .map((r) => ({
+        pipelineId: r?.pipeline_id || null,
+        pipeline: r?.pipeline_name || 'Pipeline',
+        revenue: Number(r?.revenue) || 0,
+        dealsCount: Number(r?.deals_count) || 0,
+        wonCount: Number(r?.won_count) || 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    const safeRate = (won, total) => (total > 0 ? Math.round((won / total) * 100) : 0);
+    const conversion = {
+      allTime: {
+        total: Number(totalDealsCount) || 0,
+        won: Number(wonDealsCount) || 0,
+        rate: safeRate(Number(wonDealsCount) || 0, Number(totalDealsCount) || 0),
+      },
+      last90Days: {
+        total: Number(totalDealsCount90d) || 0,
+        won: Number(wonDealsCount90d) || 0,
+        rate: safeRate(Number(wonDealsCount90d) || 0, Number(totalDealsCount90d) || 0),
+      },
+    };
+
     res.status(200).json({
       salesByUser: salesByUserWithDetails,
       funnelData,
@@ -249,6 +313,8 @@ const handler = async (req, res) => {
       taskCompletionData,
       sourceData,
       avgClosingTime,
+      pipelineRevenue,
+      conversion,
     });
   } catch (error) {
     console.error('Analytics API error:', error);

@@ -2,9 +2,24 @@ import { validateSession } from '@/config/api-validation';
 import { getConversation, createMessage, updateConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
+import { sendMail } from '@/lib/server/mail';
 import { renderTemplateString } from '@/prisma/services/template';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
+import { processAutomation } from '@/prisma/services/automation';
+
+const escapeHtml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;');
+
+const extractEmailSubject = (messages = []) => {
+  const lastInbound = [...messages].reverse().find((m) => m?.direction === 'INBOUND' && typeof m?.content === 'string');
+  const firstLine = String(lastInbound?.content || '').split('\n')[0] || '';
+  const m = firstLine.match(/^\s*(assunto|subject)\s*:\s*(.+)\s*$/i);
+  if (!m?.[2]) return null;
+  return String(m[2]).trim();
+};
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -119,6 +134,43 @@ const handler = async (req, res) => {
           }
         }
 
+        if ((!direction || direction === 'OUTBOUND') && conversation.platform === 'EMAIL') {
+          try {
+            const contactEmail = conversation.contact?.email;
+            if (!contactEmail) {
+              throw new Error('Contact email missing');
+            }
+
+            const emailIntegration = await prisma.integration.findFirst({
+              where: { workspaceId: workspace.id, provider: 'EMAIL', enabled: true },
+              select: { id: true },
+            });
+            if (!emailIntegration) {
+              throw new Error('No active Email integration found.');
+            }
+
+            const baseSubject = extractEmailSubject(conversation.messages) || `Conversa com ${conversation.contact?.name || contactEmail}`;
+            const subject = /^re\s*:/i.test(baseSubject) ? baseSubject : `Re: ${baseSubject}`;
+            const lastInboundMessageId = [...(conversation.messages || [])].reverse().find((m) => m?.direction === 'INBOUND' && m?.externalId)?.externalId || null;
+
+            const html = `<div style="white-space:pre-wrap">${escapeHtml(resolvedContent)}</div>`;
+            const info = await sendMail({
+              to: contactEmail,
+              subject,
+              text: resolvedContent,
+              html,
+              headers: lastInboundMessageId ? { 'In-Reply-To': String(lastInboundMessageId), References: String(lastInboundMessageId) } : undefined,
+            });
+
+            sentMessageId = info?.messageId ? String(info.messageId) : sentMessageId;
+            messageStatus = 'SENT';
+          } catch (mailError) {
+            log({ level: 'error', msg: 'email_send_failed', requestId, workspaceId: workspace.id, conversationId, error: mailError });
+            reportError(mailError, { route: 'email:send', requestId, workspaceId: workspace.id, conversationId });
+            messageStatus = 'FAILED';
+          }
+        }
+
         const message = await createMessage(conversationId, {
           direction: direction || 'OUTBOUND',
           type: type || 'TEXT',
@@ -127,6 +179,27 @@ const handler = async (req, res) => {
           status: messageStatus,
           externalId: sentMessageId
         });
+
+        if ((direction || 'OUTBOUND') === 'OUTBOUND' && conversation.platform === 'EMAIL' && messageStatus === 'SENT') {
+          processAutomation(workspace.id, 'EMAIL_SENT', {
+            contact: conversation.contact,
+            contactId: conversation.contactId,
+            conversation,
+            message,
+            occurredAt: new Date().toISOString(),
+          }).catch((err) => {
+            log({
+              level: 'error',
+              msg: 'automation_email_sent_failed',
+              requestId,
+              workspaceId: workspace.id,
+              conversationId,
+              messageId: message?.id || null,
+              error: err,
+            });
+            reportError(err, { route: 'automation:EMAIL_SENT', requestId, workspaceId: workspace.id, conversationId, messageId: message?.id || null });
+          });
+        }
 
         res.status(201).json({ data: { message } });
       } catch (error) {

@@ -55,6 +55,7 @@ const ITEM_ICONS = {
   'settings.team.management': UsersIcon,
   'Custom Fields': RectangleStackIcon,
   'Message Templates': DocumentTextIcon,
+  'Produtos': CreditCardIcon,
   'settings.advanced': WrenchScrewdriverIcon,
   'common.label.dashboard': HomeIcon,
   'common.label.billing': CreditCardIcon,
@@ -144,10 +145,10 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                   {isLoading
                     ? t('workspace.fetching')
                     : workspacesData?.workspaces?.length === 0
-                    ? t('workspace.message.notfound')
-                    : workspace === null
-                    ? t('workspace.action.label.select')
-                    : workspace.name}
+                      ? t('workspace.message.notfound')
+                      : workspace === null
+                        ? t('workspace.action.label.select')
+                        : workspace.name}
                 </span>
                 <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
                   <ChevronUpDownIcon className="w-3.5 h-3.5 text-zinc-500" />
@@ -161,8 +162,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                       key={i}
                       value={ws}
                       className={({ active }) =>
-                        `flex items-center gap-2 cursor-pointer px-3 py-2 text-xs transition-colors ${
-                          active ? 'bg-white/10 text-white' : 'text-zinc-400'
+                        `flex items-center gap-2 cursor-pointer px-3 py-2 text-xs transition-colors ${active ? 'bg-white/10 text-white' : 'text-zinc-400'
                         }`
                       }
                     >
@@ -222,13 +222,12 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                         }
                       }}
                       prefetch={false}
-                      className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${
-                        active
+                      className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${active
                           ? 'text-white bg-indigo-600/15 border-indigo-500/30 shadow-[0_0_20px_rgba(79,70,229,0.08)]'
                           : locked
-                          ? 'text-zinc-600 cursor-not-allowed grayscale'
-                          : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
-                      }`}
+                            ? 'text-zinc-600 cursor-not-allowed grayscale'
+                            : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                        }`}
                     >
                       {active && (
                         <motion.div
@@ -237,9 +236,8 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                         />
                       )}
                       <Icon
-                        className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                          active ? 'text-indigo-400' : 'text-zinc-500'
-                        }`}
+                        className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-indigo-400' : 'text-zinc-500'
+                          }`}
                       />
                       <span className="flex-1 truncate">{t(item.name)}</span>
                       {locked && (

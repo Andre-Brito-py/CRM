@@ -51,6 +51,8 @@ const Analytics = () => {
   const taskCompletionData = data?.taskCompletionData || empty;
   const sourceData = data?.sourceData || empty;
   const avgClosingTime = data?.avgClosingTime || 0;
+  const pipelineRevenue = data?.pipelineRevenue || empty;
+  const conversion = data?.conversion || { allTime: { total: 0, won: 0, rate: 0 }, last90Days: { total: 0, won: 0, rate: 0 } };
 
   const messageTrend = whatsappData?.messageTrend || empty;
   const messageTotals = whatsappData?.messageTotals || { inbound: 0, outbound: 0, total: 0 };
@@ -86,6 +88,18 @@ const Analytics = () => {
       amount: s.amount || 0,
     }));
   }, [salesTrend]);
+
+  const pipelineRevenueChart = useMemo(() => {
+    const rows = (pipelineRevenue || [])
+      .map((p) => ({
+        pipeline: p.pipeline,
+        revenue: p.revenue || 0,
+        won: p.wonCount || 0,
+        deals: p.dealsCount || 0,
+      }))
+      .sort((a, b) => b.revenue - a.revenue);
+    return rows.slice(0, 12);
+  }, [pipelineRevenue]);
 
   const whatsappTrendChart = useMemo(() => {
     const format = (iso) => {
@@ -186,6 +200,23 @@ const Analytics = () => {
 
     csvRows.push([]);
 
+    // Revenue by Pipeline
+    csvRows.push(['Receita por pipeline']);
+    csvRows.push(['Pipeline', 'Receita', 'Negócios ganhos', 'Negócios totais']);
+    (pipelineRevenue || []).forEach((p) => {
+      csvRows.push([`"${p.pipeline}"`, p.revenue || 0, p.wonCount || 0, p.dealsCount || 0]);
+    });
+
+    csvRows.push([]);
+
+    // Conversion Rate
+    csvRows.push(['Taxa de conversão']);
+    csvRows.push(['Período', 'Total negócios', 'Negócios ganhos', 'Taxa (%)']);
+    csvRows.push(['All time', conversion?.allTime?.total || 0, conversion?.allTime?.won || 0, conversion?.allTime?.rate || 0]);
+    csvRows.push(['Últimos 90 dias', conversion?.last90Days?.total || 0, conversion?.last90Days?.won || 0, conversion?.last90Days?.rate || 0]);
+
+    csvRows.push([]);
+
     // WhatsApp Messages (Last 30 Days)
     csvRows.push([t('analytics.export.sections.whatsappLast30Days')]);
     csvRows.push([t('analytics.export.columns.date'), t('analytics.whatsapp.inbound'), t('analytics.whatsapp.outbound'), t('analytics.whatsapp.total')]);
@@ -244,193 +275,225 @@ const Analytics = () => {
       <Content.Divider />
       <Content.Container>
         <div id="analytics-cards">
-        <Paywall
-          minPlan="STANDARD"
-          message="Analytics avançados como funil de conversão, desempenho de vendedores e tendências de receita estão disponíveis no plano Standard ou superior."
-        >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card>
-            <Card.Body title={t('analytics.avgClosingTime.title')}>
-              <div className="flex flex-col items-center justify-center h-full py-6">
-                <CountUp value={avgClosingTime || 0} className="text-5xl font-bold text-blue-600" />
-                <span className="text-gray-500 text-lg mt-2">{t('analytics.avgClosingTime.days')}</span>
-                <p className="text-sm text-gray-400 mt-4 text-center">
-                  {t('analytics.avgClosingTime.subtitle')}
-                </p>
-              </div>
-            </Card.Body>
-          </Card>
-
-          <Card>
-            <Card.Body title={t('analytics.whatsapp.title')}>
-              <div className="grid grid-cols-3 gap-3 mb-4">
-                <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                  <div className="text-xs text-gray-500">{t('analytics.whatsapp.inbound')}</div>
-                  <div className="text-xl font-semibold text-gray-900">
-                    <CountUp value={messageTotals.inbound} />
+          <Paywall
+            minPlan="STANDARD"
+            message="Analytics avançados como funil de conversão, desempenho de vendedores e tendências de receita estão disponíveis no plano Standard ou superior."
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <Card.Body title={t('analytics.avgClosingTime.title')}>
+                  <div className="flex flex-col items-center justify-center h-full py-6">
+                    <CountUp value={avgClosingTime || 0} className="text-5xl font-bold text-blue-600" />
+                    <span className="text-gray-500 text-lg mt-2">{t('analytics.avgClosingTime.days')}</span>
+                    <p className="text-sm text-gray-400 mt-4 text-center">
+                      {t('analytics.avgClosingTime.subtitle')}
+                    </p>
                   </div>
-                </div>
-                <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                  <div className="text-xs text-gray-500">{t('analytics.whatsapp.outbound')}</div>
-                  <div className="text-xl font-semibold text-gray-900">
-                    <CountUp value={messageTotals.outbound} />
+                </Card.Body>
+              </Card>
+
+              <Card>
+                <Card.Body title="Taxa de conversão (últimos 90 dias)">
+                  <div className="flex flex-col items-center justify-center h-full py-6">
+                    <CountUp value={conversion?.last90Days?.rate || 0} className="text-5xl font-bold text-emerald-600" />
+                    <span className="text-gray-500 text-lg mt-2">%</span>
+                    <p className="text-sm text-gray-400 mt-4 text-center">
+                      {`${conversion?.last90Days?.won || 0} ganhos / ${conversion?.last90Days?.total || 0} negócios criados`}
+                    </p>
                   </div>
-                </div>
-                <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                  <div className="text-xs text-gray-500">{t('analytics.whatsapp.total')}</div>
-                  <div className="text-xl font-semibold text-gray-900">
-                    <CountUp value={messageTotals.total} />
+                </Card.Body>
+              </Card>
+
+              <Card>
+                <Card.Body title={t('analytics.whatsapp.title')}>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
+                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.inbound')}</div>
+                      <div className="text-xl font-semibold text-gray-900">
+                        <CountUp value={messageTotals.inbound} />
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
+                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.outbound')}</div>
+                      <div className="text-xl font-semibold text-gray-900">
+                        <CountUp value={messageTotals.outbound} />
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
+                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.total')}</div>
+                      <div className="text-xl font-semibold text-gray-900">
+                        <CountUp value={messageTotals.total} />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {mounted ? (
-                <div className="h-56">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#16a34a" isAnimationActive animationDuration={900} />
-                      <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#2563eb" isAnimationActive animationDuration={900} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
+                  {mounted ? (
+                    <div className="h-56">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="day" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#16a34a" isAnimationActive animationDuration={900} />
+                          <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#2563eb" isAnimationActive animationDuration={900} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
 
-          <Card>
-            <Card.Body title={t('analytics.sellers.title')}>
-              {mounted ? (
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={sellerPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
-                      <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
-                      <Tooltip formatter={(v, n) => (n === 'amount' ? formatCurrency(v) : v)} />
-                      <Legend />
-                      <Bar dataKey="amount" name={t('analytics.sellers.revenue')} fill="#2563eb" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                      <Bar dataKey="won" name={t('analytics.sellers.dealsWon')} fill="#16a34a" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
+              <Card>
+                <Card.Body title={t('analytics.sellers.title')}>
+                  {mounted ? (
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={sellerPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
+                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
+                          <Tooltip formatter={(v, n) => (n === 'amount' ? formatCurrency(v) : v)} />
+                          <Legend />
+                          <Bar dataKey="amount" name={t('analytics.sellers.revenue')} fill="#2563eb" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                          <Bar dataKey="won" name={t('analytics.sellers.dealsWon')} fill="#16a34a" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
 
-          <Card>
-            <Card.Body title={t('analytics.tasksBySeller.title')}>
-              {mounted ? (
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={taskPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="completed" name={t('analytics.tasksBySeller.completed')} fill="#7c3aed" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                      <Bar dataKey="total" name={t('analytics.tasksBySeller.total')} fill="#94a3b8" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
+              <Card>
+                <Card.Body title={t('analytics.tasksBySeller.title')}>
+                  {mounted ? (
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={taskPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
+                          <YAxis tick={{ fontSize: 11 }} />
+                          <Tooltip />
+                          <Legend />
+                          <Bar dataKey="completed" name={t('analytics.tasksBySeller.completed')} fill="#7c3aed" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                          <Bar dataKey="total" name={t('analytics.tasksBySeller.total')} fill="#94a3b8" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
 
-          <Card>
-            <Card.Body title={t('analytics.leadSources.title')}>
-              {mounted ? (
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Tooltip formatter={(v, n, p) => {
-                        const payload = p?.payload;
-                        if (!payload) return v;
-                        return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.name];
-                      }} />
-                      <Legend />
-                      <Pie
-                        data={leadSources}
-                        dataKey="amount"
-                        nameKey="name"
-                        outerRadius={90}
-                        isAnimationActive
-                        animationDuration={900}
-                      >
-                        {leadSources.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
+              <Card>
+                <Card.Body title={t('analytics.leadSources.title')}>
+                  {mounted ? (
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Tooltip formatter={(v, n, p) => {
+                            const payload = p?.payload;
+                            if (!payload) return v;
+                            return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.name];
+                          }} />
+                          <Legend />
+                          <Pie
+                            data={leadSources}
+                            dataKey="amount"
+                            nameKey="name"
+                            outerRadius={90}
+                            isAnimationActive
+                            animationDuration={900}
+                          >
+                            {leadSources.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
 
-          <Card>
-            <Card.Body title={t('analytics.salesFunnel.title')}>
-              {mounted ? (
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <FunnelChart>
-                      <Tooltip formatter={(v, n, p) => {
-                        const payload = p?.payload;
-                        if (!payload) return v;
-                        return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.stage];
-                      }} />
-                      <Funnel
-                        dataKey="count"
-                        data={funnelData || []}
-                        nameKey="stage"
-                        isAnimationActive
-                        animationDuration={900}
-                      >
-                        <LabelList position="right" fill="#111827" stroke="none" dataKey="stage" />
-                        {(funnelData || []).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Funnel>
-                    </FunnelChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
+              <Card>
+                <Card.Body title={t('analytics.salesFunnel.title')}>
+                  {mounted ? (
+                    <div className="h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <FunnelChart>
+                          <Tooltip formatter={(v, n, p) => {
+                            const payload = p?.payload;
+                            if (!payload) return v;
+                            return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.stage];
+                          }} />
+                          <Funnel
+                            dataKey="count"
+                            data={funnelData || []}
+                            nameKey="stage"
+                            isAnimationActive
+                            animationDuration={900}
+                          >
+                            <LabelList position="right" fill="#111827" stroke="none" dataKey="stage" />
+                            {(funnelData || []).map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Funnel>
+                        </FunnelChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
 
-          <Card className="col-span-1 md:col-span-2">
-            <Card.Body title={t('analytics.salesTrend.title')}>
-              {mounted ? (
-                <div className="h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={salesTrendChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
-                      <Tooltip formatter={(v) => formatCurrency(v)} />
-                      <Line
-                        type="monotone"
-                        dataKey="amount"
-                        name={t('analytics.salesTrend.revenue')}
-                        stroke="#2563eb"
-                        strokeWidth={3}
-                        dot={false}
-                        isAnimationActive
-                        animationDuration={900}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </Card.Body>
-          </Card>
-        </div>
-        </Paywall>
+              <Card className="col-span-1 md:col-span-2">
+                <Card.Body title={t('analytics.salesTrend.title')}>
+                  {mounted ? (
+                    <div className="h-72">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={salesTrendChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
+                          <Tooltip formatter={(v) => formatCurrency(v)} />
+                          <Line
+                            type="monotone"
+                            dataKey="amount"
+                            name={t('analytics.salesTrend.revenue')}
+                            stroke="#2563eb"
+                            strokeWidth={3}
+                            dot={false}
+                            isAnimationActive
+                            animationDuration={900}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
+
+              <Card className="col-span-1 md:col-span-2">
+                <Card.Body title="Receita por pipeline">
+                  {mounted ? (
+                    <div className="h-72">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={pipelineRevenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="pipeline" tick={{ fontSize: 11 }} interval={0} height={70} angle={-20} textAnchor="end" />
+                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
+                          <Tooltip formatter={(v, n) => (n === 'revenue' ? formatCurrency(v) : v)} />
+                          <Legend />
+                          <Bar dataKey="revenue" name="Receita" fill="#2563eb" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                          <Bar dataKey="won" name="Ganhos" fill="#16a34a" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ) : null}
+                </Card.Body>
+              </Card>
+            </div>
+          </Paywall>
         </div>
       </Content.Container>
     </AccountLayout>

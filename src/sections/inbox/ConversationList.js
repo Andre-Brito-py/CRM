@@ -179,10 +179,15 @@ const ConversationList = ({
                   <h3 className="text-sm font-medium text-gray-900 truncate">
                     {conversation.contact?.name || conversation.externalId || t('common.unknown')}
                   </h3>
-                  <span className="text-xs text-gray-500 flex-shrink-0 ml-1">
-                    {conversation.updatedAt &&
-                      formatDistanceToNow(new Date(conversation.updatedAt), { addSuffix: false, locale: dateFnsLocale })}
-                  </span>
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-1">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-700">
+                      {conversation.platform || '—'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {conversation.updatedAt &&
+                        formatDistanceToNow(new Date(conversation.updatedAt), { addSuffix: false, locale: dateFnsLocale })}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-sm text-gray-500 truncate">
                   {conversation.lastMessage || t('inbox.noMessagesYet')}

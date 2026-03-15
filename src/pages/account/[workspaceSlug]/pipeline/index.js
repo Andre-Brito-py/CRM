@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PlusIcon, SparklesIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, SparklesIcon, XMarkIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from 'react-i18next';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -160,14 +160,26 @@ const Pipeline = () => {
               </Paywall>
             )}
           </div>
-          <button
-            id="pipeline-add-deal-btn"
-            className="flex items-center justify-center px-8 py-3 text-white bg-zinc-900 rounded-2xl hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/20 active:scale-95 font-bold text-sm"
-            onClick={toggleModal}
-          >
-            <PlusIcon className="w-5 h-5 mr-2 stroke-[3]" />
-            Add Deal
-          </button>
+          <div className="flex items-center gap-3">
+            <a
+              href={workspace?.slug ? `/api/workspace/${workspace.slug}/export?format=csv&entity=deals` : '#'}
+              className="flex items-center justify-center px-6 py-3 text-zinc-600 bg-white border border-zinc-200 rounded-2xl hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-300 shadow-sm font-medium text-sm group"
+              onClick={(e) => {
+                if (!workspace?.slug) e.preventDefault();
+              }}
+            >
+              <ArrowDownTrayIcon className="w-5 h-5 mr-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+              Export Deals CSV
+            </a>
+            <button
+              id="pipeline-add-deal-btn"
+              className="flex items-center justify-center px-8 py-3 text-white bg-zinc-900 rounded-2xl hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/20 active:scale-95 font-bold text-sm"
+              onClick={toggleModal}
+            >
+              <PlusIcon className="w-5 h-5 mr-2 stroke-[3]" />
+              Add Deal
+            </button>
+          </div>
         </div>
 
         {aiInsights && (

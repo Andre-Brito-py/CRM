@@ -100,6 +100,10 @@ const menu = (workspaceId) => [
         moduleKey: 'templates',
       },
       {
+        name: 'Produtos',
+        path: `/account/${workspaceId}/settings/payment-products`,
+      },
+      {
         name: 'settings.advanced',
         path: `/account/${workspaceId}/settings/advanced`,
       },

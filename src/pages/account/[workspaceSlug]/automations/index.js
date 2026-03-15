@@ -124,12 +124,17 @@ const Automations = () => {
         dealId: simulateInputs.dealId || null,
       };
 
+      const isMessageEvent =
+        newRule.triggerType === 'INCOMING_MESSAGE' ||
+        newRule.triggerType === 'EMAIL_SENT';
+      const defaultPlatform = newRule.triggerType === 'EMAIL_SENT' ? 'EMAIL' : 'WHATSAPP';
+
       const eventData =
-        newRule.triggerType === 'INCOMING_MESSAGE'
+        isMessageEvent
           ? {
             ...baseEventData,
             message: { content: simulateInputs.message || '' },
-            conversation: { platform: newRule.triggerConfig.platform || 'WHATSAPP' },
+            conversation: { platform: newRule.triggerConfig.platform || defaultPlatform },
           }
           : newRule.triggerType === 'PAYMENT_CREATED' || newRule.triggerType === 'PAYMENT_PAID' || newRule.triggerType === 'PAYMENT_FAILED'
             ? {
@@ -364,6 +369,41 @@ const Automations = () => {
             </span>
           ) : (
             t('automations.trigger.received')
+          )}
+          {operator === 'OR' ? (
+            <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">
+              {t('automations.trigger.filter.operatorChip')}: {operator}
+            </span>
+          ) : null}
+          {rule.triggerConfig?.platform ? (
+            <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">
+              {t('automations.trigger.filter.channelChip')}: {rule.triggerConfig.platform}
+            </span>
+          ) : null}
+          {rule.triggerConfig?.tagId ? (
+            <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">
+              {t('automations.trigger.filter.tagChip')}: {tags.find(tg => tg.id === rule.triggerConfig.tagId)?.name || t('automations.unknownTag')}
+            </span>
+          ) : null}
+          {hasHours ? (
+            <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">
+              {t('automations.trigger.filter.hoursChip')}: {hours.start}-{hours.end}
+            </span>
+          ) : null}
+        </span>
+      );
+    } else if (rule.triggerType === 'EMAIL_SENT') {
+      const keywords = rule.triggerConfig?.keywords;
+      return (
+        <span>
+          {t('automations.trigger.emailSent')}{' '}
+          {keywords ? (
+            <span>
+              {t('automations.trigger.contains')}{' '}
+              <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">{keywords}</span>
+            </span>
+          ) : (
+            t('automations.trigger.sent')
           )}
           {operator === 'OR' ? (
             <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">
@@ -630,6 +670,7 @@ const Automations = () => {
                   >
                     <option value="DEAL_STAGE_CHANGED">{t('automations.trigger.option.dealStageChanged')}</option>
                     <option value="INCOMING_MESSAGE">{t('automations.trigger.option.incomingMessage')}</option>
+                    <option value="EMAIL_SENT">{t('automations.trigger.option.emailSent')}</option>
                     <option value="PAYMENT_CREATED">{t('automations.trigger.option.paymentCreated')}</option>
                     <option value="PAYMENT_PAID">{t('automations.trigger.option.paymentPaid')}</option>
                     <option value="PAYMENT_FAILED">{t('automations.trigger.option.paymentFailed')}</option>
@@ -662,7 +703,7 @@ const Automations = () => {
                   </div>
                 )}
 
-                {newRule.triggerType === 'INCOMING_MESSAGE' && (
+                {(newRule.triggerType === 'INCOMING_MESSAGE' || newRule.triggerType === 'EMAIL_SENT') && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.keywords')}</label>
                     <input
@@ -743,6 +784,7 @@ const Automations = () => {
                       >
                         <option value="">{t('automations.trigger.filter.anyChannel')}</option>
                         <option value="WHATSAPP">WHATSAPP</option>
+                        <option value="EMAIL">EMAIL</option>
                       </select>
                     </div>
 

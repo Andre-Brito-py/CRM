@@ -2,7 +2,7 @@ import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { UserGroupIcon, BuildingOfficeIcon, CreditCardIcon, ServerIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon, BuildingOfficeIcon, CreditCardIcon, ServerIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
 import AdminLayout from '@/layouts/AdminLayout';
 import fetcher from '@/lib/client/fetcher';
@@ -47,7 +47,16 @@ const AdminDashboard = () => {
     <AdminLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
+            <Link
+              href="/api/admin/export.csv"
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              <ArrowDownTrayIcon className="h-5 w-5 mr-2 text-gray-500" aria-hidden="true" />
+              Export CSV
+            </Link>
+          </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="py-4">

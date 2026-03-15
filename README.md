@@ -46,6 +46,8 @@ Arquivo: `.env`
 DATABASE_URL="postgresql://..."
 DATABASE_URL_POOLED="postgresql://..." # opcional: URL do pooler (PgBouncer/Neon/Supabase)
 NEXTAUTH_SECRET="..."
+GOOGLE_CLIENT_ID="..."        # opcional: Login com Google
+GOOGLE_CLIENT_SECRET="..."    # opcional: Login com Google
 EMAIL_FROM="..."
 EMAIL_SERVICE="..."
 EMAIL_SERVER_USER="..."
@@ -87,6 +89,7 @@ Chaves comuns:
 - Domínios (Vercel): `VERCEL_API_URL`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `VERCEL_AUTH_BEARER_TOKEN`, `VERCEL_IP_ADDRESS`
 - Storage (S3): `AWS_S3_ACCESS_KEY_ID`, `AWS_S3_SECRET_ACCESS_KEY`, `AWS_S3_REGION`, `AWS_S3_BUCKET_NAME`
 - Web Push: `WEB_PUSH_EMAIL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`
+- Zapier: `ZAPIER_ENABLED`, `ZAPIER_ALLOWED_HOSTS`
 - Cron: `CRON_SECRET`
 - Analytics: `GOOGLE_ANALYTICS_ID`
 - Geral: `APP_URL`
@@ -94,6 +97,52 @@ Chaves comuns:
 Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
 - Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
+
+## Zapier (integrações externas via Webhooks)
+O Zapier no Closify é feito via **Webhooks + Automações**:
+- O workspace cria um webhook apontando para um **Catch Hook** do Zapier.
+- Uma automação dispara a ação **CALL_WEBHOOK**, que envia um POST JSON para todos os webhooks ativos que batem com o evento.
+
+O que dá para fazer:
+- Conectar o Closify a qualquer app suportado pelo Zapier (Google Sheets, Slack, Gmail, HubSpot, Trello, Notion, etc.) usando Zaps.
+- Disparar integrações por evento do produto via automações (ex.: mudança de etapa, inbound WhatsApp, eventos de pagamento, NPS).
+- Filtrar o que vai para o Zapier por:
+  - evento do webhook (`*` para “todos” ou nomes específicos)
+  - regras/condições do builder de automações (AND/OR e filtros por propriedades do evento)
+- Pausar/reativar webhooks por workspace e acompanhar entregas (histórico + retentativas).
+- Rotacionar o segredo do webhook (HMAC) quando precisar (segurança).
+
+Administração (Super Admin):
+- Habilitar/desabilitar Zapier na plataforma via `ZAPIER_ENABLED`.
+- Restringir hosts permitidos via `ZAPIER_ALLOWED_HOSTS` (CSV, ex.: `hooks.zapier.com`).
+- Monitorar e gerenciar webhooks Zapier em Admin → System (listar, pausar/ativar, rotacionar segredo).
+
+Eventos (gatilhos) que podem disparar o Zapier hoje (via Automations):
+- `DEAL_STAGE_CHANGED`
+- `INCOMING_MESSAGE`
+- `EMAIL_SENT`
+- `PAYMENT_CREATED`
+- `PAYMENT_PAID`
+- `PAYMENT_FAILED`
+- `NPS_RESPONSE_RECEIVED`
+- `NPS_PROMOTER`
+- `NPS_DETRACTOR`
+- `SLA_BREACH`
+
+Payload enviado:
+```json
+{
+  "event": "NOME_DO_EVENTO",
+  "workspaceId": "ws_...",
+  "data": { "..." : "..." },
+  "occurredAt": "2026-03-15T12:34:56.000Z"
+}
+```
+
+Headers de assinatura (HMAC):
+- `x-closify-event`: nome do evento
+- `x-closify-timestamp`: unix timestamp (segundos)
+- `x-closify-signature`: `sha256=<hex>` do HMAC-SHA256 usando o segredo do webhook e a mensagem `${timestamp}.${rawBody}`
 
 ## IA (cota + overage)
 O uso de IA é controlado por:
@@ -115,9 +164,11 @@ Comportamento:
 - Workspaces (multi-tenant)
 - Deals + pipeline kanban
 - Contatos/empresas + atividades
-- Inbox omnichannel (WhatsApp)
-- Login (magic link + senha) + 2FA
+- Inbox omnichannel (WhatsApp + Email)
+- Login (magic link + senha) + 2FA + Google (opcional)
 - Inbox: resumo de conversa com IA (sob demanda)
+- Inbox (Email): sugestão de resposta com IA
+- Automações: gatilho `EMAIL_SENT` (envio de email pelo inbox)
 - Paywall por plano e painel de super admin
 - Customer Satisfaction (NPS): páginas + gráficos com animação
 - Sistema de pagamentos do CRM (multi-gateway) + webhooks
@@ -129,6 +180,7 @@ Comportamento:
 - Aviso global “Sistema em manutenção” configurável no Super Admin (com previsão de retorno)
 - Formulários Web (Form Builder): criação de formulários públicos para captura de leads com mapeamento dinâmico de campos.
 - Refino Estético: substituição de emojis por ícones vetoriais (Heroicons) em todo o Help Center.
+- Exportação CSV (CRM): Contatos e Deals por workspace + export administrativo (Super Admin).
 
 ## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
 - **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.

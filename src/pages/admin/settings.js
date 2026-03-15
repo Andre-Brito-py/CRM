@@ -99,6 +99,13 @@ const CATALOG = [
     ],
   },
   {
+    title: 'Zapier',
+    items: [
+      { key: 'ZAPIER_ENABLED', category: 'INTEGRATIONS', label: 'Zapier habilitado (true/false)', secret: false },
+      { key: 'ZAPIER_ALLOWED_HOSTS', category: 'INTEGRATIONS', label: 'Hosts permitidos (CSV, ex: hooks.zapier.com)', secret: false },
+    ],
+  },
+  {
     title: 'Jobs (cron)',
     items: [{ key: 'CRON_SECRET', category: 'INTEGRATIONS', label: 'Cron Secret', secret: true }],
   },

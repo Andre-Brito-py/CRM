@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import Link from 'next/link';
@@ -29,12 +29,19 @@ const System = () => {
     fetcher,
     { refreshInterval: 15000 }
   );
+  const { data: zapierData, mutate: mutateZapier } = useSWR(
+    session ? '/api/admin/system/zapier-webhooks' : null,
+    fetcher,
+    { refreshInterval: 15000 }
+  );
   const [running, setRunning] = useState(null);
   const [incidentTitle, setIncidentTitle] = useState('');
   const [incidentSeverity, setIncidentSeverity] = useState('P2');
   const [incidentSummary, setIncidentSummary] = useState('');
   const [creatingIncident, setCreatingIncident] = useState(false);
   const [workspaceSlug, setWorkspaceSlug] = useState('');
+  const [zapierAllowedHostsText, setZapierAllowedHostsText] = useState('');
+  const [zapierSaving, setZapierSaving] = useState(null);
 
   const health = data?.data;
   const isLoading = !data;
@@ -57,6 +64,14 @@ const System = () => {
   };
 
   const metrics = health?.metrics || null;
+  const zapier = zapierData?.data || null;
+
+  useEffect(() => {
+    if (!zapier) return;
+    const allowedHosts = Array.isArray(zapier.allowedHosts) ? zapier.allowedHosts : [];
+    const next = allowedHosts.join(', ');
+    setZapierAllowedHostsText((prev) => (prev ? prev : next));
+  }, [zapier]);
 
   return (
     <AdminLayout>
@@ -283,6 +298,195 @@ const System = () => {
           {health && (
             <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">Zapier</h3>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500">Controle de webhooks Zapier e configuração global da plataforma.</p>
+              </div>
+              <div className="border-t border-gray-200 px-4 py-5 sm:p-6 space-y-5">
+                <div className="flex flex-col lg:flex-row lg:items-end gap-3">
+                  <div className="flex-1">
+                    <div className="text-sm font-medium text-gray-900">Hosts permitidos</div>
+                    <div className="mt-1 text-xs text-gray-500">Lista CSV de hosts, ex: hooks.zapier.com</div>
+                    <input
+                      type="text"
+                      value={zapierAllowedHostsText}
+                      onChange={(e) => setZapierAllowedHostsText(e.target.value)}
+                      className="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      placeholder="hooks.zapier.com"
+                    />
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      disabled={zapierSaving === 'hosts'}
+                      className="inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium border border-gray-300 bg-white hover:bg-gray-50 disabled:opacity-60"
+                      onClick={async () => {
+                        setZapierSaving('hosts');
+                        try {
+                          const res = await api('/api/admin/system/zapier-webhooks', {
+                            method: 'PATCH',
+                            body: { action: 'SET_ALLOWED_HOSTS', allowedHosts: zapierAllowedHostsText },
+                          });
+                          if (res?.error?.msg) throw new Error(res.error.msg);
+                          toast.success('Hosts salvos');
+                          mutateZapier();
+                        } catch (e) {
+                          toast.error(e?.message || 'Falha ao salvar hosts');
+                        } finally {
+                          setZapierSaving(null);
+                        }
+                      }}
+                    >
+                      {zapierSaving === 'hosts' ? 'Salvando...' : 'Salvar hosts'}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={zapierSaving === 'enabled'}
+                      className={`inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white disabled:opacity-60 ${zapier?.enabled ? 'bg-rose-600 hover:bg-rose-700' : 'bg-emerald-600 hover:bg-emerald-700'}`}
+                      onClick={async () => {
+                        setZapierSaving('enabled');
+                        try {
+                          const res = await api('/api/admin/system/zapier-webhooks', {
+                            method: 'PATCH',
+                            body: { action: 'SET_ENABLED', enabled: !zapier?.enabled },
+                          });
+                          if (res?.error?.msg) throw new Error(res.error.msg);
+                          toast.success(zapier?.enabled ? 'Zapier desabilitado' : 'Zapier habilitado');
+                          mutateZapier();
+                        } catch (e) {
+                          toast.error(e?.message || 'Falha ao atualizar Zapier');
+                        } finally {
+                          setZapierSaving(null);
+                        }
+                      }}
+                    >
+                      {zapierSaving === 'enabled'
+                        ? 'Atualizando...'
+                        : zapier?.enabled
+                          ? 'Desabilitar Zapier'
+                          : 'Habilitar Zapier'}
+                    </button>
+                    <Link
+                      href="/admin/settings"
+                      className="inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium border border-indigo-200 bg-white text-indigo-700 hover:bg-indigo-50"
+                    >
+                      Abrir configs
+                    </Link>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Workspace</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URL</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Events</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ativo</th>
+                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Secret</th>
+                        <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200 text-sm text-gray-700">
+                      {(zapier?.webhooks || []).length > 0 ? (
+                        zapier.webhooks.map((w) => (
+                          <tr key={w.id}>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <div className="font-medium text-gray-900">{w.workspace?.name || '-'}</div>
+                              <div className="text-xs text-gray-500">{w.workspace?.slug || '-'}</div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="max-w-[520px] break-all font-mono text-xs text-gray-700">{w.url}</div>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="max-w-[360px] break-all text-xs text-gray-600">
+                                {Array.isArray(w.events) ? w.events.join(', ') : String(w.events || '')}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-semibold ${w.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-700'}`}>
+                                {w.isActive ? 'Ativo' : 'Pausado'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap">
+                              <span className="font-mono text-xs text-gray-500">{w.secretMasked}</span>
+                            </td>
+                            <td className="px-3 py-2 whitespace-nowrap text-right">
+                              <div className="flex justify-end gap-2">
+                                <Link
+                                  href={w.workspace?.slug ? `/account/${w.workspace.slug}/integrations/webhooks` : '#'}
+                                  className={`px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs ${w.workspace?.slug ? '' : 'pointer-events-none opacity-60'}`}
+                                >
+                                  Abrir
+                                </Link>
+                                <button
+                                  type="button"
+                                  disabled={zapierSaving === w.id}
+                                  className="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 text-xs disabled:opacity-60"
+                                  onClick={async () => {
+                                    setZapierSaving(w.id);
+                                    try {
+                                      const res = await api('/api/admin/system/zapier-webhooks', {
+                                        method: 'PATCH',
+                                        body: { action: 'SET_WEBHOOK_ACTIVE', webhookId: w.id, isActive: !w.isActive },
+                                      });
+                                      if (res?.error?.msg) throw new Error(res.error.msg);
+                                      toast.success(!w.isActive ? 'Webhook ativado' : 'Webhook pausado');
+                                      mutateZapier();
+                                    } catch (e) {
+                                      toast.error(e?.message || 'Falha ao atualizar webhook');
+                                    } finally {
+                                      setZapierSaving(null);
+                                    }
+                                  }}
+                                >
+                                  {zapierSaving === w.id ? 'Salvando...' : w.isActive ? 'Pausar' : 'Ativar'}
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={zapierSaving === `rotate:${w.id}`}
+                                  className="px-3 py-1 rounded border border-rose-200 bg-white text-rose-700 hover:bg-rose-50 text-xs disabled:opacity-60"
+                                  onClick={async () => {
+                                    setZapierSaving(`rotate:${w.id}`);
+                                    try {
+                                      const res = await api('/api/admin/system/zapier-webhooks', {
+                                        method: 'PATCH',
+                                        body: { action: 'ROTATE_WEBHOOK_SECRET', webhookId: w.id },
+                                      });
+                                      if (res?.error?.msg) throw new Error(res.error.msg);
+                                      const secret = res?.data?.webhook?.secret || '';
+                                      window.prompt('Novo secret (copie agora):', secret);
+                                      toast.success('Secret rotacionado');
+                                      mutateZapier();
+                                    } catch (e) {
+                                      toast.error(e?.message || 'Falha ao rotacionar secret');
+                                    } finally {
+                                      setZapierSaving(null);
+                                    }
+                                  }}
+                                >
+                                  Rotacionar secret
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="px-3 py-8 text-center text-sm text-gray-500">
+                            Nenhum webhook Zapier encontrado.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {health && (
+            <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+              <div className="px-4 py-5 sm:px-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">Incidentes e SLA</h3>
                 <p className="mt-1 max-w-2xl text-sm text-gray-500">Registro interno para suporte e operação.</p>
               </div>
@@ -455,10 +659,10 @@ const System = () => {
                                 <td className="px-3 py-2">
                                   <span
                                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${status === 'RESOLVED'
-                                        ? 'bg-green-100 text-green-800'
-                                        : responseOverdue || resolveOverdue
-                                          ? 'bg-red-100 text-red-800'
-                                          : 'bg-yellow-100 text-yellow-800'
+                                      ? 'bg-green-100 text-green-800'
+                                      : responseOverdue || resolveOverdue
+                                        ? 'bg-red-100 text-red-800'
+                                        : 'bg-yellow-100 text-yellow-800'
                                       }`}
                                   >
                                     {status}

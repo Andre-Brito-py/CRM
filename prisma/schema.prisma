@@ -372,6 +372,7 @@ model Workspace {
   npsSurveys             NpsSurvey[]
   npsResponses           NpsResponse[]
   payments               Payment[]
+  paymentProducts        PaymentProduct[]
   paymentSetting         WorkspacePaymentSetting?
   pipelines              Pipeline[]
   platformSubscription   PlatformSubscription?
@@ -397,6 +398,7 @@ model Integration {
   updatedAt   DateTime  @updatedAt
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId, provider], name: "workspaceId_provider")
   @@index([workspaceId, provider, enabled])
   @@map("integrations")
 }
@@ -565,6 +567,27 @@ model Payment {
   @@index([providerId])
   @@index([providerId, providerPaymentId])
   @@map("payments")
+}
+
+model PaymentProduct {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  slug        String
+  description String?
+  currency    String   @default("BRL")
+  price       Decimal  @db.Decimal(10, 2)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([workspaceId, slug])
+  @@index([workspaceId])
+  @@index([workspaceId, active])
+  @@map("payment_products")
 }
 
 enum NpsSurveyTriggerType {

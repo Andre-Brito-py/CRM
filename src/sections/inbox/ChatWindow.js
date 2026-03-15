@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
-import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon, CreditCardIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
 import { useTranslation } from 'react-i18next';
@@ -10,12 +10,21 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
+const formatMoney = (value, currency = 'BRL') =>
+  new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: String(currency || 'BRL').toUpperCase(),
+    maximumFractionDigits: 2,
+  }).format(Number(value || 0));
+
 const ChatWindow = ({
   conversation,
   onSendMessage,
   onAssign,
   members = [],
   templates = [],
+  paymentProducts = [],
+  workspaceSlug,
   onCreateTemplate,
   messageText,
   onMessageChange,
@@ -47,6 +56,12 @@ const ChatWindow = ({
       onSendMessage(messageText);
       onMessageChange('');
     }
+  };
+
+  const appendToMessage = (text) => {
+    const next = `${messageText || ''}`.trim();
+    if (!next) return onMessageChange(text);
+    return onMessageChange(`${next}\n${text}`);
   };
 
   const handleCreateTemplate = (e) => {
@@ -94,7 +109,7 @@ const ChatWindow = ({
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h2>
             <p className="text-sm text-gray-500">
-              {conversation.platform} • {conversation.contact?.phone || conversation.externalId}
+              {conversation.platform} • {conversation.platform === 'EMAIL' ? (conversation.contact?.email || conversation.externalId) : (conversation.contact?.phone || conversation.externalId)}
             </p>
           </div>
         </div>
@@ -284,6 +299,66 @@ const ChatWindow = ({
                               >
                                 <p className="font-medium">{template.name}</p>
                                 <p className="text-xs text-gray-500 truncate">{template.content}</p>
+                              </button>
+                            )}
+                          </Menu.Item>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+          </div>
+
+          <div className="relative">
+            <Menu as="div" className="relative inline-block text-left">
+              <div>
+                <Menu.Button
+                  className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  title="Produtos"
+                >
+                  <CreditCardIcon className="w-5 h-5" />
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute bottom-full left-0 mb-2 w-72 origin-bottom-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                  <div className="py-1">
+                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
+                      Produtos
+                    </div>
+                    {paymentProducts.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                        Nenhum produto ativo
+                      </div>
+                    ) : (
+                      <div className="max-h-60 overflow-y-auto">
+                        {paymentProducts.map((product) => (
+                          <Menu.Item key={product.id}>
+                            {({ active }) => (
+                              <button
+                                type="button"
+                                onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
+                                className={classNames(
+                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                                  'block w-full text-left px-4 py-2 text-sm'
+                                )}
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <p className="font-medium truncate">{product.name}</p>
+                                  <p className="text-xs text-gray-600 whitespace-nowrap">
+                                    {formatMoney(product.price, product.currency)}
+                                  </p>
+                                </div>
+                                <p className="text-xs text-gray-500 truncate">Inserir link fixo</p>
                               </button>
                             )}
                           </Menu.Item>
