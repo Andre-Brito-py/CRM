@@ -95,8 +95,9 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
   const amount = Math.ceil((Number(tokens) * Number(pricePer1M) * 100) / 1_000_000);
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
-  await stripe.invoiceItems.create({
+  const invoiceItem = await stripe.invoiceItems.create({
     customer: stripeCustomerId,
+    ...(subscriptionId ? { subscription: String(subscriptionId) } : {}),
     currency,
     amount,
     description: `AI overage (${Number(tokens)} tokens) - workspace ${workspace.slug}`,
@@ -110,7 +111,13 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     },
   });
 
-  return { currency, amount };
+  return {
+    currency,
+    amount,
+    stripeCustomerId,
+    subscriptionId,
+    invoiceItemId: invoiceItem?.id || null,
+  };
 };
 
 const handler = async (req, res) => {
@@ -201,10 +208,12 @@ const handler = async (req, res) => {
     const isEmail = String(conversation?.platform || '').toUpperCase() === 'EMAIL';
     const systemPrompt = isEmail
       ? `Você é um agente de suporte do ${workspace.name} respondendo por EMAIL.
+${workspace.aiContext ? `\nContexto da Empresa:\n${workspace.aiContext}\n` : ''}
 Escreva uma resposta profissional, cordial e objetiva para a última mensagem do cliente.
 Retorne apenas o corpo do email (sem "Assunto:", sem assinatura com placeholders).
 Use parágrafos curtos e linguagem clara. Não use Markdown.`
       : `You are a helpful customer support assistant for ${workspace.name}.
+${workspace.aiContext ? `\nCompany Context:\n${workspace.aiContext}\n` : ''}
 Your goal is to help the customer with their inquiries in a professional, friendly, and concise manner.
 Draft a response to the last message from the user. Do not include placeholders like "[Your Name]".`;
 
@@ -212,14 +221,16 @@ Draft a response to the last message from the user. Do not include placeholders 
     let quota = null;
     let overage = null;
     let overageMode = false;
+    let tokensEstimated = null;
 
     const tokensPerDay = Number(limits.aiTokens24h || 0);
     if (Number.isFinite(tokensPerDay) && tokensPerDay > 0) {
-      const contextMessages = messages.slice(-10);
+      const contextMessages = messages.slice(-20);
       const estimatedPromptTokens =
         estimateTokens(systemPrompt) +
         contextMessages.reduce((acc, m) => acc + estimateTokens(m.content), 0);
       const estimatedTotalTokens = estimatedPromptTokens + 500;
+      tokensEstimated = estimatedTotalTokens;
 
       const rlTokens = await rateLimit({
         req,
@@ -301,7 +312,7 @@ Draft a response to the last message from the user. Do not include placeholders 
         model: 'gpt-3.5-turbo',
         messages: [
           { role: 'system', content: systemPrompt },
-          ...messages.slice(-10) // Context window of last 10 messages
+          ...messages.slice(-20) // Context window of last 20 messages
         ],
         temperature: 0.7,
         max_tokens: 500
@@ -317,21 +328,56 @@ Draft a response to the last message from the user. Do not include placeholders 
     const data = await response.json();
     const suggestion = data.choices[0]?.message?.content?.trim();
 
-    if (overageMode) {
-      const tokens = Number(data?.usage?.total_tokens || 0);
-      if (Number.isFinite(tokens) && tokens > 0) {
-        try {
-          await billAiOverage({
-            workspace,
-            requestId,
-            userId,
-            tokens,
-            pricePer1M: overageSettings.pricePer1M,
-          });
-        } catch (error) {
-          log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
-        }
+    const tokensTotal = Number(data?.usage?.total_tokens || 0);
+    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+
+    let billingResult = null;
+    if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      try {
+        billingResult = await billAiOverage({
+          workspace,
+          requestId,
+          userId,
+          tokens: tokensTotal,
+          pricePer1M: overageSettings.pricePer1M,
+        });
+      } catch (error) {
+        log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
       }
+    }
+
+    if (Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      prisma.aiUsageEvent?.create?.({
+        data: {
+          workspaceId: workspace.id,
+          userId: userId || null,
+          requestId,
+          route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/suggest-reply',
+          provider: 'openai',
+          model: 'gpt-3.5-turbo',
+          tokensTotal: Math.max(0, Math.floor(tokensTotal)),
+          tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
+          tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,
+          tokensEstimated: Number.isFinite(tokensEstimated) && tokensEstimated > 0 ? Math.floor(tokensEstimated) : null,
+          overageMode,
+          billedAmount: billingResult?.amount ?? null,
+          billedCurrency: billingResult?.currency ?? null,
+          stripeCustomerId: billingResult?.stripeCustomerId ?? null,
+          stripeSubscriptionId: billingResult?.subscriptionId ?? null,
+          stripeInvoiceItemId: billingResult?.invoiceItemId ?? null,
+        },
+      })
+        ?.catch((error) => {
+          log({
+            level: 'error',
+            msg: 'ai_usage_log_failed',
+            requestId,
+            workspaceId: workspace.id,
+            userId,
+            error,
+          });
+        });
     }
 
     res.status(200).json({

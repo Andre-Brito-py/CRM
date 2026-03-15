@@ -355,6 +355,14 @@ const Inbox = () => {
         description: t('onboarding.tour.inbox.step3.desc'),
         position: 'top',
       }
+    },
+    {
+      element: '#ai-summarize-btn',
+      popover: {
+        title: 'Resumo IA',
+        description: 'Clique aqui para gerar um resumo executivo de toda a conversa em segundos.',
+        position: 'top',
+      }
     }
   ];
 

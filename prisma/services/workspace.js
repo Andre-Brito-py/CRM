@@ -248,6 +248,7 @@ export const getWorkspace = async (id, email, slug) =>
       slug: true,
       workspaceCode: true,
       customFieldDefinitions: true,
+      aiContext: true,
       creator: { select: { email: true, customerPayment: true } },
       members: {
         select: {
@@ -459,6 +460,20 @@ export const updateSlug = async (id, email, newSlug, pathSlug) => {
       where: { id: workspace.id },
     });
     return slug;
+  } else {
+    throw new Error('Unable to find workspace');
+  }
+};
+
+export const updateAiContext = async (id, email, aiContext, slug) => {
+  const workspace = await getOwnWorkspace(id, email, slug);
+
+  if (workspace) {
+    await prisma.workspace.update({
+      data: { aiContext },
+      where: { id: workspace.id },
+    });
+    return aiContext;
   } else {
     throw new Error('Unable to find workspace');
   }

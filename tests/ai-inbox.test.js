@@ -23,11 +23,19 @@ jest.mock('@/lib/server/config', () => ({
   getSystemConfig: jest.fn(),
 }));
 
+jest.mock('@/lib/server/stripe', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+
 jest.mock('@/prisma/index', () => ({
   __esModule: true,
   default: {
     conversation: {
       findFirst: jest.fn(),
+    },
+    user: {
+      findUnique: jest.fn(),
     },
   },
 }));
@@ -38,6 +46,7 @@ import { getConversation } from '@/prisma/services/conversation';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 import { getSystemConfig } from '@/lib/server/config';
+import getStripe from '@/lib/server/stripe';
 import prisma from '@/prisma/index';
 
 import suggestReplyHandler from '@/pages/api/workspace/[workspaceSlug]/inbox/[conversationId]/suggest-reply';
@@ -69,7 +78,7 @@ describe('AI Inbox endpoints', () => {
     validateSession.mockResolvedValue({
       user: { id: 'u_1', userId: 'u_1', email: 'agent@example.com', name: 'Agente' },
     });
-    getWorkspace.mockResolvedValue({ id: 'w_1', name: 'Acme', slug: 'acme' });
+    getWorkspace.mockResolvedValue({ id: 'w_1', name: 'Acme', slug: 'acme', creatorId: 'u_creator' });
   });
 
   test('suggest-reply returns fallback suggestion when API key is missing', async () => {
@@ -125,6 +134,92 @@ describe('AI Inbox endpoints', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body?.data?.summary).toContain('Ponto 1');
+
+    global.fetch = prevFetch;
+  });
+
+  test('suggest-reply bills overage into next invoice when opted-in', async () => {
+    const prevFetch = global.fetch;
+    global.fetch = jest.fn(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        choices: [{ message: { content: 'Resposta sugerida' } }],
+        usage: { total_tokens: 1000 },
+      }),
+    }));
+
+    getSystemConfig.mockImplementation(async (key, fallback) => {
+      if (key === 'OPENAI_API_KEY') return 'sk_test';
+      if (key === 'AI_QUOTA_WARN_PERCENT') return '80';
+      if (key === 'AI_OVERAGE_ENABLED') return 'true';
+      if (key === 'AI_OVERAGE_REQUIRE_OPTIN') return 'true';
+      if (key === 'AI_OVERAGE_PRICE_PER_1M_TOKENS') return '4.00';
+      if (key === 'AI_OVERAGE_MAX_TOKENS_24H') return '200000';
+      return fallback ?? null;
+    });
+
+    getConversation.mockResolvedValue({
+      id: 'c_3',
+      workspaceId: 'w_1',
+      contact: { name: 'Maria' },
+      messages: [{ id: 'm_1', direction: 'INBOUND', content: 'Oi' }],
+    });
+
+    getWorkspaceLimits.mockResolvedValue({ aiRequests24h: 15, aiTokens24h: 10 });
+
+    rateLimit.mockImplementation(async ({ key }) => {
+      const k = String(key || '');
+      if (k.includes('ai:suggest-reply:5m')) return { ok: true };
+      if (k.includes('ai:suggest-reply:day')) return { ok: true };
+      if (k.includes('ai:tokens_overage:day')) return { ok: true, remaining: 199000, resetAt: new Date().toISOString() };
+      if (k.includes('ai:tokens:day')) return { ok: false, remaining: 0, resetAt: new Date().toISOString() };
+      return { ok: true };
+    });
+
+    prisma.user.findUnique.mockResolvedValue({
+      id: 'u_creator',
+      email: 'owner@example.com',
+      customerPayment: {
+        paymentId: 'cus_123',
+        providerSubscriptionId: 'sub_123',
+      },
+    });
+
+    const stripeInvoiceItemCreate = jest.fn(async () => ({}));
+    const stripeSubscriptionRetrieve = jest.fn(async () => ({
+      items: { data: [{ price: { currency: 'usd' } }] },
+    }));
+    getStripe.mockResolvedValue({
+      invoiceItems: { create: stripeInvoiceItemCreate },
+      subscriptions: { retrieve: stripeSubscriptionRetrieve },
+    });
+
+    const { req, res } = createReqRes({
+      query: { workspaceSlug: 'acme', conversationId: 'c_3' },
+      headers: { 'x-ai-overage': 'true', 'x-request-id': 'req_1' },
+    });
+
+    await suggestReplyHandler(req, res);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body?.data?.suggestion).toBe('Resposta sugerida');
+    expect(stripeInvoiceItemCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        customer: 'cus_123',
+        subscription: 'sub_123',
+        currency: 'usd',
+        amount: 1,
+        metadata: expect.objectContaining({
+          workspaceId: 'w_1',
+          workspaceSlug: 'acme',
+          requestId: 'req_1',
+          userId: 'u_1',
+          tokens: '1000',
+          pricePer1M: '4',
+        }),
+      })
+    );
 
     global.fetch = prevFetch;
   });

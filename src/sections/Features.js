@@ -2,7 +2,10 @@ import { motion } from 'framer-motion';
 import { 
   ChatBubbleBottomCenterTextIcon, 
   BoltIcon, 
-  ChartBarSquareIcon 
+  ChartBarSquareIcon,
+  DocumentCheckIcon,
+  FaceSmileIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from "react-i18next";
 
@@ -21,6 +24,21 @@ const getFeatures = (t) => [
     name: t("landing.features.item3.title", 'Poder de No-code & Workflow Engine'),
     description: t("landing.features.item3.desc", 'Crie regras, fluxos, gatilhos de e-mail e campos personalizados para o seu nicho sem escrever nenhuma linha de código. Closify se molda 100% à sua operação.'),
     icon: ChartBarSquareIcon,
+  },
+  {
+    name: t("landing.features.item4.title", 'Form Builder No-Code'),
+    description: t("landing.features.item4.desc", 'Crie formulários de captura de leads em segundos e integre-os automaticamente ao seu funil de vendas sem código.'),
+    icon: DocumentCheckIcon,
+  },
+  {
+    name: t("landing.features.item5.title", 'NPS & Satisfação'),
+    description: t("landing.features.item5.desc", 'Mensure a felicidade dos seus clientes com pesquisas automatizadas e gráficos interativos de fidelidade.'),
+    icon: FaceSmileIcon,
+  },
+  {
+    name: t("landing.features.item6.title", 'Segurança Enterprise'),
+    description: t("landing.features.item6.desc", 'Isolamento total de dados, trilhas de auditoria sensíveis e conformidade com a LGPD por padrão.'),
+    icon: ShieldCheckIcon,
   },
 ];
 
@@ -72,7 +90,7 @@ const Features = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 w-full"
         >
           {features.map((feature, index) => (
             <motion.div 

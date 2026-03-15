@@ -213,6 +213,7 @@ model User {
   assignedTasks         Task[]
   notifications         Notification[]
   createdWorkspace      Workspace[]
+  aiUsageEvents         AiUsageEvent[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -241,6 +242,35 @@ model StripeEvent {
 
   @@index([livemode, type, receivedAt])
   @@map("stripe_events")
+}
+
+model AiUsageEvent {
+  id                 String   @id @default(cuid())
+  workspaceId         String
+  userId              String?
+  requestId           String?
+  route               String
+  provider            String
+  model               String?
+  tokensTotal         Int
+  tokensPrompt        Int?
+  tokensCompletion    Int?
+  tokensEstimated     Int?
+  overageMode         Boolean  @default(false)
+  billedAmount        Int?
+  billedCurrency      String?
+  stripeCustomerId    String?
+  stripeSubscriptionId String?
+  stripeInvoiceItemId String?
+  createdAt           DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([overageMode, createdAt])
+  @@index([stripeSubscriptionId])
+  @@map("ai_usage_events")
 }
 
 enum FiscalProvider {
@@ -357,6 +387,7 @@ model Workspace {
   deletedAt              DateTime?
   updatedAt              DateTime?                @updatedAt
   customFieldDefinitions Json?
+  aiContext              String?   @db.Text
   activities             Activity[]
   apiKeys                ApiKey[]
   automationRules        AutomationRule[]
@@ -381,6 +412,7 @@ model Workspace {
   notifications          Notification[]
   webhooks               Webhook[]
   webForms               WebForm[]
+  aiUsageEvents          AiUsageEvent[]
   creator                User                     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])

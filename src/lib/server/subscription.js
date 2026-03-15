@@ -97,6 +97,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
             webhooks: f.maxWebhooks || f.maxUsers || null,
             automations: f.maxAutomations || null,
             whatsappIntegrations: f.maxWhatsApp || 5,
+            instagramIntegrations: f.maxInstagram || 5,
             contacts: f.maxContacts || null,
             aiRequests24h: f.maxAiRequests24h || 100,
             aiTokens24h: f.maxAiTokens24h || 30000,
@@ -131,6 +132,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         webhooks: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 10 : null,
         automations: planType === 'FREE' ? 3 : planType === 'STANDARD' ? 20 : null,
         whatsappIntegrations: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 5 : null,
+        instagramIntegrations: planType === 'FREE' ? 1 : planType === 'STANDARD' ? 5 : null,
         contacts: planType === 'FREE' ? 100 : null,
         aiRequests24h: planType === 'FREE' ? 100 : planType === 'STANDARD' ? 1000 : 10000,
         aiTokens24h: planType === 'FREE' ? 30000 : planType === 'STANDARD' ? 300000 : 1000000,
@@ -219,6 +221,15 @@ export const canAddWhatsAppIntegration = async (workspaceId, currentWAintegratio
     const limits = await getWorkspaceLimits(workspaceId);
     if (limits.whatsappIntegrations === null) return true;
     return currentWAintegrationsCount < limits.whatsappIntegrations;
+};
+
+/**
+ * Validation to check how many Instagram numbers a user can connect
+ */
+export const canAddInstagramIntegration = async (workspaceId, currentIGintegrationsCount) => {
+    const limits = await getWorkspaceLimits(workspaceId);
+    if (limits.instagramIntegrations === null) return true;
+    return currentIGintegrationsCount < limits.instagramIntegrations;
 };
 
 /**

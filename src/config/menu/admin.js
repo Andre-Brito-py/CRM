@@ -7,6 +7,10 @@ const menu = () => [
         path: '/admin',
       },
       {
+        name: 'AI / Usage',
+        path: '/admin/ai/usage',
+      },
+      {
         name: 'API Settings',
         path: '/admin/settings',
       },

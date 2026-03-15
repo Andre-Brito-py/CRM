@@ -1,8 +1,6 @@
 # Closify CRM
 
-Este repositório é privado.
-
-Não é um projeto “open source”, nem algo feito para ser bonito para outras pessoas. É o meu caderno de obra: decisões, dúvidas, lembretes e as partes que eu não posso esquecer quando eu estiver cansado e achar que “já sei”.
+Plataforma CRM multi-tenant com foco em operação comercial e atendimento omnichannel (WhatsApp + Email), pipeline de vendas, automações e monetização por planos.
 
 ## O que eu estou construindo (em uma frase)
 Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém de planilha.
@@ -11,6 +9,20 @@ Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém d
 - Quero abrir um negócio com isso.
 - Preciso de uma plataforma que eu controle (produto, dados e evolução).
 - A meta é simples: resolver dor real com uma experiência sólida.
+
+## Landing page (Marketing)
+A landing page é a home pública (`/`) e serve como vitrine do produto (proposta de valor, features e preços).
+
+Como ela é montada hoje:
+- Página: `src/pages/index.js` (SSG com revalidate, buscando planos no banco para o bloco de preços)
+- Layout: `LandingLayout`
+- Seções: `src/sections/*` (`Hero`, `Features`, `Pricing`, `Testimonial`, `FAQ`, `CallToAction`, `Footer`)
+
+Páginas públicas úteis:
+- `/demo` (demonstração)
+- `/auth/login` e `/auth/register`
+- `/privacy` e `/terms`
+- `/f/[slug]` (Form Builder público)
 
 ## Regras internas (pra eu não me sabotar)
 - Nada de credenciais no código/repo.
@@ -159,6 +171,10 @@ Configurações do overage (Super Admin → Settings → IA):
 Comportamento:
 - Quando a API retorna `LIMIT_REACHED` com `overage.enabled=true`, a UI pode pedir confirmação e reenviar a chamada com header `x-ai-overage: true`.
 - Em overage, é criado um `invoice_item` no Stripe do cliente (customer do workspace owner) com o valor proporcional ao total de tokens retornado pelo provedor.
+
+Auditoria e acompanhamento (Super Admin):
+- Eventos de uso de IA ficam persistidos em `AiUsageEvent` (tokens, rota, modelo e dados de cobrança quando houver).
+- Painel de consumo: `/admin/ai/usage` (gráficos por dia e rankings por workspace/rota/modelo).
 
 ## Coisas que já estão no produto (resumo curto)
 - Workspaces (multi-tenant)

@@ -25,6 +25,7 @@ const General = ({ isTeamOwner, workspace }) => {
   const [isSubmitting, setSubmittingState] = useState(false);
   const [name, setName] = useState(workspace.name || '');
   const [slug, setSlug] = useState(workspace.slug || '');
+  const [aiContext, setAiContext] = useState(workspace.aiContext || '');
   const validName = name.length > 0 && name.length <= 16;
   const validSlug =
     slug.length > 0 &&
@@ -72,15 +73,37 @@ const General = ({ isTeamOwner, workspace }) => {
     });
   };
 
+  const changeAiContext = (event) => {
+    event.preventDefault();
+    setSubmittingState(true);
+    api(`/api/workspace/${workspace.slug}/ai-context`, {
+      body: { aiContext },
+      method: 'PUT',
+    }).then((response) => {
+      setSubmittingState(false);
+
+      if (response.errors) {
+        Object.keys(response.errors).forEach((error) =>
+          toast.error(response.errors[error].msg)
+        );
+      } else {
+        toast.success('AI Context successfully updated!');
+      }
+    });
+  };
+
   const copyToClipboard = () => toast.success('Copied to clipboard!');
 
   const handleNameChange = (event) => setName(event.target.value);
 
   const handleSlugChange = (event) => setSlug(event.target.value);
+  
+  const handleAiContextChange = (event) => setAiContext(event.target.value);
 
   useEffect(() => {
     setName(workspace.name);
     setSlug(workspace.slug);
+    setAiContext(workspace.aiContext || '');
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
 
@@ -180,6 +203,32 @@ const General = ({ isTeamOwner, workspace }) => {
               </CopyToClipboard>
             </div>
           </Card.Body>
+        </Card>
+        <Card>
+          <Card.Body
+            title="AI Business Context"
+            subtitle="Describe your company, products, and sales style to help Closify AI suggest better replies and insights."
+          >
+            <textarea
+              className="px-3 py-2 border rounded w-full h-32 resize-none text-sm"
+              disabled={isSubmitting || !isTeamOwner}
+              onChange={handleAiContextChange}
+              placeholder="Ex: We are a high-end real estate agency focused on luxury apartments in São Paulo. Our sales style is professional yet friendly, focusing on the long-term investment value..."
+              value={aiContext}
+            />
+          </Card.Body>
+          <Card.Footer>
+            <small>Maximum 5000 characters recommendation for best results.</small>
+            {isTeamOwner && (
+              <Button
+                className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20"
+                disabled={isSubmitting}
+                onClick={changeAiContext}
+              >
+                Update AI Context
+              </Button>
+            )}
+          </Card.Footer>
         </Card>
 
         {/* Presets Card */}

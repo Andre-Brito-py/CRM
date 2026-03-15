@@ -116,4 +116,14 @@
 .premium-tour-popover .driver-popover-prev-btn {
   @apply text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors text-sm font-bold !important;
   background: transparent !important;
-}
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 3s ease-in-out infinite;
+}
+

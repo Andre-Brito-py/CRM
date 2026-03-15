@@ -94,8 +94,9 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
   const amount = Math.ceil((Number(tokens) * Number(pricePer1M) * 100) / 1_000_000);
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
-  await stripe.invoiceItems.create({
+  const invoiceItem = await stripe.invoiceItems.create({
     customer: stripeCustomerId,
+    ...(subscriptionId ? { subscription: String(subscriptionId) } : {}),
     currency,
     amount,
     description: `AI overage (${Number(tokens)} tokens) - workspace ${workspace.slug}`,
@@ -109,7 +110,13 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     },
   });
 
-  return { currency, amount };
+  return {
+    currency,
+    amount,
+    stripeCustomerId,
+    subscriptionId,
+    invoiceItemId: invoiceItem?.id || null,
+  };
 };
 
 const buildTranscript = (messages, contactName) => {
@@ -217,18 +224,29 @@ const handler = async (req, res) => {
       });
     }
 
-    const prompt = `Resuma esta conversa de atendimento ao cliente em 3-5 pontos concisos. Identifique: (1) o problema ou necessidade principal, (2) o que foi dito/prometido, e (3) o próximo passo recomendado. Seja objetivo.\n\nTranscrição:\n${transcript}`;
+    const prompt = `
+      Resuma esta conversa de atendimento ao cliente em 3-5 pontos concisos. 
+      Identifique: (1) o problema ou necessidade principal, (2) o que foi dito/prometido, e (3) o próximo passo recomendado.
+      
+      Contexto da Empresa:
+      ${workspace.aiContext || 'Não fornecido.'}
+
+      Transcrição:
+      ${transcript}
+    `;
     const systemMessage = 'Você é um agente de suporte senior analisando conversas. Responda sempre em Português.';
 
     const overageSettings = await getAiOverageSettings();
     let quota = null;
     let overage = null;
     let overageMode = false;
+    let tokensEstimated = null;
 
     const tokensPerDay = Number(limits.aiTokens24h || 0);
     if (Number.isFinite(tokensPerDay) && tokensPerDay > 0) {
       const estimatedPromptTokens = estimateTokens(systemMessage) + estimateTokens(prompt);
       const estimatedTotalTokens = estimatedPromptTokens + 300;
+      tokensEstimated = estimatedTotalTokens;
 
       const rlTokens = await rateLimit({
         req,
@@ -323,21 +341,56 @@ const handler = async (req, res) => {
     const data = await response.json();
     const summary = data.choices[0]?.message?.content?.trim();
 
-    if (overageMode) {
-      const tokens = Number(data?.usage?.total_tokens || 0);
-      if (Number.isFinite(tokens) && tokens > 0) {
-        try {
-          await billAiOverage({
-            workspace,
-            requestId,
-            userId,
-            tokens,
-            pricePer1M: overageSettings.pricePer1M,
-          });
-        } catch (error) {
-          log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
-        }
+    const tokensTotal = Number(data?.usage?.total_tokens || 0);
+    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+
+    let billingResult = null;
+    if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      try {
+        billingResult = await billAiOverage({
+          workspace,
+          requestId,
+          userId,
+          tokens: tokensTotal,
+          pricePer1M: overageSettings.pricePer1M,
+        });
+      } catch (error) {
+        log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
       }
+    }
+
+    if (Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      prisma.aiUsageEvent?.create?.({
+        data: {
+          workspaceId: workspace.id,
+          userId: userId || null,
+          requestId,
+          route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/summarize',
+          provider: 'openai',
+          model: 'gpt-3.5-turbo',
+          tokensTotal: Math.max(0, Math.floor(tokensTotal)),
+          tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
+          tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,
+          tokensEstimated: Number.isFinite(tokensEstimated) && tokensEstimated > 0 ? Math.floor(tokensEstimated) : null,
+          overageMode,
+          billedAmount: billingResult?.amount ?? null,
+          billedCurrency: billingResult?.currency ?? null,
+          stripeCustomerId: billingResult?.stripeCustomerId ?? null,
+          stripeSubscriptionId: billingResult?.subscriptionId ?? null,
+          stripeInvoiceItemId: billingResult?.invoiceItemId ?? null,
+        },
+      })
+        ?.catch((error) => {
+          log({
+            level: 'error',
+            msg: 'ai_usage_log_failed',
+            requestId,
+            workspaceId: workspace.id,
+            userId,
+            error,
+          });
+        });
     }
 
     res.status(200).json({

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
-import { getSession } from 'next-auth/react';
+import { getSession, useSession } from 'next-auth/react';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import Content from '@/components/Content/index';
@@ -14,14 +14,14 @@ import AddTaskModal from '@/sections/tasks/AddTaskModal';
 import { useWorkspace } from '@/providers/workspace';
 import api from '@/lib/common/api';
 import toast from 'react-hot-toast';
-import { getWorkspace } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import fetcher from '@/lib/client/fetcher';
 
-const ContactDetails = ({ workspace }) => {
+const ContactDetails = ({ workspace, isTeamOwner }) => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const { workspaceSlug, contactId } = router.query;
+  const { data: session } = useSession();
   const { setWorkspace } = useWorkspace();
   const { contact, isLoading, mutate } = useContact(workspaceSlug, contactId);
   const { tags: allTags, mutate: mutateTags } = useTags(workspaceSlug);
@@ -171,6 +171,22 @@ const ContactDetails = ({ workspace }) => {
 
       if (response?.error) {
         toast.error(response.error.msg || 'Failed to create payment');
+        if (response?.error?.code === 'PAYMENT_NOT_CONFIGURED') {
+          const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
+          const isOwner = !isSuperAdmin && Boolean(isTeamOwner);
+          const target = isSuperAdmin
+            ? `/admin/finance/workspace-payment-settings?workspaceSlug=${encodeURIComponent(String(workspaceSlug || ''))}`
+            : isOwner
+              ? String(response?.error?.cta || `/account/${workspaceSlug}/settings/payments`)
+              : null;
+
+          if (target) {
+            const go = confirm('Pagamentos não configurados para este workspace. Abrir configurações agora?');
+            if (go) {
+              router.push(target);
+            }
+          }
+        }
         return;
       }
 
@@ -756,14 +772,20 @@ const ContactDetails = ({ workspace }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
+  let isTeamOwner = false;
   let workspace = null;
 
   if (session) {
+    const { getWorkspace, isWorkspaceOwner } = await import('@/prisma/services/workspace');
     workspace = await getWorkspace(
       session.user.userId,
       session.user.email,
       context.params.workspaceSlug
     );
+
+    if (workspace) {
+      isTeamOwner = isWorkspaceOwner(session.user.email, workspace);
+    }
   }
 
   if (!workspace) {
@@ -772,6 +794,7 @@ export const getServerSideProps = async (context) => {
 
   return {
     props: {
+      isTeamOwner,
       workspace,
     },
   };

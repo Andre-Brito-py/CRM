@@ -88,8 +88,9 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
   const amount = Math.ceil((Number(tokens) * Number(pricePer1M) * 100) / 1_000_000);
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
-  await stripe.invoiceItems.create({
+  const invoiceItem = await stripe.invoiceItems.create({
     customer: stripeCustomerId,
+    ...(subscriptionId ? { subscription: String(subscriptionId) } : {}),
     currency,
     amount,
     description: `AI overage (${Number(tokens)} tokens) - workspace ${workspace.slug}`,
@@ -103,7 +104,13 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     },
   });
 
-  return { currency, amount };
+  return {
+    currency,
+    amount,
+    stripeCustomerId,
+    subscriptionId,
+    invoiceItemId: invoiceItem?.id || null,
+  };
 };
 
 const handler = async (req, res) => {
@@ -180,7 +187,21 @@ const handler = async (req, res) => {
       },
       include: {
         stage: true,
-        contact: true
+        contact: {
+          include: {
+            conversations: {
+              where: { deletedAt: null },
+              orderBy: { updatedAt: 'desc' },
+              take: 1,
+              include: {
+                messages: {
+                  orderBy: { createdAt: 'desc' },
+                  take: 5
+                }
+              }
+            }
+          }
+        }
       }
     });
 
@@ -206,27 +227,47 @@ const handler = async (req, res) => {
       return `- ${stage.name}: ${stageDeals.length} negócios, Valor Total: ${totalValue}`;
     }).join('\n');
 
+    const dealsSummary = deals.map(d => {
+      const lastMessages = d.contact?.conversations?.[0]?.messages?.map(m => `[${m.direction}] ${m.content.slice(0, 100)}`).join('\n') || 'No messages';
+      return `Deal ID: ${d.id}, Name: ${d.name}, Amount: ${d.amount}, Stage: ${d.stage.name}, Last Messages:\n${lastMessages}`;
+    }).join('\n\n');
+
     const prompt = `
-      Analise os dados deste pipeline de vendas e forneça insights estratégicos curtos (máx 3 pontos).
-      Nome do Pipeline: ${pipeline.name}
-      Resumo por Estágio:
+      Analyze this sales pipeline and provide:
+      1. Strategic insights (short, max 3 points).
+      2. For each deal, predict the success probability (0-100%) and identify if it needs urgent follow-up.
+
+      Company Context:
+      ${workspace.aiContext || 'No specific context provided.'}
+
+      Pipeline Summary:
       ${stagesSummary}
       
-      Total de Negócios: ${deals.length}
+      Deals Data:
+      ${dealsSummary}
       
-      Destaque gargalos ou oportunidades.
+      Return the result as a raw JSON object with this structure:
+      {
+        "insights": "General strategic analysis...",
+        "deals": [
+          { "id": "deal-id", "probability": number, "urgency": "low" | "medium" | "high", "reason": "short explanation" }
+        ]
+      }
+      Only return the JSON.
     `;
 
-    const systemMessage = 'You are a sales manager analyst.';
+    const systemMessage = 'You are an expert sales analyst and manager.';
     const overageSettings = await getAiOverageSettings();
     let quota = null;
     let overage = null;
     let overageMode = false;
+    let tokensEstimated = null;
 
     const tokensPerDay = Number(limits.aiTokens24h || 0);
     if (Number.isFinite(tokensPerDay) && tokensPerDay > 0) {
       const estimatedPromptTokens = estimateTokens(systemMessage) + estimateTokens(prompt);
       const estimatedTotalTokens = estimatedPromptTokens + 400;
+      tokensEstimated = estimatedTotalTokens;
 
       const rlTokens = await rateLimit({
         req,
@@ -316,28 +357,73 @@ const handler = async (req, res) => {
     }
 
     const data = await response.json();
-    const insights = data.choices[0]?.message?.content?.trim();
+    let result = { insights: "Unable to parse AI response", deals: [] };
 
-    if (overageMode) {
-      const tokens = Number(data?.usage?.total_tokens || 0);
-      if (Number.isFinite(tokens) && tokens > 0) {
-        try {
-          await billAiOverage({
-            workspace,
-            requestId,
-            userId,
-            tokens,
-            pricePer1M: overageSettings.pricePer1M,
-          });
-        } catch (error) {
-          log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
-        }
+    try {
+      const content = data.choices[0]?.message?.content?.trim();
+      // Remove markdown code blocks if present
+      const jsonStr = content.replace(/^```json\n?/, '').replace(/```$/, '').trim();
+      result = JSON.parse(jsonStr);
+    } catch (e) {
+      log({ level: 'error', msg: 'ai_insights_parse_error', requestId, workspaceId: workspace.id, error: e.message });
+      result.insights = data.choices[0]?.message?.content?.trim();
+    }
+
+    const tokensTotal = Number(data?.usage?.total_tokens || 0);
+    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+
+    let billingResult = null;
+    if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      try {
+        billingResult = await billAiOverage({
+          workspace,
+          requestId,
+          userId,
+          tokens: tokensTotal,
+          pricePer1M: overageSettings.pricePer1M,
+        });
+      } catch (error) {
+        log({ level: 'error', msg: 'ai_overage_billing_failed', requestId, workspaceId: workspace.id, userId, error });
       }
+    }
+
+    if (Number.isFinite(tokensTotal) && tokensTotal > 0) {
+      prisma.aiUsageEvent?.create?.({
+        data: {
+          workspaceId: workspace.id,
+          userId: userId || null,
+          requestId,
+          route: '/api/workspace/[workspaceSlug]/pipelines/[pipelineId]/insights',
+          provider: 'openai',
+          model: 'gpt-3.5-turbo',
+          tokensTotal: Math.max(0, Math.floor(tokensTotal)),
+          tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
+          tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,
+          tokensEstimated: Number.isFinite(tokensEstimated) && tokensEstimated > 0 ? Math.floor(tokensEstimated) : null,
+          overageMode,
+          billedAmount: billingResult?.amount ?? null,
+          billedCurrency: billingResult?.currency ?? null,
+          stripeCustomerId: billingResult?.stripeCustomerId ?? null,
+          stripeSubscriptionId: billingResult?.subscriptionId ?? null,
+          stripeInvoiceItemId: billingResult?.invoiceItemId ?? null,
+        },
+      })
+        ?.catch((error) => {
+          log({
+            level: 'error',
+            msg: 'ai_usage_log_failed',
+            requestId,
+            workspaceId: workspace.id,
+            userId,
+            error,
+          });
+        });
     }
 
     res.status(200).json({
       data: {
-        insights,
+        ...result,
         provider: 'openai',
         quota,
         overage: overage || {

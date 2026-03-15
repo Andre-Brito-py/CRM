@@ -5,6 +5,7 @@ import { isModuleAllowed } from '@/lib/server/subscription';
 import { createMessage, createConversation } from '@/prisma/services/conversation';
 import { createActivity } from '@/prisma/services/activity';
 import { renderTemplateString } from '@/prisma/services/template';
+import { getSystemConfig } from '@/lib/server/config';
 import crypto from 'crypto';
 
 const MAX_AUTOMATION_JOB_ATTEMPTS = 5;
@@ -531,6 +532,11 @@ export const simulateAutomationRule = async (workspaceId, rule, eventData) => {
     preview.tagId = actionConfig?.tagId || null;
   }
 
+  if (actionType === 'SEND_NPS') {
+    preview.surveyId = actionConfig?.surveyId || null;
+    preview.channel = actionConfig?.channel || 'whatsapp';
+  }
+
   if (actionType === 'CALL_WEBHOOK') {
     preview.eventName = actionConfig?.eventName || rule?.triggerType;
   }
@@ -605,6 +611,9 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
       break;
     case 'SEND_NOTIFICATION':
       await executeSendNotificationAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'SEND_NPS':
+      await executeSendNpsAction(workspaceId, actionConfig, eventData);
       break;
     default:
       console.warn(`Unknown action type: ${actionType}`);
@@ -1262,5 +1271,135 @@ const executeSendNotificationAction = async (workspaceId, actionConfig, eventDat
   } catch (error) {
     console.error('Failed to execute Send Notification automation:', error);
     throw error;
+  }
+};
+
+const executeSendNpsAction = async (workspaceId, actionConfig, eventData) => {
+  const DEFAULT_QUESTION = 'Em uma escala de 0 a 10, o quanto você recomendaria nossa empresa para um amigo?';
+  
+  const {
+    surveyId,
+    channel = 'whatsapp',
+    integrationId: configIntegrationId,
+    message: messageTemplate = '',
+    subject: subjectTemplate = '',
+  } = actionConfig;
+
+  if (!surveyId) {
+    console.warn('Missing surveyId for SEND_NPS action');
+    return;
+  }
+
+  let contactId = eventData.contactId || eventData.contact?.id || null;
+  if (!contactId && eventData.dealId) {
+    const deal = await prisma.deal.findFirst({
+      where: { id: eventData.dealId, workspaceId },
+      select: { contactId: true },
+    });
+    contactId = deal?.contactId || null;
+  }
+
+  if (!contactId) {
+    console.warn('No contact found for NPS automation');
+    return;
+  }
+
+  const [survey, contact] = await Promise.all([
+    prisma.npsSurvey.findFirst({
+      where: { id: surveyId, workspaceId },
+      select: { id: true, name: true },
+    }),
+    prisma.contact.findFirst({
+      where: { id: contactId, workspaceId },
+      select: { id: true, name: true, email: true, phone: true },
+    }),
+  ]);
+
+  if (!survey || !contact) {
+    console.warn('Survey or Contact not found for NPS automation');
+    return;
+  }
+
+  // Generate public URL
+  const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000');
+  const link = `${appUrl}/nps/respond/${survey.id}/${contact.id}`;
+
+  const message = messageTemplate ? await renderTemplateString(workspaceId, messageTemplate, eventData) : '';
+  const subject = subjectTemplate ? await renderTemplateString(workspaceId, subjectTemplate, eventData) : `Pesquisa NPS - ${survey.name}`;
+  const body = `${message ? `${message}\n\n` : ''}${DEFAULT_QUESTION}\n\n${link}`;
+
+  if (channel === 'whatsapp') {
+    let integrationId = configIntegrationId;
+    if (!integrationId) {
+      const defaultIntegration = await prisma.integration.findFirst({
+        where: { workspaceId, provider: 'WHATSAPP', enabled: true },
+        select: { id: true },
+      });
+      integrationId = defaultIntegration?.id;
+    }
+
+    if (!integrationId || !contact.phone) {
+      console.warn('Missing integration or phone for NPS WhatsApp');
+      return;
+    }
+
+    const wamid = await sendWhatsAppMessage(integrationId, contact.phone, body);
+
+    // 1. Check if conversation exists or create one
+    let conversation = await prisma.conversation.findFirst({
+      where: { workspaceId, contactId, platform: 'WHATSAPP' },
+    });
+
+    if (!conversation) {
+      conversation = await createConversation(workspaceId, {
+        contactId,
+        platform: 'WHATSAPP',
+        externalId: contact.phone
+      });
+    }
+
+    // 2. Log in Database
+    await createMessage(conversation.id, {
+      direction: 'OUTBOUND',
+      type: 'TEXT',
+      content: body,
+      status: 'SENT',
+      externalId: wamid
+    });
+  } else if (channel === 'email') {
+    const enabled = await isModuleAllowed(workspaceId, 'email_marketing');
+    if (!enabled || !contact.email) {
+      console.warn('Email marketing disabled or no email for contact');
+      return;
+    }
+
+    const info = await sendMail({
+      to: contact.email,
+      subject,
+      text: body,
+      html: `<p>${message.replace(/\n/g, '<br/>')}</p><p>${DEFAULT_QUESTION}</p><p><a href="${link}">${link}</a></p>`,
+    });
+
+    // 1. Check if conversation exists or create one
+    let conversation = await prisma.conversation.findFirst({
+      where: { workspaceId, contactId, platform: 'EMAIL' },
+    });
+
+    if (!conversation) {
+      conversation = await createConversation(workspaceId, {
+        contactId,
+        platform: 'EMAIL',
+        externalId: contact.email
+      });
+    }
+
+    // 2. Log in Database
+    await createMessage(conversation.id, {
+      direction: 'OUTBOUND',
+      type: 'EMAIL',
+      content: `Assunto: ${subject}\n\n${body}`,
+      status: 'SENT',
+      externalId: info?.messageId ? String(info.messageId) : null,
+    });
   }
 };

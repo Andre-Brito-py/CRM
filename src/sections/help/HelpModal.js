@@ -25,6 +25,11 @@ import {
   BriefcaseIcon,
   WrenchScrewdriverIcon,
   CakeIcon,
+  ShieldCheckIcon,
+  CommandLineIcon,
+  CpuChipIcon,
+  ArrowPathRoundedSquareIcon,
+  PresentationChartLineIcon
 } from '@heroicons/react/24/outline';
 
 const sanitizeHelpHtml = (input) => {
@@ -94,15 +99,16 @@ const sanitizeHelpHtml = (input) => {
 
 /* ─── Static help categories (content from i18n) ───────────────────── */
 const HELP_CATEGORIES = [
-  { key: 'crm', icon: PhoneIcon },
+  { key: 'crm', icon: UsersIcon },
   { key: 'pipelines', icon: RectangleStackIcon },
+  { key: 'ai_context', icon: CpuChipIcon },
   { key: 'inbox', icon: InboxIcon },
+  { key: 'nps', icon: PresentationChartLineIcon },
   { key: 'tasks', icon: CheckCircleIcon },
   { key: 'custom_fields', icon: Cog6ToothIcon },
-  { key: 'automations', icon: BoltIcon },
-  { key: 'analytics', icon: ChartBarIcon },
-  { key: 'integrations', icon: PuzzlePieceIcon },
-  { key: 'presets', icon: RocketLaunchIcon },
+  { key: 'automations', icon: ArrowPathRoundedSquareIcon },
+  { key: 'analytics', icon: SparklesIcon },
+  { key: 'integrations', icon: GlobeAltIcon },
   { key: 'billing', icon: CreditCardIcon },
   { key: 'team', icon: UsersIcon },
 ];
@@ -367,12 +373,13 @@ const TUTORIAL_CONTENT = {
           ].map((p) => {
             const Icon = p.icon;
             return (
-            <div key={p.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
-              <div className="text-blue-600 dark:text-blue-400 mb-2"><Icon className="w-6 h-6" /></div>
-              <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mb-1">{p.name}</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{p.desc}</p>
-            </div>
-          )})}
+              <div key={p.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
+                <div className="text-blue-600 dark:text-blue-400 mb-2"><Icon className="w-6 h-6" /></div>
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mb-1">{p.name}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{p.desc}</p>
+              </div>
+            )
+          })}
         </div>
 
         <div className="space-y-4 mt-2">
@@ -631,6 +638,88 @@ const TUTORIAL_CONTENT = {
       </div>
     ),
   },
+  audit_lgpd: {
+    icon: ShieldCheckIcon,
+    title: 'Segurança & Auditoria',
+    subtitle: 'Proteção de dados e conformidade',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          O Closify registra todas as ações sensíveis para garantir total transparência e conformidade com a LGPD.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title="Trilha de Auditoria" desc="Veja quem acessou o sistema, de qual IP e quais registros foram exportados ou deletados." />
+          <Step number={2} title="Autenticação 2FA" desc="Habilite a camada extra de segurança via Google Authenticator nas suas configurações de perfil." />
+          <Step number={3} title="Conformidade LGPD" desc="Utilize nossas ferramentas de anonimização e exclusão permanente de dados de contatos." />
+        </div>
+        <TipBox>
+          Logs de auditoria não podem ser deletados nem por administradores, garantindo a integridade dos dados da sua empresa.
+        </TipBox>
+      </div>
+    ),
+  },
+  finops: {
+    icon: ChartBarIcon,
+    title: 'FinOps & Custos',
+    subtitle: 'Gestão visual de recursos',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Monitore o consumo de recursos e a saúde financeira da sua operação em tempo real.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title="Dashboard de Uso" desc="Acompanhe o consumo de mensagens de WhatsApp e créditos de IA (ChatGPT)." />
+          <Step number={2} title="Estimativa de Custos" desc="Veja o valor projetado da sua fatura com base no uso de APIs de terceiros." />
+          <Step number={3} title="Gestão de Limites" desc="Configure alertas para ser notificado antes de atingir 80% da sua cota mensal." />
+        </div>
+        <TipBox>
+          O Dashboard recalcula os custos a cada 1 hora. Fique atento aos créditos de IA para não interromper suas automações.
+        </TipBox>
+      </div>
+    ),
+  },
+  advanced_integrations: {
+    icon: CommandLineIcon,
+    title: 'Integrações & API',
+    subtitle: 'Zapier e Conectividade',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Conecte o Closify a mais de 5.000 aplicativos através do Zapier ou integrações via API.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title="Chaves de API" desc="Gere chaves de acesso únicas por workspace para integrar seu sistema proprietário." />
+          <Step number={2} title="Webhooks Assinados" desc="Utilizamos assinaturas HMAC para garantir que os dados vieram do Closify." />
+          <Step number={3} title="Zapier Catch Hooks" desc="Receba leads de qualquer lugar do mundo e crie contatos automaticamente no Closify." />
+        </div>
+        <TipBox>
+          Para maior segurança, nunca compartilhe suas chaves de API por canais não criptografados.
+        </TipBox>
+      </div>
+    ),
+  },
+  instagram: {
+    icon: SparklesIcon,
+    title: 'Instagram Direct',
+    subtitle: 'Inbox Omnichannel',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          Conecte seu Instagram Business para receber e responder Direct Messages diretamente pelo Closify.
+        </p>
+        <div className="space-y-4">
+          <Step number={1} title='Acesse Configurações → Integrações → Instagram' desc='No menu superior, clique em "Configurações" e selecione "Instagram Direct" na lista de integrações.' />
+          <Step number={2} title='Prepare sua conta Meta' desc='Certifique-se de que sua conta do Instagram é do tipo "Business" e está vinculada a uma Página do Facebook.' />
+          <Step number={3} title='Clique em "+ Adicionar Conta Instagram"' desc='Preencha os campos: Nome Amigável, ID da Página, ID do Instagram e o Token de Acesso (gerado no Meta Developers).' />
+          <Step number={4} title='Configure o Webhook' desc='Copie a URL de Webhook exibida no Closify e cole no seu App da Meta, configurando o token de verificação que você definiu.' />
+          <Step number={5} title='Tudo pronto!' desc='As mensagens enviadas para seu Instagram agora aparecerão em sua Inbox Omnichannel.' />
+        </div>
+        <TipBox>
+          Lembre-se de ativar a permissão de &quot;Acesso a Mensagens&quot; nas configurações do seu App na Meta para que o sistema consiga ler os Directs.
+        </TipBox>
+      </div>
+    ),
+  },
 };
 
 /* ─── All tutorial keys for sidebar nav ────────────────────────────── */
@@ -651,8 +740,8 @@ const HelpModal = ({ isOpen, toggle }) => {
   const filteredTutorials = TUTORIAL_KEYS.filter((key) => {
     const tut = TUTORIAL_CONTENT[key];
     const term = searchQuery.toLowerCase();
-    return (tut.title?.toLowerCase() || '').includes(term) || 
-           (tut.subtitle?.toLowerCase() || '').includes(term);
+    return (tut.title?.toLowerCase() || '').includes(term) ||
+      (tut.subtitle?.toLowerCase() || '').includes(term);
   });
 
   return (

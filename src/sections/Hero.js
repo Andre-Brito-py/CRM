@@ -166,7 +166,7 @@ const Hero = () => {
         >
           <motion.div variants={itemVariants} className="inline-flex items-center px-4 py-1.5 mb-8 text-sm font-medium text-indigo-300 bg-indigo-500/10 rounded-full border border-indigo-500/20 backdrop-blur-sm">
             <span className="flex h-2 w-2 rounded-full bg-indigo-500 mr-2 animate-pulse" />
-            V1.4 Premium Edition
+            V1.5 Cloud Edition
           </motion.div>
           
           <motion.h1 variants={itemVariants} className="text-5xl font-extrabold tracking-tight text-white sm:text-7xl font-executive">
@@ -197,7 +197,7 @@ const Hero = () => {
             
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
-                href="#demo"
+                href="/demo"
                 className="flex items-center justify-center w-full px-8 py-4 text-lg font-bold text-zinc-300 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 hover:text-white transition-all sm:w-auto backdrop-blur-md"
               >
                 {t("landing.hero.viewDemo")}

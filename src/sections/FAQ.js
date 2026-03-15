@@ -3,31 +3,36 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from "react-i18next";
 
-const faqs = [
+const getFaqs = (t) => [
   {
-    question: "Como funciona a Inteligência Artificial no Closify CRM?",
-    answer: "Nossa IA analisa todo o histórico de conversas e o contexto da sua empresa para sugerir respostas baseadas em gatilhos de vendas. Ela também resume longas reuniões e sinaliza quais negócios (Deals) estão com probabilidade de sucesso (Pipeline Insights) e quais precisam de follow-up urgente.",
+    question: t("landing.faq.q1", "Como o Closify CRM garante a segurança dos meus dados?"),
+    answer: t("landing.faq.a1", "Utilizamos isolamento multi-tenant rigoroso, criptografia de ponta e trilhas de auditoria para todas as ações sensíveis. Além disso, oferecemos ferramentas nativas para conformidade com a LGPD."),
   },
   {
-    question: "Posso conectar meu WhatsApp e Instagram direto na plataforma?",
-    answer: "Sim! Com a integração Omnichannel, todas as mensagens de WhatsApp, Instagram Direct e E-mail chegam na mesma caixa de entrada da sua equipe. Você não precisa ficar trocando de aba e ainda pode acionar automações No-code para responder dúvidas fora de hora.",
+    question: t("landing.faq.q2", "Posso automatizar o envio de pesquisas de satisfação?"),
+    answer: t("landing.faq.a2", "Sim! Nosso módulo de NPS permite criar pesquisas e dispará-las automaticamente via WhatsApp ou E-mail com base em gatilhos do seu funil de vendas."),
   },
   {
-    question: "O que significa 'criar ferramentas No-code' internamente?",
-    answer: "O Closify permite que você crie campos personalizados (Custom Fields) ilimitados, formulários dinâmicos de captura (Webhooks) e defina réguas de automação complexas de disparo sem escrever uma única linha de código. Você adapta o CRM ao seu processo, e não o contrário.",
+    question: t("landing.faq.q3", "Como funcionam as integrações via API e Zapier?"),
+    answer: t("landing.faq.a3", "Oferecemos chaves de API por workspace e suporte nativo a webhooks. Você pode conectar o Closify a mais de 5.000 aplicativos através do Zapier ou Make com facilidade."),
   },
   {
-    question: "Existe limite de contatos ou usuários?",
-    answer: "A arquitetura do Closify foi validada para alta performance, suportando volumes altíssimos. Os limites mensais variam APENAS de acordo com o plano contratado da nuvem ou os pacotes Premium da empresa que forneceu o CRM para você. Contate o Suporte para limites de Enterprise.",
+    question: t("landing.faq.question.ia", "Como funciona a Inteligência Artificial no Closify CRM?"),
+    answer: t("landing.faq.answer.ia", "Nossa IA analisa todo o histórico de conversas e o contexto da sua empresa para sugerir respostas baseadas em gatilhos de vendas. Ela também resume longas reuniões e sinaliza quais negócios (Deals) estão com probabilidade de sucesso (Pipeline Insights) e quais precisam de follow-up urgente."),
   },
   {
-    question: "Como migro meus contatos de outro CRM (ex: Pipedrive ou HubSpot)?",
-    answer: "Temos ferramentas nativas de importação via CSV ou integração direta por API (Zapier/Make). Sua equipe de Onboarding estará ajudando no processo sem custos adicionais nos pacotes anuais de alto nível.",
-  }
+    question: t("landing.faq.question.omnichannel", "Posso conectar meu WhatsApp e Instagram direto na plataforma?"),
+    answer: t("landing.faq.answer.omnichannel", "Sim! Com a integração Omnichannel, todas as mensagens de WhatsApp, Instagram Direct e E-mail chegam na mesma caixa de entrada da sua equipe. Você não precisa ficar trocando de aba e ainda pode acionar automações No-code para responder dúvidas fora de hora."),
+  },
+  {
+    question: t("landing.faq.question.nocode", "O que significa 'criar ferramentas No-code' internamente?"),
+    answer: t("landing.faq.answer.nocode", "O Closify permite que você crie campos personalizados (Custom Fields) ilimitados, formulários dinâmicos de captura (Webhooks) e defina réguas de automação complexas de disparo sem escrever uma única linha de código. Você adapta o CRM ao seu processo, e não o contrário."),
+  },
 ];
 
 const FAQ = () => {
   const { t } = useTranslation();
+  const faqs = getFaqs(t);
   const [openIndex, setOpenIndex] = useState(0); // O primeiro item começa aberto
 
   return (

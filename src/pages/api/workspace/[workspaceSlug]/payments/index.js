@@ -11,6 +11,12 @@ import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
 import { createAuditActivity } from '@/prisma/services/activity';
 
+const normalizeBillingType = (value) => {
+  const t = String(value || '').trim().toUpperCase();
+  if (t === 'BOLETO' || t === 'CREDIT_CARD' || t === 'PIX') return t;
+  return 'PIX';
+};
+
 const handler = async (req, res) => {
   const { method } = req;
   const { workspaceSlug } = req.query;
@@ -78,6 +84,12 @@ const handler = async (req, res) => {
         return res.status(400).json({ error: { msg: 'Invalid value' } });
       }
 
+      const normalizedBillingType = normalizeBillingType(billingType);
+      const dueDateObj = dueDate ? new Date(dueDate) : null;
+      if (dueDate && (!dueDateObj || Number.isNaN(dueDateObj.getTime()))) {
+        return res.status(400).json({ error: { msg: 'Invalid dueDate' } });
+      }
+
       const deal = dealId
         ? await prisma.deal.findFirst({
           where: { id: dealId, workspaceId: workspace.id, deletedAt: null },
@@ -100,23 +112,6 @@ const handler = async (req, res) => {
       const { percentage, fixed } = await getPlatformFeeSettings(workspace.id);
       const { platformFee, netAmount } = calculateFees({ amount: parsedValue, percentage, fixed });
 
-      const localPayment = await prisma.payment.create({
-        data: {
-          workspaceId: workspace.id,
-          contactId: contact.id,
-          dealId: deal?.id || (dealId || null),
-          amount: parsedValue,
-          value: parsedValue,
-          platformFee,
-          netAmount,
-          description: description || null,
-          billingType,
-          dueDate: dueDate ? new Date(dueDate) : null,
-          status: 'PENDING',
-          externalReference: null,
-        },
-      });
-
       const provider = await getProvider(workspace.id);
       const providerName = String(provider?.provider?.name || '').toLowerCase();
       const paymentSetting = await prisma.workspacePaymentSetting.findUnique({
@@ -124,17 +119,15 @@ const handler = async (req, res) => {
         select: { providerAccountId: true },
       });
       const providerAccountId = paymentSetting?.providerAccountId || null;
-      if (providerName === 'asaas' && platformFee > 0 && !providerAccountId) {
-        warnings.push('Monetização: defina Provider Account (walletId) para habilitar split no Asaas.');
-      }
-      if (providerName === 'mercadopago' && platformFee > 0 && !providerAccountId) {
-        warnings.push('Monetização: defina Provider Account (collector_id) para habilitar taxa no Mercado Pago.');
-      }
-      if (providerName === 'pagarme' && platformFee > 0 && !providerAccountId) {
-        warnings.push('Monetização: defina Provider Account (recipient_id) para habilitar split no Pagar.me.');
-      }
-      if (providerName === 'stripe' && platformFee > 0) {
-        warnings.push('Monetização: Stripe sem split automático (necessário Stripe Connect para dividir valores).');
+      const requiresRecipientAccount = ['asaas', 'mercadopago', 'pagarme', 'stripe'].includes(providerName);
+      if (requiresRecipientAccount && !providerAccountId) {
+        return res.status(400).json({
+          error: {
+            code: 'PAYMENT_NOT_CONFIGURED',
+            msg: 'Pagamento não configurado. Cadastre sua conta recebedora para receber repasses.',
+            cta: `/account/${workspaceSlug}/settings/payments`,
+          },
+        });
       }
 
       let providerCustomerId = null;
@@ -158,13 +151,30 @@ const handler = async (req, res) => {
         }
       }
 
+      const localPayment = await prisma.payment.create({
+        data: {
+          workspaceId: workspace.id,
+          contactId: contact.id,
+          dealId: deal?.id || (dealId || null),
+          amount: parsedValue,
+          value: parsedValue,
+          platformFee,
+          netAmount,
+          description: description ? String(description).trim() : null,
+          billingType: normalizedBillingType,
+          dueDate: dueDateObj,
+          status: 'PENDING',
+          externalReference: null,
+        },
+      });
+
       const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
       const paymentResult = await provider.createPayment({
         customerId: providerCustomerId,
-        billingType,
+        billingType: normalizedBillingType,
         amount: parsedValue,
         currency: 'BRL',
-        dueDate: dueDate ? String(dueDate).slice(0, 10) : new Date().toISOString().slice(0, 10),
+        dueDate: dueDateObj ? dueDateObj.toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
         description,
         externalReference: localPayment.id,
         successUrl: appUrl ? `${appUrl}/account/${workspaceSlug}/payments?status=success` : undefined,
@@ -206,7 +216,7 @@ const handler = async (req, res) => {
           target: { paymentId: updated.id, contactId: contact.id, dealId: deal?.id || null },
           metadata: {
             amount: parsedValue,
-            billingType,
+            billingType: normalizedBillingType,
             status: updated.status,
             provider: providerName || null,
           },

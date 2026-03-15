@@ -104,6 +104,10 @@ const menu = (workspaceId) => [
         path: `/account/${workspaceId}/settings/payment-products`,
       },
       {
+        name: 'Pagamentos',
+        path: `/account/${workspaceId}/settings/payments`,
+      },
+      {
         name: 'settings.advanced',
         path: `/account/${workspaceId}/settings/advanced`,
       },

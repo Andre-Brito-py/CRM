@@ -256,6 +256,30 @@ const Analytics = () => {
         description: t('onboarding.tour.analytics.step1.desc'),
         position: 'bottom',
       }
+    },
+    {
+      element: '#analytics-whatsapp',
+      popover: {
+        title: 'Métricas de WhatsApp',
+        description: 'Veja o volume de mensagens recebidas e enviadas, além da tendência diária.',
+        position: 'top',
+      }
+    },
+    {
+      element: '#analytics-sellers',
+      popover: {
+        title: 'Performance do Time',
+        description: 'Compare a receita gerada e o número de negócios ganhos por cada vendedor.',
+        position: 'top',
+      }
+    },
+    {
+      element: '#analytics-funnel',
+      popover: {
+        title: 'Funil de Conversão',
+        description: 'Identifique em quais estágios você está perdendo mais leads.',
+        position: 'left',
+      }
     }
   ];
 
@@ -304,7 +328,7 @@ const Analytics = () => {
                 </Card.Body>
               </Card>
 
-              <Card>
+              <Card id="analytics-whatsapp">
                 <Card.Body title={t('analytics.whatsapp.title')}>
                   <div className="grid grid-cols-3 gap-3 mb-4">
                     <div className="rounded-lg bg-gray-50 border px-3 py-2">
@@ -345,7 +369,7 @@ const Analytics = () => {
                 </Card.Body>
               </Card>
 
-              <Card>
+              <Card id="analytics-sellers">
                 <Card.Body title={t('analytics.sellers.title')}>
                   {mounted ? (
                     <div className="h-64">
@@ -416,7 +440,7 @@ const Analytics = () => {
                 </Card.Body>
               </Card>
 
-              <Card>
+              <Card id="analytics-funnel">
                 <Card.Body title={t('analytics.salesFunnel.title')}>
                   {mounted ? (
                     <div className="h-64">

@@ -61,6 +61,7 @@ const handler = async (req, res) => {
 
         const { name, email, password } = req.body || {};
         const termsAccepted = req.body?.termsAccepted === true;
+        const twoFactorEnabled = req.body?.twoFactorEnabled === true;
         const planPriceId = req.body?.planPriceId ? String(req.body.planPriceId) : null;
         const normalizedEmail = String(email || '').trim().toLowerCase();
 
@@ -114,6 +115,7 @@ const handler = async (req, res) => {
                 password: hashedPassword,
                 termsVersion,
                 termsAcceptedAt: new Date(),
+                twoFactorEnabled: twoFactorEnabled || false,
             },
         });
 

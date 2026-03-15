@@ -21,6 +21,7 @@ const Pipeline = () => {
 
   // AI Insights
   const [aiInsights, setAiInsights] = useState(null);
+  const [dealInsights, setDealInsights] = useState({});
   const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
 
@@ -97,6 +98,11 @@ const Pipeline = () => {
                 toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
               }
               setAiInsights(retry.data.insights);
+              if (retry.data.deals) {
+                const insightsMap = {};
+                retry.data.deals.forEach(d => { insightsMap[d.id] = d; });
+                setDealInsights(insightsMap);
+              }
               toast.success('Insights generated!');
               return;
             }
@@ -114,6 +120,11 @@ const Pipeline = () => {
           toast(t('inbox.ai.quotaWarning', { remaining: String(r ?? ''), limit: String(l ?? '') }));
         }
         setAiInsights(response.data.insights);
+        if (response.data.deals) {
+          const insightsMap = {};
+          response.data.deals.forEach(d => { insightsMap[d.id] = d; });
+          setDealInsights(insightsMap);
+        }
         toast.success('Insights generated!');
       }
     } catch (error) {
@@ -209,7 +220,7 @@ const Pipeline = () => {
             <p className="text-zinc-500 font-bold tracking-[0.15em] text-xs uppercase">Orchestrating segments...</p>
           </div>
         ) : pipeline ? (
-          <PipelineBoard pipeline={pipeline} workspaceSlug={workspace?.slug} />
+          <PipelineBoard pipeline={pipeline} workspaceSlug={workspace?.slug} dealAiInsights={dealInsights} />
         ) : (
           <Content.Empty>
             No pipeline found. Please contact support.

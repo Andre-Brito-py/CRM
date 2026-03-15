@@ -97,6 +97,23 @@ export default async function handler(req, res) {
     const amount = Number(product.price || 0);
     const { platformFee, netAmount } = calculateFees({ amount, percentage, fixed });
 
+    const provider = await getProvider(workspace.id);
+    const providerName = String(provider?.provider?.name || '').toLowerCase();
+    const paymentSetting = await prisma.workspacePaymentSetting.findUnique({
+      where: { workspaceId: workspace.id },
+      select: { providerAccountId: true },
+    });
+    const providerAccountId = paymentSetting?.providerAccountId || null;
+    const requiresRecipientAccount = ['asaas', 'mercadopago', 'pagarme', 'stripe'].includes(providerName);
+    if (requiresRecipientAccount && !providerAccountId) {
+      return res.status(400).json({
+        error: {
+          code: 'PAYMENT_NOT_CONFIGURED',
+          msg: 'Pagamento indisponível. Contate o vendedor.',
+        },
+      });
+    }
+
     const localPayment = await prisma.payment.create({
       data: {
         workspaceId: workspace.id,
@@ -113,14 +130,6 @@ export default async function handler(req, res) {
         externalReference: null,
       },
     });
-
-    const provider = await getProvider(workspace.id);
-    const providerName = String(provider?.provider?.name || '').toLowerCase();
-    const paymentSetting = await prisma.workspacePaymentSetting.findUnique({
-      where: { workspaceId: workspace.id },
-      select: { providerAccountId: true },
-    });
-    const providerAccountId = paymentSetting?.providerAccountId || null;
 
     let providerCustomerId = null;
     if (providerName === 'asaas') {

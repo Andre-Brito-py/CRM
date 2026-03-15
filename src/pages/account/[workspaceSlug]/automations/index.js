@@ -43,7 +43,7 @@ const Automations = () => {
     triggerType: 'DEAL_STAGE_CHANGED',
     triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', operator: 'AND', hours: { start: null, end: null } },
     actionType: 'SEND_WHATSAPP',
-    actionConfig: { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
+    actionConfig: { surveyId: '', channel: 'whatsapp', templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', userIdToNotify: '', link: '' }
   });
 
   const automationSteps = [
@@ -89,6 +89,9 @@ const Automations = () => {
   const { data: tagsData } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/tags` : null
   );
+  const { data: npsSurveysData } = useSWR(
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/nps/surveys` : null
+  );
 
   const automations = automationsData?.data?.rules || automationsData?.data?.automations || [];
   const pipelines = pipelinesData?.data?.pipelines || [];
@@ -96,6 +99,7 @@ const Automations = () => {
   const members = membersData?.data?.members || [];
   const tags = tagsData?.data?.tags || [];
   const logs = logsData?.data?.logs || [];
+  const npsSurveys = npsSurveysData?.data?.surveys || [];
 
   // Helper to get all stages from all pipelines
   const allStages = pipelines.flatMap(p => p.stages || []);
@@ -111,7 +115,7 @@ const Automations = () => {
         triggerType: 'DEAL_STAGE_CHANGED',
         triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', operator: 'AND', hours: { start: null, end: null } },
         actionType: 'SEND_WHATSAPP',
-        actionConfig: { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' }
+        actionConfig: { surveyId: '', channel: 'whatsapp', templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' }
       });
     }
   };
@@ -235,6 +239,11 @@ const Automations = () => {
 
     if (newRule.actionType === 'SEND_NOTIFICATION' && (!newRule.actionConfig.userIdToNotify || !newRule.actionConfig.title)) {
       toast.error('User and Title are required for notifications');
+      return;
+    }
+
+    if (newRule.actionType === 'SEND_NPS' && !newRule.actionConfig.surveyId) {
+      toast.error(t('automations.validation.surveyRequired', 'A pesquisa NPS é obrigatória'));
       return;
     }
 
@@ -508,6 +517,16 @@ const Automations = () => {
       return (
         <span>
           Send Notification to <span className="ml-1 px-2 py-0.5 bg-orange-100 text-orange-800 rounded text-xs">{memberName}</span>
+        </span>
+      );
+    } else if (rule.actionType === 'SEND_NPS') {
+      const surveyName = npsSurveys.find(s => s.id === rule.actionConfig?.surveyId)?.name || t('automations.unknownSurvey', 'Pesquisa Desconhecida');
+      const channel = rule.actionConfig?.channel === 'whatsapp' ? 'WhatsApp' : 'E-mail';
+      return (
+        <span>
+          {t('automations.action.sendNps', 'Enviar Pesquisa NPS')}{' '}
+          <span className="ml-1 px-2 py-0.5 bg-pink-100 text-pink-800 rounded text-xs">{surveyName}</span>
+          <span className="ml-2 px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded text-xs">{channel}</span>
         </span>
       );
     }
@@ -856,6 +875,7 @@ const Automations = () => {
                         }
                       });
                       else if (next === 'SEND_NOTIFICATION') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, userIdToNotify: '' } });
+                      else if (next === 'SEND_NPS') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, surveyId: '', channel: 'whatsapp' } });
                       else setNewRule({ ...newRule, actionType: next, actionConfig: base });
                     }}
                   >
@@ -869,6 +889,7 @@ const Automations = () => {
                     <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
                     <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
                     <option value="SEND_NOTIFICATION">Send In-App Notification</option>
+                    <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
                     <option value="MULTI_ACTIONS">{t('automations.action.option.multiActions')}</option>
                   </select>
                 </div>
@@ -896,6 +917,7 @@ const Automations = () => {
                         else if (nextType === 'MOVE_DEAL_STAGE') setAction({ type: nextType, config: { stageId: '' } });
                         else if (nextType === 'APPLY_TAG') setAction({ type: nextType, config: { tagId: '' } });
                         else if (nextType === 'SEND_NOTIFICATION') setAction({ type: nextType, config: { userIdToNotify: '', title: '', content: '', link: '' } });
+                        else if (nextType === 'SEND_NPS') setAction({ type: nextType, config: { surveyId: '', channel: 'whatsapp', message: '', subject: '', body: '' } });
                         else setAction({ type: nextType, config: nextConfigBase });
                       };
 
@@ -919,6 +941,7 @@ const Automations = () => {
                                 <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
                                 <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
                                 <option value="SEND_NOTIFICATION">Send Notification</option>
+                                <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
                               </select>
                             </div>
                             <button
@@ -1024,6 +1047,75 @@ const Automations = () => {
                                 />
                               </div>
                             </>
+                          )}
+
+                          {type === 'SEND_NPS' && (
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.selectSurvey', 'Selecionar Pesquisa')}</label>
+                                <select
+                                  required
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  value={config.surveyId || ''}
+                                  onChange={(e) => setAction({ config: { ...config, surveyId: e.target.value } })}
+                                >
+                                  <option value="">{t('automations.action.selectSurveyPlaceholder', 'Selecione uma pesquisa')}</option>
+                                  {npsSurveys.map((survey) => (
+                                    <option key={survey.id} value={survey.id}>
+                                      {survey.name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.channel', 'Canal')}</label>
+                                <select
+                                  required
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  value={config.channel || 'whatsapp'}
+                                  onChange={(e) => setAction({ config: { ...config, channel: e.target.value } })}
+                                >
+                                  <option value="whatsapp">{t('automations.action.channel.whatsapp', 'WhatsApp')}</option>
+                                  <option value="email">{t('automations.action.channel.email', 'E-mail')}</option>
+                                </select>
+                              </div>
+                              {config.channel === 'whatsapp' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700">{t('automations.action.message', 'Mensagem (Opcional)')}</label>
+                                  <textarea
+                                    rows={3}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                    placeholder={t('automations.action.messagePlaceholder', 'Olá {{contact.firstName}}, pode nos avaliar?')}
+                                    value={config.message || ''}
+                                    onChange={(e) => setAction({ config: { ...config, message: e.target.value } })}
+                                  />
+                                </div>
+                              )}
+                              {config.channel === 'email' && (
+                                <>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject', 'Assunto do E-mail')}</label>
+                                    <input
+                                      type="text"
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                      placeholder={t('automations.action.emailSubjectPlaceholder', 'Sua opinião é importante')}
+                                      value={config.subject || ''}
+                                      onChange={(e) => setAction({ config: { ...config, subject: e.target.value } })}
+                                    />
+                                  </div>
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody', 'Corpo do E-mail (Opcional)')}</label>
+                                    <textarea
+                                      rows={3}
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                      placeholder={t('automations.action.emailBodyPlaceholder', 'Olá {{contact.firstName}}, como foi sua experiência?')}
+                                      value={config.body || ''}
+                                      onChange={(e) => setAction({ config: { ...config, body: e.target.value } })}
+                                    />
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           )}
 
                           {type === 'ASSIGN_TO_USER' && (
@@ -1462,6 +1554,90 @@ const Automations = () => {
                         })}
                       />
                     </div>
+                  </div>
+                )}
+
+                {newRule.actionType === 'SEND_NPS' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.selectSurvey', 'Selecionar Pesquisa')}</label>
+                      <select
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.actionConfig.surveyId || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, surveyId: e.target.value }
+                        })}
+                      >
+                        <option value="">{t('automations.action.selectSurveyPlaceholder', 'Selecione uma pesquisa')}</option>
+                        {npsSurveys.map((survey) => (
+                          <option key={survey.id} value={survey.id}>
+                            {survey.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.channel', 'Canal')}</label>
+                      <select
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.actionConfig.channel || 'whatsapp'}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, channel: e.target.value }
+                        })}
+                      >
+                        <option value="whatsapp">{t('automations.action.channel.whatsapp', 'WhatsApp')}</option>
+                        <option value="email">{t('automations.action.channel.email', 'E-mail')}</option>
+                      </select>
+                    </div>
+                    {newRule.actionConfig.channel === 'whatsapp' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.action.message', 'Mensagem (Opcional)')}</label>
+                        <textarea
+                          rows={3}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                          placeholder={t('automations.action.messagePlaceholder', 'Olá {{contact.firstName}}, pode nos avaliar?')}
+                          value={newRule.actionConfig.message || ''}
+                          onChange={(e) => setNewRule({
+                            ...newRule,
+                            actionConfig: { ...newRule.actionConfig, message: e.target.value }
+                          })}
+                        />
+                      </div>
+                    )}
+                    {newRule.actionConfig.channel === 'email' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject', 'Assunto do E-mail')}</label>
+                          <input
+                            type="text"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            placeholder={t('automations.action.emailSubjectPlaceholder', 'Sua opinião é importante')}
+                            value={newRule.actionConfig.subject || ''}
+                            onChange={(e) => setNewRule({
+                              ...newRule,
+                              actionConfig: { ...newRule.actionConfig, subject: e.target.value }
+                            })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody', 'Corpo do E-mail (Opcional)')}</label>
+                          <textarea
+                            rows={3}
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            placeholder={t('automations.action.emailBodyPlaceholder', 'Olá {{contact.firstName}}, como foi sua experiência?')}
+                            value={newRule.actionConfig.body || ''}
+                            onChange={(e) => setNewRule({
+                              ...newRule,
+                              actionConfig: { ...newRule.actionConfig, body: e.target.value }
+                            })}
+                          />
+                        </div>
+                      </>
+                    )}
                   </div>
                 )}
               </div>

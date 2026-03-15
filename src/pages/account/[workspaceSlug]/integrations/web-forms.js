@@ -17,6 +17,7 @@ import Meta from '@/components/Meta/index';
 import Card from '@/components/Card/index';
 import Modal from '@/components/Modal/index';
 import WebFormBuilder from '@/components/WebFormBuilder/index';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 
@@ -131,12 +132,33 @@ const WebForms = () => {
     toast.success('Link copied to clipboard!');
   };
 
+  const webFormSteps = [
+    {
+      element: '#btn-create-web-form',
+      popover: {
+        title: 'Crie seu Formulário',
+        description: 'Comece criando um formulário público para capturar leads diretamente no seu CRM.',
+        position: 'bottom',
+      },
+    },
+    {
+      element: '#web-forms-list',
+      popover: {
+        title: 'Sua Lista de Formulários',
+        description: 'Aqui você gerencia todos os seus formulários, copia links públicos e edita campos.',
+        position: 'top',
+      },
+    },
+  ];
+
   return (
     <AccountLayout>
+      <OnboardingTour tourId="web-forms-tour" steps={webFormSteps} />
       <Meta title={`Web Forms - ${workspace?.name || 'Workspace'}`} />
       <Content title="Web Forms (Form Builder)" subtitle="Build public forms to capture leads directly into your CRM pipelines.">
         <div className="flex justify-end mb-5">
           <button
+            id="btn-create-web-form"
             className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
             onClick={toggleModal}
           >
@@ -163,7 +185,7 @@ const WebForms = () => {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div id="web-forms-list" className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {webForms.map((form) => (
               <Card key={form.id}>
                 <Card.Body>

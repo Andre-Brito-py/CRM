@@ -3,7 +3,7 @@ import { useSession } from 'next-auth/react';
 import { PlusIcon, TicketIcon, TrashIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import api from '@/lib/common/api';
-import { AdminLayout } from '@/layouts/index';
+import AdminLayout from '@/layouts/AdminLayout';
 import Meta from '@/components/Meta/index';
 import Card from '@/components/Card/index';
 import Button from '@/components/Button/index';

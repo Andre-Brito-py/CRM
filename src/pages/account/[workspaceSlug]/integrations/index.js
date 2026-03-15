@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { useTranslation } from 'react-i18next';
 import {
   ChatBubbleLeftRightIcon,
   GlobeAltIcon,
@@ -10,12 +11,11 @@ import {
 } from '@heroicons/react/24/outline';
 
 import AccountLayout from '@/layouts/AccountLayout';
-import { useWorkspace } from '@/providers/workspace';
 
 const Integrations = () => {
   const router = useRouter();
   const { workspaceSlug } = router.query;
-  const { workspace } = useWorkspace();
+  const { t } = useTranslation();
 
   const integrations = [
     {
@@ -67,15 +67,22 @@ const Integrations = () => {
       icon: BoltIcon,
       bgColor: 'bg-orange-500',
     },
+    {
+      name: 'Instagram Direct',
+      description: 'Respond to Instagram messages directly from your CRM inbox.',
+      href: `/account/${workspaceSlug}/integrations/instagram`,
+      icon: ChatBubbleLeftRightIcon,
+      bgColor: 'bg-pink-600',
+    },
   ];
 
   return (
     <AccountLayout>
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <h1 className="text-2xl font-semibold text-gray-900">Integrations</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">{t('common.label.integrations')}</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Connect your workspace with third-party tools.
+            {t('integrations.subtitle')}
           </p>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-6">
@@ -103,14 +110,14 @@ const Integrations = () => {
                     <div className="w-0 flex-1 flex">
                       {integration.comingSoon ? (
                         <span className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-400 font-medium border border-transparent rounded-bl-lg cursor-not-allowed">
-                          <span className="ml-3">Configure</span>
+                          <span className="ml-3">{t('common.action.configure')}</span>
                         </span>
                       ) : (
                         <Link
                           href={integration.href}
                           className="relative -mr-px w-0 flex-1 inline-flex items-center justify-center py-4 text-sm text-gray-700 font-medium border border-transparent rounded-bl-lg hover:text-gray-500"
                         >
-                          <span className="ml-3">Configure</span>
+                          <span className="ml-3">{t('common.action.configure')}</span>
                         </Link>
                       )}
                     </div>

@@ -255,6 +255,30 @@ const Workspace = () => {
         description: t('onboarding.tour.dashboard.step1.desc'),
         position: 'bottom',
       }
+    },
+    {
+      element: '#usage-section',
+      popover: {
+        title: 'Uso e Limites',
+        description: 'Monitore aqui quantos membros, webhooks e IA você ainda tem disponíveis no mês.',
+        position: 'top',
+      }
+    },
+    {
+      element: '#revenue-chart',
+      popover: {
+        title: 'Performance de Venda',
+        description: 'Acompanhe o crescimento da sua receita e o volume de negócios ganhos.',
+        position: 'right',
+      }
+    },
+    {
+      element: '#nps-section',
+      popover: {
+        title: 'Voz do Cliente (NPS)',
+        description: 'Veja como está a satisfação dos seus clientes com base nas pesquisas enviadas.',
+        position: 'left',
+      }
     }
   ];
 
@@ -277,7 +301,7 @@ const Workspace = () => {
           </div>
 
           {usage && (
-            <div className="premium-card p-8 mb-8">
+            <div id="usage-section" className="premium-card p-8 mb-8">
               <div className="flex items-center justify-between mb-6 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
                 <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
                   Uso e limites
@@ -358,7 +382,7 @@ const Workspace = () => {
           )}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="premium-card p-8 lg:col-span-2">
+            <div id="revenue-chart" className="premium-card p-8 lg:col-span-2">
               <div className="flex items-center justify-between mb-8">
                 <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
                   Revenue Performance
@@ -413,7 +437,7 @@ const Workspace = () => {
             </div>
 
             <div className="space-y-8 lg:col-span-1">
-              <div className="premium-card p-8">
+              <div id="nps-section" className="premium-card p-8">
                 <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
                   <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
                     NPS

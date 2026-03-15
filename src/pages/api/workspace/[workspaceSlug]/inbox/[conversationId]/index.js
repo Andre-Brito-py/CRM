@@ -171,6 +171,34 @@ const handler = async (req, res) => {
           }
         }
 
+        if ((!direction || direction === 'OUTBOUND') && conversation.platform === 'INSTAGRAM') {
+          try {
+            const contactId = conversation.externalId || (conversation.contact?.customFields?.instagramId);
+            if (!contactId) {
+              throw new Error('Contact Instagram ID missing');
+            }
+
+            let { integrationId } = req.body;
+            if (!integrationId) {
+              const defaultIntegration = await prisma.integration.findFirst({
+                where: { workspaceId: workspace.id, provider: 'INSTAGRAM', enabled: true }
+              });
+              if (!defaultIntegration) {
+                return res.status(400).json({ error: { msg: 'No active Instagram integration found.' } });
+              }
+              integrationId = defaultIntegration.id;
+            }
+
+            const { sendInstagramMessage } = await import('@/lib/server/instagram');
+            sentMessageId = await sendInstagramMessage(integrationId, contactId, resolvedContent);
+            messageStatus = 'SENT';
+          } catch (igError) {
+            log({ level: 'error', msg: 'instagram_send_failed', requestId, workspaceId: workspace.id, conversationId, error: igError });
+            reportError(igError, { route: 'instagram:send', requestId, workspaceId: workspace.id, conversationId });
+            messageStatus = 'FAILED';
+          }
+        }
+
         const message = await createMessage(conversationId, {
           direction: direction || 'OUTBOUND',
           type: type || 'TEXT',

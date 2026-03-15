@@ -25,8 +25,21 @@ export default class StripeProvider extends PaymentProviderInterface {
     return customer;
   }
 
-  async createPayment({ customerId, amount, currency, description, metadata, successUrl, cancelUrl }) {
+  async createPayment({ customerId, amount, currency, description, metadata, successUrl, cancelUrl, recipientAccountId, platformFee }) {
     const stripe = this.getClient();
+    const unitAmount = Math.round(Number(amount) * 100);
+    const feeAmount = Math.round(Number(platformFee || 0) * 100);
+
+    const paymentIntentData =
+      recipientAccountId
+        ? {
+          application_fee_amount:
+            Number.isFinite(feeAmount) && feeAmount > 0 && feeAmount < unitAmount ? feeAmount : undefined,
+          transfer_data: { destination: String(recipientAccountId) },
+          metadata: metadata || undefined,
+        }
+        : undefined;
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId || undefined,
       mode: 'payment',
@@ -35,7 +48,7 @@ export default class StripeProvider extends PaymentProviderInterface {
         {
           price_data: {
             currency: (currency || 'brl').toLowerCase(),
-            unit_amount: Math.round(Number(amount) * 100),
+            unit_amount: unitAmount,
             product_data: { name: description || 'Payment' },
           },
           quantity: 1,
@@ -44,6 +57,7 @@ export default class StripeProvider extends PaymentProviderInterface {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: metadata || undefined,
+      payment_intent_data: paymentIntentData,
     });
 
     return {

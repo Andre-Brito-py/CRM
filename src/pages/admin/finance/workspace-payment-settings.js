@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import useSWR, { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
@@ -13,12 +14,21 @@ import Button from '@/components/Button/index';
 
 const WorkspacePaymentSettings = () => {
   const { data: session } = useSession();
+  const router = useRouter();
   const { mutate } = useSWRConfig();
   const { data, error } = useSWR(session ? '/api/admin/finance/workspace-payment-settings' : null, fetcher);
 
   const isLoading = !data && !error;
   const workspaces = data?.data?.workspaces || [];
   const providers = data?.data?.providers;
+  const workspaceSlugFilterRaw = router.query?.workspaceSlug ? String(router.query.workspaceSlug) : '';
+  const workspaceSlugFilter = workspaceSlugFilterRaw.trim();
+
+  const filteredWorkspaces = useMemo(() => {
+    if (!workspaceSlugFilter) return workspaces;
+    const match = workspaces.filter((w) => String(w.slug) === workspaceSlugFilter);
+    return match.length ? match : workspaces;
+  }, [workspaces, workspaceSlugFilter]);
 
   const providerOptions = useMemo(() => {
     return (Array.isArray(providers) ? providers : [])
@@ -104,6 +114,19 @@ const WorkspacePaymentSettings = () => {
       <Content.Container>
         <Card>
           <Card.Body title="Provider por workspace" subtitle="Selecione o gateway e sobrescreva taxas se necessário">
+            {workspaceSlugFilter ? (
+              <div className="mb-4 flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+                <div className="text-sm text-blue-900">
+                  Filtro ativo: <span className="font-semibold">/{workspaceSlugFilter}</span>
+                </div>
+                <Button
+                  className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-bold"
+                  onClick={() => router.replace('/admin/finance/workspace-payment-settings')}
+                >
+                  Limpar filtro
+                </Button>
+              </div>
+            ) : null}
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -142,11 +165,12 @@ const WorkspacePaymentSettings = () => {
                       </td>
                     </tr>
                   ) : (
-                    workspaces.map((w) => {
+                    filteredWorkspaces.map((w) => {
                       const row = getRow(w);
                       const disabled = savingId === w.id;
+                      const highlighted = workspaceSlugFilter && String(w.slug) === workspaceSlugFilter;
                       return (
-                        <tr key={w.id}>
+                        <tr key={w.id} className={highlighted ? 'bg-yellow-50' : undefined}>
                           <td className="px-6 py-4">
                             <div className="text-sm font-semibold text-gray-900">{w.name}</div>
                             <div className="text-xs text-gray-500">/{w.slug}</div>

@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useSWRConfig } from 'swr';
 import api from '@/lib/common/api';
 
-const BoardColumn = ({ stage, deals, workspaceSlug }) => {
+const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights }) => {
   const router = useRouter();
 
   return (
@@ -36,6 +36,22 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
                       }`}
                     style={provided.draggableProps.style}
                   >
+                    {dealAiInsights?.[deal.id] && (
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border flex items-center gap-1 shadow-sm ${dealAiInsights[deal.id].probability >= 70 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                            dealAiInsights[deal.id].probability >= 40 ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                              'bg-rose-50 text-rose-700 border-rose-200'
+                          }`}>
+                          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70 animate-pulse" />
+                          {dealAiInsights[deal.id].probability}% Success
+                        </span>
+                        {dealAiInsights[deal.id].urgency === 'high' && (
+                          <span className="text-[10px] font-black bg-indigo-600 text-white px-2 py-0.5 rounded-full shadow-lg shadow-indigo-600/30 uppercase tracking-tighter flex items-center gap-1 animate-bounce-subtle">
+                            <span>🔥</span> Urgent
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className="font-executive font-bold text-zinc-900 text-[15px] mb-2 truncate group-hover:text-indigo-600 transition-colors">{deal.name}</div>
                     <div className="flex justify-between items-center mt-3">
                       <span className="text-sm font-bold text-zinc-900">
@@ -85,7 +101,7 @@ const BoardColumn = ({ stage, deals, workspaceSlug }) => {
   );
 };
 
-const PipelineBoard = ({ pipeline, workspaceSlug }) => {
+const PipelineBoard = ({ pipeline, workspaceSlug, dealAiInsights }) => {
   const { mutate } = useSWRConfig();
   const [stages, setStages] = useState([]);
 
@@ -152,6 +168,7 @@ const PipelineBoard = ({ pipeline, workspaceSlug }) => {
             stage={stage}
             deals={stage.deals || []}
             workspaceSlug={workspaceSlug}
+            dealAiInsights={dealAiInsights}
           />
         ))}
       </div>
