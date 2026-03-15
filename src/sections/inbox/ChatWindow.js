@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
-import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon, CreditCardIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon, CreditCardIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
 import { useTranslation } from 'react-i18next';
 import Paywall from '@/components/Paywall';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import toast from 'react-hot-toast';
+import api from '@/lib/common/api';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -32,6 +34,12 @@ const ChatWindow = ({
   isGeneratingAI,
   onSummarizeConversation,
   isSummarizingAI,
+  aiObjective,
+  onAiObjectiveChange,
+  aiSuggestOnlyEnabled = true,
+  onAiSuggestOnlyEnabledChange,
+  onToggleAutopilot,
+  isTogglingAutopilot = false,
   onBack
 }) => {
   const { t } = useTranslation();
@@ -40,6 +48,15 @@ const ChatWindow = ({
   const [newTemplateContent, setNewTemplateContent] = useState('');
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
   const [summaryText, setSummaryText] = useState('');
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
+  const [scheduleConfig, setScheduleConfig] = useState({ summary: '', description: '' });
+  const [availability, setAvailability] = useState(null);
+  const [selectedSlotStart, setSelectedSlotStart] = useState('');
+  const [scheduledEvent, setScheduledEvent] = useState(null);
+  const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
+  const [isRescheduling, setIsRescheduling] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -49,6 +66,17 @@ const ChatWindow = ({
   useEffect(() => {
     scrollToBottom();
   }, [conversation?.messages]);
+
+  useEffect(() => {
+    const contactName = conversation?.contact?.name || conversation?.externalId || '';
+    setScheduleConfig({
+      summary: contactName ? `Reunião com ${contactName}` : 'Reunião',
+      description: '',
+    });
+    setAvailability(null);
+    setSelectedSlotStart('');
+    setScheduledEvent(null);
+  }, [conversation?.id, conversation?.contact?.name, conversation?.externalId]);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -80,6 +108,138 @@ const ChatWindow = ({
     if (summary) {
       setSummaryText(summary);
       setIsSummaryModalOpen(true);
+    }
+  };
+
+  const formatSlot = (iso) => {
+    const d = iso ? new Date(String(iso)) : null;
+    if (!d || !Number.isFinite(d.getTime())) return String(iso || '');
+    return d.toLocaleString();
+  };
+
+  const buildSlotsMessage = (slots) => {
+    const items = Array.isArray(slots) ? slots : [];
+    if (items.length === 0) return '';
+    const lines = items.map((s, idx) => `${idx + 1}) ${formatSlot(s.start)}`);
+    return `${t('inbox.schedule.step1.prefix')}\n${lines.join('\n')}\n\n${t('inbox.schedule.step1.question')}`;
+  };
+
+  const checkAvailability = async () => {
+    if (!workspaceSlug) return;
+    setIsCheckingAvailability(true);
+    setAvailability(null);
+    setSelectedSlotStart('');
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/integrations/google_calendar/freebusy`, {
+        method: 'POST',
+        body: {
+          maxSuggestions: 5,
+        },
+      });
+      if (res?.status >= 400) throw new Error(res?.error?.msg || 'Failed');
+      setAvailability(res?.data || null);
+      const first = res?.data?.suggestions?.[0]?.start || '';
+      setSelectedSlotStart(first);
+      toast.success(t('inbox.schedule.availability.ok'));
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.schedule.availability.failed'));
+    } finally {
+      setIsCheckingAvailability(false);
+    }
+  };
+
+  const createEvent = async () => {
+    if (!workspaceSlug) return;
+    if (!selectedSlotStart) return;
+    const slot = availability?.suggestions?.find((s) => s.start === selectedSlotStart) || null;
+    if (!slot?.start || !slot?.end) return;
+    setIsScheduling(true);
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/integrations/google_calendar/events`, {
+        method: 'POST',
+        body: {
+          calendarId: availability?.calendarId || undefined,
+          start: slot.start,
+          end: slot.end,
+          summary: scheduleConfig.summary,
+          description: scheduleConfig.description,
+          conversationId: conversation?.id,
+          contactId: conversation?.contact?.id,
+        },
+      });
+      if (res?.status >= 400) throw new Error(res?.error?.msg || 'Failed');
+      setScheduledEvent(res?.data?.event || null);
+      toast.success(t('inbox.schedule.event.created'));
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.schedule.event.failed'));
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
+  const insertStep1Message = () => {
+    const msg = buildSlotsMessage(availability?.suggestions || []);
+    if (!msg) return;
+    appendToMessage(msg);
+    toast.success(t('inbox.schedule.step1.inserted'));
+  };
+
+  const insertStep2Message = () => {
+    const slot = scheduledEvent?.start || selectedSlotStart;
+    if (!slot) return;
+    const msg = `${t('inbox.schedule.step2.prefix')} ${formatSlot(slot)}. ${t('inbox.schedule.step2.suffix')}`;
+    appendToMessage(msg);
+    toast.success(t('inbox.schedule.step2.inserted'));
+  };
+
+  const cancelEvent = async () => {
+    if (!workspaceSlug) return;
+    if (!scheduledEvent?.id) return;
+    setIsCanceling(true);
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/integrations/google_calendar/events?eventId=${encodeURIComponent(scheduledEvent.id)}`, {
+        method: 'DELETE',
+        body: {
+          calendarId: availability?.calendarId || undefined,
+        },
+      });
+      if (res?.status >= 400) throw new Error(res?.error?.msg || 'Failed');
+      setScheduledEvent(null);
+      toast.success(t('inbox.schedule.event.canceled'));
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.schedule.event.cancelFailed'));
+    } finally {
+      setIsCanceling(false);
+    }
+  };
+
+  const rescheduleEvent = async () => {
+    if (!workspaceSlug) return;
+    if (!scheduledEvent?.id) return;
+    if (!selectedSlotStart) return;
+    const slot = availability?.suggestions?.find((s) => s.start === selectedSlotStart) || null;
+    if (!slot?.start || !slot?.end) return;
+    setIsRescheduling(true);
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/integrations/google_calendar/events?eventId=${encodeURIComponent(scheduledEvent.id)}`, {
+        method: 'PATCH',
+        body: {
+          calendarId: availability?.calendarId || undefined,
+          start: slot.start,
+          end: slot.end,
+        },
+      });
+      if (res?.status >= 400) throw new Error(res?.error?.msg || 'Failed');
+      setScheduledEvent(res?.data?.event || null);
+      toast.success(t('inbox.schedule.event.rescheduled'));
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.schedule.event.rescheduleFailed'));
+    } finally {
+      setIsRescheduling(false);
     }
   };
 
@@ -115,7 +275,19 @@ const ChatWindow = ({
         </div>
 
         {/* Assignee Selector */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => onToggleAutopilot?.(!conversation.autopilotEnabled)}
+            disabled={!onToggleAutopilot || isTogglingAutopilot}
+            className={classNames(
+              'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border shadow-sm',
+              conversation.autopilotEnabled ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
+              (!onToggleAutopilot || isTogglingAutopilot) ? 'opacity-60 cursor-not-allowed' : ''
+            )}
+          >
+            {t('inbox.autopilot.label')}: {conversation.autopilotEnabled ? t('inbox.autopilot.enabled') : t('inbox.autopilot.disabled')}
+          </button>
           <span className="mr-2 text-sm text-gray-500">{t('inbox.assignee.label')}</span>
           <Menu as="div" className="relative inline-block text-left">
             <div>
@@ -229,8 +401,8 @@ const ChatWindow = ({
               <button
                 id="ai-suggest-btn"
                 type="button"
-                onClick={onGenerateResponse}
-                disabled={isGeneratingAI}
+                onClick={() => onGenerateResponse?.({ objective: aiObjective })}
+                disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
                 className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
                 title={t('inbox.ai.generate')}
               >
@@ -246,6 +418,40 @@ const ChatWindow = ({
               >
                 <DocumentTextIcon className={`w-5 h-5 ${isSummarizingAI ? 'text-blue-500 animate-pulse' : ''}`} />
               </button>
+              <button
+                type="button"
+                onClick={() => setIsScheduleModalOpen(true)}
+                disabled={aiObjective !== 'schedule'}
+                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                title={t('inbox.schedule.open')}
+              >
+                <CalendarDaysIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="ml-3 flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs text-gray-600 select-none">
+                <input
+                  type="checkbox"
+                  checked={Boolean(aiSuggestOnlyEnabled)}
+                  onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                {t('inbox.ai.suggestOnly')}
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">{t('inbox.ai.objective.label')}</span>
+                <select
+                  value={aiObjective || ''}
+                  onChange={(e) => onAiObjectiveChange?.(e.target.value)}
+                  className="h-9 rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="support">{t('inbox.ai.objective.support')}</option>
+                  <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
+                  <option value="close">{t('inbox.ai.objective.close')}</option>
+                  <option value="schedule">{t('inbox.ai.objective.schedule')}</option>
+                </select>
+              </div>
             </div>
           </Paywall>
 
@@ -523,6 +729,165 @@ const ChatWindow = ({
                         {t('common.action.copy')}
                       </button>
                     </CopyToClipboard>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={isScheduleModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => setIsScheduleModalOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                    {t('inbox.schedule.title')}
+                  </Dialog.Title>
+
+                  <div className="mt-4 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.summary')}</label>
+                        <input
+                          type="text"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                          value={scheduleConfig.summary || ''}
+                          onChange={(e) => setScheduleConfig((p) => ({ ...p, summary: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.description')}</label>
+                        <input
+                          type="text"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                          value={scheduleConfig.description || ''}
+                          onChange={(e) => setScheduleConfig((p) => ({ ...p, description: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={checkAvailability}
+                        disabled={isCheckingAvailability}
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                      >
+                        {isCheckingAvailability ? t('common.loading') : t('inbox.schedule.availability.check')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={insertStep1Message}
+                        disabled={!availability?.suggestions?.length}
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {t('inbox.schedule.step1.insert')}
+                      </button>
+                    </div>
+
+                    {availability?.suggestions?.length ? (
+                      <div className="rounded-lg border border-gray-200 bg-white p-4">
+                        <div className="text-sm font-medium text-gray-900 mb-2">{t('inbox.schedule.slots')}</div>
+                        <div className="space-y-2">
+                          {availability.suggestions.map((s) => (
+                            <label key={s.start} className="flex items-center gap-2 text-sm text-gray-700">
+                              <input
+                                type="radio"
+                                name="slot"
+                                value={s.start}
+                                checked={selectedSlotStart === s.start}
+                                onChange={(e) => setSelectedSlotStart(e.target.value)}
+                              />
+                              <span>{formatSlot(s.start)} → {formatSlot(s.end)}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={createEvent}
+                            disabled={!selectedSlotStart || isScheduling}
+                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {isScheduling ? t('common.loading') : t('inbox.schedule.event.create')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {scheduledEvent?.id ? (
+                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div className="text-sm font-medium text-gray-900 mb-2">{t('inbox.schedule.event.createdTitle')}</div>
+                        <div className="text-sm text-gray-700 space-y-1">
+                          <div>{scheduledEvent.summary || scheduleConfig.summary}</div>
+                          <div>{formatSlot(scheduledEvent.start)}</div>
+                          {scheduledEvent.htmlLink ? (
+                            <a href={scheduledEvent.htmlLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                              {t('inbox.schedule.event.openLink')}
+                            </a>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-3 flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={insertStep2Message}
+                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                          >
+                            {t('inbox.schedule.step2.insert')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={rescheduleEvent}
+                            disabled={!selectedSlotStart || isRescheduling}
+                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                          >
+                            {isRescheduling ? t('common.loading') : t('inbox.schedule.event.reschedule')}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={cancelEvent}
+                            disabled={isCanceling}
+                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                          >
+                            {isCanceling ? t('common.loading') : t('inbox.schedule.event.cancel')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      onClick={() => setIsScheduleModalOpen(false)}
+                    >
+                      {t('common.action.cancel')}
+                    </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

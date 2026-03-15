@@ -36,10 +36,16 @@ const CATALOG = [
     items: [
       { key: 'NFSE_ENABLED', category: 'FISCAL', label: 'Habilitar emissão (true/false)', secret: false },
       { key: 'FOCUS_NFE_API_KEY', category: 'FISCAL', label: 'Focus NFe API Key', secret: true },
+      { key: 'FOCUSNFE_TOKEN', category: 'FISCAL', label: 'Focus NFe token (legacy)', secret: true },
       { key: 'FOCUS_NFE_ENVIRONMENT', category: 'FISCAL', label: 'Focus NFe Environment (homologacao/producao)', secret: false },
       { key: 'FOCUS_NFE_NFSE_ENDPOINT', category: 'FISCAL', label: 'Focus NFe endpoint (nfse/nfsen)', secret: false },
       { key: 'NFSE_CODIGO_TRIBUTACAO_NACIONAL_ISS', category: 'FISCAL', label: 'Código Tributação Nacional ISS', secret: false },
       { key: 'NFSE_CODIGO_NBS', category: 'FISCAL', label: 'Código NBS', secret: false },
+      { key: 'NFSE_ISSUERS_JSON', category: 'FISCAL', label: 'Emitentes (JSON)', secret: false },
+      { key: 'NFSE_ISSUER_CODE', category: 'FISCAL', label: 'Emitente padrão: código', secret: false },
+      { key: 'NFSE_ISSUER_NAME', category: 'FISCAL', label: 'Emitente padrão: nome', secret: false },
+      { key: 'NFSE_ISSUER_CNPJ', category: 'FISCAL', label: 'Emitente padrão: CNPJ', secret: false },
+      { key: 'NFSE_ISSUER_IS_DEFAULT', category: 'FISCAL', label: 'Emitente padrão (true/false)', secret: false },
     ],
   },
   {
@@ -60,6 +66,13 @@ const CATALOG = [
       { key: 'EMAIL_SERVICE', category: 'EMAIL', label: 'Email Service', secret: false },
       { key: 'EMAIL_SERVER_USER', category: 'EMAIL', label: 'SMTP User', secret: false },
       { key: 'EMAIL_SERVER_PASSWORD', category: 'EMAIL', label: 'SMTP Password', secret: true },
+    ],
+  },
+  {
+    title: 'Google (OAuth)',
+    items: [
+      { key: 'GOOGLE_CLIENT_ID', category: 'INTEGRATIONS', label: 'Google Client ID', secret: false },
+      { key: 'GOOGLE_CLIENT_SECRET', category: 'INTEGRATIONS', label: 'Google Client Secret', secret: true },
     ],
   },
   {
@@ -107,11 +120,27 @@ const CATALOG = [
   },
   {
     title: 'Jobs (cron)',
-    items: [{ key: 'CRON_SECRET', category: 'INTEGRATIONS', label: 'Cron Secret', secret: true }],
+    items: [
+      { key: 'CRON_SECRET', category: 'INTEGRATIONS', label: 'Cron Secret', secret: true },
+      { key: 'MEDIA_RETENTION_DAYS', category: 'INTEGRATIONS', label: 'Retenção de mídia (dias, ex: 30)', secret: false },
+      { key: 'MEDIA_RETENTION_BATCH', category: 'INTEGRATIONS', label: 'Retenção de mídia (lote, ex: 1000)', secret: false },
+    ],
   },
   {
     title: 'Analytics',
     items: [{ key: 'GOOGLE_ANALYTICS_ID', category: 'INTEGRATIONS', label: 'Google Analytics ID', secret: false, public: true }],
+  },
+  {
+    title: 'FinOps',
+    items: [
+      { key: 'FINOPS_UNIT_COST_WHATSAPP_OUTBOUND', category: 'FINOPS', label: 'Custo unitário WhatsApp outbound', secret: false },
+      { key: 'FINOPS_UNIT_COST_AI_REQUEST', category: 'FINOPS', label: 'Custo unitário IA request', secret: false },
+      { key: 'FINOPS_UNIT_COST_UPLOAD_REQUEST', category: 'FINOPS', label: 'Custo unitário upload request', secret: false },
+      { key: 'DEFAULT_WORKSPACE_PAYMENT_PROVIDER', category: 'FINOPS', label: 'Gateway padrão do CRM (ex: asaas)', secret: false },
+      { key: 'PLATFORM_FEE_PERCENTAGE', category: 'FINOPS', label: 'Fee da plataforma (percentual)', secret: false },
+      { key: 'PLATFORM_FEE_FIXED', category: 'FINOPS', label: 'Fee da plataforma (fixo)', secret: false },
+      { key: 'PAYMENT_WHATSAPP_MESSAGE_TEMPLATE', category: 'FINOPS', label: 'Template WhatsApp (cobrança)', secret: false },
+    ],
   },
   {
     title: 'Manutenção',

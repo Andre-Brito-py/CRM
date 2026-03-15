@@ -38,6 +38,9 @@ const Inbox = () => {
   const [isSummarizingAI, setIsSummarizingAI] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
+  const [aiObjective, setAiObjective] = useState('');
+  const [aiSuggestOnlyEnabled, setAiSuggestOnlyEnabled] = useState(true);
+  const [isTogglingAutopilot, setIsTogglingAutopilot] = useState(false);
 
   const locale = useMemo(() => {
     const base = (i18n?.language || 'en').split('-')[0];
@@ -140,14 +143,40 @@ const Inbox = () => {
     }
   }, [selectedId, conversations]);
 
-  const handleGenerateResponse = async () => {
+  useEffect(() => {
+    if (!mounted) return;
+    if (!workspaceSlug) return;
+    if (!selectedConversation?.id) return;
+
+    const convId = selectedConversation.id;
+    const defaultObjective = String(selectedConversation?.platform || '').toUpperCase() === 'EMAIL' ? 'support' : 'qualify';
+
+    try {
+      const rawObjective = localStorage.getItem(`aiObjective:${workspaceSlug}:${convId}`);
+      setAiObjective(rawObjective || defaultObjective);
+    } catch {
+      setAiObjective(defaultObjective);
+    }
+
+    try {
+      const rawMode = localStorage.getItem(`aiSuggestOnly:${workspaceSlug}:${convId}`);
+      setAiSuggestOnlyEnabled(rawMode !== 'false');
+    } catch {
+      setAiSuggestOnlyEnabled(true);
+    }
+  }, [mounted, selectedConversation?.id, selectedConversation?.platform, workspaceSlug]);
+
+  const handleGenerateResponse = async (opts = {}) => {
     if (!selectedConversation) return;
 
     setIsGeneratingAI(true);
     try {
+      const objectiveToUse = String(opts?.objective || aiObjective || '').trim() || (String(selectedConversation?.platform || '').toUpperCase() === 'EMAIL' ? 'support' : 'qualify');
+
       const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/suggest-reply`, {
         method: 'POST',
         headers: aiOverageOptIn ? { 'x-ai-overage': 'true' } : undefined,
+        body: { objective: objectiveToUse },
       });
 
       if (response.status >= 400 || response.error) {
@@ -166,6 +195,7 @@ const Inbox = () => {
             const retry = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}/suggest-reply`, {
               method: 'POST',
               headers: { 'x-ai-overage': 'true' },
+              body: { objective: objectiveToUse },
             });
             if (retry.data?.suggestion) {
               setMessageText(retry.data.suggestion);
@@ -199,6 +229,24 @@ const Inbox = () => {
     } finally {
       setIsGeneratingAI(false);
     }
+  };
+
+  const handleChangeAiObjective = (objective) => {
+    if (!workspaceSlug || !selectedConversation?.id) return;
+    const v = String(objective || '').trim();
+    setAiObjective(v);
+    try {
+      localStorage.setItem(`aiObjective:${workspaceSlug}:${selectedConversation.id}`, v);
+    } catch { }
+  };
+
+  const handleToggleSuggestOnly = (enabled) => {
+    if (!workspaceSlug || !selectedConversation?.id) return;
+    const next = Boolean(enabled);
+    setAiSuggestOnlyEnabled(next);
+    try {
+      localStorage.setItem(`aiSuggestOnly:${workspaceSlug}:${selectedConversation.id}`, String(next));
+    } catch { }
   };
 
   const handleSummarizeConversation = async () => {
@@ -331,6 +379,37 @@ const Inbox = () => {
     }
   };
 
+  const handleToggleAutopilot = async (enabled) => {
+    if (!selectedConversation) return;
+    if (!workspaceSlug) return;
+
+    const previousConversations = [...conversations];
+    setIsTogglingAutopilot(true);
+
+    mutateConversations({
+      data: {
+        conversations: conversations.map((c) =>
+          c.id === selectedId ? { ...c, autopilotEnabled: enabled } : c
+        )
+      }
+    }, false);
+
+    try {
+      await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
+        method: 'PUT',
+        body: { autopilotEnabled: enabled },
+      });
+      toast.success(t('inbox.autopilot.updated'));
+      mutateConversations();
+    } catch (error) {
+      console.error(error);
+      toast.error(t('inbox.autopilot.updateFailed'));
+      mutateConversations({ data: { conversations: previousConversations } }, false);
+    } finally {
+      setIsTogglingAutopilot(false);
+    }
+  };
+
   const inboxSteps = [
     {
       element: '#conversation-list',
@@ -457,6 +536,12 @@ const Inbox = () => {
                   isGeneratingAI={isGeneratingAI}
                   onSummarizeConversation={handleSummarizeConversation}
                   isSummarizingAI={isSummarizingAI}
+                  aiObjective={aiObjective}
+                  onAiObjectiveChange={handleChangeAiObjective}
+                  aiSuggestOnlyEnabled={aiSuggestOnlyEnabled}
+                  onAiSuggestOnlyEnabledChange={handleToggleSuggestOnly}
+                  onToggleAutopilot={handleToggleAutopilot}
+                  isTogglingAutopilot={isTogglingAutopilot}
                   onBack={() => setSelectedId(null)}
                 />
               </div>

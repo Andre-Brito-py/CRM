@@ -58,8 +58,8 @@ Arquivo: `.env`
 DATABASE_URL="postgresql://..."
 DATABASE_URL_POOLED="postgresql://..." # opcional: URL do pooler (PgBouncer/Neon/Supabase)
 NEXTAUTH_SECRET="..."
-GOOGLE_CLIENT_ID="..."        # opcional: Login com Google
-GOOGLE_CLIENT_SECRET="..."    # opcional: Login com Google
+GOOGLE_CLIENT_ID="..."        # opcional: Login com Google (também pode ser setado no Super Admin)
+GOOGLE_CLIENT_SECRET="..."    # opcional: Login com Google (também pode ser setado no Super Admin)
 EMAIL_FROM="..."
 EMAIL_SERVICE="..."
 EMAIL_SERVER_USER="..."
@@ -86,6 +86,10 @@ ADMIN_EMAIL="..."
 # FOCUS_NFE_NFSE_ENDPOINT="nfsen"
 # NFSE_CODIGO_TRIBUTACAO_NACIONAL_ISS="..."
 # NFSE_CODIGO_NBS="..."
+
+# Retenção de mídia (LGPD) — limpeza automática de referências de mídia em mensagens
+# MEDIA_RETENTION_DAYS="30"
+# MEDIA_RETENTION_BATCH="1000"
 ```
 
 Produção:
@@ -96,6 +100,7 @@ As credenciais abaixo podem ser configuradas em runtime no painel de Super Admin
 
 Chaves comuns:
 - IA: `OPENAI_API_KEY`
+- Google OAuth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 - Pagamentos da plataforma: `PAYMENTS_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`
 - Email: `EMAIL_FROM`, `EMAIL_SERVICE`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`
 - Domínios (Vercel): `VERCEL_API_URL`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `VERCEL_AUTH_BEARER_TOKEN`, `VERCEL_IP_ADDRESS`
@@ -104,11 +109,18 @@ Chaves comuns:
 - Zapier: `ZAPIER_ENABLED`, `ZAPIER_ALLOWED_HOSTS`
 - Cron: `CRON_SECRET`
 - Analytics: `GOOGLE_ANALYTICS_ID`
+- Retenção de mídia: `MEDIA_RETENTION_DAYS`, `MEDIA_RETENTION_BATCH`
+- NFS-e: `NFSE_*`, `FOCUS_NFE_*` e emitentes (`NFSE_ISSUERS_JSON`, `NFSE_ISSUER_*`)
+- FinOps: `FINOPS_UNIT_COST_*` e fees (`PLATFORM_FEE_*`)
 - Geral: `APP_URL`
 
 Valores “public” expostos via `/api/public-config` (seguros para o browser):
 - `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
 - Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
+
+Observações:
+- Secrets cadastrados no painel (ex.: `GOOGLE_CLIENT_SECRET`, `OPENAI_API_KEY`, tokens/chaves de pagamento) são persistidos criptografados na tabela `SystemConfig`.
+- `NEXTAUTH_SECRET` e `CONFIG_ENCRYPTION_KEY` são base de segurança/criptografia e devem ficar no ambiente (não são configuráveis via painel). Trocar esses valores invalida sessões e impede descriptografar secrets já persistidos.
 
 ## Zapier (integrações externas via Webhooks)
 O Zapier no Closify é feito via **Webhooks + Automações**:
@@ -184,6 +196,9 @@ Auditoria e acompanhamento (Super Admin):
 - Login (magic link + senha) + 2FA + Google (opcional)
 - Inbox: resumo de conversa com IA (sob demanda)
 - Inbox (Email): sugestão de resposta com IA
+- WhatsApp multimodal (Etapa E): áudio→texto (transcrição) e imagem→texto (OCR) com consentimento
+- WhatsApp documentos (Etapa E): extração de texto para tipos `text/*` (com consentimento)
+- LGPD (Etapa E): retenção/limpeza de `mediaUrl` via cron `/api/cron/media-retention`
 - Automações: gatilho `EMAIL_SENT` (envio de email pelo inbox)
 - Paywall por plano e painel de super admin
 - Assentos por plano (membros aceitos) + limite de convites pendentes (anti-spam)

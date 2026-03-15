@@ -1,10 +1,10 @@
 import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/server/auth';
+import { getAuthOptions } from '@/lib/server/auth';
 import { ensureRequestId } from '@/lib/server/request-id';
 
 export const requireSuperAdmin = async (req, res) => {
   ensureRequestId(req, res);
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getServerSession(req, res, await getAuthOptions());
   if (!session) {
     res.status(401).json({ error: { msg: 'Unauthorized' } });
     return null;

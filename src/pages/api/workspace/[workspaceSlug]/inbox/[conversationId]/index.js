@@ -57,7 +57,7 @@ const handler = async (req, res) => {
 
     case 'PUT':
       try {
-        const { assigneeId } = req.body;
+        const { assigneeId, autopilotEnabled } = req.body || {};
 
         const conversation = await getConversation(conversationId);
         if (!conversation) {
@@ -68,7 +68,35 @@ const handler = async (req, res) => {
           return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
-        const updated = await updateConversation(conversationId, { assigneeId });
+        const data = {};
+        if (assigneeId !== undefined) data.assigneeId = assigneeId;
+        if (autopilotEnabled !== undefined) {
+          if (typeof autopilotEnabled !== 'boolean') {
+            return res.status(400).json({ error: { msg: 'Invalid autopilotEnabled value' } });
+          }
+          data.autopilotEnabled = autopilotEnabled;
+        }
+
+        const updated = await updateConversation(conversationId, data);
+
+        if (autopilotEnabled === true && !conversation.autopilotEnabled) {
+          processAutomation(workspace.id, 'AUTOPILOT_ENABLED', {
+            contact: updated.contact,
+            contactId: updated.contactId,
+            conversation: updated,
+            occurredAt: new Date().toISOString(),
+          }).catch((err) => {
+            log({
+              level: 'error',
+              msg: 'automation_autopilot_enabled_failed',
+              requestId,
+              workspaceId: workspace.id,
+              conversationId,
+              error: err,
+            });
+            reportError(err, { route: 'automation:AUTOPILOT_ENABLED', requestId, workspaceId: workspace.id, conversationId });
+          });
+        }
         res.status(200).json({ data: { conversation: updated } });
       } catch (error) {
         log({ level: 'error', msg: 'conversation_update_failed', requestId, workspaceId: workspace.id, conversationId, error });

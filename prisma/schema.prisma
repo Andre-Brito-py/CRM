@@ -678,6 +678,8 @@ model Conversation {
   workspaceId String
   contactId   String?
   assigneeId  String?
+  autopilotEnabled Boolean       @default(false)
+  mediaProcessingConsentAt DateTime?
   platform    String             @default("WHATSAPP")
   externalId  String?
   status      ConversationStatus @default(OPEN)

@@ -217,6 +217,14 @@ const Automations = () => {
       return;
     }
 
+    if (newRule.actionType === 'AUTO_REPLY_AI') {
+      const cooldown = newRule.actionConfig?.cooldownMinutes;
+      if (cooldown !== undefined && cooldown !== null && cooldown !== '' && (!Number.isFinite(Number(cooldown)) || Number(cooldown) < 0)) {
+        toast.error(t('automations.validation.cooldownInvalid', 'Cooldown inválido'));
+        return;
+      }
+    }
+
     if (newRule.actionType === 'ASSIGN_TO_USER' && !newRule.actionConfig.userId) {
       toast.error(t('automations.validation.userRequired'));
       return;
@@ -271,6 +279,14 @@ const Automations = () => {
         if (type === 'SEND_EMAIL' && (!cfg.subject || !cfg.body)) {
           toast.error(t('automations.validation.emailRequired'));
           return;
+        }
+
+        if (type === 'AUTO_REPLY_AI') {
+          const cooldown = cfg?.cooldownMinutes;
+          if (cooldown !== undefined && cooldown !== null && cooldown !== '' && (!Number.isFinite(Number(cooldown)) || Number(cooldown) < 0)) {
+            toast.error(t('automations.validation.cooldownInvalid', 'Cooldown inválido'));
+            return;
+          }
         }
 
         if (type === 'ASSIGN_TO_USER' && !cfg.userId) {
@@ -684,11 +700,12 @@ const Automations = () => {
                     onChange={(e) => setNewRule({
                       ...newRule,
                       triggerType: e.target.value,
-                      triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', hours: { start: null, end: null } }
+                      triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', hours: { start: null, end: null }, requireAutopilotEnabled: false }
                     })}
                   >
                     <option value="DEAL_STAGE_CHANGED">{t('automations.trigger.option.dealStageChanged')}</option>
                     <option value="INCOMING_MESSAGE">{t('automations.trigger.option.incomingMessage')}</option>
+                    <option value="AUTOPILOT_ENABLED">{t('automations.trigger.option.autopilotEnabled')}</option>
                     <option value="EMAIL_SENT">{t('automations.trigger.option.emailSent')}</option>
                     <option value="PAYMENT_CREATED">{t('automations.trigger.option.paymentCreated')}</option>
                     <option value="PAYMENT_PAID">{t('automations.trigger.option.paymentPaid')}</option>
@@ -804,7 +821,23 @@ const Automations = () => {
                         <option value="">{t('automations.trigger.filter.anyChannel')}</option>
                         <option value="WHATSAPP">WHATSAPP</option>
                         <option value="EMAIL">EMAIL</option>
+                        <option value="INSTAGRAM">INSTAGRAM</option>
                       </select>
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.requireAutopilot')}</label>
+                      <label className="mt-1 inline-flex items-center gap-2 text-sm text-gray-700">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(newRule.triggerConfig?.requireAutopilotEnabled)}
+                          onChange={(e) => setNewRule({
+                            ...newRule,
+                            triggerConfig: { ...newRule.triggerConfig, requireAutopilotEnabled: e.target.checked }
+                          })}
+                        />
+                        {t('automations.trigger.filter.requireAutopilotHelp')}
+                      </label>
                     </div>
 
                     <div>
@@ -857,9 +890,10 @@ const Automations = () => {
                     value={newRule.actionType}
                     onChange={(e) => {
                       const next = e.target.value;
-                      const base = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
+                      const base = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', objective: '', cooldownMinutes: 0 };
                       if (next === 'SEND_WHATSAPP') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'SEND_EMAIL') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                      else if (next === 'AUTO_REPLY_AI') setNewRule({ ...newRule, actionType: next, actionConfig: { objective: '', cooldownMinutes: 0 } });
                       else if (next === 'ASSIGN_TO_USER') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'CREATE_TASK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
                       else if (next === 'CALL_WEBHOOK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
@@ -883,6 +917,7 @@ const Automations = () => {
                     {emailMarketingEnabled && (
                       <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
                     )}
+                    <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
                     <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
                     <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
                     <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
@@ -911,6 +946,7 @@ const Automations = () => {
                         const nextConfigBase = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
                         if (nextType === 'SEND_WHATSAPP') setAction({ type: nextType, config: { templateId: '' } });
                         else if (nextType === 'SEND_EMAIL') setAction({ type: nextType, config: { subject: '', body: '', from: '' } });
+                        else if (nextType === 'AUTO_REPLY_AI') setAction({ type: nextType, config: { objective: '', cooldownMinutes: 0 } });
                         else if (nextType === 'ASSIGN_TO_USER') setAction({ type: nextType, config: { userId: '' } });
                         else if (nextType === 'CREATE_TASK') setAction({ type: nextType, config: { title: '', content: '', dueInDays: 0, assigneeId: '' } });
                         else if (nextType === 'CALL_WEBHOOK') setAction({ type: nextType, config: { eventName: '' } });
@@ -935,6 +971,7 @@ const Automations = () => {
                                 {emailMarketingEnabled && (
                                   <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
                                 )}
+                                <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
                                 <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
                                 <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
                                 <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
@@ -1047,6 +1084,35 @@ const Automations = () => {
                                 />
                               </div>
                             </>
+                          )}
+
+                          {type === 'AUTO_REPLY_AI' && (
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiObjective')}</label>
+                                <select
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  value={config.objective || ''}
+                                  onChange={(e) => setAction({ config: { ...config, objective: e.target.value } })}
+                                >
+                                  <option value="">{t('automations.action.aiObjectivePlaceholder', 'Padrão')}</option>
+                                  <option value="support">{t('inbox.ai.objective.support')}</option>
+                                  <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
+                                  <option value="close">{t('inbox.ai.objective.close')}</option>
+                                  <option value="schedule">{t('inbox.ai.objective.schedule')}</option>
+                                </select>
+                              </div>
+                              <div className="sm:col-span-2">
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiCooldownMinutes')}</label>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  value={Number(config.cooldownMinutes || 0)}
+                                  onChange={(e) => setAction({ config: { ...config, cooldownMinutes: Number(e.target.value || 0) } })}
+                                />
+                              </div>
+                            </div>
                           )}
 
                           {type === 'SEND_NPS' && (
@@ -1345,6 +1411,41 @@ const Automations = () => {
                       />
                     </div>
                   </>
+                )}
+
+                {newRule.actionType === 'AUTO_REPLY_AI' && (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiObjective')}</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.actionConfig.objective || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, objective: e.target.value }
+                        })}
+                      >
+                        <option value="">{t('automations.action.aiObjectivePlaceholder', 'Padrão')}</option>
+                        <option value="support">{t('inbox.ai.objective.support')}</option>
+                        <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
+                        <option value="close">{t('inbox.ai.objective.close')}</option>
+                        <option value="schedule">{t('inbox.ai.objective.schedule')}</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiCooldownMinutes')}</label>
+                      <input
+                        type="number"
+                        min={0}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        value={Number(newRule.actionConfig.cooldownMinutes || 0)}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, cooldownMinutes: Number(e.target.value || 0) }
+                        })}
+                      />
+                    </div>
+                  </div>
                 )}
 
                 {newRule.actionType === 'ASSIGN_TO_USER' && (

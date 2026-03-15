@@ -13,7 +13,156 @@ import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 import { rateLimit } from '@/lib/server/rateLimit';
 import getStripe from '@/lib/server/stripe';
 
-export const authOptions = {
+let cachedGoogleOauthAt = 0;
+let cachedGoogleOauth = null;
+
+const getGoogleOauthConfig = async () => {
+  const now = Date.now();
+  if (cachedGoogleOauth && now - cachedGoogleOauthAt < 60_000) return cachedGoogleOauth;
+
+  const [clientIdRaw, clientSecretRaw] = await Promise.all([
+    getSystemConfig('GOOGLE_CLIENT_ID', process.env.GOOGLE_CLIENT_ID),
+    getSystemConfig('GOOGLE_CLIENT_SECRET', process.env.GOOGLE_CLIENT_SECRET),
+  ]);
+
+  const clientId = String(clientIdRaw || '').trim();
+  const clientSecret = String(clientSecretRaw || '').trim();
+  const ok = clientId.length > 0 && clientSecret.length > 0;
+
+  cachedGoogleOauthAt = now;
+  cachedGoogleOauth = { ok, clientId, clientSecret };
+  return cachedGoogleOauth;
+};
+
+const createCredentialsProvider = () =>
+  CredentialsProvider({
+    name: 'Credentials',
+    credentials: {
+      email: { label: "Email", type: "email" },
+      password: { label: "Password", type: "password" },
+      token2fa: { label: "2FA Token", type: "text" }
+    },
+    async authorize(credentials, req) {
+      if (!credentials?.email || !credentials?.password) {
+        throw new Error('Please enter an email and password');
+      }
+
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const normalizedEmail = String(credentials.email || '').trim().toLowerCase();
+      const isTruthy = (value) => {
+        const v = String(value || '').trim().toLowerCase();
+        return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+      };
+
+      if (req) {
+        const rlIp = await rateLimit({ req, limit: 60, windowMs: 5 * 60_000 });
+        if (!rlIp.ok) {
+          throw new Error('Too Many Requests');
+        }
+        const rlEmail = await rateLimit({ req, limit: 15, windowMs: 5 * 60_000, key: `auth:login:email:${normalizedEmail}` });
+        if (!rlEmail.ok) {
+          throw new Error('Too Many Requests');
+        }
+      }
+
+      const user = await prisma.user.findFirst({
+        where: {
+          email: {
+            equals: normalizedEmail,
+            mode: 'insensitive',
+          }
+        }
+      });
+
+      if (!user || !user.password) {
+        await sleep(250);
+        throw new Error('No user found or password not set (use magic link to login and set a password)');
+      }
+
+      const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+
+      if (!isPasswordValid) {
+        await sleep(250);
+        throw new Error('Invalid password');
+      }
+
+      if (!user.emailVerified) {
+        await sleep(250);
+        throw new Error('Please verify your email address first');
+      }
+
+      if (user.twoFactorEnabled) {
+        if (!credentials.token2fa) {
+          throw new Error('2FA_REQUIRED');
+        }
+
+        if (!user.twoFactorSecret) {
+          throw new Error('2FA secret is missing. Please contact support.');
+        }
+
+        const isValidToken = authenticator.check(credentials.token2fa, user.twoFactorSecret);
+
+        if (!isValidToken) {
+          await sleep(200);
+          throw new Error('Invalid 2FA code');
+        }
+      }
+
+      const requireCardOnSignup = isTruthy(
+        await getSystemConfig(
+          'PAYMENTS_REQUIRE_CARD_ON_SIGNUP',
+          process.env.PAYMENTS_REQUIRE_CARD_ON_SIGNUP ?? 'true'
+        )
+      );
+      if (requireCardOnSignup && user.role !== 'SUPERADMIN') {
+        const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
+        if (paymentsSecretKey) {
+          let customerPayment = await getPayment(user.email);
+          if (!customerPayment) {
+            await createPaymentAccount(user.email, user.id);
+            customerPayment = await getPayment(user.email);
+          }
+          if (!customerPayment?.paymentId) {
+            throw new Error('PAYMENT_METHOD_REQUIRED');
+          }
+
+          const stripe = await getStripe();
+          const paymentMethods = await stripe.paymentMethods.list({
+            customer: customerPayment.paymentId,
+            type: 'card',
+            limit: 1,
+          });
+          const hasCard = Array.isArray(paymentMethods?.data) && paymentMethods.data.length > 0;
+          if (!hasCard) {
+            throw new Error('PAYMENT_METHOD_REQUIRED');
+          }
+        }
+      }
+
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        image: user.image,
+      };
+    }
+  });
+
+const createEmailProvider = () =>
+  EmailProvider({
+    sendVerificationRequest: async ({ identifier: email, url }) => {
+      const { host } = new URL(url);
+      const emailFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
+      await sendMail({
+        html: html({ email, url, from: emailFrom }),
+        subject: `[Closify] Sign in to ${host}`,
+        text: text({ email, url, from: emailFrom }),
+        to: email,
+      });
+    },
+  });
+
+const buildBaseAuthOptions = () => ({
   adapter: PrismaAdapter(prisma),
   callbacks: {
     session: async ({ session, token }) => {
@@ -91,6 +240,32 @@ export const authOptions = {
       }
     },
   },
+  secret: process.env.NEXTAUTH_SECRET || null,
+  session: {
+    strategy: 'jwt',
+  },
+});
+
+export const getAuthOptions = async () => {
+  const providers = [];
+  const google = await getGoogleOauthConfig();
+  if (google.ok) {
+    providers.push(
+      GoogleProvider({
+        clientId: google.clientId,
+        clientSecret: google.clientSecret,
+      })
+    );
+  }
+
+  providers.push(createCredentialsProvider());
+  providers.push(createEmailProvider());
+
+  return { ...buildBaseAuthOptions(), providers };
+};
+
+export const authOptions = {
+  ...buildBaseAuthOptions(),
   providers: [
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
@@ -100,133 +275,7 @@ export const authOptions = {
         }),
       ]
       : []),
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-        token2fa: { label: "2FA Token", type: "text" }
-      },
-      async authorize(credentials, req) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Please enter an email and password');
-        }
-
-        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-        const normalizedEmail = String(credentials.email || '').trim().toLowerCase();
-        const isTruthy = (value) => {
-          const v = String(value || '').trim().toLowerCase();
-          return v === 'true' || v === '1' || v === 'yes' || v === 'on';
-        };
-
-        if (req) {
-          const rlIp = await rateLimit({ req, limit: 60, windowMs: 5 * 60_000 });
-          if (!rlIp.ok) {
-            throw new Error('Too Many Requests');
-          }
-          const rlEmail = await rateLimit({ req, limit: 15, windowMs: 5 * 60_000, key: `auth:login:email:${normalizedEmail}` });
-          if (!rlEmail.ok) {
-            throw new Error('Too Many Requests');
-          }
-        }
-
-        const user = await prisma.user.findFirst({
-          where: {
-            email: {
-              equals: normalizedEmail,
-              mode: 'insensitive',
-            }
-          }
-        });
-
-        if (!user || !user.password) {
-          await sleep(250);
-          throw new Error('No user found or password not set (use magic link to login and set a password)');
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isPasswordValid) {
-          await sleep(250);
-          throw new Error('Invalid password');
-        }
-
-        if (!user.emailVerified) {
-          await sleep(250);
-          throw new Error('Please verify your email address first');
-        }
-
-        if (user.twoFactorEnabled) {
-          if (!credentials.token2fa) {
-            throw new Error('2FA_REQUIRED');
-          }
-
-          if (!user.twoFactorSecret) {
-            throw new Error('2FA secret is missing. Please contact support.');
-          }
-
-          const isValidToken = authenticator.check(credentials.token2fa, user.twoFactorSecret);
-
-          if (!isValidToken) {
-            await sleep(200);
-            throw new Error('Invalid 2FA code');
-          }
-        }
-
-        const requireCardOnSignup = isTruthy(
-          await getSystemConfig(
-            'PAYMENTS_REQUIRE_CARD_ON_SIGNUP',
-            process.env.PAYMENTS_REQUIRE_CARD_ON_SIGNUP ?? 'true'
-          )
-        );
-        if (requireCardOnSignup && user.role !== 'SUPERADMIN') {
-          const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
-          if (paymentsSecretKey) {
-            let customerPayment = await getPayment(user.email);
-            if (!customerPayment) {
-              await createPaymentAccount(user.email, user.id);
-              customerPayment = await getPayment(user.email);
-            }
-            if (!customerPayment?.paymentId) {
-              throw new Error('PAYMENT_METHOD_REQUIRED');
-            }
-
-            const stripe = await getStripe();
-            const paymentMethods = await stripe.paymentMethods.list({
-              customer: customerPayment.paymentId,
-              type: 'card',
-              limit: 1,
-            });
-            const hasCard = Array.isArray(paymentMethods?.data) && paymentMethods.data.length > 0;
-            if (!hasCard) {
-              throw new Error('PAYMENT_METHOD_REQUIRED');
-            }
-          }
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
-        };
-      }
-    }),
-    EmailProvider({
-      sendVerificationRequest: async ({ identifier: email, url }) => {
-        const { host } = new URL(url);
-        const emailFrom = await getSystemConfig('EMAIL_FROM', process.env.EMAIL_FROM);
-        await sendMail({
-          html: html({ email, url, from: emailFrom }),
-          subject: `[Closify] Sign in to ${host}`,
-          text: text({ email, url, from: emailFrom }),
-          to: email,
-        });
-      },
-    }),
+    createCredentialsProvider(),
+    createEmailProvider(),
   ],
-  secret: process.env.NEXTAUTH_SECRET || null,
-  session: {
-    strategy: 'jwt',
-  },
 };
