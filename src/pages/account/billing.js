@@ -243,22 +243,42 @@ const Billing = ({ invoices, products }) => {
                       maximumFractionDigits: 2,
                     }).format(Number(product.prices.unit_amount / 100))}
                     <span className="text-sm text-gray-400 font-medium ml-2">
-                      / {product.prices.interval}
+                       / mo
                     </span>
                   </h3>
+                  {product.prices.unit_amount_annual > 0 && (
+                    <p className="mt-2 text-sm text-green-600 font-bold">
+                      {new Intl.NumberFormat('en-US', {
+                        style: 'currency',
+                        currency: (product.prices.currency || 'USD').toUpperCase(),
+                        maximumFractionDigits: 2,
+                      }).format(Number(product.prices.unit_amount_annual / 100))} / yr (Save 20%)
+                    </p>
+                  )}
                 </Card.Body>
                 <Card.Footer>
-                  <Button
-                    className="w-full text-white bg-blue-600 hover:bg-blue-500"
-                    disabled={isSubmitting || !product.prices.id}
-                    onClick={() => subscribe(product.prices.id)}
-                  >
-                    {isSubmitting
-                      ? 'Redirecting...'
-                      : product.prices.id
-                        ? `Change to ${product.name}`
-                        : 'Unavailable'}
-                  </Button>
+                  <div className="w-full flex space-x-2">
+                    <Button
+                      className={`flex-1 text-white ${!product.prices.id ? 'bg-zinc-400' : 'bg-blue-600 hover:bg-blue-500'}`}
+                      disabled={isSubmitting || !product.prices.id}
+                      onClick={() => subscribe(product.prices.id)}
+                    >
+                      {isSubmitting
+                        ? 'Wait...'
+                        : product.prices.id
+                          ? `Assinar Mensal`
+                          : 'Indisponível'}
+                    </Button>
+                    {product.prices.id_annual && (
+                      <Button
+                        className="flex-1 text-white bg-green-600 hover:bg-green-500"
+                        disabled={isSubmitting}
+                        onClick={() => subscribe(product.prices.id_annual)}
+                      >
+                         Assinar Anual
+                      </Button>
+                    )}
+                  </div>
                 </Card.Footer>
               </Card>
             ))}
@@ -368,12 +388,16 @@ export const getServerSideProps = async (context) => {
       getAllPlans(),
     ]);
 
-    const products = (plans || []).map((plan) => ({
+    const products = (plans || [])
+      .filter((p) => p.isActive)
+      .map((plan) => ({
       name: plan.name,
       description: plan.description,
       prices: {
         id: plan.stripePriceId,
+        id_annual: plan.stripePriceIdAnnual,
         unit_amount: Number(plan.price) * 100,
+        unit_amount_annual: (Number(plan.priceAnnual) || 0) * 100,
         currency: plan.currency,
         interval: plan.interval,
       },

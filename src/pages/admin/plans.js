@@ -48,9 +48,10 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     slug: plan?.slug || '',
     description: plan?.description || '',
     price: plan?.price || 0,
+    priceAnnual: plan?.priceAnnual || 0,
     currency: plan?.currency || 'USD',
-    interval: plan?.interval || 'month',
     stripePriceId: plan?.stripePriceId || '',
+    stripePriceIdAnnual: plan?.stripePriceIdAnnual || '',
     maxUsers: plan?.features?.maxUsers ?? 5,
     maxPendingInvites:
       plan?.features?.maxPendingInvites ??
@@ -123,9 +124,11 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         slug: formData.slug,
         description: formData.description,
         price: parseFloat(formData.price),
+        priceAnnual: formData.priceAnnual ? parseFloat(formData.priceAnnual) : null,
         currency: formData.currency,
-        interval: formData.interval,
+        interval: 'month',
         stripePriceId: formData.stripePriceId,
+        stripePriceIdAnnual: formData.stripePriceIdAnnual,
         isActive: formData.isActive,
         features,
       });
@@ -165,8 +168,13 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Price</label>
+            <label className="block text-sm font-medium text-gray-700">Monthly Price</label>
             <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Annual Price</label>
+            <input type="number" name="priceAnnual" min="0" step="0.01" value={formData.priceAnnual} onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
           </div>
           <div>
@@ -174,20 +182,19 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             <input type="text" name="currency" required value={formData.currency} onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Interval</label>
-            <select name="interval" value={formData.interval} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-              <option value="month">Monthly</option>
-              <option value="year">Yearly</option>
-            </select>
-          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Optional)</label>
-          <input type="text" name="stripePriceId" value={formData.stripePriceId} onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Monthly)</label>
+            <input type="text" name="stripePriceId" value={formData.stripePriceId} onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Annual)</label>
+            <input type="text" name="stripePriceIdAnnual" value={formData.stripePriceIdAnnual} onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+          </div>
         </div>
 
         {/* Trial */}
@@ -369,7 +376,8 @@ const Plans = () => {
                             <div className="text-right space-y-1">
                               <p className="text-sm font-bold text-gray-900">
                                 {new Intl.NumberFormat('en-US', { style: 'currency', currency: plan.currency }).format(plan.price)}
-                                <span className="text-gray-500 font-normal"> / {plan.interval}</span>
+                                <span className="text-gray-500 font-normal"> / mo</span>
+                                {plan.priceAnnual > 0 && <span className="ml-2 text-indigo-600">({new Intl.NumberFormat('en-US', { style: 'currency', currency: plan.currency }).format(plan.priceAnnual)} / yr)</span>}
                               </p>
                               <div className="flex items-center justify-end gap-2">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${plan.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>

@@ -339,6 +339,12 @@ Como isso funciona internamente (resumo):
 - **Exportação de Dados:** funcionalidade de exportação do Workspace em JSON disponível em Configurações Avançadas.
 - **UI/UX:** refinamento do Help Center removendo emojis e padronizando com Heroicons.
 
+### 2026-03-15
+- **Assinaturas Anuais e Mensais (Toggle):** Implementação completa do fluxo de assinaturas anuais com desconto. Banco de dados adaptado para armazenar `priceAnnual` e `stripePriceIdAnnual`. Landing Page e Checkout recebem toggle interativo mensal/anual mostrando preço equivalente para conversão inteligente.
+- **Painel de Faturamento Interno:** Clientes já assinantes agora conseguem alterar o ciclo de cobrança diretamente pelo painel B2B sem passar pelo Suporte, vendo a economia de 20% com transparência. Super Admin atualizado para gerenciar Stripe IDs de planos anuais nativamente.
+- **Auditoria de Termos de Uso (LGPD/GDPR):** Inserção restritiva em `terms.js` protegendo a plataforma contra chargebacks e garantindo legalidade no modelo "Pay-as-you-go" (Overage Limit por IA) e taxação/split de Gateways de pagamentos utilizados via plataforma. Modelagem legal "No Refunds for Annuals cancelation". Atualização de versão de política impondo aceite da base de clientes na próxima autenticação.
+- **Global Cookie Consent (Glassmorphism Banner):** Banner elegante global cobrindo consentimento de cookies da infraestrutura com fallback em `localStorage`. Retirada do tracking nativo do `_app.js` (Google Analytics), vinculando o disparo estatístico estritamente ao aceite condicionado do pop-up para alinhar à GDPR e LGPD europeia/brasileira.
+
 ---
 
 ## 📄 Licença

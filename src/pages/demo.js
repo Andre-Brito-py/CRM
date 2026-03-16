@@ -318,6 +318,7 @@ export const getServerSideProps = async () => {
         plan: premiumPlan ? {
           name: premiumPlan.name,
           price: Number(premiumPlan.price),
+          priceAnnual: premiumPlan.priceAnnual ? Number(premiumPlan.priceAnnual) : null,
           currency: premiumPlan.currency,
           interval: premiumPlan.interval
         } : null

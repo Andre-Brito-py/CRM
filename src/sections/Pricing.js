@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -31,6 +32,7 @@ const getCurrencyFormatter = (currency) => {
 
 const Pricing = ({ products }) => {
   const { t } = useTranslation();
+  const [isAnnual, setIsAnnual] = useState(false);
 
   return (
     <div id="pricing" className="w-full py-32 bg-[#050505] relative overflow-hidden border-t border-zinc-900">
@@ -50,6 +52,26 @@ const Pricing = ({ products }) => {
           <p className="mt-6 text-xl text-zinc-400 leading-relaxed">
             {t("landing.pricing.subtitle", "Start free, upgrade when you need more power. Transparent pricing for high-performance teams.")}
           </p>
+          
+          <div className="mt-10 flex items-center justify-center p-1.5 bg-zinc-900/60 rounded-full border border-zinc-800">
+            <button
+              onClick={() => setIsAnnual(false)}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
+                !isAnnual ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              {t("landing.pricing.monthly", "Mensal")}
+            </button>
+            <button
+              onClick={() => setIsAnnual(true)}
+              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+                isAnnual ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              {t("landing.pricing.annually", "Anual")}
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">Economize 20%</span>
+            </button>
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
@@ -60,10 +82,10 @@ const Pricing = ({ products }) => {
               const featuresList = parseFeatures(product.features);
               const currencyFormatter = getCurrencyFormatter(product.currency);
               const isFree = Number(product.price) === 0;
-              const intervalLabel =
-                product.interval === 'year'
-                  ? t('landing.pricing.year', '/yr')
-                  : t('landing.pricing.month', '/mo');
+              const hasAnnualPrice = product.priceAnnual != null && product.priceAnnual > 0;
+              const displayPrice = isAnnual && hasAnnualPrice ? Number(product.priceAnnual) / 12 : Number(product.price);
+              const intervalParam = isAnnual && hasAnnualPrice ? 'year' : 'month';
+              const intervalLabel = t('landing.pricing.month', '/mês');
 
               return (
                 <motion.div
@@ -80,7 +102,7 @@ const Pricing = ({ products }) => {
                 >
                   {isMostPopular && (
                     <div className="absolute top-0 left-0 w-full bg-indigo-600 py-1.5 text-center text-xs font-bold text-white uppercase tracking-wider">
-                      {t("landing.pricing.popular", "Most Popular")}
+                      {t("landing.pricing.popular", "Mais Popular")}
                     </div>
                   )}
 
@@ -88,24 +110,32 @@ const Pricing = ({ products }) => {
                     <h3 className="text-2xl font-bold text-white">{t(`landing.pricing.plan.${product.name}.name`, product.name)}</h3>
                     <p className="text-zinc-400 min-h-[48px]">{t(`landing.pricing.plan.${product.name}.desc`, product.description)}</p>
 
-                    <div className="flex items-baseline space-x-2 my-8">
-                      <span className="text-5xl font-extrabold text-white">
-                        {isFree ? t('landing.pricing.free', 'Free') : currencyFormatter.format(Number(product.price))}
-                      </span>
-                      {!isFree && <span className="text-zinc-500 font-medium">{intervalLabel}</span>}
+                    <div className="flex flex-col my-8">
+                      <div className="flex items-baseline space-x-2">
+                        <span className="text-5xl font-extrabold text-white">
+                          {isFree ? t('landing.pricing.free', 'Grátis') : currencyFormatter.format(displayPrice)}
+                        </span>
+                        {!isFree && <span className="text-zinc-500 font-medium">{intervalLabel}</span>}
+                      </div>
+                      {!isFree && isAnnual && hasAnnualPrice && (
+                        <p className="text-sm text-green-400 mt-2 font-medium">Cobrado {currencyFormatter.format(product.priceAnnual)} por ano</p>
+                      )}
+                      {!isFree && !isAnnual && hasAnnualPrice && (
+                        <p className="text-sm text-zinc-500 mt-2 opacity-0">Placeholder</p> // Maintain height
+                      )}
                     </div>
 
                     <Link
                       href={{
                         pathname: '/auth/register',
-                        query: product?.slug ? { plan: product.slug } : undefined,
+                        query: product?.slug ? { plan: product.slug, interval: intervalParam } : undefined,
                       }}
                       className={`flex items-center justify-center w-full px-6 py-4 text-base font-bold rounded-xl transition-all ${isMostPopular
                         ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg'
                         : 'bg-zinc-800 text-white hover:bg-zinc-700'
                         }`}
                     >
-                      {t("landing.pricing.getStarted", "Get Started")}
+                      {t("landing.pricing.getStarted", "Começar Agora")}
                     </Link>
 
                     <div className="pt-8 mt-8 border-t border-zinc-800">

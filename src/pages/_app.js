@@ -13,6 +13,7 @@ import progressBarConfig from '@/config/progress-bar/index';
 import swrConfig from '@/config/swr/index';
 import WorkspaceProvider from '@/providers/workspace';
 import fetcher from '@/lib/client/fetcher';
+import CookieConsent from '@/components/CookieConsent';
 
 import '@/styles/globals.css';
 let enData = require('../messages/en.json');
@@ -102,6 +103,7 @@ const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
   const [gaReady, setGaReady] = useState(false);
   const [maintenanceDismissed, setMaintenanceDismissed] = useState(false);
+  const [hasConsent, setHasConsent] = useState(false);
   useTranslation();
   const router = useRouter();
   const swrOptions = swrConfig();
@@ -138,7 +140,13 @@ const App = ({ Component, pageProps }) => {
   TopBarProgress.config(progressBarConfig());
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'production') return;
+    if (typeof window !== 'undefined') {
+      setHasConsent(localStorage.getItem('closify_cookie_consent') === 'true');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== 'production' || !hasConsent) return;
     let cancelled = false;
 
     (async () => {
@@ -158,7 +166,7 @@ const App = ({ Component, pageProps }) => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasConsent]);
 
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production') return;
@@ -237,6 +245,7 @@ const App = ({ Component, pageProps }) => {
               </div>
             )}
             <Component {...pageProps} />
+            <CookieConsent onAccept={() => setHasConsent(true)} />
           </WorkspaceProvider>
         </ThemeProvider>
       </SWRConfig>

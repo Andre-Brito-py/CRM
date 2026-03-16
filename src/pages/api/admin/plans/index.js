@@ -52,16 +52,18 @@ export default async function handler(req, res) {
       res.status(500).json({ error: { msg: 'Failed to fetch plans' } });
     }
   } else if (req.method === 'POST') {
-    const { name, slug, price, interval, currency, features, stripePriceId, description, isActive } = req.body;
+    const { name, slug, price, priceAnnual, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
 
     try {
       const desiredType = normalizePlanType(slug);
       let syncedPrice = Number(price || 0);
+      let syncedPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
       let syncedCurrency = normalizeCurrency(currency);
-      let syncedInterval = normalizeInterval(interval);
+      let syncedInterval = 'month'; // default for the monthly tier
       let finalStripePriceId = stripePriceId || null;
+      let finalStripePriceIdAnnual = stripePriceIdAnnual || null;
 
-      if (stripePriceId) {
+      if (stripePriceId || stripePriceIdAnnual) {
         let stripePrice = null;
         try {
           const stripe = await getStripe();
@@ -89,7 +91,7 @@ export default async function handler(req, res) {
             });
           } catch { }
         }
-      } else if (toCents(syncedPrice) > 0) {
+      } else if (toCents(syncedPrice) > 0 || (syncedPriceAnnual && toCents(syncedPriceAnnual) > 0)) {
         if (!desiredType) {
           res.status(400).json({ error: { msg: 'Slug inválido. Use FREE, STANDARD ou PREMIUM.' } });
           return;
@@ -103,20 +105,30 @@ export default async function handler(req, res) {
           return;
         }
 
-        const type = String(slug || '').trim().toUpperCase();
         const product = await stripe.products.create({
           name: String(name || 'Plano'),
           metadata: { type: desiredType },
         });
 
-        const created = await stripe.prices.create({
-          unit_amount: toCents(syncedPrice),
-          currency: String(syncedCurrency).toLowerCase(),
-          recurring: { interval: syncedInterval },
-          product: product.id,
-        });
+        if (toCents(syncedPrice) > 0) {
+          const created = await stripe.prices.create({
+            unit_amount: toCents(syncedPrice),
+            currency: String(syncedCurrency).toLowerCase(),
+            recurring: { interval: 'month' },
+            product: product.id,
+          });
+          finalStripePriceId = created.id;
+        }
 
-        finalStripePriceId = created.id;
+        if (syncedPriceAnnual && toCents(syncedPriceAnnual) > 0) {
+          const createdAnnual = await stripe.prices.create({
+            unit_amount: toCents(syncedPriceAnnual),
+            currency: String(syncedCurrency).toLowerCase(),
+            recurring: { interval: 'year' },
+            product: product.id,
+          });
+          finalStripePriceIdAnnual = createdAnnual.id;
+        }
       }
 
       const plan = await prisma.plan.create({
@@ -124,10 +136,12 @@ export default async function handler(req, res) {
           name,
           slug,
           price: syncedPrice,
+          priceAnnual: syncedPriceAnnual,
           interval: syncedInterval,
           currency: syncedCurrency,
           features,
           stripePriceId: finalStripePriceId,
+          stripePriceIdAnnual: finalStripePriceIdAnnual,
           description,
           isActive: typeof isActive === 'boolean' ? isActive : true,
         },
@@ -140,7 +154,7 @@ export default async function handler(req, res) {
           action: 'PLAN_CREATE',
           title: 'Plan created',
           target: { planId: plan.id },
-          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, currency: plan.currency, isActive: plan.isActive },
+          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, currency: plan.currency, isActive: plan.isActive },
         },
         req
       );

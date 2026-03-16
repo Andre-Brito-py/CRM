@@ -886,9 +886,11 @@ model Plan {
   slug          String                 @unique
   description   String?
   price         Float
+  priceAnnual   Float?
   currency      String                 @default("USD")
   interval      String                 @default("month")
   stripePriceId String?
+  stripePriceIdAnnual String?
   features      Json?
   isActive      Boolean                @default(true)
   createdAt     DateTime               @default(now())

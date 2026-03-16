@@ -9,7 +9,7 @@ import Meta from '@/components/Meta/index';
 import { redirectToCheckout } from '@/lib/client/stripe';
 import { getAllPlans } from '@/prisma/services/plan';
 
-const Register = ({ plans, initialPlanSlug }) => {
+const Register = ({ plans, initialPlanSlug, initialInterval }) => {
     const router = useRouter();
     const [isSubmitting, setSubmittingState] = useState(false);
     const [isRedirecting, setRedirectingState] = useState(false);
@@ -20,6 +20,7 @@ const Register = ({ plans, initialPlanSlug }) => {
         password: '',
         confirmPassword: '',
         planSlug: initialPlanSlug || '',
+        interval: initialInterval || 'month',
         termsAccepted: false,
         twoFactorEnabled: false
     });
@@ -40,16 +41,22 @@ const Register = ({ plans, initialPlanSlug }) => {
 
     useEffect(() => {
         if (!router.isReady) return;
-        const raw = router.query?.plan;
-        const normalized = String(Array.isArray(raw) ? raw[0] : raw || '')
+        const rawPlan = router.query?.plan;
+        const rawInterval = router.query?.interval;
+        
+        const normalizedPlan = String(Array.isArray(rawPlan) ? rawPlan[0] : rawPlan || '')
             .trim()
             .toUpperCase();
-        if (!normalized) return;
-        setFormData((prev) => {
-            if (prev.planSlug === normalized) return prev;
-            return { ...prev, planSlug: normalized };
-        });
-    }, [router.isReady, router.query?.plan]);
+        
+        const normalizedInterval = String(Array.isArray(rawInterval) ? rawInterval[0] : rawInterval || '').trim().toLowerCase() === 'year' ? 'year' : 'month';
+
+        if (normalizedPlan) {
+            setFormData((prev) => {
+                if (prev.planSlug === normalizedPlan && prev.interval === normalizedInterval) return prev;
+                return { ...prev, planSlug: normalizedPlan, interval: normalizedInterval };
+            });
+        }
+    }, [router.isReady, router.query?.plan, router.query?.interval]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -62,7 +69,17 @@ const Register = ({ plans, initialPlanSlug }) => {
 
         const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
         const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
-        const planPriceId = selectedPlan?.stripePriceId ? String(selectedPlan.stripePriceId) : null;
+        
+        const isAnnual = formData.interval === 'year';
+        let planPriceId = null;
+        
+        if (selectedPlan) {
+            if (isAnnual && selectedPlan.stripePriceIdAnnual) {
+                planPriceId = String(selectedPlan.stripePriceIdAnnual);
+            } else if (selectedPlan.stripePriceId) {
+                planPriceId = String(selectedPlan.stripePriceId);
+            }
+        }
 
         if (formData.password !== formData.confirmPassword) {
             toast.error('Passwords do not match');
@@ -298,7 +315,7 @@ const Register = ({ plans, initialPlanSlug }) => {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="planSlug">Plano selecionado</label>
                             <div className="relative">
                                 <select
@@ -313,16 +330,44 @@ const Register = ({ plans, initialPlanSlug }) => {
                                         .filter((p) => Boolean(p?.isActive))
                                         .filter((p) => String(p?.slug || '').toUpperCase() !== 'FREE')
                                         .sort((a, b) => Number(a.price) - Number(b.price))
-                                        .map((plan) => (
-                                            <option key={plan.id} value={String(plan.slug || '').toUpperCase()}>
-                                                {plan.name} — {plan.currency} {plan.price}/{plan.interval === 'month' ? 'mês' : 'ano'}
-                                            </option>
-                                        ))}
+                                        .map((plan) => {
+                                            const isAnnual = formData.interval === 'year';
+                                            const hasAnnualPrice = plan.priceAnnual != null && plan.priceAnnual > 0;
+                                            const displayPrice = isAnnual && hasAnnualPrice ? Number((plan.priceAnnual / 12).toFixed(2)) : plan.price;
+                                            const displayInterval = 'mês';
+                                            const billingType = isAnnual && hasAnnualPrice ? ' (cobrado anualmente)' : '';
+                                            
+                                            return (
+                                                <option key={plan.id} value={String(plan.slug || '').toUpperCase()}>
+                                                    {plan.name} — {plan.currency} {displayPrice}/{displayInterval}{billingType}
+                                                </option>
+                                            );
+                                        })}
                                 </select>
                                 <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 </div>
                             </div>
+                            
+                            {isPaidPlan && (
+                                <div className="flex bg-gray-100 p-1 rounded-xl">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setFormData({...formData, interval: 'month'})} 
+                                        className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${formData.interval !== 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Mensal
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setFormData({...formData, interval: 'year'})} 
+                                        className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex justify-center items-center gap-2 ${formData.interval === 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                                    >
+                                        Anual <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-20%</span>
+                                    </button>
+                                </div>
+                            )}
+
                             <p className="text-xs text-gray-400 ml-1">
                                 Para garantir a segurança da plataforma e validar sua identidade, é necessário cadastrar um cartão (Stripe), mesmo no plano gratuito.
                             </p>
@@ -394,10 +439,12 @@ export default Register;
 
 export const getServerSideProps = async (context) => {
     const rawPlan = context?.query?.plan;
+    const rawInterval = context?.query?.interval;
     const normalizedPlan = String(Array.isArray(rawPlan) ? rawPlan[0] : rawPlan || '')
         .trim()
         .toUpperCase();
     const initialPlanSlug = ['FREE', 'STANDARD', 'PREMIUM'].includes(normalizedPlan) ? normalizedPlan : '';
+    const initialInterval = String(Array.isArray(rawInterval) ? rawInterval[0] : rawInterval || '').trim().toLowerCase() === 'year' ? 'year' : 'month';
 
     try {
         const plans = await getAllPlans();
@@ -407,14 +454,16 @@ export const getServerSideProps = async (context) => {
             slug: plan.slug,
             description: plan.description ?? null,
             price: plan.price,
+            priceAnnual: plan.priceAnnual ?? null,
             currency: plan.currency,
             interval: plan.interval,
             stripePriceId: plan.stripePriceId ?? null,
+            stripePriceIdAnnual: plan.stripePriceIdAnnual ?? null,
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),
         }));
-        return { props: { plans: safePlans, initialPlanSlug } };
+        return { props: { plans: safePlans, initialPlanSlug, initialInterval } };
     } catch (error) {
-        return { props: { plans: [], initialPlanSlug } };
+        return { props: { plans: [], initialPlanSlug, initialInterval: 'month' } };
     }
 };

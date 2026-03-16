@@ -14,8 +14,8 @@ const TermsOfUse = () => {
     process.env.NEXT_PUBLIC_COMPANY_NAME || 'Closify CRM';
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@example.com';
-  const termsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
-  const lastUpdated = '13/03/2026';
+  const termsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-15';
+  const lastUpdated = '15/03/2026';
 
   const acceptedAt = session?.user?.termsAcceptedAt || null;
   const acceptedVersion = session?.user?.termsVersion || null;
@@ -134,9 +134,12 @@ const TermsOfUse = () => {
             O uso profissional da Plataforma requer a assinatura de Planos Pagos de forma pré-paga e automática.
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
-            <li><strong>Cobranças:</strong> Os valores correspondentes à sua licença SaaS serão faturados periodicamente (mensalmente ou anualmente) e processados pelo provedor Stripe. Impostos cabíveis serão emitidos nas Notas Fiscais correspondentes.</li>
-            <li><strong>Upgrade/Downgrade:</strong> Migrações de planos são imediatas. Downgrades mantêm a franquia e os recursos do plano antigo até o último dia vigente do ciclo atual de faturamento. Extensões (&quot;add-ons&quot;) de inteligência artificial requerem crédito em conta sob demanda, ou compra de pacotes adicionais.</li>
-            <li><strong>Inadimplência:</strong> O não pagamento até a data de vencimento poderá acarretar bloqueio sistêmico com carência limitada de acesso (&quot;Grace Period&quot;), e após 60 (sessenta) dias, o espaço hospedado bem como todos os dados, regras e fluxos poderão entrar em purga técnica definitiva (exclusão).</li>
+            <li><strong>Cobranças e Ciclos:</strong> Os valores correspondentes à sua licença SaaS serão faturados periodicamente (mensalmente ou anualmente, conforme escolha no momento do checkout) e processados pelo provedor Stripe. Impostos cabíveis serão emitidos nas Notas Fiscais correspondentes. A assinatura anual garante o preço equivalente com desconto, cobrado integralmente à vista e de forma recorrente a cada 12 (doze) meses.</li>
+            <li><strong>Cancelamento e Reembolsos:</strong> O Cliente pode cancelar sua assinatura (desabilitar a renovação automática) a qualquer momento pelo Painel do Cliente. Não efetuamos estornos ou reembolsos proporcionais pelos meses restantes não utilizados caso decida cancelar um ciclo anual vigente antes de seu término.</li>
+            <li><strong>Upgrade/Downgrade e Grace Period:</strong> Migrações de planos para tiers superiores (Upgrades) são processadas imediatamente, com o valor pro-rata calculado e cobrado adequadamente pelo gateway. Downgrades mantêm a franquia e os recursos do plano original ativos em uma "Carência Base" (Grace Period) até o último dia vigente do ciclo atual de faturamento, evitando disrupção operacional imediata de automações antes da data de corte. Extensões ("add-ons") de inteligência artificial requerem crédito em conta sob demanda, ou compra de pacotes adicionais.</li>
+            <li><strong>Inadimplência:</strong> O não pagamento até a data de vencimento poderá acarretar bloqueio sistêmico com carência limitada de acesso ("Grace Period"), e após 60 (sessenta) dias, o espaço hospedado bem como todos os dados, regras e fluxos poderão entrar em purga técnica definitiva (exclusão).</li>
+            <li><strong>Uso de Inteligência Artificial e Limites Excedentes (Overages):</strong> Os planos da plataforma incluem cotas predefinidas para utilização de Inteligência Artificial (transcrição, resumos, insights, etc.). Caso o Cliente exceda o limite mensal do seu plano, a plataforma adotará o modelo "Pay-as-you-go", realizando cobranças automáticas subsequentes (Overage Fees) baseadas no consumo volumétrico extra (por tokens ou minutos), a fim de evitar a paralisação abrupta dos serviços essenciais no seu Workspace. As métricas de consumo ficam disponíveis no painel administrativo.</li>
+            <li><strong>Taxas de Serviço e Transações na Plataforma:</strong> Caso a plataforma disponibilize infraestrutura de pagamentos embutida (checkout nativo) para que o Cliente fature os seus próprios usuários e clientes finais, o {companyName} cobrará uma comissão ou taxa de serviço pré-determinada pela intermediação tecnológica de cada transação (porcentagem e/ou valor fixo deduzido na fonte). Ao utilizar o serviço de pagamentos da plataforma, o Cliente declara ciência e acordo manifesto com as retenções operacionais vigentes.</li>
           </ul>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">6. Limitação de Responsabilidade</h2>

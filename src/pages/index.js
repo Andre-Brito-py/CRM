@@ -71,6 +71,7 @@ export const getStaticProps = async () => {
         slug: plan.slug,
         description: plan.description,
         price: Number(plan.price),
+        priceAnnual: plan.priceAnnual ? Number(plan.priceAnnual) : null,
         currency: plan.currency,
         interval: plan.interval,
         features: plan.features,
