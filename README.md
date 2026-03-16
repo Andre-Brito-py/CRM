@@ -152,6 +152,14 @@ Importante:
   - `invoice.payment_failed`
 - Copiar o “Signing secret” (`whsec_...`) e setar em `STRIPE_WEBHOOK_SECRET`.
 
+### 5) Checklist go-live (antes de anunciar)
+- Vercel (Production): `DATABASE_URL` (pooled), `APP_URL`, `NEXTAUTH_SECRET`, `CONFIG_ENCRYPTION_KEY`, Email e Stripe setados.
+- Neon (direct): rodar `npm run prisma:migrate:deploy` e depois `npx prisma db seed` (com `SUPERADMIN_*`).
+- Acesso admin: login do superadmin e conferência de planos/priceIds/configs em Admin.
+- Auth: cadastro + verificação de e-mail funcionando (link valida) e magic link do NextAuth funcionando.
+- Stripe: fluxo de checkout e webhook chegando em `/api/webhooks/stripe` sem erro de assinatura.
+- Termos: `NEXT_PUBLIC_TERMS_VERSION` e `TERMS_VERSION` iguais e tela `/terms` OK.
+
 ## Configuração de APIs (Super Admin)
 As credenciais abaixo podem ser configuradas em runtime no painel de Super Admin (API Configuration), sem redeploy. O backend lê via `getSystemConfig(...)` com fallback para `process.env`.
 
