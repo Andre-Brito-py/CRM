@@ -135,9 +135,22 @@ const App = ({ Component, pageProps }) => {
     return maintenanceExpectedAt;
   })();
 
-  Router.events.on('routeChangeStart', () => setProgress(true));
-  Router.events.on('routeChangeComplete', () => setProgress(false));
-  TopBarProgress.config(progressBarConfig());
+  useEffect(() => {
+    TopBarProgress.config(progressBarConfig());
+
+    const handleStart = () => setProgress(true);
+    const handleStop = () => setProgress(false);
+
+    Router.events.on('routeChangeStart', handleStart);
+    Router.events.on('routeChangeComplete', handleStop);
+    Router.events.on('routeChangeError', handleStop);
+
+    return () => {
+      Router.events.off('routeChangeStart', handleStart);
+      Router.events.off('routeChangeComplete', handleStop);
+      Router.events.off('routeChangeError', handleStop);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
