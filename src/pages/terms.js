@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { useSession } from 'next-auth/react';
 
 import Meta from '@/components/Meta/index';
@@ -43,9 +43,13 @@ const TermsOfUse = () => {
         } catch { }
       }
 
-      const nextParam = router.query?.next ? String(router.query.next) : null;
+      const nextParam = router?.query?.next ? String(router.query.next) : null;
       const destination = nextParam || '/account';
-      router.push(destination);
+      if (router) {
+        router.push(destination);
+      } else if (typeof window !== 'undefined') {
+        window.location.assign(destination);
+      }
     } finally {
       setAcceptingState(false);
     }

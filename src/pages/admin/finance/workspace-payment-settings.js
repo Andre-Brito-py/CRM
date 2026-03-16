@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import useSWR, { useSWRConfig } from 'swr';
 import toast from 'react-hot-toast';
 
@@ -21,7 +21,7 @@ const WorkspacePaymentSettings = () => {
   const isLoading = !data && !error;
   const workspaces = data?.data?.workspaces || [];
   const providers = data?.data?.providers;
-  const workspaceSlugFilterRaw = router.query?.workspaceSlug ? String(router.query.workspaceSlug) : '';
+  const workspaceSlugFilterRaw = router?.query?.workspaceSlug ? String(router.query.workspaceSlug) : '';
   const workspaceSlugFilter = workspaceSlugFilterRaw.trim();
 
   const filteredWorkspaces = useMemo(() => {
