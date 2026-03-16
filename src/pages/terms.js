@@ -83,15 +83,15 @@ const TermsOfUse = () => {
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">1. Introdução e Aceite</h2>
           <p className="mb-4">
             Estes Termos de Uso (&quot;Termos&quot;) representam um acordo legal vinculativo entre você, a empresa ou entidade
-            que representa (&quot;Cliente&quot; ou &quot;Usuário&quot;) e a <strong>{companyName}</strong>. 
-            Ao criar uma conta, acessar ou utilizar a nossa plataforma de software como serviço (SaaS), API e serviços correlatos 
-            (&quot;Plataforma&quot;), você declara possuir capacidade legal (ou poderes de representação de sua empresa) e 
+            que representa (&quot;Cliente&quot; ou &quot;Usuário&quot;) e a <strong>{companyName}</strong>.
+            Ao criar uma conta, acessar ou utilizar a nossa plataforma de software como serviço (SaaS), API e serviços correlatos
+            (&quot;Plataforma&quot;), você declara possuir capacidade legal (ou poderes de representação de sua empresa) e
             aceita incondicionalmente estes Termos e a nossa Política de Privacidade.
           </p>
 
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">2. Descrição e Provisão do Serviço</h2>
           <p className="mb-4">
-            O <strong>{companyName}</strong> é uma plataforma B2B que fornece ferramentas de CRM, gestão de funis de venda, 
+            O <strong>{companyName}</strong> é uma plataforma B2B que fornece ferramentas de CRM, gestão de funis de venda,
             automações (workflows), relatórios analíticos, caixas de entrada omnichannel (suporte) e formulários de captura de leads.
           </p>
           <p className="mb-4">
@@ -117,7 +117,7 @@ const TermsOfUse = () => {
 
           <h2 className="text-2xl font-semibold mt-8 mb-4 text-gray-900">4. Dados e Compliance (LGPD e GDPR)</h2>
           <p className="mb-4">
-            Nos moldes da <strong>Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018)</strong> e da <strong>GDPR</strong>, 
+            Nos moldes da <strong>Lei Geral de Proteção de Dados (LGPD - Lei 13.709/2018)</strong> e da <strong>GDPR</strong>,
             é fundamental estabelecer os papéis legais das partes envolvidas:
           </p>
           <ul className="list-disc pl-6 mb-4 space-y-2">
@@ -136,9 +136,9 @@ const TermsOfUse = () => {
           <ul className="list-disc pl-6 mb-4 space-y-2">
             <li><strong>Cobranças e Ciclos:</strong> Os valores correspondentes à sua licença SaaS serão faturados periodicamente (mensalmente ou anualmente, conforme escolha no momento do checkout) e processados pelo provedor Stripe. Impostos cabíveis serão emitidos nas Notas Fiscais correspondentes. A assinatura anual garante o preço equivalente com desconto, cobrado integralmente à vista e de forma recorrente a cada 12 (doze) meses.</li>
             <li><strong>Cancelamento e Reembolsos:</strong> O Cliente pode cancelar sua assinatura (desabilitar a renovação automática) a qualquer momento pelo Painel do Cliente. Não efetuamos estornos ou reembolsos proporcionais pelos meses restantes não utilizados caso decida cancelar um ciclo anual vigente antes de seu término.</li>
-            <li><strong>Upgrade/Downgrade e Grace Period:</strong> Migrações de planos para tiers superiores (Upgrades) são processadas imediatamente, com o valor pro-rata calculado e cobrado adequadamente pelo gateway. Downgrades mantêm a franquia e os recursos do plano original ativos em uma "Carência Base" (Grace Period) até o último dia vigente do ciclo atual de faturamento, evitando disrupção operacional imediata de automações antes da data de corte. Extensões ("add-ons") de inteligência artificial requerem crédito em conta sob demanda, ou compra de pacotes adicionais.</li>
-            <li><strong>Inadimplência:</strong> O não pagamento até a data de vencimento poderá acarretar bloqueio sistêmico com carência limitada de acesso ("Grace Period"), e após 60 (sessenta) dias, o espaço hospedado bem como todos os dados, regras e fluxos poderão entrar em purga técnica definitiva (exclusão).</li>
-            <li><strong>Uso de Inteligência Artificial e Limites Excedentes (Overages):</strong> Os planos da plataforma incluem cotas predefinidas para utilização de Inteligência Artificial (transcrição, resumos, insights, etc.). Caso o Cliente exceda o limite mensal do seu plano, a plataforma adotará o modelo "Pay-as-you-go", realizando cobranças automáticas subsequentes (Overage Fees) baseadas no consumo volumétrico extra (por tokens ou minutos), a fim de evitar a paralisação abrupta dos serviços essenciais no seu Workspace. As métricas de consumo ficam disponíveis no painel administrativo.</li>
+            <li><strong>Upgrade/Downgrade e Grace Period:</strong> Migrações de planos para tiers superiores (Upgrades) são processadas imediatamente, com o valor pro-rata calculado e cobrado adequadamente pelo gateway. Downgrades mantêm a franquia e os recursos do plano original ativos em uma &quot;Carência Base&quot; (Grace Period) até o último dia vigente do ciclo atual de faturamento, evitando disrupção operacional imediata de automações antes da data de corte. Extensões (&quot;add-ons&quot;) de inteligência artificial requerem crédito em conta sob demanda, ou compra de pacotes adicionais.</li>
+            <li><strong>Inadimplência:</strong> O não pagamento até a data de vencimento poderá acarretar bloqueio sistêmico com carência limitada de acesso (&quot;Grace Period&quot;), e após 60 (sessenta) dias, o espaço hospedado bem como todos os dados, regras e fluxos poderão entrar em purga técnica definitiva (exclusão).</li>
+            <li><strong>Uso de Inteligência Artificial e Limites Excedentes (Overages):</strong> Os planos da plataforma incluem cotas predefinidas para utilização de Inteligência Artificial (transcrição, resumos, insights, etc.). Caso o Cliente exceda o limite mensal do seu plano, a plataforma adotará o modelo &quot;Pay-as-you-go&quot;, realizando cobranças automáticas subsequentes (Overage Fees) baseadas no consumo volumétrico extra (por tokens ou minutos), a fim de evitar a paralisação abrupta dos serviços essenciais no seu Workspace. As métricas de consumo ficam disponíveis no painel administrativo.</li>
             <li><strong>Taxas de Serviço e Transações na Plataforma:</strong> Caso a plataforma disponibilize infraestrutura de pagamentos embutida (checkout nativo) para que o Cliente fature os seus próprios usuários e clientes finais, o {companyName} cobrará uma comissão ou taxa de serviço pré-determinada pela intermediação tecnológica de cada transação (porcentagem e/ou valor fixo deduzido na fonte). Ao utilizar o serviço de pagamentos da plataforma, o Cliente declara ciência e acordo manifesto com as retenções operacionais vigentes.</li>
           </ul>
 

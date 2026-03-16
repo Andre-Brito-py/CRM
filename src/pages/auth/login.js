@@ -119,12 +119,12 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white">
+    <div className="flex min-h-screen w-full bg-white">
       <Meta title="Closify | Login" description="Sign in to your account." />
       <Toaster position="bottom-center" toastOptions={{ duration: 10000 }} />
       
       {/* Left side: branding/image style with modern gradients and mockup preview */}
-      <div className="hidden lg:flex lg:w-1/2 relative bg-[#0a0a0b] flex-col items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#0a0a0b] flex-col justify-between p-12 relative overflow-hidden">
         {/* Abstract background effects */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-600/20 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[120px]" />
@@ -142,17 +142,17 @@ const Login = () => {
             Gerencie leads, automatize processos e feche negócios mais rápido com o CRM mais intuitivo e poderoso do mercado.
           </p>
           
-          <div className="mt-8 p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 relative overflow-hidden group">
+          <div className="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <img 
               src="/images/mockups/dashboard.png" 
               alt="Dashboard Preview" 
-              className="rounded-lg shadow-2xl border border-white/5 transform group-hover:translate-y-[-5px] transition-transform duration-500" 
+              className="rounded-lg shadow-2xl border border-white/5 transform group-hover:translate-y-[-5px] transition-transform duration-500 w-full max-h-[220px] object-contain object-top" 
             />
           </div>
         </div>
         
-        <div className="absolute bottom-12 left-12 right-12 flex justify-between items-center text-sm text-gray-500">
+        <div className="relative z-10 flex justify-between items-center text-sm text-gray-500 mt-8">
           <p>© 2026 Closify CRM. All rights reserved.</p>
           <div className="flex space-x-6">
             <Link href="/terms" className="hover:text-white transition-colors">Termos</Link>
@@ -161,8 +161,9 @@ const Login = () => {
         </div>
       </div>
 
+
       {/* Right side: Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 bg-gray-50 lg:bg-white overflow-y-auto">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 bg-gray-50 lg:bg-white">
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
           <div className="lg:hidden mb-12 text-center">
              <Link href="/">
