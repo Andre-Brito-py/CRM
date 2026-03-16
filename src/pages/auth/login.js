@@ -131,8 +131,10 @@ const Login = () => {
         
         <div className="relative z-10 w-full max-w-lg">
           <div className="mb-12">
-             <Link href="/">
-                <img src="/images/logo-full.png" alt="Closify Logo" className="h-10 w-auto cursor-pointer" style={{ filter: 'brightness(0) invert(1)' }} />
+             <Link href="/" className="inline-flex items-center gap-2 group">
+               <span className="text-2xl font-black tracking-tight text-white group-hover:opacity-80 transition-opacity">
+                 Clos<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ify</span>
+               </span>
              </Link>
           </div>
           <h2 className="text-5xl font-extrabold text-white leading-tight mb-6">
@@ -163,7 +165,14 @@ const Login = () => {
 
 
       {/* Right side: Login form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 bg-gray-50 lg:bg-white">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-20 bg-gray-50 lg:bg-white relative">
+        {/* Subtle top-right logo — desktop only */}
+        <div className="absolute top-6 right-8 hidden lg:block">
+          <Link href="/">
+            <img src="/images/logo-full.png" alt="Closify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
+          </Link>
+        </div>
+
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
           <div className="lg:hidden mb-12 text-center">
              <Link href="/">

@@ -175,8 +175,10 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                 <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/10 rounded-full blur-[100px]" />
 
                 <div className="relative z-10">
-                    <Link href="/">
-                        <img src="/images/logo-full.png" alt="Closify Logo" className="h-10 w-auto brightness-[100] mb-16 cursor-pointer" style={{ filter: 'brightness(0) invert(1)' }} />
+                    <Link href="/" className="inline-flex items-center gap-2 group">
+                        <span className="text-2xl font-black tracking-tight text-white group-hover:opacity-80 transition-opacity mb-16 inline-block">
+                            Clos<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">ify</span>
+                        </span>
                     </Link>
 
                     <div className="space-y-8">
@@ -216,7 +218,14 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
             </div>
 
             {/* Right side: Register form */}
-            <div className="w-full lg:w-3/5 flex items-center justify-center p-8 sm:p-12 md:p-16 bg-gray-50 lg:bg-white overflow-y-auto">
+            <div className="w-full lg:w-3/5 flex items-center justify-center p-8 sm:p-12 md:p-16 bg-gray-50 lg:bg-white overflow-y-auto relative">
+                {/* Subtle top-right logo — desktop only */}
+                <div className="absolute top-6 right-8 hidden lg:block">
+                    <Link href="/">
+                        <img src="/images/logo-full.png" alt="Closify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
+                    </Link>
+                </div>
+
                 <div className="w-full max-w-xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="lg:hidden text-center mb-8">
                         <img src="/images/logo-full.png" alt="Closify Logo" className="h-8 w-auto mx-auto mb-4" />
