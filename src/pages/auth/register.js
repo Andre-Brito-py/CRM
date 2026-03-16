@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 import { getProviders, signIn } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
 
 import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { redirectToCheckout } from '@/lib/client/stripe';
-import { getAllPlans } from '@/prisma/services/plan';
 
 const Register = ({ plans, initialPlanSlug, initialInterval }) => {
     const router = useRouter();
@@ -39,15 +38,19 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
         })();
     }, []);
 
+    const routerIsReady = Boolean(router?.isReady);
+    const routerPlan = router?.query?.plan;
+    const routerInterval = router?.query?.interval;
+
     useEffect(() => {
-        if (!router.isReady) return;
-        const rawPlan = router.query?.plan;
-        const rawInterval = router.query?.interval;
-        
+        if (!routerIsReady) return;
+        const rawPlan = routerPlan;
+        const rawInterval = routerInterval;
+
         const normalizedPlan = String(Array.isArray(rawPlan) ? rawPlan[0] : rawPlan || '')
             .trim()
             .toUpperCase();
-        
+
         const normalizedInterval = String(Array.isArray(rawInterval) ? rawInterval[0] : rawInterval || '').trim().toLowerCase() === 'year' ? 'year' : 'month';
 
         if (normalizedPlan) {
@@ -56,7 +59,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                 return { ...prev, planSlug: normalizedPlan, interval: normalizedInterval };
             });
         }
-    }, [router.isReady, router.query?.plan, router.query?.interval]);
+    }, [routerIsReady, routerPlan, routerInterval]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -69,10 +72,10 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
 
         const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
         const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
-        
+
         const isAnnual = formData.interval === 'year';
         let planPriceId = null;
-        
+
         if (selectedPlan) {
             if (isAnnual && selectedPlan.stripePriceIdAnnual) {
                 planPriceId = String(selectedPlan.stripePriceIdAnnual);
@@ -345,7 +348,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                                             const displayPrice = isAnnual && hasAnnualPrice ? Number((plan.priceAnnual / 12).toFixed(2)) : plan.price;
                                             const displayInterval = 'mês';
                                             const billingType = isAnnual && hasAnnualPrice ? ' (cobrado anualmente)' : '';
-                                            
+
                                             return (
                                                 <option key={plan.id} value={String(plan.slug || '').toUpperCase()}>
                                                     {plan.name} — {plan.currency} {displayPrice}/{displayInterval}{billingType}
@@ -357,19 +360,19 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 </div>
                             </div>
-                            
+
                             {isPaidPlan && (
                                 <div className="flex bg-gray-100 p-1 rounded-xl">
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setFormData({...formData, interval: 'month'})} 
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, interval: 'month' })}
                                         className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${formData.interval !== 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Mensal
                                     </button>
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setFormData({...formData, interval: 'year'})} 
+                                    <button
+                                        type="button"
+                                        onClick={() => setFormData({ ...formData, interval: 'year' })}
                                         className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex justify-center items-center gap-2 ${formData.interval === 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
                                         Anual {selectedPlan?.annualDiscount > 0 && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-{selectedPlan.annualDiscount}%</span>}
@@ -456,6 +459,7 @@ export const getServerSideProps = async (context) => {
     const initialInterval = String(Array.isArray(rawInterval) ? rawInterval[0] : rawInterval || '').trim().toLowerCase() === 'year' ? 'year' : 'month';
 
     try {
+        const { getAllPlans } = await import('@/prisma/services/plan');
         const plans = await getAllPlans();
         const safePlans = (plans || []).map((plan) => ({
             id: plan.id,

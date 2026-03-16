@@ -1,7 +1,7 @@
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import DefaultErrorPage from 'next/error';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/compat/router';
 
 import Meta from '@/components/Meta';
 import {
@@ -12,7 +12,7 @@ import {
 const Site = ({ workspace }) => {
   const router = useRouter();
 
-  if (router.isFallback) {
+  if (router?.isFallback) {
     return <h1>Loading...</h1>;
   }
 

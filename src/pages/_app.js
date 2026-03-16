@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Router, { useRouter } from 'next/router';
+import Router from 'next/router';
 import { SessionProvider } from 'next-auth/react';
 import { ThemeProvider } from 'next-themes';
 import ReactGA from 'react-ga';
@@ -105,7 +105,6 @@ const App = ({ Component, pageProps }) => {
   const [maintenanceDismissed, setMaintenanceDismissed] = useState(false);
   const [hasConsent, setHasConsent] = useState(false);
   useTranslation();
-  const router = useRouter();
   const swrOptions = swrConfig();
 
   const isTruthy = (value) => {
@@ -189,12 +188,12 @@ const App = ({ Component, pageProps }) => {
       ReactGA.pageview(url);
     };
 
-    router.events.on('routeChangeComplete', handleRouteChange);
+    Router.events.on('routeChangeComplete', handleRouteChange);
 
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
+      Router.events.off('routeChangeComplete', handleRouteChange);
     };
-  }, [router.events, gaReady]);
+  }, [gaReady]);
 
   // Load saved language preference or detect from browser
   useEffect(() => {
