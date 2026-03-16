@@ -14,8 +14,8 @@ const TermsOfUse = () => {
     process.env.NEXT_PUBLIC_COMPANY_NAME || 'Closify CRM';
   const supportEmail =
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@example.com';
-  const termsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-15';
-  const lastUpdated = '15/03/2026';
+  const termsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
+  const lastUpdated = '13/03/2026';
 
   const acceptedAt = session?.user?.termsAcceptedAt || null;
   const acceptedVersion = session?.user?.termsVersion || null;

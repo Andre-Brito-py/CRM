@@ -26,6 +26,16 @@ const Login = () => {
 
   const isEmailValid = isEmail(email);
 
+  const formatAuthError = (raw) => {
+    const code = String(raw || '').trim();
+    if (!code) return 'Falha ao autenticar. Tente novamente.';
+    if (code === 'INVALID_CREDENTIALS') return 'Email ou senha inválidos.';
+    if (code === 'EMAIL_NOT_VERIFIED') return 'Confirme seu e-mail antes de entrar.';
+    if (code === 'Too Many Requests') return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+    if (code === 'AccessDenied') return 'Acesso negado.';
+    return code;
+  };
+
   useEffect(() => {
     if (router?.query?.verified === 'true') {
       toast.success('Email verified successfully! You can now log in.');
@@ -72,7 +82,7 @@ const Login = () => {
         }
       } else {
         setSubmittingState(false);
-        toast.error(result.error);
+        toast.error(formatAuthError(result.error));
       }
     } else {
       setSubmittingState(false);

@@ -218,7 +218,7 @@ const handler = async (req, res) => {
         allow_promotion_codes: true,
         metadata: {
           customerId: customerPayment.customerId,
-          type: product.metadata.type,
+          type: targetType,
           automaticTax: automaticTaxEnabled ? 'true' : 'false',
           taxIdCollection: taxIdCollectionEnabled ? 'true' : 'false',
         },

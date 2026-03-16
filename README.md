@@ -67,6 +67,7 @@ Arquivo: `.env`
 DATABASE_URL="postgresql://..."
 DATABASE_URL_POOLED="postgresql://..." # opcional: URL do pooler (PgBouncer/Neon/Supabase)
 NEXTAUTH_SECRET="..."
+CONFIG_ENCRYPTION_KEY="..."       # recomendada: criptografa secrets do Super Admin (se faltar, usa NEXTAUTH_SECRET)
 GOOGLE_CLIENT_ID="..."        # opcional: Login com Google (também pode ser setado no Super Admin)
 GOOGLE_CLIENT_SECRET="..."    # opcional: Login com Google (também pode ser setado no Super Admin)
 EMAIL_FROM="..."
@@ -76,6 +77,7 @@ EMAIL_SERVER_PASSWORD="..."
 PAYMENTS_SECRET_KEY="..."        # Stripe (assinaturas do SaaS)
 STRIPE_WEBHOOK_SECRET="..."      # webhook de assinatura (Stripe)
 ADMIN_EMAIL="..."
+SUPERADMIN_PASSWORD="..."        # seed do super admin
 
 # Pagamentos do CRM (gateway configurável via Super Admin)
 # (essas chaves ficam na tabela SystemConfig / PaymentProviderCredential, não precisam ficar no .env)
@@ -103,6 +105,52 @@ ADMIN_EMAIL="..."
 
 Produção:
 - Definir `NEXTAUTH_URL` com a URL pública canônica (ex.: `https://app.seudominio.com`).
+
+## Deploy (Vercel + Neon) — lembrete operacional
+Recomendação: usar Neon + Vercel (serverless) com `DATABASE_URL` apontando para o **pooler** do Neon.
+
+### 1) Neon
+- Criar o projeto e copiar:
+  - **Connection string pooled** (Pooler/PgBouncer): usar como `DATABASE_URL` na Vercel.
+  - **Connection string direct** (sem pooler): usar localmente para rodar migrations/seed.
+
+### 2) Vercel (Environment Variables)
+Configurar no ambiente **Production**:
+- `DATABASE_URL` = Neon pooled
+- `APP_URL` = URL pública canônica (ex.: `https://app.seudominio.com`)
+- `NEXTAUTH_SECRET` (obrigatória em produção; se faltar, o auth falha)
+- `CONFIG_ENCRYPTION_KEY` (recomendada; não trocar depois)
+- Email: `EMAIL_FROM`, `EMAIL_SERVICE`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`
+- Stripe: `PAYMENTS_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_PUBLISHABLE_KEY`)
+- Termos: `NEXT_PUBLIC_TERMS_VERSION` e `TERMS_VERSION` (mesmo valor)
+
+### 3) Migrations e seed (rodar antes do go-live)
+Na Vercel, o deploy não aplica migration automaticamente. Rodar via máquina local/CI usando a **direct URL do Neon**:
+
+```bash
+# aplicar migrations em produção
+DATABASE_URL="postgresql://...NEON_DIRECT..." npm run prisma:migrate:deploy
+
+# criar/atualizar superadmin + planos
+SUPERADMIN_EMAIL="admin@..." SUPERADMIN_PASSWORD="..." npx prisma db seed
+```
+
+Importante:
+- Essa etapa aplica a migration do novo fluxo de verificação de e-mail (`emailVerificationTokens`) e evita conflitos com tokens do NextAuth.
+- `verificationTokens` continua existindo porque o NextAuth usa essa tabela para magic link.
+
+### 4) Stripe Webhook (produção)
+- Stripe Dashboard → Developers → Webhooks → Add endpoint
+- URL do endpoint:
+  - `https://app.seudominio.com/api/webhooks/stripe`
+- Eventos mínimos esperados pelo handler:
+  - `checkout.session.completed`
+  - `customer.subscription.created`
+  - `customer.subscription.updated`
+  - `customer.subscription.deleted`
+  - `invoice.paid` (ou `invoice.payment_succeeded`)
+  - `invoice.payment_failed`
+- Copiar o “Signing secret” (`whsec_...`) e setar em `STRIPE_WEBHOOK_SECRET`.
 
 ## Configuração de APIs (Super Admin)
 As credenciais abaixo podem ser configuradas em runtime no painel de Super Admin (API Configuration), sem redeploy. O backend lê via `getSystemConfig(...)` com fallback para `process.env`.

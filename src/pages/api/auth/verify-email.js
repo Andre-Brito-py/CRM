@@ -30,7 +30,37 @@ const handler = async (req, res) => {
             return res.status(429).send('Too Many Requests');
         }
 
-        const verificationToken = await prisma.verificationToken.findFirst({
+        const emailVerificationToken = await prisma.emailVerificationToken.findFirst({
+            where: {
+                email: {
+                    equals: normalizedEmail,
+                    mode: 'insensitive',
+                },
+                token,
+                expires: { gt: new Date() }
+            }
+        });
+
+        if (emailVerificationToken) {
+            await prisma.user.updateMany({
+                where: {
+                    id: emailVerificationToken.userId,
+                    email: {
+                        equals: normalizedEmail,
+                        mode: 'insensitive',
+                    }
+                },
+                data: { emailVerified: new Date() }
+            });
+
+            await prisma.emailVerificationToken.deleteMany({
+                where: { userId: emailVerificationToken.userId }
+            });
+
+            return res.redirect('/auth/login?verified=true');
+        }
+
+        const legacyVerificationToken = await prisma.verificationToken.findFirst({
             where: {
                 identifier: {
                     equals: normalizedEmail,
@@ -41,7 +71,7 @@ const handler = async (req, res) => {
             }
         });
 
-        if (!verificationToken) {
+        if (!legacyVerificationToken) {
             await sleep(jitterMs(250, 450));
             return res.status(400).send('<h1>Invalid or Expired Token</h1><p>Please log in or request a new verification email.</p>');
         }
@@ -61,7 +91,8 @@ const handler = async (req, res) => {
                 identifier: {
                     equals: normalizedEmail,
                     mode: 'insensitive',
-                }
+                },
+                token,
             }
         });
 

@@ -38,6 +38,10 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found' } });
         }
 
+        if (user.twoFactorEnabled && !req.body?.reset) {
+            return res.status(400).json({ error: { msg: '2FA is already enabled' } });
+        }
+
         // Generate secret only if not exists or if explicitly resetting
         let secret = user.twoFactorSecret;
         if (!secret || req.body.reset) {
@@ -55,7 +59,7 @@ const handler = async (req, res) => {
         // Generate QR Code image data URL
         const qrCodeUrl = await QRCode.toDataURL(otpauth);
 
-        res.status(200).json({ data: { qrCodeUrl, secret } });
+        res.status(200).json({ data: { qrCodeUrl } });
     } catch (error) {
         log({ level: 'error', msg: 'auth_2fa_setup_failed', requestId, userId: session.user.userId, error });
         reportError(error, { route: '/api/auth/2fa/setup', requestId, userId: session.user.userId });

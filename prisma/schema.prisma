@@ -205,6 +205,7 @@ model User {
   fiscalProfile         FiscalProfile?
   fiscalDocuments       FiscalDocument[]
   domains               Domain[]
+  emailVerificationTokens EmailVerificationToken[]
   membership            Member[]         @relation("membership")
   invitedMembers        Member[]         @relation("inviter")
   sessions              Session[]
@@ -374,6 +375,22 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verificationTokens")
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([email])
+  @@index([expires])
+  @@map("emailVerificationTokens")
 }
 
 model Workspace {

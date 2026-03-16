@@ -61,7 +61,6 @@ const handler = async (req, res) => {
 
         const { name, email, password } = req.body || {};
         const termsAccepted = req.body?.termsAccepted === true;
-        const twoFactorEnabled = req.body?.twoFactorEnabled === true;
         const planPriceId = req.body?.planPriceId ? String(req.body.planPriceId) : null;
         const normalizedEmail = String(email || '').trim().toLowerCase();
 
@@ -115,16 +114,25 @@ const handler = async (req, res) => {
                 password: hashedPassword,
                 termsVersion,
                 termsAcceptedAt: new Date(),
-                twoFactorEnabled: twoFactorEnabled || false,
+                twoFactorEnabled: false,
             },
         });
 
         const token = crypto.randomBytes(32).toString('hex');
-        await prisma.verificationToken.create({
+        await prisma.emailVerificationToken.deleteMany({
+            where: {
+                email: {
+                    equals: normalizedEmail,
+                    mode: 'insensitive',
+                },
+            },
+        });
+        await prisma.emailVerificationToken.create({
             data: {
-                identifier: normalizedEmail,
+                userId: user.id,
+                email: normalizedEmail,
                 token,
-                expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+                expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
             },
         });
 

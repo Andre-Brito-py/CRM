@@ -21,7 +21,6 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
         planSlug: initialPlanSlug || '',
         interval: initialInterval || 'month',
         termsAccepted: false,
-        twoFactorEnabled: false
     });
 
     useEffect(() => {
@@ -106,7 +105,6 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                     password: formData.password,
                     termsAccepted: true,
                     planPriceId,
-                    twoFactorEnabled: formData.twoFactorEnabled
                 }),
             });
 
@@ -128,7 +126,6 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                     confirmPassword: '',
                     planSlug: '',
                     termsAccepted: false,
-                    twoFactorEnabled: false
                 });
 
                 if (data?.data?.sessionId) {
@@ -386,23 +383,6 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                         </div>
 
                         <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50 space-y-4">
-                            <label className="flex items-start group cursor-pointer">
-                                <div className="relative flex items-center mt-1">
-                                    <input
-                                        type="checkbox"
-                                        name="twoFactorEnabled"
-                                        checked={formData.twoFactorEnabled}
-                                        onChange={handleInputChange}
-                                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-gray-300 checked:border-emerald-600 checked:bg-emerald-600 transition-all"
-                                    />
-                                    <svg className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 left-0.5 pointer-events-none transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                </div>
-                                <div className="ml-3 select-none">
-                                    <span className="block text-sm font-bold text-gray-900">Ativar Autenticação de Dois Fatores (2FA)</span>
-                                    <span className="block text-xs text-gray-500">Aumente a segurança da sua conta agora. Recomendado.</span>
-                                </div>
-                            </label>
-
                             <label className="flex items-start group cursor-pointer">
                                 <div className="relative flex items-center mt-1">
                                     <input
