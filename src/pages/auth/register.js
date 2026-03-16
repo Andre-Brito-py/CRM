@@ -363,7 +363,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                                         onClick={() => setFormData({...formData, interval: 'year'})} 
                                         className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex justify-center items-center gap-2 ${formData.interval === 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
-                                        Anual <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-20%</span>
+                                        Anual {selectedPlan?.annualDiscount > 0 && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-{selectedPlan.annualDiscount}%</span>}
                                     </button>
                                 </div>
                             )}
@@ -459,6 +459,7 @@ export const getServerSideProps = async (context) => {
             interval: plan.interval,
             stripePriceId: plan.stripePriceId ?? null,
             stripePriceIdAnnual: plan.stripePriceIdAnnual ?? null,
+            annualDiscount: plan.annualDiscount ?? 0,
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),
         }));

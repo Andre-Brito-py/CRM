@@ -41,7 +41,7 @@ export default async function handler(req, res) {
   const { planId } = req.query;
 
   if (req.method === 'PUT') {
-    const { name, slug, price, priceAnnual, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
+    const { name, slug, price, priceAnnual, annualDiscount, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
 
     try {
       const existing = await prisma.plan.findUnique({
@@ -52,11 +52,13 @@ export default async function handler(req, res) {
       const desiredType = normalizePlanType(slug);
       const desiredPrice = Number(price || 0);
       const desiredPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
+      const desiredDiscount = annualDiscount != null ? Number(annualDiscount) : null;
       const desiredCurrency = normalizeCurrency(currency);
       const desiredInterval = 'month';
 
       let syncedPrice = desiredPrice;
       let syncedPriceAnnual = desiredPriceAnnual;
+      let syncedDiscount = desiredDiscount;
       let syncedCurrency = desiredCurrency;
       let syncedInterval = desiredInterval;
       let finalStripePriceId = existing?.stripePriceId || null;
@@ -185,6 +187,7 @@ export default async function handler(req, res) {
           slug,
           price: syncedPrice,
           priceAnnual: syncedPriceAnnual,
+          annualDiscount: syncedDiscount,
           interval: syncedInterval,
           currency: syncedCurrency,
           features,
@@ -202,7 +205,7 @@ export default async function handler(req, res) {
           action: 'PLAN_UPDATE',
           title: 'Plan updated',
           target: { planId },
-          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, currency: plan.currency, isActive: plan.isActive },
+          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, annualDiscount: plan.annualDiscount, currency: plan.currency, isActive: plan.isActive },
         },
         req
       );

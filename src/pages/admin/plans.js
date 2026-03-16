@@ -49,6 +49,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     description: plan?.description || '',
     price: plan?.price || 0,
     priceAnnual: plan?.priceAnnual || 0,
+    annualDiscount: plan?.annualDiscount || 0,
     currency: plan?.currency || 'USD',
     stripePriceId: plan?.stripePriceId || '',
     stripePriceIdAnnual: plan?.stripePriceIdAnnual || '',
@@ -79,10 +80,24 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
+    
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+      };
+
+      // Auto-calculate annual price if monthly price or discount changes
+      if (name === 'price' || name === 'annualDiscount') {
+        const monthly = parseFloat(name === 'price' ? value : prev.price) || 0;
+        const discount = parseFloat(name === 'annualDiscount' ? value : prev.annualDiscount) || 0;
+        if (discount > 0) {
+          newData.priceAnnual = (monthly * 12 * (1 - discount / 100)).toFixed(2);
+        }
+      }
+
+      return newData;
+    });
   };
 
   const toggleModule = (key) => {
@@ -125,6 +140,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         description: formData.description,
         price: parseFloat(formData.price),
         priceAnnual: formData.priceAnnual ? parseFloat(formData.priceAnnual) : null,
+        annualDiscount: formData.annualDiscount ? parseFloat(formData.annualDiscount) : null,
         currency: formData.currency,
         interval: 'month',
         stripePriceId: formData.stripePriceId,
@@ -166,11 +182,16 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Monthly Price</label>
             <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleChange}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 underline decoration-blue-500">Discount (%)</label>
+            <input type="number" name="annualDiscount" min="0" max="100" step="1" value={formData.annualDiscount} onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-blue-100 bg-blue-50/30 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 font-bold text-blue-600" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Annual Price</label>

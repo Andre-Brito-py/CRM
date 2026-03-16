@@ -69,7 +69,11 @@ const Pricing = ({ products }) => {
               }`}
             >
               {t("landing.pricing.annually", "Anual")}
-              <span className="text-[10px] sm:text-xs uppercase tracking-wider bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">Economize 20%</span>
+              {products?.some(p => p.annualDiscount > 0) && (
+                <span className="text-[10px] sm:text-xs uppercase tracking-wider bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">
+                  {t("landing.pricing.saveUpTo", "Economize")} {Math.max(...products.map(p => p.annualDiscount || 0))}%
+                </span>
+              )}
             </button>
           </div>
         </motion.div>
@@ -118,7 +122,12 @@ const Pricing = ({ products }) => {
                         {!isFree && <span className="text-zinc-500 font-medium">{intervalLabel}</span>}
                       </div>
                       {!isFree && isAnnual && hasAnnualPrice && (
-                        <p className="text-sm text-green-400 mt-2 font-medium">Cobrado {currencyFormatter.format(product.priceAnnual)} por ano</p>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <p className="text-sm text-green-400 font-medium">Cobrado {currencyFormatter.format(product.priceAnnual)} por ano</p>
+                          {product.annualDiscount > 0 && (
+                            <p className="text-xs text-green-500/80 font-bold uppercase tracking-tight">Economia de {product.annualDiscount}% no plano anual</p>
+                          )}
+                        </div>
                       )}
                       {!isFree && !isAnnual && hasAnnualPrice && (
                         <p className="text-sm text-zinc-500 mt-2 opacity-0">Placeholder</p> // Maintain height

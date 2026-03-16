@@ -52,12 +52,13 @@ export default async function handler(req, res) {
       res.status(500).json({ error: { msg: 'Failed to fetch plans' } });
     }
   } else if (req.method === 'POST') {
-    const { name, slug, price, priceAnnual, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
+    const { name, slug, price, priceAnnual, annualDiscount, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
 
     try {
       const desiredType = normalizePlanType(slug);
       let syncedPrice = Number(price || 0);
       let syncedPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
+      let syncedDiscount = annualDiscount != null ? Number(annualDiscount) : null;
       let syncedCurrency = normalizeCurrency(currency);
       let syncedInterval = 'month'; // default for the monthly tier
       let finalStripePriceId = stripePriceId || null;
@@ -137,6 +138,7 @@ export default async function handler(req, res) {
           slug,
           price: syncedPrice,
           priceAnnual: syncedPriceAnnual,
+          annualDiscount: syncedDiscount,
           interval: syncedInterval,
           currency: syncedCurrency,
           features,
@@ -154,7 +156,7 @@ export default async function handler(req, res) {
           action: 'PLAN_CREATE',
           title: 'Plan created',
           target: { planId: plan.id },
-          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, currency: plan.currency, isActive: plan.isActive },
+          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, annualDiscount: plan.annualDiscount, currency: plan.currency, isActive: plan.isActive },
         },
         req
       );

@@ -887,6 +887,7 @@ model Plan {
   description   String?
   price         Float
   priceAnnual   Float?
+  annualDiscount Float?
   currency      String                 @default("USD")
   interval      String                 @default("month")
   stripePriceId String?
