@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { format } from 'date-fns';
 import { UserIcon, EyeIcon, NoSymbolIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
@@ -12,7 +11,6 @@ import api from '@/lib/common/api';
 
 const Users = () => {
   const { data: session } = useSession();
-  const router = useRouter();
   const { data, error, mutate } = useSWR(session ? '/api/admin/users' : null, fetcher);
   const [impersonating, setImpersonating] = useState(null);
   const [processing, setProcessing] = useState(null);

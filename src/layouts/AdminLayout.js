@@ -1,29 +1,30 @@
 import { useEffect } from 'react';
-import { useRouter } from 'next/router';
+import Router from 'next/router';
 import { useSession } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
+import dynamic from 'next/dynamic';
 
 import Content from '@/components/Content/index';
 import Header from '@/components/Header/index';
-import Sidebar from '@/components/Sidebar/index';
 import menu from '@/config/menu/admin';
+
+const Sidebar = dynamic(() => import('@/components/Sidebar/index'), { ssr: false });
 
 const AdminLayout = ({ children }) => {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/auth/login');
+      Router.replace('/auth/login');
     } else if (status === 'authenticated') {
       // Check for SUPERADMIN role
       if (session?.user?.role !== 'SUPERADMIN') {
         // Redirect to home or show unauthorized
         // For development, we might want to bypass this or ensure we have a superadmin
-        router.replace('/');
+        Router.replace('/');
       }
     }
-  }, [status, session, router]);
+  }, [status, session]);
 
   if (status === 'loading') return <></>;
 
