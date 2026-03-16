@@ -15,8 +15,9 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     env:
-      NODE_ENV: development
+      NODE_ENV: production
       NPM_CONFIG_PRODUCTION: "false"
+      PWA_DISABLE: "true"
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=public
       SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres?schema=shadow
       NEXTAUTH_SECRET: ci_dummy_secret
