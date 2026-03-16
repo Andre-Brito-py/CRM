@@ -14,7 +14,6 @@ import {
   SparklesIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
-import { getAllPlans } from '@/prisma/services/plan';
 
 // Mock Data for the Interactive Board
 const initialStages = [
@@ -309,6 +308,7 @@ export default DemoPage;
 
 export const getServerSideProps = async () => {
   try {
+    const { getAllPlans } = await import('@/prisma/services/plan');
     const plans = await getAllPlans();
     // Get the first active paid plan to showcase in the sidebar
     const premiumPlan = plans.find(p => p.isActive && Number(p.price) > 0) || null;
