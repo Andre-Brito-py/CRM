@@ -1,5 +1,5 @@
 import { getSession } from 'next-auth/react';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 
 export default async function handler(req, res) {
@@ -17,18 +17,15 @@ export default async function handler(req, res) {
     return;
   }
 
-  const isMember = workspace.members.some(
-    (member) => member.email === session.user.email
-  );
-
-  if (!isMember) {
+  const isOwner = isWorkspaceOwner(session.user.email, workspace);
+  if (!isOwner) {
     res.status(403).json({ error: { msg: 'Forbidden' } });
     return;
   }
 
   if (req.method === 'PUT') {
     const { customFieldDefinitions } = req.body;
-    
+
     // Validate customFieldDefinitions
     if (!Array.isArray(customFieldDefinitions)) {
       res.status(400).json({ error: { msg: 'Invalid format' } });

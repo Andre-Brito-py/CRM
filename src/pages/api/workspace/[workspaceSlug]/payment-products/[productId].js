@@ -1,6 +1,6 @@
 import prisma from '@/prisma/index';
 import { validateSession } from '@/config/api-validation';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
 import { ensureRequestId } from '@/lib/server/request-id';
@@ -20,6 +20,11 @@ export default async function handler(req, res) {
   );
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
+  }
+
+  const isOwner = isWorkspaceOwner(session.user.email, workspace);
+  if (!isOwner) {
+    return res.status(403).json({ error: { msg: 'Forbidden' } });
   }
 
   const product = await prisma.paymentProduct.findFirst({
@@ -101,4 +106,3 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: { msg: `${method} method unsupported` } });
 }
-

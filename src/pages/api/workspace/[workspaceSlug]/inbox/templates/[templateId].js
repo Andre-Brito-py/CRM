@@ -1,6 +1,6 @@
 import { getSession } from 'next-auth/react';
 import { deleteTemplate, updateTemplate } from '@/prisma/services/template';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 
 const handler = async (req, res) => {
   const { method } = req;
@@ -11,10 +11,19 @@ const handler = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const workspace = await getWorkspace(null, session.user.email, workspaceSlug);
+  const workspace = await getWorkspace(
+    session.user.userId || session.user.id,
+    session.user.email,
+    workspaceSlug
+  );
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found' } });
+  }
+
+  const isOwner = isWorkspaceOwner(session.user.email, workspace);
+  if (!isOwner) {
+    return res.status(403).json({ error: { msg: 'Forbidden' } });
   }
 
   switch (method) {

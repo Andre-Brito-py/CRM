@@ -99,6 +99,10 @@ if (!i18n.isInitialized) {
     });
 }
 
+Object.entries(resources).forEach(([lng, bundle]) => {
+  i18n.addResourceBundle(lng, 'translation', bundle.translation, true, true);
+});
+
 const App = ({ Component, pageProps }) => {
   const [progress, setProgress] = useState(false);
   const [gaReady, setGaReady] = useState(false);
@@ -106,6 +110,12 @@ const App = ({ Component, pageProps }) => {
   const [hasConsent, setHasConsent] = useState(false);
   useTranslation();
   const swrOptions = swrConfig();
+
+  useEffect(() => {
+    Object.entries(resources).forEach(([lng, bundle]) => {
+      i18n.addResourceBundle(lng, 'translation', bundle.translation, true, true);
+    });
+  }, []);
 
   const isTruthy = (value) => {
     const v = String(value || '').trim().toLowerCase();

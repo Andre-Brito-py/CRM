@@ -11,7 +11,7 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { getSession } from 'next-auth/react';
-import { getWorkspace, isWorkspaceCreator } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceCreator, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 
@@ -163,6 +163,7 @@ const Advanced = ({ isCreator, workspace }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
+  let isOwner = false;
   let isCreator = false;
   let workspace = null;
 
@@ -173,6 +174,7 @@ export const getServerSideProps = async (context) => {
       context.params.workspaceSlug
     );
     if (workspace) {
+      isOwner = isWorkspaceOwner(session.user.email, workspace);
       isCreator = isWorkspaceCreator(session.user.userId, workspace.creatorId);
     }
   }
@@ -188,6 +190,15 @@ export const getServerSideProps = async (context) => {
 
   if (!workspace) {
     return { notFound: true };
+  }
+
+  if (!isOwner) {
+    return {
+      redirect: {
+        destination: `/account/${workspace.slug}`,
+        permanent: false,
+      },
+    };
   }
 
   return { props: { isCreator, workspace } };

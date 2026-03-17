@@ -1,5 +1,5 @@
 import { validateSession } from '@/config/api-validation';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { INDUSTRY_PRESETS } from '@/lib/server/presets';
 
@@ -18,6 +18,11 @@ const handler = async (req, res) => {
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
+  }
+
+  const isOwner = isWorkspaceOwner(session.user.email, workspace);
+  if (!isOwner) {
+    return res.status(403).json({ error: { msg: 'Forbidden' } });
   }
 
   if (method === 'POST') {

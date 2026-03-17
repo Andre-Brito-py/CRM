@@ -1,6 +1,6 @@
 import prisma from '@/prisma/index';
 import { getSession } from 'next-auth/react';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 
 const WON_STAGE_NAMES_LOWER = ['fechado', 'closed', 'won'];
 
@@ -24,6 +24,7 @@ const handler = async (req, res) => {
     }
 
     const workspaceId = workspace.id;
+    const isOwner = isWorkspaceOwner(session.user.email, workspace);
 
     // ── WhatsApp scope: single focused query ─────────────────────────
     if (scope === 'whatsapp') {
@@ -73,6 +74,10 @@ const handler = async (req, res) => {
       );
 
       return res.status(200).json({ messageTrend, messageTotals });
+    }
+
+    if (!isOwner) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     // ── Full analytics scope: ALL queries in parallel ─────────────────

@@ -1,5 +1,5 @@
 import { getSession } from 'next-auth/react';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { getApiKeys, createApiKey } from '@/prisma/services/api-key';
 import { createAuditActivity } from '@/prisma/services/activity';
 
@@ -14,6 +14,11 @@ const handler = async (req, res) => {
 
   if (!workspace) {
     return res.status(404).json({ error: 'Workspace not found' });
+  }
+
+  const isOwner = isWorkspaceOwner(session.user.email, workspace);
+  if (!isOwner) {
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
   if (req.method === 'GET') {

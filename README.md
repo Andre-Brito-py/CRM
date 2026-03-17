@@ -31,6 +31,12 @@ Login (UX):
 - A tela usa `min-h-screen` (em vez de `h-screen`) para evitar corte de conteúdo em alturas menores.
 - Links de “Termos” e “Privacidade” ficam sempre visíveis (não ficam atrás do mockup).
 
+## Customer Satisfaction (NPS)
+Rotas no app (por workspace):
+- `/account/[workspaceSlug]/customer-satisfaction/nps-surveys`
+- `/account/[workspaceSlug]/customer-satisfaction/responses`
+- `/account/[workspaceSlug]/customer-satisfaction/analytics`
+
 ## Regras internas (pra eu não me sabotar)
 - Nada de credenciais no código/repo.
 - Tudo que for “admin master” tem que ser auditável e seguro.

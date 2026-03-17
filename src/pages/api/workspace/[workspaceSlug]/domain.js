@@ -5,7 +5,7 @@ import {
   deleteDomain,
   verifyDomain,
 } from '@/prisma/services/domain';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { createAuditActivity } from '@/prisma/services/activity';
 import { getSystemConfig } from '@/lib/server/config';
 
@@ -17,6 +17,10 @@ const handler = async (req, res) => {
     await validateAddDomain(req, res);
     const { domainName } = req.body;
     const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
+    const isOwner = workspace ? isWorkspaceOwner(session.user.email, workspace) : false;
+    if (!isOwner) {
+      return res.status(403).json({ errors: { error: { msg: 'Forbidden' } } });
+    }
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
@@ -71,6 +75,10 @@ const handler = async (req, res) => {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
     const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
+    const isOwner = workspace ? isWorkspaceOwner(session.user.email, workspace) : false;
+    if (!isOwner) {
+      return res.status(403).json({ errors: { error: { msg: 'Forbidden' } } });
+    }
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),
@@ -121,6 +129,10 @@ const handler = async (req, res) => {
     const session = await validateSession(req, res);
     const { domainName } = req.body;
     const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
+    const isOwner = workspace ? isWorkspaceOwner(session.user.email, workspace) : false;
+    if (!isOwner) {
+      return res.status(403).json({ errors: { error: { msg: 'Forbidden' } } });
+    }
     const [teamId, apiUrl, projectId, token] = await Promise.all([
       getSystemConfig('VERCEL_TEAM_ID', process.env.VERCEL_TEAM_ID),
       getSystemConfig('VERCEL_API_URL', process.env.VERCEL_API_URL),

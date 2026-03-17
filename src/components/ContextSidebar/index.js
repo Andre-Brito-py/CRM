@@ -40,6 +40,7 @@ import Modal from '@/components/Modal/index';
 const ITEM_ICONS = {
   'common.label.home': HomeIcon,
   'Inbox': InboxIcon,
+  'Chat Interno': UsersIcon,
   'Pipeline': RectangleStackIcon,
   'Contacts': PhoneIcon,
   'Companies': BuildingOffice2Icon,
@@ -47,9 +48,9 @@ const ITEM_ICONS = {
   'common.label.integrations': PuzzlePieceIcon,
   'Automations': BoltIcon,
   'Analytics': ChartBarIcon,
-  'NPS Surveys': FaceSmileIcon,
-  'NPS Responses': CheckCircleIcon,
-  'NPS Analytics': ChartBarIcon,
+  'nps.menu.surveys': FaceSmileIcon,
+  'nps.menu.responses': CheckCircleIcon,
+  'nps.menu.analytics': ChartBarIcon,
   'settings.workspace.information': Cog6ToothIcon,
   'settings.domain.configuration': GlobeAltIcon,
   'settings.team.management': UsersIcon,
@@ -223,10 +224,10 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                       }}
                       prefetch={false}
                       className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${active
-                          ? 'text-white bg-indigo-600/15 border-indigo-500/30 shadow-[0_0_20px_rgba(79,70,229,0.08)]'
-                          : locked
-                            ? 'text-zinc-600 cursor-not-allowed grayscale'
-                            : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
+                        ? 'text-white bg-indigo-600/15 border-indigo-500/30 shadow-[0_0_20px_rgba(79,70,229,0.08)]'
+                        : locked
+                          ? 'text-zinc-600 cursor-not-allowed grayscale'
+                          : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
                         }`}
                     >
                       {active && (

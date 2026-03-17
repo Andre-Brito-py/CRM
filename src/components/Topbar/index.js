@@ -64,9 +64,9 @@ const ITEM_ICONS = {
   'common.label.integrations': PuzzlePieceIcon,
   'Automations': BoltIcon,
   'Analytics': ChartBarIcon,
-  'NPS Surveys': FaceSmileIcon,
-  'NPS Responses': CheckCircleIcon,
-  'NPS Analytics': ChartBarIcon,
+  'nps.menu.surveys': FaceSmileIcon,
+  'nps.menu.responses': CheckCircleIcon,
+  'nps.menu.analytics': ChartBarIcon,
   'settings.workspace.information': Cog6ToothIcon,
   'settings.domain.configuration': GlobeAltIcon,
   'settings.team.management': UsersIcon,
@@ -200,7 +200,7 @@ const Topbar = ({ menu, staticMenu }) => {
     },
     {
       id: 'customer-satisfaction',
-      label: 'Customer Satisfaction',
+      label: t('common.label.customerSatisfaction'),
       items: menu?.find((m) => m.name === 'Customer Satisfaction')?.menuItems || [],
     },
     {
@@ -321,12 +321,12 @@ const Topbar = ({ menu, staticMenu }) => {
                       )}
                     </div>
                     <div className="p-3 bg-black/20 border-t border-white/5 flex items-center justify-center">
-                       <button
-                         onClick={isSubscribed ? unsubscribe : subscribe}
-                         className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
-                       >
-                         {isSubscribed ? '🔔 Desativar Notificações do Navegador' : '🔕 Ativar Notificações do Navegador'}
-                       </button>
+                      <button
+                        onClick={isSubscribed ? unsubscribe : subscribe}
+                        className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
+                      >
+                        {isSubscribed ? '🔔 Desativar Notificações do Navegador' : '🔕 Ativar Notificações do Navegador'}
+                      </button>
                     </div>
                   </Popover.Panel>
                 </Transition>

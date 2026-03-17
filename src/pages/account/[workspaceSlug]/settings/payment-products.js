@@ -354,8 +354,16 @@ export const getServerSideProps = async (context) => {
     return { notFound: true };
   }
 
+  if (!isTeamOwner) {
+    return {
+      redirect: {
+        destination: `/account/${workspace.slug}`,
+        permanent: false,
+      },
+    };
+  }
+
   return { props: { isTeamOwner, workspace } };
 };
 
 export default PaymentProducts;
-

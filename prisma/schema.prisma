@@ -215,6 +215,10 @@ model User {
   notifications         Notification[]
   createdWorkspace      Workspace[]
   aiUsageEvents         AiUsageEvent[]
+  internalChatChannelsAsA InternalChatChannel[] @relation("InternalChatUserA")
+  internalChatChannelsAsB InternalChatChannel[] @relation("InternalChatUserB")
+  internalChatMessages  InternalChatMessage[]
+  internalChatBridgesCreated InternalChatBridge[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -430,6 +434,9 @@ model Workspace {
   webhooks               Webhook[]
   webForms               WebForm[]
   aiUsageEvents          AiUsageEvent[]
+  internalChatChannels   InternalChatChannel[]
+  internalChatMessages   InternalChatMessage[]
+  internalChatBridgeWorkspaces InternalChatBridgeWorkspace[]
   creator                User                     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
@@ -1038,4 +1045,82 @@ model WebForm {
   @@index([workspaceId])
   @@index([workspaceId, slug])
   @@map("web_forms")
+}
+
+enum InternalChatChannelKind {
+  TEAM
+  DIRECT
+}
+
+model InternalChatChannel {
+  id          String                  @id @default(cuid())
+  workspaceId String
+  key         String
+  kind        InternalChatChannelKind @default(TEAM)
+  title       String?
+  userAId     String?
+  userBId     String?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  userA     User?     @relation("InternalChatUserA", fields: [userAId], references: [id], onDelete: SetNull)
+  userB     User?     @relation("InternalChatUserB", fields: [userBId], references: [id], onDelete: SetNull)
+  messages  InternalChatMessage[]
+
+  @@unique([workspaceId, key])
+  @@index([workspaceId, kind, deletedAt])
+  @@map("internal_chat_channels")
+}
+
+model InternalChatMessage {
+  id                String   @id @default(cuid())
+  workspaceId        String
+  channelId          String
+  authorId           String
+  originWorkspaceId  String?
+  originMessageId    String?
+  content            String   @db.Text
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  editedAt           DateTime?
+  deletedAt          DateTime?
+
+  workspace Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  channel   InternalChatChannel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author    User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, channelId, createdAt])
+  @@index([channelId, createdAt])
+  @@map("internal_chat_messages")
+}
+
+model InternalChatBridge {
+  id          String   @id @default(cuid())
+  name        String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  createdBy  User                       @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  workspaces InternalChatBridgeWorkspace[]
+
+  @@index([createdById])
+  @@map("internal_chat_bridges")
+}
+
+model InternalChatBridgeWorkspace {
+  id          String   @id @default(cuid())
+  bridgeId    String
+  workspaceId String
+  createdAt   DateTime @default(now())
+
+  bridge    InternalChatBridge @relation(fields: [bridgeId], references: [id], onDelete: Cascade)
+  workspace Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([bridgeId, workspaceId])
+  @@index([workspaceId])
+  @@map("internal_chat_bridge_workspaces")
 }

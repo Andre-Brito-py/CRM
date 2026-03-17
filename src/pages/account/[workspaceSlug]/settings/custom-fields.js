@@ -7,7 +7,7 @@ import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
@@ -53,7 +53,7 @@ const CustomFields = ({ workspace }) => {
     setFields(newFields);
   };
 
-    const updateField = (index, key, value) => {
+  const updateField = (index, key, value) => {
     const newFields = [...fields];
     newFields[index][key] = value;
     // Auto-generate key from label if key is empty and we're updating the label
@@ -135,8 +135,8 @@ const CustomFields = ({ workspace }) => {
 
                     {(field.type === 'select' || field.type === 'multi-select') && (
                       <div className="sm:col-span-3">
-                         <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Options (comma separated)</label>
-                         <input
+                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Options (comma separated)</label>
+                        <input
                           type="text"
                           value={field.options || ''}
                           onChange={(e) => updateField(index, 'options', e.target.value)}
@@ -184,7 +184,7 @@ const CustomFields = ({ workspace }) => {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-4 flex justify-between">
               <button
                 id="add-field-btn"
@@ -194,7 +194,7 @@ const CustomFields = ({ workspace }) => {
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5 text-gray-500" />
                 Add Field
               </button>
-              
+
               <button
                 onClick={saveFields}
                 disabled={isSubmitting}
@@ -212,6 +212,7 @@ const CustomFields = ({ workspace }) => {
 
 export const getServerSideProps = async (context) => {
   const session = await getSession(context);
+  let isTeamOwner = false;
   let workspace = null;
 
   if (session) {
@@ -220,6 +221,9 @@ export const getServerSideProps = async (context) => {
       session.user.email,
       context.params.workspaceSlug
     );
+    if (workspace) {
+      isTeamOwner = isWorkspaceOwner(session.user.email, workspace);
+    }
   }
 
   if (!session) {
@@ -233,6 +237,15 @@ export const getServerSideProps = async (context) => {
 
   if (!workspace) {
     return { notFound: true };
+  }
+
+  if (!isTeamOwner) {
+    return {
+      redirect: {
+        destination: `/account/${workspace.slug}`,
+        permanent: false,
+      },
+    };
   }
 
   return {

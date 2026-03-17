@@ -23,7 +23,15 @@ const AccountLayout = ({ children }) => {
 
   const requiredTermsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
   const currentSlug = workspace?.slug || router.query.workspaceSlug;
-  const workspaceMenu = currentSlug ? menu(currentSlug) : [];
+  const isOwner = useMemo(() => {
+    const email = session?.user?.email || null;
+    if (!email || !workspace?.members) return false;
+    return workspace.members.some((m) => {
+      const memberEmail = m?.email || m?.member?.email || null;
+      return memberEmail === email && m?.teamRole === 'OWNER';
+    });
+  }, [session?.user?.email, workspace?.members]);
+  const workspaceMenu = currentSlug ? menu(currentSlug, { isOwner }) : [];
   const { allowedModules, trial } = usePlanFeatures();
 
   // Filtra seções inteiras do menu cujo módulo está desabilitado
@@ -46,7 +54,7 @@ const AccountLayout = ({ children }) => {
     }
     if (slug && path.includes(`/account/${slug}/customer-satisfaction`)) {
       const csSection = workspaceMenu.find((m) => m.name === 'Customer Satisfaction');
-      return { label: 'Customer Satisfaction', items: csSection?.menuItems || [] };
+      return { label: t('common.label.customerSatisfaction'), items: csSection?.menuItems || [] };
     }
     if (slug && path.startsWith(`/account/${slug}`)) {
       const wsSection = workspaceMenu.find((m) => m.name === 'Workspace');

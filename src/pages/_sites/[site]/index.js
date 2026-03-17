@@ -1,7 +1,7 @@
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
 import DefaultErrorPage from 'next/error';
 import Link from 'next/link';
-import { useRouter } from 'next/compat/router';
+import { useRouter } from 'next/router';
 
 import Meta from '@/components/Meta';
 import {

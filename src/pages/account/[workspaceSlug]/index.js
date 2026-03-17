@@ -175,6 +175,7 @@ const Workspace = () => {
     fetcher
   );
 
+  const isOwner = dashboardData?.permissions?.isOwner === true;
   const usage = dashboardData?.usage || null;
   const formatLimit = (value) => (value == null ? 'Ilimitado' : value);
   const formatBrl = (value) =>
@@ -184,68 +185,77 @@ const Workspace = () => {
       maximumFractionDigits: 2,
     }).format(Number(value) || 0);
 
-  const stats = useMemo(() => [
-    {
-      title: 'Total Contacts',
-      value: dashboardData?.stats?.contacts || 0,
-      icon: UserGroupIcon,
-      color: 'blue',
-    },
-    {
-      title: 'Open Deals',
-      value: dashboardData?.stats?.openDeals || 0,
-      icon: BriefcaseIcon,
-      color: 'yellow',
-    },
-    {
-      title: 'Won Deals',
-      value: dashboardData?.stats?.wonDeals || 0,
-      icon: ChartBarIcon,
-      color: 'green',
-    },
-    {
-      title: 'Revenue',
-      value: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0
-      }).format(dashboardData?.stats?.revenue || 0),
-      icon: CurrencyDollarIcon,
-      color: 'indigo',
-    },
-    {
-      title: 'Payments Paid',
-      value: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0
-      }).format(dashboardData?.stats?.paymentsPaidAmount || 0),
-      icon: CreditCardIcon,
-      color: 'green',
-    },
-    {
-      title: 'Payments Pending',
-      value: new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL',
-        maximumFractionDigits: 0
-      }).format(dashboardData?.stats?.paymentsPendingAmount || 0),
-      icon: ClockIcon,
-      color: 'yellow',
-    },
-    {
-      title: 'NPS Score',
-      value: dashboardData?.stats?.npsScore ?? 0,
-      icon: ChartBarIcon,
-      color: 'sky',
-    },
-    {
-      title: 'NPS Responses',
-      value: dashboardData?.stats?.npsResponses ?? 0,
-      icon: UserGroupIcon,
-      color: 'indigo',
-    },
-  ], [dashboardData]);
+  const stats = useMemo(() => {
+    const base = [
+      {
+        title: 'Total Contacts',
+        value: dashboardData?.stats?.contacts || 0,
+        icon: UserGroupIcon,
+        color: 'blue',
+      },
+      {
+        title: 'Open Deals',
+        value: dashboardData?.stats?.openDeals || 0,
+        icon: BriefcaseIcon,
+        color: 'yellow',
+      },
+      {
+        title: 'Won Deals',
+        value: dashboardData?.stats?.wonDeals || 0,
+        icon: ChartBarIcon,
+        color: 'green',
+      },
+      {
+        title: 'NPS Score',
+        value: dashboardData?.stats?.npsScore ?? 0,
+        icon: ChartBarIcon,
+        color: 'sky',
+      },
+      {
+        title: 'NPS Responses',
+        value: dashboardData?.stats?.npsResponses ?? 0,
+        icon: UserGroupIcon,
+        color: 'indigo',
+      },
+    ];
+
+    if (!isOwner) return base;
+
+    return [
+      ...base.slice(0, 3),
+      {
+        title: 'Revenue',
+        value: new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          maximumFractionDigits: 0,
+        }).format(dashboardData?.stats?.revenue || 0),
+        icon: CurrencyDollarIcon,
+        color: 'indigo',
+      },
+      {
+        title: 'Payments Paid',
+        value: new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          maximumFractionDigits: 0,
+        }).format(dashboardData?.stats?.paymentsPaidAmount || 0),
+        icon: CreditCardIcon,
+        color: 'green',
+      },
+      {
+        title: 'Payments Pending',
+        value: new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          maximumFractionDigits: 0,
+        }).format(dashboardData?.stats?.paymentsPendingAmount || 0),
+        icon: ClockIcon,
+        color: 'yellow',
+      },
+      ...base.slice(3),
+    ];
+  }, [dashboardData, isOwner]);
 
   const dashboardSteps = [
     {
@@ -254,33 +264,27 @@ const Workspace = () => {
         title: t('onboarding.tour.dashboard.step1.title'),
         description: t('onboarding.tour.dashboard.step1.desc'),
         position: 'bottom',
-      }
+      },
     },
-    {
-      element: '#usage-section',
-      popover: {
-        title: 'Uso e Limites',
-        description: 'Monitore aqui quantos membros, webhooks e IA você ainda tem disponíveis no mês.',
-        position: 'top',
+    isOwner
+      ? {
+        element: '#usage-section',
+        popover: {
+          title: 'Uso e Limites',
+          description: 'Monitore aqui quantos membros, webhooks e IA você ainda tem disponíveis no mês.',
+          position: 'top',
+        },
       }
-    },
-    {
-      element: '#revenue-chart',
-      popover: {
-        title: 'Performance de Venda',
-        description: 'Acompanhe o crescimento da sua receita e o volume de negócios ganhos.',
-        position: 'right',
-      }
-    },
+      : null,
     {
       element: '#nps-section',
       popover: {
         title: 'Voz do Cliente (NPS)',
         description: 'Veja como está a satisfação dos seus clientes com base nas pesquisas enviadas.',
         position: 'left',
-      }
-    }
-  ];
+      },
+    },
+  ].filter(Boolean);
 
   return (
     workspace && (
@@ -382,61 +386,63 @@ const Workspace = () => {
           )}
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div id="revenue-chart" className="premium-card p-8 lg:col-span-2">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
-                  Revenue Performance
-                </h3>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
-                  <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Monthly Growth</span>
+            {isOwner && (
+              <div id="revenue-chart" className="premium-card p-8 lg:col-span-2">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">
+                    Revenue Performance
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Monthly Growth</span>
+                  </div>
+                </div>
+
+                <div className="h-[300px] w-full mt-4">
+                  {dashboardData?.salesData?.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={dashboardData.salesData}>
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
+                        <XAxis
+                          dataKey="name"
+                          axisLine={false}
+                          tickLine={false}
+                          tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }}
+                          dy={10}
+                        />
+                        <YAxis
+                          hide
+                          domain={[0, 'auto']}
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Area
+                          type="monotone"
+                          dataKey="value"
+                          stroke="#6366f1"
+                          strokeWidth={4}
+                          fillOpacity={1}
+                          fill="url(#colorRevenue)"
+                          animationDuration={2000}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
+                      <ChartBarIcon className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mb-4" />
+                      <p className="text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No sales metrics yet</p>
+                    </div>
+                  )}
                 </div>
               </div>
+            )}
 
-              <div className="h-[300px] w-full mt-4">
-                {dashboardData?.salesData?.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={dashboardData.salesData}>
-                      <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.1} />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }}
-                        dy={10}
-                      />
-                      <YAxis
-                        hide
-                        domain={[0, 'auto']}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#6366f1"
-                        strokeWidth={4}
-                        fillOpacity={1}
-                        fill="url(#colorRevenue)"
-                        animationDuration={2000}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-3xl">
-                    <ChartBarIcon className="w-10 h-10 text-zinc-200 dark:text-zinc-800 mb-4" />
-                    <p className="text-zinc-400 dark:text-zinc-600 font-bold uppercase tracking-widest text-[10px]">No sales metrics yet</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-8 lg:col-span-1">
+            <div className={`space-y-8 ${isOwner ? 'lg:col-span-1' : 'lg:col-span-3'}`}>
               <div id="nps-section" className="premium-card p-8">
                 <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-4">
                   <h3 className="text-xl font-executive font-bold text-zinc-900 dark:text-white">

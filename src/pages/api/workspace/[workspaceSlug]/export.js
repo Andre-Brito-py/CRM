@@ -1,6 +1,6 @@
 import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
-import { getWorkspace } from '@/prisma/services/workspace';
+import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 
 // Helper: run a Prisma query and return fallback on failure (graceful degradation)
 const safeQuery = async (fn, fallback = []) => {
@@ -61,6 +61,11 @@ export default async function handler(req, res) {
     const workspace = await getWorkspace(session.user.userId, session.user.email, workspaceSlug);
     if (!workspace) {
       return res.status(403).json({ error: 'Forbidden or Workspace not found' });
+    }
+
+    const isOwner = isWorkspaceOwner(session.user.email, workspace);
+    if (!isOwner) {
+      return res.status(403).json({ error: 'Forbidden' });
     }
 
     const format = String(req.query?.format || '').trim().toLowerCase();
