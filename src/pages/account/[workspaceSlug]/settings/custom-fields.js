@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import toast from 'react-hot-toast';
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Content from '@/components/Content/index';
@@ -10,6 +10,7 @@ import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
+import { authOptions } from '@/lib/server/auth';
 
 const CustomFields = ({ workspace }) => {
   const { t } = useTranslation();
@@ -211,7 +212,7 @@ const CustomFields = ({ workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await getServerSession(context.req, context.res, authOptions);
   let isTeamOwner = false;
   let workspace = null;
 

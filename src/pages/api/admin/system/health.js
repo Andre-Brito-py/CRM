@@ -1,24 +1,10 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import os from 'os';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
-
-  if (!session) {
-    res.status(401).json({ error: { msg: 'Unauthorized' } });
-    return;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true },
-  });
-
-  if (!user || user.role !== 'SUPERADMIN') {
-    res.status(403).json({ error: { msg: 'Forbidden' } });
-    return;
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   const now = new Date();
   const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);

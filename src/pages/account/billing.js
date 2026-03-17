@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import formatDistance from 'date-fns/formatDistance';
 import Link from 'next/link';
-import { getSession, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import toast from 'react-hot-toast';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -18,6 +19,7 @@ import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
+import { authOptions } from '@/lib/server/auth';
 
 const Billing = ({ invoices, products }) => {
   const { t } = useTranslation();
@@ -243,7 +245,7 @@ const Billing = ({ invoices, products }) => {
                       maximumFractionDigits: 2,
                     }).format(Number(product.prices.unit_amount / 100))}
                     <span className="text-sm text-gray-400 font-medium ml-2">
-                       / mo
+                      / mo
                     </span>
                   </h3>
                   {product.prices.unit_amount_annual > 0 && (
@@ -275,7 +277,7 @@ const Billing = ({ invoices, products }) => {
                         disabled={isSubmitting}
                         onClick={() => subscribe(product.prices.id_annual)}
                       >
-                         Assinar Anual
+                        Assinar Anual
                       </Button>
                     )}
                   </div>
@@ -358,7 +360,7 @@ const Billing = ({ invoices, products }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await getServerSession(context.req, context.res, authOptions);
 
   if (!session || !session.user?.email) {
     return {
@@ -391,17 +393,17 @@ export const getServerSideProps = async (context) => {
     const products = (plans || [])
       .filter((p) => p.isActive)
       .map((plan) => ({
-      name: plan.name,
-      description: plan.description,
-      prices: {
-        id: plan.stripePriceId,
-        id_annual: plan.stripePriceIdAnnual,
-        unit_amount: Number(plan.price) * 100,
-        unit_amount_annual: (Number(plan.priceAnnual) || 0) * 100,
-        currency: plan.currency,
-        interval: plan.interval,
-      },
-    }));
+        name: plan.name,
+        description: plan.description,
+        prices: {
+          id: plan.stripePriceId,
+          id_annual: plan.stripePriceIdAnnual,
+          unit_amount: Number(plan.price) * 100,
+          unit_amount_annual: (Number(plan.priceAnnual) || 0) * 100,
+          currency: plan.currency,
+          interval: plan.interval,
+        },
+      }));
 
     return {
       props: {

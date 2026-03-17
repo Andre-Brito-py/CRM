@@ -1,7 +1,7 @@
-import { getSession } from 'next-auth/react';
 import getStripe from '@/lib/server/stripe';
 import prisma from '@/prisma/index';
 import { createPlatformAuditActivity } from '@/prisma/services/activity';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 const resolveSubscriptionTypeFromStripe = async (stripe, subscription) => {
   const priceId = subscription?.items?.data?.[0]?.price?.id;
@@ -17,22 +17,8 @@ const shouldDowngradeFromStripeStatus = (status) => {
 };
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
-
-  if (!session) {
-    res.status(401).json({ error: { msg: 'Unauthorized' } });
-    return;
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true },
-  });
-
-  if (!user || user.role !== 'SUPERADMIN') {
-    res.status(403).json({ error: { msg: 'Forbidden' } });
-    return;
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   if (req.method === 'GET') {
     try {

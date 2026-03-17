@@ -1,5 +1,5 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 const parseDelimiter = (req) => {
   const raw = String(req.query?.delimiter || '').trim();
@@ -35,24 +35,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: { msg: 'Method not supported' } });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
-
-  const userId = session.user.userId || session.user.id || null;
-  if (!userId) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { role: true, email: true },
-  });
-
-  if (!user || user.role !== 'SUPERADMIN') {
-    return res.status(403).json({ error: { msg: 'Forbidden' } });
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   const delimiter = parseDelimiter(req);
   const today = new Date().toISOString().split('T')[0];
@@ -65,7 +49,7 @@ export default async function handler(req, res) {
   res.write('\ufeff');
 
   const exportedAt = new Date().toISOString();
-  csvWriteRow(res, ['Closify Admin Export', exportedAt, user.email || ''], delimiter);
+  csvWriteRow(res, ['Closify Admin Export', exportedAt, session.user.email || ''], delimiter);
   csvWriteRow(res, [], delimiter);
 
   const workspaces = await prisma.workspace.findMany({
@@ -213,4 +197,3 @@ export default async function handler(req, res) {
 
   res.end();
 }
-

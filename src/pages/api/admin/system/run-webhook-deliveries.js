@@ -1,7 +1,7 @@
 import crypto from 'crypto';
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import { createPlatformAuditActivity } from '@/prisma/services/activity';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 const MAX_WEBHOOK_DELIVERY_ATTEMPTS = 5;
 const computeBackoffMs = ({ attempt, baseMs = 60_000, capMs = 60 * 60_000 }) => {
@@ -17,18 +17,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: { msg: 'Method not supported' } });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true, email: true },
-  });
-  if (!user || user.role !== 'SUPERADMIN') {
-    return res.status(403).json({ error: { msg: 'Forbidden' } });
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   const lockKey = 'admin:run-webhook-deliveries';
 
@@ -134,7 +124,7 @@ export default async function handler(req, res) {
 
     await createPlatformAuditActivity(
       session.user.userId || session.user.id,
-      session.user.email || user.email,
+      session.user.email,
       {
         action: 'RUN_WEBHOOK_DELIVERIES',
         title: 'Admin ran webhook deliveries',
@@ -155,4 +145,3 @@ export default async function handler(req, res) {
     }
   }
 }
-

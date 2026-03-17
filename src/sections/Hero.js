@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bars3Icon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -25,10 +25,17 @@ const itemVariants = {
 const Hero = () => {
   const { status: sessionStatus } = useSession();
   const [showMenu, setMenuVisibility] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const toggleMenu = () => setMenuVisibility(!showMenu);
   const { t, i18n } = useTranslation();
   const currentLang = (i18n.resolvedLanguage || i18n.language || 'en').split('-')[0];
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isAuthenticated = mounted && sessionStatus === 'authenticated';
 
   return (
     <div className="relative bg-[#0a0a0b] overflow-hidden min-h-screen flex flex-col text-white selection:bg-indigo-500/30">
@@ -73,12 +80,12 @@ const Hero = () => {
           className="hidden items-center justify-end md:flex md:flex-1 lg:w-0"
         >
           <Link
-            href={sessionStatus === 'authenticated' ? '/account' : '/auth/login'}
+            href={isAuthenticated ? '/account' : '/auth/login'}
             className="text-sm font-medium text-zinc-400 hover:text-white transition-colors whitespace-nowrap"
           >
-            {sessionStatus === 'authenticated' ? t("landing.nav.dashboard", "Go to Dashboard") : t("landing.nav.signin", "Sign in")}
+            {isAuthenticated ? t("landing.nav.dashboard", "Go to Dashboard") : t("landing.nav.signin", "Sign in")}
           </Link>
-          {sessionStatus !== 'authenticated' && (
+          {!isAuthenticated && (
             <Link
               href="/auth/register"
               className="inline-flex items-center justify-center px-6 py-2.5 ml-8 text-sm font-semibold text-white bg-indigo-600 rounded-xl hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-500/25 transition-all"

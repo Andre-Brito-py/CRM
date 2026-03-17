@@ -1,25 +1,15 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import { processDueAutomationJobs } from '@/prisma/services/automation';
 import { createPlatformAuditActivity } from '@/prisma/services/activity';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { msg: 'Method not supported' } });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true, email: true },
-  });
-  if (!user || user.role !== 'SUPERADMIN') {
-    return res.status(403).json({ error: { msg: 'Forbidden' } });
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   try {
     const lockKey = 'admin:run-automation-jobs';
@@ -33,7 +23,7 @@ export default async function handler(req, res) {
 
     await createPlatformAuditActivity(
       session.user.userId || session.user.id,
-      session.user.email || user.email,
+      session.user.email,
       {
         action: 'RUN_AUTOMATION_JOBS',
         title: 'Admin ran automation jobs',
@@ -55,4 +45,3 @@ export default async function handler(req, res) {
     }
   }
 }
-

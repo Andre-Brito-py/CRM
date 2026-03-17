@@ -1,7 +1,7 @@
-import { getSession } from 'next-auth/react';
 import prisma from '@/prisma/index';
 import getStripe from '@/lib/server/stripe';
 import { createPlatformAuditActivity } from '@/prisma/services/activity';
+import { requireSuperAdmin } from '@/lib/server/requireSuperAdmin';
 
 const normalizeInterval = (value) => {
   const v = String(value || '').trim().toLowerCase();
@@ -20,23 +20,8 @@ const normalizePlanType = (value) => {
 };
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
-
-  if (!session) {
-    res.status(401).json({ error: { msg: 'Unauthorized' } });
-    return;
-  }
-
-  // Double check role from DB for security
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.userId },
-    select: { role: true },
-  });
-
-  if (!user || user.role !== 'SUPERADMIN') {
-    res.status(403).json({ error: { msg: 'Forbidden' } });
-    return;
-  }
+  const session = await requireSuperAdmin(req, res);
+  if (!session) return;
 
   const { planId } = req.query;
 
@@ -94,7 +79,7 @@ export default async function handler(req, res) {
                 recurring: { interval: 'month' },
                 product: currentPrice.product,
               });
-              stripe.prices.update(finalStripePriceId, { active: false }).catch(() => {});
+              stripe.prices.update(finalStripePriceId, { active: false }).catch(() => { });
               finalStripePriceId = created.id;
               syncedPrice = desiredPrice;
             } else {
@@ -124,7 +109,7 @@ export default async function handler(req, res) {
                 recurring: { interval: 'year' },
                 product: currentPriceA.product,
               });
-              stripe.prices.update(finalStripePriceIdAnnual, { active: false }).catch(() => {});
+              stripe.prices.update(finalStripePriceIdAnnual, { active: false }).catch(() => { });
               finalStripePriceIdAnnual = createdA.id;
               syncedPriceAnnual = desiredPriceAnnual;
             } else {
@@ -176,7 +161,7 @@ export default async function handler(req, res) {
           stripe.products.update(productId, {
             name: String(name || 'Plano'),
             metadata: { type: desiredType },
-          }).catch(() => {});
+          }).catch(() => { });
         }
       }
 

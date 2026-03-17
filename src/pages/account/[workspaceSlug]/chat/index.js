@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getSession, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import useSWR from 'swr';
 import toast from 'react-hot-toast';
 import { UserCircleIcon, UsersIcon, LinkIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -15,6 +16,7 @@ import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import useWorkspaces from '@/hooks/data/useWorkspaces';
+import { getAuthOptions } from '@/lib/server/auth';
 
 const formatTime = (iso) => {
   try {
@@ -253,10 +255,10 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
       <Content.Container>
         <Card>
           <div className="flex flex-col md:flex-row h-[70vh] min-h-[540px]">
-            <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-gray-200">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+            <div className="w-full md:w-[360px] lg:w-[420px] border-b md:border-b-0 md:border-r border-gray-200">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-b border-gray-200">
                 <div className="text-sm font-semibold text-gray-800">Conversas</div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   <Button
                     onClick={() => setShowMembersModal(true)}
                     className="px-3 py-2 text-xs rounded-xl"
@@ -512,7 +514,7 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await getServerSession(context.req, context.res, await getAuthOptions());
   if (!session) {
     return {
       redirect: {
@@ -536,6 +538,7 @@ export const getServerSideProps = async (context) => {
 
   return {
     props: {
+      session,
       isTeamOwner,
       workspace,
     },

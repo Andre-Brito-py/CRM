@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import toast from 'react-hot-toast';
 import { PlusIcon, PencilIcon, TrashIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import AccountLayout from '@/layouts/AccountLayout';
@@ -12,6 +12,7 @@ import api from '@/lib/common/api';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
+import { authOptions } from '@/lib/server/auth';
 
 const SUPPORTED_LANGUAGES = ['und', 'pt', 'en', 'es', 'fr', 'de', 'it'];
 
@@ -440,7 +441,7 @@ const Templates = () => {
 export default Templates;
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await getServerSession(context.req, context.res, authOptions);
   let isTeamOwner = false;
   let workspace = null;
 

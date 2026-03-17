@@ -505,7 +505,10 @@ const Inbox = () => {
             </div>
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200">
-              <div id="conversation-list" className={`${selectedId ? 'hidden md:block h-full md:flex-shrink-0' : 'block w-full h-full'}`}>
+              <div
+                id="conversation-list"
+                className={`${selectedId ? 'hidden md:block' : 'block'} h-full flex-shrink-0 w-full md:w-[420px] lg:w-[480px]`}
+              >
                 <ConversationList
                   conversations={conversations}
                   selectedId={selectedId}
@@ -520,7 +523,7 @@ const Inbox = () => {
                   user={session?.user}
                 />
               </div>
-              <div id="chat-window" className={`${selectedId ? 'block w-full md:w-auto' : 'hidden md:block'} flex-1 h-full`}>
+              <div id="chat-window" className={`${selectedId ? 'block' : 'hidden md:block'} flex-1 min-w-0 h-full`}>
                 <ChatWindow
                   conversation={selectedConversation}
                   messages={selectedConversation?.messages || []}

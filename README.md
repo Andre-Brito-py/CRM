@@ -2,6 +2,10 @@
 
 Plataforma CRM multi-tenant com foco em operação comercial e atendimento omnichannel (WhatsApp + Email), pipeline de vendas, automações e monetização por planos.
 
+## Atualizações recentes
+- 2026-03-17: correção do dashboard do Super Admin (contadores/estatísticas) e padronização da autenticação/role nas rotas `/api/admin/*`.
+- 2026-03-17: melhoria de layout/visibilidade no Chat Interno (evita sobreposição em telas menores).
+
 ## O que eu estou construindo (em uma frase)
 Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém de planilha.
 

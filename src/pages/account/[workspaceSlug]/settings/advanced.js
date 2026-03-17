@@ -10,10 +10,11 @@ import Content from '@/components/Content/index';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
 import { getWorkspace, isWorkspaceCreator, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { authOptions } from '@/lib/server/auth';
 
 const Advanced = ({ isCreator, workspace }) => {
   const { setWorkspace, workspace: workspaceFromContext } = useWorkspace();
@@ -162,7 +163,7 @@ const Advanced = ({ isCreator, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const session = await getServerSession(context.req, context.res, authOptions);
   let isOwner = false;
   let isCreator = false;
   let workspace = null;
