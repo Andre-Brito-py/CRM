@@ -264,6 +264,13 @@ const ChatWindow = ({
               <ArrowLeftIcon className="w-6 h-6" />
             </button>
           )}
+          <div className="w-10 h-10 mr-3 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden">
+            {conversation.contact?.image ? (
+              <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <UserCircleIcon className="w-6 h-6" />
+            )}
+          </div>
           <div>
             <h2 className="text-lg font-semibold text-gray-800">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}

@@ -1,5 +1,58 @@
 import prisma from '@/prisma/index';
 import { createNotification } from '@/prisma/services/notification';
+import crypto from 'crypto';
+
+const normalizeAvatarUrl = (value) => {
+  if (!value) return null;
+  if (typeof value !== 'string') return null;
+  const v = value.trim();
+  if (!v) return null;
+  return v;
+};
+
+const pickCustomAvatarUrl = (customFields) => {
+  if (!customFields || typeof customFields !== 'object') return null;
+  return normalizeAvatarUrl(
+    customFields.avatarUrl ||
+    customFields.photoUrl ||
+    customFields.profileImageUrl ||
+    customFields.profilePictureUrl ||
+    customFields.pictureUrl ||
+    customFields.imageUrl
+  );
+};
+
+const gravatarUrlForSeed = (seed) => {
+  const normalized = String(seed || '').trim().toLowerCase();
+  if (!normalized) return null;
+  const hash = crypto.createHash('md5').update(normalized).digest('hex');
+  return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=128`;
+};
+
+const enrichConversationContact = (conversation) => {
+  const contact = conversation?.contact;
+  if (!contact) return conversation;
+
+  const platform = String(conversation?.platform || '').toUpperCase();
+  const customAvatar = pickCustomAvatarUrl(contact.customFields);
+  const seed =
+    contact.id ||
+    contact.email ||
+    contact.phone ||
+    conversation.externalId ||
+    conversation.id;
+  const identiconAvatar = gravatarUrlForSeed(`${platform}:${seed}`);
+  const emailAvatar = platform === 'EMAIL' ? gravatarUrlForSeed(contact.email) : null;
+  const image = customAvatar || emailAvatar || identiconAvatar || null;
+
+  return {
+    ...conversation,
+    contact: {
+      ...contact,
+      image,
+    },
+  };
+};
 
 export const getConversations = async (workspaceId, filters = {}, options = {}) => {
   const where = { workspaceId };
@@ -76,11 +129,13 @@ export const getConversations = async (workspaceId, filters = {}, options = {}) 
   const pageItems = rows.slice(0, pageSize);
 
   return {
-    conversations: pageItems.map((c) => ({
-      ...c,
-      lastMessage: c.messages[0]?.content || '',
-      lastMessageAt: c.messages[0]?.createdAt || c.updatedAt,
-    })),
+    conversations: pageItems
+      .map((c) => ({
+        ...c,
+        lastMessage: c.messages[0]?.content || '',
+        lastMessageAt: c.messages[0]?.createdAt || c.updatedAt,
+      }))
+      .map(enrichConversationContact),
     meta: {
       page,
       pageSize,
@@ -101,7 +156,7 @@ export const createConversation = async (workspaceId, { contactId, platform, ext
 };
 
 export const getConversation = async (id) => {
-  return await prisma.conversation.findUnique({
+  const conversation = await prisma.conversation.findUnique({
     where: { id },
     include: {
       contact: true,
@@ -118,10 +173,11 @@ export const getConversation = async (id) => {
       },
     },
   });
+  return enrichConversationContact(conversation);
 };
 
 export const updateConversation = async (id, data) => {
-  return await prisma.conversation.update({
+  const conversation = await prisma.conversation.update({
     where: { id },
     data,
     include: {
@@ -136,6 +192,7 @@ export const updateConversation = async (id, data) => {
       },
     },
   });
+  return enrichConversationContact(conversation);
 };
 
 export const createMessage = async (conversationId, { direction, type, content, mediaUrl, status, externalId }) => {
