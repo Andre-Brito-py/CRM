@@ -21,6 +21,14 @@ const FAQ = () => {
       answer: "Você pode criar fluxos de resposta baseados em gatilhos específicos, como recebimento de novo lead ou mudança de estágio no funil. Tudo sem precisar programar."
     },
     {
+       question: "Preciso saber programar para montar minhas automações?",
+       answer: "De forma alguma. Nossa arquitetura No-Code foi desenhada para que gestores de vendas montem processos e gatilhos complexos visualmente, apenas com alguns cliques."
+    },
+    {
+       question: "Posso adicionar campos personalizados (Custom Fields)?",
+       answer: "Sim! O Closify adapta-se ao seu nicho. Crie campos de texto, números, arquivos, links ou múltiplas opções para armazenar informações exatas que o seu negócio exige."
+    },
+    {
        question: "Meus dados estão seguros?",
        answer: "Sim, utilizamos criptografia de ponta a ponta e infraestrutura bancária (AWS) para garantir que seus dados comerciais e de seus clientes estejam sempre protegidos."
     },
