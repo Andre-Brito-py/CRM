@@ -19,7 +19,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [token2fa, setToken2fa] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [step, setStep] = useState('LOGIN'); // LOGIN, 2FA, MAGIC_LINK
+  const [step, setStep] = useState('LOGIN'); // LOGIN, 2FA, MAGIC_LINK, FORGOT_PASSWORD
 
   const [isSubmitting, setSubmittingState] = useState(false);
   const [socialProviders, setSocialProviders] = useState([]);
@@ -108,6 +108,27 @@ const Login = () => {
     }
 
     setSubmittingState(false);
+  };
+
+  const requestPasswordReset = async (event) => {
+    event.preventDefault();
+    setSubmittingState(true);
+    try {
+      const resp = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const json = await resp.json().catch(() => ({}));
+      const msg = json?.data?.message || 'Se existir uma conta com este e-mail, enviaremos um link de recuperação.';
+      toast.success(msg, { duration: 6000 });
+      setStep('LOGIN');
+    } catch {
+      toast.success('Se existir uma conta com este e-mail, enviaremos um link de recuperação.', { duration: 6000 });
+      setStep('LOGIN');
+    } finally {
+      setSubmittingState(false);
+    }
   };
 
   const signInWithSocial = (socialId) => {
@@ -218,7 +239,7 @@ const Login = () => {
                   <div className="flex flex-col space-y-1.5">
                     <div className="flex justify-between items-center">
                       <label className="text-sm font-semibold text-gray-700">Senha</label>
-                      <button type="button" onClick={() => setStep('MAGIC_LINK')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
+                      <button type="button" onClick={() => setStep('FORGOT_PASSWORD')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
                         Esqueceu a senha?
                       </button>
                     </div>
@@ -256,6 +277,14 @@ const Login = () => {
                   {isSubmitting ? 'Iniciando sessão...' : 'Entrar no Closify'}
                 </Button>
               </form>
+
+              <button
+                type="button"
+                onClick={() => setStep('MAGIC_LINK')}
+                className="w-full text-center text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors"
+              >
+                Entrar com link mágico
+              </button>
 
               {socialProviders.length > 0 && (
                 <div className="space-y-4 pt-2">
@@ -377,6 +406,52 @@ const Login = () => {
                   className="w-full text-center text-sm font-bold text-gray-400 hover:text-purple-600 transition-colors uppercase tracking-wider"
                 >
                   Entrar com senha
+                </button>
+              </form>
+            </div>
+          )}
+
+          {step === 'FORGOT_PASSWORD' && (
+            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="text-left">
+                <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl mb-6 shadow-inner">
+                  <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m6 4H6a2 2 0 01-2-2v-6a2 2 0 012-2h12a2 2 0 012 2v6a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 9V7a5 5 0 0110 0v2" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Recuperar senha</h2>
+                <p className="text-gray-500 mt-2 text-lg">Informe seu e-mail para receber um link de redefinição.</p>
+              </div>
+
+              <form className="space-y-6" onSubmit={requestPasswordReset}>
+                <div className="flex flex-col space-y-1.5">
+                  <label className="text-sm font-semibold text-gray-700">Email</label>
+                  <input
+                    className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400"
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="seu@email.com"
+                    type="email"
+                    value={email}
+                    required
+                    autoFocus
+                  />
+                </div>
+
+                <Button
+                  className="w-full py-4 justify-center bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all font-bold text-lg"
+                  disabled={status === 'loading' || !isEmailValid || isSubmitting}
+                  type="submit"
+                >
+                  {isSubmitting ? 'Enviando...' : 'Enviar link de recuperação'}
+                </Button>
+
+                <button
+                  type="button"
+                  onClick={() => setStep('LOGIN')}
+                  className="w-full text-center text-sm font-bold text-gray-400 hover:text-indigo-600 transition-colors uppercase tracking-wider"
+                >
+                  Voltar para o login
                 </button>
               </form>
             </div>
