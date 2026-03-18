@@ -12,7 +12,7 @@ const Hero = () => {
   const { scrollY } = useScroll();
   
   const y1 = useTransform(scrollY, [0, 800], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 500], [1, 0]);
+  const opacity = useTransform(scrollY, [0, 300, 800], [1, 1, 0]);
 
   return (
     <section className="relative min-h-screen flex flex-col items-center bg-white overflow-hidden font-executive max-w-[100vw]">
