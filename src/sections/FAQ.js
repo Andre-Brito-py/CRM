@@ -21,8 +21,8 @@ const FAQ = () => {
       answer: "Você pode criar fluxos de resposta baseados em gatilhos específicos, como recebimento de novo lead ou mudança de estágio no funil. Tudo sem precisar programar."
     },
     {
-       question: "Preciso saber programar para montar minhas automações?",
-       answer: "De forma alguma. Nossa arquitetura No-Code foi desenhada para que gestores de vendas montem processos e gatilhos complexos visualmente, apenas com alguns cliques."
+       question: "O que é automação 'No-Code' na prática?",
+       answer: "Imagine conectar seu WhatsApp, e-mail e CRM como se estivesse brincando com blocos de montar, sem precisar escrever uma única linha de código. O 'No-Code' permite que qualquer gerente ou vendedor crie regras automáticas poderosas (ex: 'se o lead não responder em 2 dias, mande um WhatsApp') apenas clicando e arrastando na tela."
     },
     {
        question: "Posso adicionar campos personalizados (Custom Fields)?",
