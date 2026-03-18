@@ -3,6 +3,8 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { useTranslation } from "react-i18next";
+import Logo from '@/components/Logo';
 import { 
   ChartBarIcon, 
   UserGroupIcon, 
@@ -53,6 +55,7 @@ const initialStages = [
 ];
 
 const DemoPage = ({ plan }) => {
+  const { t } = useTranslation();
   const [stages, setStages] = useState(initialStages);
   const [showCTA, setShowCTA] = useState(false);
 
@@ -94,22 +97,22 @@ const DemoPage = ({ plan }) => {
           <div className="flex items-center gap-10">
             <Link href="/" className="flex items-center gap-2.5 text-zinc-400 hover:text-brand-600 transition-all group">
               <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Exit Demo</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em]">{t('demo.exit', 'Sair da Demo')}</span>
             </Link>
             <div className="h-6 w-px bg-zinc-100 hidden md:block" />
-            <img src="/images/logo-full.png" alt="Closify" className="h-8 w-auto brightness-0" />
+            <Logo variant="full" className="h-6" />
           </div>
 
           <div className="flex items-center gap-6">
              <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-50/50 rounded-2xl border border-brand-100/50">
                 <SparklesIcon className="w-4 h-4 text-brand-600 animate-pulse" />
-                <span className="text-[11px] font-black text-brand-700 uppercase tracking-widest">Premium Sandbox Mode</span>
+                <span className="text-[11px] font-black text-brand-700 uppercase tracking-widest">{t('demo.sandboxMode', 'Modo Sandbox Premium')}</span>
              </div>
              <Link 
               href="/auth/register" 
               className="bg-zinc-900 text-white px-8 py-3 rounded-2xl text-[13px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-xl shadow-zinc-200"
              >
-                Start Free Trial
+                {t('demo.startFreeTrial', 'Iniciar Teste Grátis')}
              </Link>
           </div>
         </div>
@@ -121,12 +124,12 @@ const DemoPage = ({ plan }) => {
         {/* Sleek Sidebar */}
         <aside className="hidden lg:flex w-72 bg-white border-r border-zinc-100 flex-col p-8 space-y-10">
           <div className="space-y-2">
-            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-6 ml-4">Architecture</p>
+            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-6 ml-4">{t('demo.architecture', 'Arquitetura')}</p>
             {[
-              { icon: ChartBarIcon, name: 'Analytics', active: true },
-              { icon: UserGroupIcon, name: 'Pipeline', active: false },
-              { icon: SparklesIcon, name: 'AI Insights', active: false },
-              { icon: CurrencyDollarIcon, name: 'Deals', active: false },
+              { icon: ChartBarIcon, name: t('demo.nav.analytics', 'Estatísticas'), active: true },
+              { icon: UserGroupIcon, name: t('demo.nav.pipeline', 'Funil de Vendas'), active: false },
+              { icon: SparklesIcon, name: t('demo.nav.aiInsights', 'Insights por IA'), active: false },
+              { icon: CurrencyDollarIcon, name: t('demo.nav.deals', 'Negócios'), active: false },
             ].map((item) => (
               <div 
                 key={item.name} 
@@ -145,12 +148,12 @@ const DemoPage = ({ plan }) => {
                 <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-brand-500/40">
                   <SparklesIcon className="w-6 h-6 text-white" />
                 </div>
-                <p className="text-white font-black text-xs uppercase tracking-widest mb-2">Upgrade to Pro</p>
+                <p className="text-white font-black text-xs uppercase tracking-widest mb-2">{t('demo.upgradeTitle', 'Fazer Upgrade para o Pro')}</p>
                 <p className="text-zinc-400 text-[11px] leading-relaxed mb-6 font-medium">
-                  Unlock advanced AI automation and unlimited pipelines for your growth.
+                  {t('demo.upgradeDesc', 'Desbloqueie automação avançada com IA e pipelines ilimitados para seu crescimento.')}
                 </p>
                 <Link href="/auth/register" className="w-full bg-white text-zinc-900 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-50 transition-all flex items-center justify-center shadow-lg active:scale-95">
-                  View Pricing
+                  {t('demo.viewPricing', 'Ver Preços')}
                 </Link>
               </div>
             </div>
@@ -166,10 +169,10 @@ const DemoPage = ({ plan }) => {
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
               <div>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="bg-brand-500/10 text-brand-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-brand-500/20">Active Workspace</div>
+                  <div className="bg-brand-500/10 text-brand-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-brand-500/20">{t('demo.activeWorkspace', 'Workspace Ativo')}</div>
                 </div>
-                <h1 className="text-4xl font-black text-zinc-900 tracking-tight mb-2">Omni-Pipeline Control</h1>
-                <p className="text-zinc-400 font-medium">Coordinate your global operations with real-time drag-and-drop orchestration.</p>
+                <h1 className="text-4xl font-black text-zinc-900 tracking-tight mb-2">{t('demo.pipelineControl', 'Controle Omni-Pipeline')}</h1>
+                <p className="text-zinc-400 font-medium">{t('demo.pipelineDesc', 'Coordene suas operações globais com orquestração drag-and-drop em tempo real.')}</p>
               </div>
               <div className="flex gap-6">
                 <div className="bg-white/40 backdrop-blur-md p-5 rounded-[28px] border border-zinc-100 shadow-xl shadow-zinc-200/50 flex items-center gap-5 min-w-[200px]">
@@ -177,7 +180,7 @@ const DemoPage = ({ plan }) => {
                     <ArrowTrendingUpIcon className="w-6 h-6 text-brand-600" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">Live Revenue</p>
+                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">{t('demo.liveRevenue', 'Receita Ativa')}</p>
                     <p className="text-2xl font-black text-zinc-900 tabular-nums leading-none">R$ 112.5k</p>
                   </div>
                 </div>
@@ -186,7 +189,7 @@ const DemoPage = ({ plan }) => {
                     <ClockIcon className="w-6 h-6 text-zinc-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">Global SLA</p>
+                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">{t('demo.globalSla', 'SLA Global')}</p>
                     <p className="text-2xl font-black text-zinc-900 tabular-nums leading-none">4.2m</p>
                   </div>
                 </div>
@@ -294,14 +297,14 @@ const DemoPage = ({ plan }) => {
             <div className="bg-zinc-900 text-white p-8 rounded-[40px] shadow-[0_32px_64px_rgba(0,0,0,0.3)] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden border border-white/5">
               <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(20,184,166,0.1),transparent)] animate-spin-slow" />
               <div className="relative z-10 text-center md:text-left flex-1">
-                <p className="text-2xl font-black tracking-tight leading-tight mb-2">Ready for the upgrade?</p>
-                <p className="text-zinc-400 text-sm font-medium">Deploy your own Closify instance in less than 2 minutes and start scaling with precision.</p>
+                <p className="text-2xl font-black tracking-tight leading-tight mb-2">{t('demo.readyForUpgrade', 'Pronto para o upgrade?')}</p>
+                <p className="text-zinc-400 text-sm font-medium">{t('demo.deployInstance', 'Implemente sua própria instância do Closify em menos de 2 minutos e escale com precisão.')}</p>
               </div>
               <Link 
                 href="/auth/register"
                 className="relative z-10 bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-[20px] font-black uppercase tracking-[0.15em] text-xs whitespace-nowrap transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand-500/30"
               >
-                Start Trial
+                {t('demo.startTrial', 'Começar Teste')}
                 <ChevronRightIcon className="w-5 h-5" />
               </Link>
             </div>
