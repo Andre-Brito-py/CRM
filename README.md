@@ -441,6 +441,8 @@ Como isso funciona internamente (resumo):
 - **Unificação de Marca (Executive Lilac):** Rebranding completo de ponta a ponta (Landing Page, Layouts internos, Pipeline, Settings e Help Center), substituindo as paletas default/teal pela identidade visual roxa profissional e imersiva com partículas interativas.
 - **Compliance Estrito de Cookies (GDPR/LGPD):** Evolução do Cookie Consent para um modelo granular e extensível. Usuários agora podem expandir um modal de configuração ("Configurar"), escolhendo quais categorias de cookies desejam aceitar ("Analytics", "Marketing" ou apenas "Essenciais"). O estado de consentimento foi migrado para uma persistência robusta em JSON no `localStorage` (v2), totalmente reativa via React Context e `_app.js`.
 - **Refinamentos Visuais de UI/UX:** Correções no layout e navegação, assegurando melhor visibilidade de modais e responsividade das topbars em telas de demonstração.
+- **Preços Dinâmicos na Landing Page:** O bloco de preços agora é 100% dinâmico (com utilitário de formatação de JSON) mostrando os recursos reais extraídos em tempo real das configurações ativas no painel Super Admin ("X Assentos", "WhatsApp Omnichannel").
+- **Bugfixes & Build (GitHub Actions):** Resolução de erro sintático (elementos adjacentes de JSX) no modal construtor de regras (`automations/index.js`) que bloqueava o pipeline no GitHub.
 
 ---
 

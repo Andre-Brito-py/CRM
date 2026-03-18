@@ -62,6 +62,41 @@ const Home = ({ products }) => {
   );
 };
 
+const formatPlanFeatures = (features) => {
+  if (Array.isArray(features)) return features;
+  if (!features || typeof features !== 'object') return [];
+
+  const list = [];
+  
+  if (features.maxUsers) {
+    list.push(`${features.maxUsers} Assentos`);
+  } else {
+    list.push(`Assentos Ilimitados`);
+  }
+
+  if (features.maxContacts) {
+    list.push(`${features.maxContacts} Contatos`);
+  } else {
+    list.push(`Contatos Ilimitados`);
+  }
+
+  const mods = features.allowedModules || {};
+  if (mods.inbox !== false) list.push('WhatsApp Omnichannel');
+  if (mods.pipeline !== false) list.push('Pipeline de Vendas');
+  if (mods.ai_assistant !== false) list.push('Assistente de IA Integrado');
+  
+  if (mods.automations !== false && features.maxAutomations) {
+    list.push(`${features.maxAutomations} Automações Ativas`);
+  } else if (mods.automations !== false) {
+    list.push(`Automações Ilimitadas`);
+  }
+
+  if (mods.payments !== false) list.push('Cobranças & Pagamentos');
+  if (mods.integrations !== false) list.push('API & Webhooks');
+
+  return list;
+};
+
 export const getStaticProps = async () => {
   let products = [];
   try {
@@ -76,7 +111,7 @@ export const getStaticProps = async () => {
         priceAnnual: plan.priceAnnual ? Number(plan.priceAnnual) : null,
         currency: plan.currency,
         interval: plan.interval,
-        features: plan.features,
+        features: formatPlanFeatures(plan.features),
       }))
       .sort((a, b) => a.price - b.price);
   } catch (e) {

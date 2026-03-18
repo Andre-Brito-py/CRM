@@ -1825,6 +1825,8 @@ const Automations = () => {
                       </>
                     )}
                   </div>
+                )}
+
                 </div>
               </div>
             </div>
