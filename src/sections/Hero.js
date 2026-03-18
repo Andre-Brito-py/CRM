@@ -2,6 +2,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import Logo from '@/components/Logo';
 import MouseParticles from '@/components/Animations/MouseParticles';
 
@@ -106,9 +107,10 @@ const Hero = () => {
               {/* Inbox Preview */}
               <div className="col-span-12 md:col-span-4 translate-y-20">
                  <div className="bg-white p-3 rounded-[32px] shadow-2xl border border-zinc-100 rotate-1 hover:rotate-0 transition-transform duration-700">
-                    <img 
+                    <Image 
                        src="/images/showcase/inbox.png" 
                        alt="Inbox Omnichannel" 
+                       width={800} height={600}
                        className="w-full rounded-[20px] shadow-inner"
                     />
                     <div className="mt-4 px-4 pb-2">
@@ -121,15 +123,16 @@ const Hero = () => {
               {/* Main Pipeline Showcase */}
               <div className="col-span-12 md:col-span-8">
                  <div className="bg-white p-4 rounded-[40px] shadow-[0_50px_100px_rgba(0,0,0,0.1)] border border-zinc-100 relative z-10 group overflow-hidden">
-                    <img 
+                    <Image 
                        src="/images/showcase/pipeline.png" 
                        alt="Pipeline CRM" 
+                       width={1200} height={800}
                        className="w-full rounded-[28px] transition-transform duration-1000 group-hover:scale-105"
                     />
                     {/* Floating Info Overlay */}
                     <div className="absolute bottom-10 left-10 p-6 bg-white/90 backdrop-blur-2xl rounded-3xl border border-white shadow-2xl max-w-xs text-left">
                        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-2">Power Pipeline</p>
-                       <p className="text-sm font-bold text-zinc-900 italic">"Simplificamos o caos comercial em fluxos visuais de alta performance."</p>
+                       <p className="text-sm font-bold text-zinc-900 italic">&quot;Simplificamos o caos comercial em fluxos visuais de alta performance.&quot;</p>
                     </div>
                  </div>
               </div>
@@ -138,8 +141,9 @@ const Hero = () => {
               <div className="hidden md:block absolute -right-4 lg:-right-10 top-20 w-80">
                  <div className="bg-white p-4 rounded-[32px] shadow-2xl border border-zinc-100 -rotate-3 hover:rotate-0 transition-transform duration-700 relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <img 
+                    <Image 
                        src="/images/showcase/custom-fields.png" 
+                       width={400} height={600}
                        className="w-full h-auto rounded-2xl grayscale hover:grayscale-0 transition-all duration-700"
                        alt="Custom Fields"
                     />
@@ -160,8 +164,9 @@ const Hero = () => {
                     <div className="absolute -top-4 -right-4 w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg transform -rotate-12 group-hover:rotate-0 transition-transform z-10">
                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                     </div>
-                    <img 
+                    <Image 
                        src="/images/showcase/analytics.png" 
+                       width={400} height={300}
                        className="w-full h-auto rounded-xl grayscale hover:grayscale-0 transition-all duration-700 shadow-sm"
                        alt="Analytics Preview"
                     />

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from "react-i18next";
 import { StarIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
 
 const Testimonial = () => {
   const { t } = useTranslation();
@@ -64,11 +65,11 @@ const Testimonial = () => {
                  ))}
               </div>
               <p className="text-zinc-600 text-lg font-medium leading-relaxed flex-1 italic">
-                 "{t.content}"
+                 &quot;{t.content}&quot;
               </p>
               <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-full bg-zinc-100 overflow-hidden border-2 border-brand-50">
-                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                    <Image src={t.image} alt={t.name} width={48} height={48} className="w-full h-full object-cover" />
                  </div>
                  <div className="text-left">
                     <p className="text-sm font-black text-zinc-900 uppercase tracking-tight">{t.name}</p>

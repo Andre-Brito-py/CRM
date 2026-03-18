@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useSWRConfig } from 'swr';
+import Image from 'next/image';
 import api from '@/lib/common/api';
 
 const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights }) => {
@@ -98,7 +99,7 @@ const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights }) => {
                         {deal.user && (
                           <div className="flex -space-x-2">
                             {deal.user.image ? (
-                              <img src={deal.user.image} alt={deal.user.name} className="w-8 h-8 rounded-2xl object-cover ring-4 ring-white shadow-premium" />
+                              <Image src={deal.user.image} alt={deal.user.name} width={32} height={32} className="w-8 h-8 rounded-2xl object-cover ring-4 ring-white shadow-premium" />
                             ) : (
                               <div className="w-8 h-8 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center font-black text-[11px] ring-4 ring-white shadow-premium border border-brand-100/50">
                                 {deal.user.name?.charAt(0) || '?'}

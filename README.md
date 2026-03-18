@@ -442,7 +442,7 @@ Como isso funciona internamente (resumo):
 - **Compliance Estrito de Cookies (GDPR/LGPD):** Evolução do Cookie Consent para um modelo granular e extensível. Usuários agora podem expandir um modal de configuração ("Configurar"), escolhendo quais categorias de cookies desejam aceitar ("Analytics", "Marketing" ou apenas "Essenciais"). O estado de consentimento foi migrado para uma persistência robusta em JSON no `localStorage` (v2), totalmente reativa via React Context e `_app.js`.
 - **Refinamentos Visuais de UI/UX:** Correções no layout e navegação, assegurando melhor visibilidade de modais e responsividade das topbars em telas de demonstração.
 - **Preços Dinâmicos na Landing Page:** O bloco de preços agora é 100% dinâmico (com utilitário de formatação de JSON) mostrando os recursos reais extraídos em tempo real das configurações ativas no painel Super Admin ("X Assentos", "WhatsApp Omnichannel").
-- **Bugfixes & Build (GitHub Actions):** Resolução de erro sintático (elementos adjacentes de JSX) no modal construtor de regras (`automations/index.js`) que bloqueava o pipeline no GitHub.
+- **Bugfixes & Build (GitHub Actions):** Resolução de erro sintático (elementos adjacentes de JSX) no modal construtor de automações. Correção de alertas do ESLint que bloqueavam a pipeline (caracteres de aspas não escapados e tags `<img>` otimizadas para `next/image` em seções de Hero, Testimonial e Pipeline Board).
 
 ---
 
