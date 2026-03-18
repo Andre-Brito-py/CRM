@@ -1,459 +1,102 @@
 # Closify CRM
 
-Plataforma CRM multi-tenant com foco em operação comercial e atendimento omnichannel (WhatsApp + Email), pipeline de vendas, automações e monetização por planos.
+Um CRM omnichannel projetado para vender, atender e acompanhar clientes sem virar refém de planilha. 
 
-## Atualizações recentes
-- 2026-03-17: correção do dashboard do Super Admin (contadores/estatísticas) e padronização da autenticação/role nas rotas `/api/admin/*`.
-- 2026-03-17: melhoria de layout/visibilidade no Chat Interno (evita sobreposição em telas menores).
+Plataforma B2B multi-tenant com foco em operação comercial de alta performance, atendimento unificado (WhatsApp + Email), pipeline visual, automações No-Code e monetização nativa por planos SaaS (Stripe).
+
+---
+
+## 🧭 Por que isso existe (Motivação)
+- **Construção de Negócio:** Quero alavancar um produto SaaS B2B rentável.
+- **Domínio Tecnológico:** Preciso de uma plataforma que eu controle 100% (código, produto, dados e evolução).
+- **Resolver uma Dor Real:** A meta é simples: simplificar o caos comercial de milhares de PMEs com uma experiência premium, rápida e sólida.
 
 ## 💎 Diferenciais Premium (Corporate Experience)
-A Closify foi totalmente redesenhada para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium (Antigravity-inspired).
+A Closify foi totalmente redesenhada em **Março/2026** (Executive Lilac Rebranding) para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium.
 
-### 🚀 Landing Page Cinematográfica (High-Conversion)
-Uma interface imersiva projetada para converter leads em clientes.
-- **Mouse-Following Particles:** Animações interativas que seguem o cursor, criando profundidade visual.
-- **Bento Grid Layout:** Features apresentadas de forma organizada e moderna, destacando Automação de WhatsApp e Gestão de Equipe.
-- **Pricing Dinâmico:** Gestão de planos via Super Admin com suporte a toggle Mensal/Anual e descontos inteligentes.
+- **Landing Page Cinematográfica (High-Conversion):** Interface imersiva projetada para converter leads com animações guiadas pelo mouse e *Pricing Dinâmico* gerido 100% via Super Admin (com suporte a descontos anuais).
+- **Inbox Omnichannel Unificado:** Centralize WhatsApp e E-mail em uma interface limpa. Gerencie conversas com resumos de Inteligência Artificial e sugestões automáticas de respostas em tempo real.
+- **Pipeline com Glassmorphism:** Visualize seus negócios através de um Kanban moderno, com efeitos de vidro fosco, indicadores de probabilidade (AI Fit) e filtros drag-and-drop rápidos.
+- **Custom Fields & Formulários Públicos (Web Forms):** Adapte o CRM com campos personalizados dinâmicos e crie Páginas de Captura de Leads nativas (Form Builder) num piscar de olhos.
 
-### 📥 Inbox Omnichannel Unificado
-Centralize WhatsApp e E-mail em uma interface limpa, profissional e intuitiva. Gerencie conversas com resumos de IA e sugestões inteligentes.
-![Inbox Premium](/public/images/readme/omnichannel_inbox_premium.png)
+## ⚙️ Plataforma No-Code (Adaptável ao Negócio)
+A ideia aqui é que **o CRM não é engessado**. Cada workspace consegue criar fluxos próprios sem pedir feature nova:
+- **Workflows (Automações por Regra):** Gatilhos + condições + ações, suporte a ações encadeadas e delays (ex: se "Proposta Enviada", disparar WP em 2 dias e notificar App).
+- **Webhooks & Zapier v2:** Assinatura HMAC com rotação de segredo, Catch Hooks e integração nativa com o Zapier via eventos do produto (ex: Pagamento criado, Novo Lead, Mudança no Pipeline, NPS Promotor).
+- **Presets por Nicho:** Onboarding "1-click" que monta funis, campos, automações e templates baseados na vertical do cliente (ex: Imobiliária, Assistência Técnica, Restaurante).
+- **Roteamento Inteligente:** SLA de Inbox (escalonamento e round-robin entre a equipe).
 
-### 📊 Pipeline com Glassmorphism
-Visualize seus negócios através de um Kanban moderno, com efeitos de vidro fosco, indicadores de probabilidade por IA e cards detalhados.
-![Pipeline Premium](/public/images/readme/pipeline_board_premium.png)
+---
 
-### 🛠️ Custom Fields & DnD
-Adapte o CRM ao seu negócio com campos personalizados de diversos tipos e organize tudo via Drag-and-Drop de alta performance.
-![Custom Fields Premium](/public/images/readme/custom_fields_premium.png)
+## 🧱 Arquitetura e Engenharia (Tech Stack)
 
-## O que eu estou construindo (em uma frase)
-Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém de planilha.
+### Regras Internas da Casa (Pra eu não me sabotar)
+1. *Zero credenciais hardcoded*. Tudo via \`.env\` ou cofres criptografados no banco (SystemConfig).
+2. *Segurança Admin Master*. Tudo do painel Super Admin é auditável (via tabelas de trilha \`Activity\`).
+3. *Hardening Multi-Tenant*. Tudo DEVE filtrar estritamente por \`workspaceId\` (inclusive chamadas de IA).
+4. *Validação Pragmática*. Se uma feature não tem métrica/uso, ela é removida. Melhor pequeno e funcionando do que inchado e quebrado.
 
-## Por que isso existe
-- Quero abrir um negócio com isso.
-- Preciso de uma plataforma que eu controle (produto, dados e evolução).
-- A meta é simples: resolver dor real com uma experiência sólida.
+### Dinheiro e Modelo de Negócios (Pra não me enganar)
+- **Assinaturas SaaS (Stripe):** Entram no webhook principal da plataforma e abrem ou cortam acesso automaticamente baseados nos limites definidos (ex: Overture, Seats).
+- **Pagamentos Internos do CRM:** O cliente pode usar o CRM para fazer suas próprias vendas (Asaas, MercadoPago, Pagar.me), e a plataforma debita uma \`marketplace_fee\` ou split de forma fluída e transparente.
+- **FinOps e Cota de IA:** A Inteligência artificial é taxada sobre o uso (Overage Limits). Se a Cota do plano (ex: 200k tokens) acabar, o sistema injeta um faturamento (\`invoice_item\`) no Stripe automaticamente cobrando a volumetria extra.
 
-## Landing page (Marketing)
-A landing page é a home pública (`/`) e serve como vitrine do produto (proposta de valor, features e preços).
+---
 
-Como ela é montada hoje:
-- Página: `src/pages/index.js` (SSG com revalidate, buscando planos no banco para o bloco de preços)
-- Layout: `LandingLayout`
-- Seções: `src/sections/*` (`Hero`, `Features`, `Pricing`, `Testimonial`, `FAQ`, `CallToAction`, `Footer`)
-- UX de planos:
-  - O botão de um plano no pricing leva para `/auth/register?plan=SLUG` para pré-selecionar o plano no cadastro
-  - O badge “Mais popular” fica no plano intermediário (`STANDARD` / Padrão)
+## 🚀 Como Rodar e Testar
 
-Páginas públicas úteis:
-- `/demo` (demonstração)
-- `/auth/login` e `/auth/register`
-- `/privacy` e `/terms`
-- `/f/[slug]` (Form Builder público)
-
-Login (UX):
-- A tela usa `min-h-screen` (em vez de `h-screen`) para evitar corte de conteúdo em alturas menores.
-- Links de “Termos” e “Privacidade” ficam sempre visíveis (não ficam atrás do mockup).
-
-## Customer Satisfaction (NPS)
-Rotas no app (por workspace):
-- `/account/[workspaceSlug]/customer-satisfaction/nps-surveys`
-- `/account/[workspaceSlug]/customer-satisfaction/responses`
-- `/account/[workspaceSlug]/customer-satisfaction/analytics`
-
-## Regras internas (pra eu não me sabotar)
-- Nada de credenciais no código/repo.
-- Tudo que for “admin master” tem que ser auditável e seguro.
-- Tudo que for multi-tenant tem que filtrar por `workspaceId` sempre.
-- Se uma feature não tiver métrica/uso, ela não existe (não investir tempo sem validar).
-- Melhor pequeno e funcionando do que grande e incompleto.
-
-## Como rodar local
-Pré-requisitos: Node.js 18+, Postgres.
+### Ambiente Local (Dev)
+Requisitos: Node.js 18+, Postgres Database (local ou Neon direct string).
 
 ```bash
+# 1. Instale as dependências
 npm install
+
+# 2. Roda as migrações no banco local e reseta schemas
 npx prisma migrate dev
+
+# 3. Faz o seed de planos nativos (exatamente como a Landing Page) e o login Super Admin
 npx prisma db seed
+
+# 4. Sobe a aplicação
 npm run dev
 ```
+> **Nota:** Se o Next.js mudar de porta sozinho (3001/3002), o `NEXTAUTH_URL` fixo no `.env` do localhost pode gerar tela branca de CSRF. Deixe dinâmico em dev.
 
-Se a porta 3000 estiver ocupada, o Next sobe em outra (3001/3002…). Conferir o log do terminal.
-Em dev, evite fixar `NEXTAUTH_URL` no `.env`, porque isso pode causar “tela branca” quando o Next mudar de porta automaticamente.
+### Configuração de Deploy (Go-Live na Vercel + Neon)
+- **Banco de Dados (Neon):** Utilize a *Connection String Pooled* na Vercel para suporte serverless impecável (PgBouncer automático). Use a *Direct String* local apenas para rodar `prisma db push` / `migrate deploy`.
+- **Migração em Produção:** Lembre de apontar no CLI local a url *direct* e rodar `DATABASE_URL="postgresql://...NEON_DIRECT..." npm run prisma:migrate:deploy` seguido de `npx prisma db seed`.
 
-O seed cria/atualiza os planos base no banco (FREE/STANDARD/PREMIUM) com os mesmos valores da landing.
+### SystemConfigs (API do Super Admin)
+O coração da plataforma agora vive num painel visual dentro do sistema (`/admin/system`). Todas as chaves do **OpenAI, Google OAuth, Gateway de SaaS Stripe, Domínios da Vercel para Mapeamento Custom, AWS S3 e Analytics** são persistidas lá com algoritmo forte de criptografia. 
+O `.env` em produção requer apenas o básico: `DATABASE_URL`, `NEXTAUTH_SECRET`, `APP_URL`, e a `CONFIG_ENCRYPTION_KEY` mãe.
 
-Se o Prisma reclamar de drift/migration em ambiente local, priorizar consistência do dev:
+---
 
-```bash
-npx prisma db push
-npx prisma db seed
-```
+## 📜 Diário de Bordo (Changelog de Dev)
 
-## Variáveis de ambiente (lembrete)
-Arquivo: `.env`
+Para não perder a linha de evolução, aqui estão os saltos da plataforma consolidados:
 
-```env
-DATABASE_URL="postgresql://..."
-DATABASE_URL_POOLED="postgresql://..." # opcional: URL do pooler (PgBouncer/Neon/Supabase)
-NEXTAUTH_SECRET="..."
-CONFIG_ENCRYPTION_KEY="..."       # recomendada: criptografa secrets do Super Admin (se faltar, usa NEXTAUTH_SECRET)
-GOOGLE_CLIENT_ID="..."        # opcional: Login com Google (também pode ser setado no Super Admin)
-GOOGLE_CLIENT_SECRET="..."    # opcional: Login com Google (também pode ser setado no Super Admin)
-EMAIL_FROM="..."
-EMAIL_SERVICE="..."
-EMAIL_SERVER_USER="..."
-EMAIL_SERVER_PASSWORD="..."
-PAYMENTS_SECRET_KEY="..."        # Stripe (assinaturas do SaaS)
-STRIPE_WEBHOOK_SECRET="..."      # webhook de assinatura (Stripe)
-ADMIN_EMAIL="..."
-SUPERADMIN_PASSWORD="..."        # seed do super admin
+### Fase de Maturidade B2B e Multi-Tenant (Finalizadas)
+- **Fase 6 (Auditoria e LGPD):** Adição rigorosa da trilha de auditoria para ações de Super Admin e Webhooks. Endpoints nativos `/privacy/export` e `/privacy/erase` por workspace para conformidade total com a LGPD e GDPR (Direito ao esquecimento).
+- **Fase 8 (Operações e Resiliência):** Tela de incidentes (SLA/Ack) no admin, Masquerade auditável (login como cliente), e botões globais para repescagem / reprocesso manual de webhooks falhos e automações devidas.
+- **Fase 9 (Limites Enforcados):** As lógicas de "Assentos/Membros" e de Convites Pendentes validadas ativamente para inibir Spam. Rate Limiting implementado no topo do Postgres para ser independente da memória Serverless do Node na Vercel. 
+- **Fase 11 (Stripe em Produção):** Automações rígidas cobrindo idempotência. Replay interno 2x em falha temporária e check validador `GET /api/admin/stripe/validate` detectando ambientes Test/Live descasados com um clique. Integração nativa de Nota Fiscal de Serviço (NFS-e) via Focus NFE amarrada ao pagamento efetuado (Invoice Paid).
 
-# Pagamentos do CRM (gateway configurável via Super Admin)
-# (essas chaves ficam na tabela SystemConfig / PaymentProviderCredential, não precisam ficar no .env)
-# ASAAS_API_KEY="..."
-# MERCADOPAGO_ACCESS_TOKEN="..."
-# PAGARME_SECRET_KEY="..."
-
-# FinOps (custos unitários para estimativas por workspace)
-# FINOPS_UNIT_COST_WHATSAPP_OUTBOUND="0.03"
-# FINOPS_UNIT_COST_AI_REQUEST="0.01"
-# FINOPS_UNIT_COST_UPLOAD_REQUEST="0.001"
-
-# NFS-e (opcional)
-# NFSE_ENABLED="false"
-# FOCUS_NFE_API_KEY="..."
-# FOCUS_NFE_ENVIRONMENT="homologacao"
-# FOCUS_NFE_NFSE_ENDPOINT="nfsen"
-# NFSE_CODIGO_TRIBUTACAO_NACIONAL_ISS="..."
-# NFSE_CODIGO_NBS="..."
-
-# Retenção de mídia (LGPD) — limpeza automática de referências de mídia em mensagens
-# MEDIA_RETENTION_DAYS="30"
-# MEDIA_RETENTION_BATCH="1000"
-```
-
-Produção:
-- Definir `NEXTAUTH_URL` com a URL pública canônica (ex.: `https://app.seudominio.com`).
-
-## Deploy (Vercel + Neon) — lembrete operacional
-Recomendação: usar Neon + Vercel (serverless) com `DATABASE_URL` apontando para o **pooler** do Neon.
-
-### 1) Neon
-- Criar o projeto e copiar:
-  - **Connection string pooled** (Pooler/PgBouncer): usar como `DATABASE_URL` na Vercel.
-  - **Connection string direct** (sem pooler): usar localmente para rodar migrations/seed.
-
-### 2) Vercel (Environment Variables)
-Configurar no ambiente **Production**:
-- `DATABASE_URL` = Neon pooled
-- `APP_URL` = URL pública canônica (ex.: `https://app.seudominio.com`)
-- `NEXTAUTH_SECRET` (obrigatória em produção; se faltar, o auth falha)
-- `CONFIG_ENCRYPTION_KEY` (recomendada; não trocar depois)
-- Email: `EMAIL_FROM`, `EMAIL_SERVICE`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`
-- Stripe: `PAYMENTS_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_PUBLISHABLE_KEY`)
-- Termos: `NEXT_PUBLIC_TERMS_VERSION` e `TERMS_VERSION` (mesmo valor)
-
-### 3) Migrations e seed (rodar antes do go-live)
-Na Vercel, o deploy não aplica migration automaticamente. Rodar via máquina local/CI usando a **direct URL do Neon**:
-
-```bash
-# aplicar migrations em produção
-DATABASE_URL="postgresql://...NEON_DIRECT..." npm run prisma:migrate:deploy
-
-# criar/atualizar superadmin + planos
-SUPERADMIN_EMAIL="admin@..." SUPERADMIN_PASSWORD="..." npx prisma db seed
-```
-
-Importante:
-- Essa etapa aplica a migration do novo fluxo de verificação de e-mail (`emailVerificationTokens`) e evita conflitos com tokens do NextAuth.
-- `verificationTokens` continua existindo porque o NextAuth usa essa tabela para magic link.
-
-### 4) Stripe Webhook (produção)
-- Stripe Dashboard → Developers → Webhooks → Add endpoint
-- URL do endpoint:
-  - `https://app.seudominio.com/api/webhooks/stripe`
-- Eventos mínimos esperados pelo handler:
-  - `checkout.session.completed`
-  - `customer.subscription.created`
-  - `customer.subscription.updated`
-  - `customer.subscription.deleted`
-  - `invoice.paid` (ou `invoice.payment_succeeded`)
-  - `invoice.payment_failed`
-- Copiar o “Signing secret” (`whsec_...`) e setar em `STRIPE_WEBHOOK_SECRET`.
-
-### 5) Checklist go-live (antes de anunciar)
-- Vercel (Production): `DATABASE_URL` (pooled), `APP_URL`, `NEXTAUTH_SECRET`, `CONFIG_ENCRYPTION_KEY`, Email e Stripe setados.
-- Neon (direct): rodar `npm run prisma:migrate:deploy` e depois `npx prisma db seed` (com `SUPERADMIN_*`).
-- Acesso admin: login do superadmin e conferência de planos/priceIds/configs em Admin.
-- Auth: cadastro + verificação de e-mail funcionando (link valida) e magic link do NextAuth funcionando.
-- Stripe: fluxo de checkout e webhook chegando em `/api/webhooks/stripe` sem erro de assinatura.
-- Termos: `NEXT_PUBLIC_TERMS_VERSION` e `TERMS_VERSION` iguais e tela `/terms` OK.
-
-## Configuração de APIs (Super Admin)
-As credenciais abaixo podem ser configuradas em runtime no painel de Super Admin (API Configuration), sem redeploy. O backend lê via `getSystemConfig(...)` com fallback para `process.env`.
-
-Chaves comuns:
-- IA: `OPENAI_API_KEY`
-- Google OAuth: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-- Pagamentos da plataforma: `PAYMENTS_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PUBLISHABLE_KEY`
-- Email: `EMAIL_FROM`, `EMAIL_SERVICE`, `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD`
-- Domínios (Vercel): `VERCEL_API_URL`, `VERCEL_PROJECT_ID`, `VERCEL_TEAM_ID`, `VERCEL_AUTH_BEARER_TOKEN`, `VERCEL_IP_ADDRESS`
-- Storage (S3): `AWS_S3_ACCESS_KEY_ID`, `AWS_S3_SECRET_ACCESS_KEY`, `AWS_S3_REGION`, `AWS_S3_BUCKET_NAME`
-- Web Push: `WEB_PUSH_EMAIL`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`
-- Zapier: `ZAPIER_ENABLED`, `ZAPIER_ALLOWED_HOSTS`
-- Cron: `CRON_SECRET`
-- Analytics: `GOOGLE_ANALYTICS_ID`
-- Retenção de mídia: `MEDIA_RETENTION_DAYS`, `MEDIA_RETENTION_BATCH`
-- NFS-e: `NFSE_*`, `FOCUS_NFE_*` e emitentes (`NFSE_ISSUERS_JSON`, `NFSE_ISSUER_*`)
-- FinOps: `FINOPS_UNIT_COST_*` e fees (`PLATFORM_FEE_*`)
-- Geral: `APP_URL`
-
-Valores “public” expostos via `/api/public-config` (seguros para o browser):
-- `STRIPE_PUBLISHABLE_KEY`, `GOOGLE_ANALYTICS_ID`, `VAPID_PUBLIC_KEY`, `VERCEL_IP_ADDRESS`
-- Manutenção: `MAINTENANCE_ENABLED`, `MAINTENANCE_MESSAGE`, `MAINTENANCE_EXPECTED_AT`
-
-Stripe (cadastro/assinatura):
-- Para planos pagos funcionarem no cadastro, é necessário:
-  - `PAYMENTS_SECRET_KEY` (server-side) e `STRIPE_PUBLISHABLE_KEY` (client-side, via SystemConfig ou env)
-  - `stripePriceId` configurado no plano (Super Admin → Plans)
-
-Observações:
-- Secrets cadastrados no painel (ex.: `GOOGLE_CLIENT_SECRET`, `OPENAI_API_KEY`, tokens/chaves de pagamento) são persistidos criptografados na tabela `SystemConfig`.
-- `NEXTAUTH_SECRET` e `CONFIG_ENCRYPTION_KEY` são base de segurança/criptografia e devem ficar no ambiente (não são configuráveis via painel). Trocar esses valores invalida sessões e impede descriptografar secrets já persistidos.
-
-## Zapier (integrações externas via Webhooks)
-O Zapier no Closify é feito via **Webhooks + Automações**:
-- O workspace cria um webhook apontando para um **Catch Hook** do Zapier.
-- Uma automação dispara a ação **CALL_WEBHOOK**, que envia um POST JSON para todos os webhooks ativos que batem com o evento.
-
-O que dá para fazer:
-- Conectar o Closify a qualquer app suportado pelo Zapier (Google Sheets, Slack, Gmail, HubSpot, Trello, Notion, etc.) usando Zaps.
-- Disparar integrações por evento do produto via automações (ex.: mudança de etapa, inbound WhatsApp, eventos de pagamento, NPS).
-- Filtrar o que vai para o Zapier por:
-  - evento do webhook (`*` para “todos” ou nomes específicos)
-  - regras/condições do builder de automações (AND/OR e filtros por propriedades do evento)
-- Pausar/reativar webhooks por workspace e acompanhar entregas (histórico + retentativas).
-- Rotacionar o segredo do webhook (HMAC) quando precisar (segurança).
-
-Administração (Super Admin):
-- Habilitar/desabilitar Zapier na plataforma via `ZAPIER_ENABLED`.
-- Restringir hosts permitidos via `ZAPIER_ALLOWED_HOSTS` (CSV, ex.: `hooks.zapier.com`).
-- Monitorar e gerenciar webhooks Zapier em Admin → System (listar, pausar/ativar, rotacionar segredo).
-
-Eventos (gatilhos) que podem disparar o Zapier hoje (via Automations):
-- `DEAL_STAGE_CHANGED`
-- `INCOMING_MESSAGE`
-- `EMAIL_SENT`
-- `PAYMENT_CREATED`
-- `PAYMENT_PAID`
-- `PAYMENT_FAILED`
-- `NPS_RESPONSE_RECEIVED`
-- `NPS_PROMOTER`
-- `NPS_DETRACTOR`
-- `SLA_BREACH`
-
-Payload enviado:
-```json
-{
-  "event": "NOME_DO_EVENTO",
-  "workspaceId": "ws_...",
-  "data": { "..." : "..." },
-  "occurredAt": "2026-03-15T12:34:56.000Z"
-}
-```
-
-Headers de assinatura (HMAC):
-- `x-closify-event`: nome do evento
-- `x-closify-timestamp`: unix timestamp (segundos)
-- `x-closify-signature`: `sha256=<hex>` do HMAC-SHA256 usando o segredo do webhook e a mensagem `${timestamp}.${rawBody}`
-
-## IA (cota + overage)
-O uso de IA é controlado por:
-- **Cota do plano (tokens/24h)**: limite diário por workspace (ex.: `aiTokens24h` no plano).
-- **Overage opcional (tokens/24h)**: quando a cota do plano termina, o cliente pode continuar usando IA com cobrança extra (se habilitado).
-
-Configurações do overage (Super Admin → Settings → IA):
-- `AI_QUOTA_WARN_PERCENT` (ex.: `80`)
-- `AI_OVERAGE_ENABLED` (`true/false`)
-- `AI_OVERAGE_REQUIRE_OPTIN` (`true/false`)
-- `AI_OVERAGE_PRICE_PER_1M_TOKENS` (ex.: `4.00`)
-- `AI_OVERAGE_MAX_TOKENS_24H` (ex.: `200000`)
-
-Comportamento:
-- Quando a API retorna `LIMIT_REACHED` com `overage.enabled=true`, a UI pode pedir confirmação e reenviar a chamada com header `x-ai-overage: true`.
-- Em overage, é criado um `invoice_item` no Stripe do cliente (customer do workspace owner) com o valor proporcional ao total de tokens retornado pelo provedor.
-
-Auditoria e acompanhamento (Super Admin):
-- Eventos de uso de IA ficam persistidos em `AiUsageEvent` (tokens, rota, modelo e dados de cobrança quando houver).
-- Painel de consumo: `/admin/ai/usage` (gráficos por dia e rankings por workspace/rota/modelo).
-
-## Coisas que já estão no produto (resumo curto)
-- Workspaces (multi-tenant)
-- Deals + pipeline kanban
-- Contatos/empresas + atividades
-- Inbox omnichannel (WhatsApp + Email)
-- Login (magic link + senha) + 2FA + Google (opcional)
-- Inbox: resumo de conversa com IA (sob demanda)
-- Inbox (Email): sugestão de resposta com IA
-- WhatsApp multimodal (Etapa E): áudio→texto (transcrição) e imagem→texto (OCR) com consentimento
-- WhatsApp documentos (Etapa E): extração de texto para tipos `text/*` (com consentimento)
-- LGPD (Etapa E): retenção/limpeza de `mediaUrl` via cron `/api/cron/media-retention`
-- Automações: gatilho `EMAIL_SENT` (envio de email pelo inbox)
-- Paywall por plano e painel de super admin
-- Assentos por plano (membros aceitos) + limite de convites pendentes (anti-spam)
-- Customer Satisfaction (NPS): páginas + gráficos com animação
-- Sistema de pagamentos do CRM (multi-gateway) + webhooks
-- Monetização por taxa da plataforma (split/fee quando disponível)
-- Notificações in-app (web push + bell icon) com opção no-code de envio via automações
-- Cupons e promoções (Stripe) gerenciados pelo Super Admin
-- Limites dinâmicos por plano (IA, automações, membros) com enforcement real
-- Tours de onboarding interativos por tela (com persistência "apenas uma vez")
-- Aviso global “Sistema em manutenção” configurável no Super Admin (com previsão de retorno)
-- Formulários Web (Form Builder): criação de formulários públicos para captura de leads com mapeamento dinâmico de campos.
-- Refino Estético: substituição de emojis por ícones vetoriais (Heroicons) em todo o Help Center.
-- Exportação CSV (CRM): Contatos e Deals por workspace + export administrativo (Super Admin).
-
-## Fase 6 (Auditoria, LGPD e segurança de dados) — o que mudou
-- **Trilha de auditoria (ações sensíveis):** registro de eventos com metadados de request (ip, user-agent, rota, método) em `Activity` via `AUDIT_*`.
-- **Ações auditadas:** super admin (configs/planos/reconciliação), webhooks (criar/rotacionar/deletar segredo), API keys (criar/deletar), integrações (WhatsApp), convites e alterações de workspace (slug/nome/delete).
-- **LGPD por workspace:** endpoints para exportação e remoção.
-  - Export: `GET /api/workspace/:workspaceSlug/privacy/export`
-  - Erase: `POST /api/workspace/:workspaceSlug/privacy/erase`
-- **Hardening multi-tenant:** rotas críticas passaram a checar permissão + filtrar por `workspaceId` (incluindo endpoints de IA como resumo de conversa e insights de pipeline).
-
-## Fase 8 (Suporte e operação comercial) — o que mudou
-- **Masquerade auditável:** iniciar/parar impersonação com trilha de auditoria.
-- **Operação (SUPERADMIN):** botões no Admin → System para reprocessar entregas de webhook e jobs de automação “due”.
-- **Reconciliação de pagamentos:** UI no Admin → Payments para inspeção/ação rápida quando o gateway divergir do estado interno.
-- **Incidentes e SLA interno:** registro de incidentes (P0–P3) com prazos de resposta/resolução, ack e resolução, direto no Admin → System.
-- **Onboarding/migração:** checklist operacional e atalhos por workspace (presets, importação, integrações, templates).
-
-## Fase 9 (Go-live comercial “vendível”) — o que mudou
-- **Limites por plano aplicados:** convites/membros, webhooks, automações, IA (quota + rate limit) e upload/storage.
-- **Assentos (usuários) por plano (comportamento comercial):**
-  - O que conta como “usuário”: `Member` com `status=ACCEPTED` no workspace (assento ativo).
-  - Convites pendentes (`status=PENDING`) não consomem assento, mas têm limite próprio por plano (anti-spam).
-  - Enforcement:
-    - convidar: valida `maxUsers` (assentos) e `maxPendingInvites` (pendentes)
-    - aceitar/entrar via link: valida `maxUsers` antes de virar `ACCEPTED`
-  - Administração (Super Admin → Plans): `features.maxUsers` e `features.maxPendingInvites` são editáveis por plano. Valor `0` significa ilimitado.
-- **Rate limit distribuído:** contador em Postgres (`rate_limit_counters`) para não depender de memória do node em produção.
-- **Observabilidade:** healthcheck administrativo com `status`, `alerts` e `thresholds` (retorna 503 quando degradado).
-- **FinOps por workspace:** dashboard mostra uso/limites e custo estimado (WhatsApp/IA/uploads).
-- **Infra (Postgres gerenciado):**
-  - App suporta `DATABASE_URL_POOLED` (pooler) como datasource do Prisma.
-  - Migração adiciona índices de performance para consultas típicas (membros, integrações, conversas, webhooks, automações, rate limits).
-
-## Fase 11 (Stripe em produção) — o que mudou
-- **Validação automatizada (SUPERADMIN):** `GET /api/admin/stripe/validate` verifica modo LIVE/TEST, Billing Portal, endpoint de webhook (URL + eventos obrigatórios), e consistência de planos (Price/Product no Stripe).
-- **Auditoria + idempotência de webhooks:** persistência por `event.id` em `stripe_events` com status (`received/processing/processed/failed`) e lock para evitar duplicação.
-- **Observação de eventos LIVE:** Admin → Settings mostra “Eventos LIVE (últimas 24h)” com contagem, eventos faltantes e status.
-- **Replay 2x (idempotência):** no mesmo card, é possível reenviar um `evt_...` duas vezes e detectar automaticamente se houve duplicação.
-  - API: `POST /api/admin/stripe/validate` com `{ "eventId": "evt_...", "times": 2 }`
-- **NFS-e (opcional):** emissão automática atrelada ao `invoice.paid`/`invoice.payment_succeeded` quando `NFSE_ENABLED=true`, com gestão de emitentes no painel de Super Admin.
-
-## Plataforma No-Code (o que torna o CRM “adaptável”)
-A ideia aqui é simples: o CRM não é “um CRM fixo”. Cada workspace consegue adaptar processos sem precisar pedir feature nova.
-
-O que já existe hoje:
-- **Workflows (automações por regra):** gatilhos + condições + ações, com suporte a ações encadeadas e ações com atraso (delay).
-- **Simulação / explicação do disparo:** ajuda a entender “por que uma regra rodou” (ou não) antes de colocar em produção.
-- **Logs de execução:** registro de regras executadas e falhas para auditoria e debug operacional.
-- **Templates de mensagem v2:** variáveis (contato/empresa/negócio/atendente), pastas, busca, idioma e duplicação simples (versionamento via nome).
-- **Campos personalizados v2 (schema flexível):** tipos avançados (checkbox, multi-select, moeda, URL, telefone), validação e obrigatoriedade.
-- **Webhooks v2 (integrações):** assinatura HMAC com rotação de segredo, filtros por evento (inclusive “enviar todos”), painel de entregas com histórico e retentativas.
-- **API Keys por workspace:** gera chaves para integrações externas consumirem dados do workspace com controle de acesso.
-- **Presets por nicho (1-click setup):** cria pipeline + campos + templates + automações prontos para segmentos (imobiliária, clínica, agência, assistência técnica, restaurante).
-- **Roteamento e SLA no Inbox:** regras de atribuição (origem/palavra-chave/região/horário/carga), escalonamento automático e alertas.
-- Notificações por automação: ação "Enviar notificação" disponível no builder de automações — o usuário pode escolher se sua app envia push ou não, sem código.
-- **Form Builder (No-Code Leads):** criador visual de formulários com suporte a labels customizadas, tipos de campo, obrigatoriedade e mapeamento automático para propriedades do contato no CRM. Gera URLs públicas `/f/[slug]` prontas para uso.
-
-Exemplos práticos (sem código):
-- Quando um lead chega via WhatsApp e contém “orçamento” → criar negócio no pipeline X e atribuir para o vendedor A.
-- Quando um negócio entra em “Proposta enviada” → agendar follow-up em 2 dias e enviar template de mensagem.
-- Quando um cliente fica sem resposta por 15 min → escalonar para outro atendente e registrar atividade.
-- Quando um pagamento muda para “PAID” → disparar automação e webhook para uma ferramenta externa.
-
-Como isso funciona internamente (resumo):
-- As regras, templates e definições de campos ficam **no banco** e são avaliadas no backend.
-- O workspace pode ter seu próprio conjunto de regras, campos e templates, sem impactar outros clientes.
-
-## Próximas decisões (anotar antes de codar)
-- Qual é o ICP real (quem paga)?
-- Qual é o MVP que dá pra cobrar rápido?
-- Onde eu preciso ser “10/10” e onde “bom o suficiente” resolve?
-
-## Dinheiro (pra eu não me enganar)
-- Assinatura do SaaS: entra no Stripe da plataforma (PAYMENTS_SECRET_KEY).
-- Pagamentos do CRM: por workspace, com gateway configurável e monetização por taxa.
-- Objetivo: taxa da plataforma ser automática (split/marketplace_fee), não “planilha”.
-
-## Notas rápidas (pra lembrar depois)
-- Se aparecer 404 em páginas do admin, confirmar em qual porta o dev server subiu.
-- Se aparecer Unauthorized em ação de admin, checar sessão/cookie e rota usada.
-
-## Diário (anotações de dev)
-### 2026-03-12
-- Arquitetura de pagamentos do CRM por provider (Asaas/Stripe/Pagar.me/Mercado Pago), com credenciais e settings no banco.
-- Painel de Super Admin para configurar providers e settings por workspace.
-- Webhook unificado de pagamentos com validação de assinatura por gateway.
-- Monetização automática nas cobranças do CRM:
-  - Asaas: split repassando líquido pro workspace.
-  - Mercado Pago: collector + marketplace_fee.
-  - Pagar.me: tentativa de split flat (com fallback se o endpoint não suportar).
-- Correção: listagem de usuários no Super Admin usando sessão server-side.
-
-### 2026-03-13
-- Fase 6 concluída: auditoria, LGPD e isolamento multi-tenant.
-- Auditoria com `AUDIT_*` incluindo request metadata (ip, user-agent, rota, método, request-id).
-- Exportação e remoção de dados por workspace (LGPD) via `/privacy/export` e `/privacy/erase`.
-- Ajustes de isolamento: reforço de `workspaceId` em rotas críticas e endpoints de IA.
-- Fase 8 concluída: ferramentas operacionais (masquerade, reprocessos), incidentes/SLA e onboarding.
-- Fase 9 concluída: limites por plano, SLO/alertas, FinOps por workspace e suporte a pooler Postgres.
-- Sistema de notificações in-app implementado (modelo Prisma, API, web push, bell icon na topbar).
-- Ação no-code "Enviar Notificação" adicionada ao builder de automações.
-- Cupons e promoções (Stripe): criação de cupom + código promocional via Super Admin, integrado ao checkout.
-- Limites dinâmicos de IA/automação por plano: campos no editor de planos, enforcement nos endpoints, dashboard refletindo uso real.
-- Tours de onboarding expandidos para todas as telas principais (contatos, empresas, pipeline, inbox, tarefas, automações, analytics, settings, campos personalizados, equipe, templates, billing, NPS, detalhes do negócio).
-- Corrigido bug onde tours repetiam ou exibiam mensagens vazias (persistência + traduções PT/EN corrigidas).
-- Preset "Restaurante" adicionado ao setup em 1 clique.
-
-### 2026-03-14
-- Inbox: botão “Resumir conversa” (IA) abrindo modal com opção de copiar.
-- IA: `suggest-reply` com fallback quando `OPENAI_API_KEY` não estiver configurada.
-- Modo manutenção: banner global configurável via Super Admin e chaves públicas via `/api/public-config`.
-- CI: ajuste no workflow para evitar falha no smoke test quando variáveis mínimas não estiverem presentes.
-- **Web Forms (Form Builder):** implementação completa do construtor de formulários, API de submissão pública e integração com CRM (criação de contatos, deals e atividades).
-- **Compliance & Portabilidade:** reescrita dos Termos de Uso e Política de Privacidade para padrão B2B SaaS (Controlador/Operador) e LGPD.
-- **Exportação de Dados:** funcionalidade de exportação do Workspace em JSON disponível em Configurações Avançadas.
-- **UI/UX:** refinamento do Help Center removendo emojis e padronizando com Heroicons.
-
-### 2026-03-15
-- **Assinaturas Anuais e Mensais (Toggle):** Implementação completa do fluxo de assinaturas anuais com desconto dinâmico (porcentagem). Banco de dados adaptado para armazenar `annualDiscount`, `priceAnnual` e `stripePriceIdAnnual`. Landing Page e Checkout recebem toggle interativo mensal/anual mostrando preço equivalente para conversão inteligente.
-- **Painel de Faturamento Interno:** Clientes já assinantes agora conseguem alterar o ciclo de cobrança diretamente pelo painel B2B sem passar pelo Suporte, vendo a economia calculada dinamicamente com transparência. Super Admin atualizado para gerenciar porcentagem de desconto e auto-calcular preços anuais.
-- **Estratégia de Marketing (Mensalidade Anual):** Na página de cadastro, agora exibimos o valor da "mensalidade proporcional" para planos anuais (ex: R$ 119,20/mês em vez de R$ 1.430,40/ano), reduzindo a fricção cognitiva e aumentando a percepção de valor.
-- **Auditoria de Termos de Uso (LGPD/GDPR):** Inserção restritiva em `terms.js` protegendo a plataforma contra chargebacks e garantindo legalidade no modelo "Pay-as-you-go" (Overage Limit por IA) e taxação/split de Gateways de pagamentos utilizados via plataforma. Modelagem legal "No Refunds for Annuals cancelation". Atualização de versão de política impondo aceite da base de clientes na próxima autenticação.
-- **Global Cookie Consent (Glassmorphism Banner):** Banner elegante global cobrindo consentimento de cookies da infraestrutura com fallback em `localStorage`. Retirada do tracking nativo do `_app.js` (Google Analytics), vinculando o disparo estatístico estritamente ao aceite condicionado do pop-up para alinhar à GDPR e LGPD europeia/brasileira.
-
-### 2026-03-18
-- **Unificação de Marca (Executive Lilac):** Rebranding completo de ponta a ponta (Landing Page, Layouts internos, Pipeline, Settings e Help Center), substituindo as paletas default/teal pela identidade visual roxa profissional e imersiva com partículas interativas.
-- **Compliance Estrito de Cookies (GDPR/LGPD):** Evolução do Cookie Consent para um modelo granular e extensível. Usuários agora podem expandir um modal de configuração ("Configurar"), escolhendo quais categorias de cookies desejam aceitar ("Analytics", "Marketing" ou apenas "Essenciais"). O estado de consentimento foi migrado para uma persistência robusta em JSON no `localStorage` (v2), totalmente reativa via React Context e `_app.js`.
-- **Refinamentos Visuais de UI/UX:** Correções no layout e navegação, assegurando melhor visibilidade de modais e responsividade das topbars em telas de demonstração.
-- **Internacionalização (i18n):** Tradução nativa das CTAs (Call-To-Actions) e propagandas na página de "Demonstração Interativa", passando respeitar o idioma local do navegador do usuário.
-- **Fix de Interface (Demo):** Remoção de anomalia visual (quadrado preto) substituindo a tag da logo estática pelo componente global dinâmico `<Logo>` no topo da interface.
-- **Preços Dinâmicos na Landing Page:** O bloco de preços agora é 100% dinâmico (com utilitário de formatação de JSON) mostrando os recursos reais extraídos em tempo real das configurações ativas no painel Super Admin ("X Assentos", "WhatsApp Omnichannel").
-- **Bugfixes & Build (GitHub Actions):** Resolução de erro sintático no modal construtor de automações. Eliminação de funções duplicadas em `services/automation.js` que derrubavam a compilação do Webpack. Correção de configuração do Host de Imagens (`i.pravatar.cc`) no arquivo `next.config.js` que causava "Unhandled Runtime Error" em ambiente de desenvolvimento. Correção de alertas do ESLint que bloqueavam a pipeline (caracteres de aspas não escapados e tags `<img>` otimizadas para `next/image` em seções de Hero, Testimonial e Pipeline Board).
+### Sprint "Polimento Executivo" (Março 2026)
+- **Rebranding "Executive Lilac":** A interface abandonou as cores padrão "Teal" em direção à uma identidade primária "Brand/Roxa", infundindo credibilidade e elegância da ponta do pipeline à apresentação do Help Center corporativo.
+- **UI/UX & Dinamismo:** Preços da Landing Page calculados e renderizados de forma "Ao Vivo" conectados ao JSON dos Planos (Super Admin). Modais globais de Cookie Consent configuráveis pelo cliente, reativados usando Contextos da React v18 e migrados do G-Analytics nativo em prol de scripts condicionados à LGPD.
+- **Múltiplos Ciclos de Faturamento (SaaS):** Adição de lógica mensal e descontos inteligentes (percentuais dinâmicos) na assinatura anual, exibidos na interface de preços em *Real-Time* com gatilho de convencimento cognitivo (preço proporcional no mês equivalente para planos anuais).
+- **Robustez de UX Pública:** A tela de login uniu estética e modernismo e ganhou "visão dupla" com imagem. A "Interactive Demo" se blindou de anomalias (incluindo host de imagens não liberadas do Next.js Avatar) e traduções `react-i18next` dinâmicas completas foram implementadas para os leads gringos nas suas propagandas/call-to-actions.
 
 ---
 
 ## 📄 Licença
 
-Este projeto é licenciado sob a **MIT License** — veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto comercial é mantido e licenciado sob a **MIT License** — veja o arquivo [LICENSE](LICENSE) para detalhes de cópia e direitos.
 
 ---
 
 <div align="center">
-  Feito com ❤️ por <a href="https://github.com/Andre-Brito-py">Andre Brito</a>
+  Construído com obsessão por <a href="https://github.com/Andre-Brito-py">Andre Brito</a>
 </div>
