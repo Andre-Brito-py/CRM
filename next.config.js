@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const moduleExports = withPWA({
   images: {
-    domains: [''],
+    domains: ['i.pravatar.cc', 'lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
   },
   reactStrictMode: true,
   async headers() {
