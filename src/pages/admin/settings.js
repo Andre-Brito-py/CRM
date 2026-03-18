@@ -466,7 +466,7 @@ const AdminSettings = () => {
                               {status.isSet ? 'Configurado' : 'Pendente'}
                             </span>
                             {item.public ? (
-                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                              <span className="px-2 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-700">
                                 Public
                               </span>
                             ) : null}
@@ -529,7 +529,7 @@ const AdminSettings = () => {
                                   secret: item.secret,
                                 })
                               }
-                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
                             >
                               <KeyIcon className="h-4 w-4" />
                               {saving ? 'Salvando...' : 'Salvar'}

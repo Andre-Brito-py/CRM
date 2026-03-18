@@ -37,7 +37,7 @@ const Integrations = () => {
       description: 'Receive real-time events from your workspace.',
       href: `/account/${workspaceSlug}/integrations/webhooks`,
       icon: GlobeAltIcon,
-      bgColor: 'bg-blue-500',
+      bgColor: 'bg-brand-500',
     },
     {
       name: 'API Keys',

@@ -87,7 +87,7 @@ const Advanced = ({ isCreator, workspace }) => {
               O arquivo conterá todos os Leads, Negócios (Deals), Tarefas, e configurações de funil. Pode levar alguns segundos para compilar os dados. Mantenha os dados baixados de seus clientes seguros.
             </small>
             <Button
-              className="text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-2 whitespace-nowrap"
+              className="text-white bg-brand-600 hover:bg-brand-700 flex items-center gap-2 whitespace-nowrap"
               onClick={handleExportData}
             >
               <ArrowDownTrayIcon className="w-4 h-4" />

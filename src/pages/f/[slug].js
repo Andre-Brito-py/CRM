@@ -68,7 +68,7 @@ export default function PublicWebForm() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div></div>;
   if (error) return <div className="min-h-screen flex items-center justify-center bg-gray-50"><div className="text-red-500 bg-red-50 p-4 rounded-lg shadow">{error}</div></div>;
   if (!form) return null;
 
@@ -117,7 +117,7 @@ export default function PublicWebForm() {
                   required={field.required}
                   value={formData[field.id] || ''}
                   onChange={(e) => handleChange(field.id, e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm p-3 border"
                   rows={4}
                 />
               ) : field.type === 'email' ? (
@@ -126,7 +126,7 @@ export default function PublicWebForm() {
                   required={field.required}
                   value={formData[field.id] || ''}
                   onChange={(e) => handleChange(field.id, e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm p-3 border"
                 />
               ) : field.type === 'tel' ? (
                  <input
@@ -134,7 +134,7 @@ export default function PublicWebForm() {
                   required={field.required}
                   value={formData[field.id] || ''}
                   onChange={(e) => handleChange(field.id, e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm p-3 border"
                 />
               ) : (
                 <input
@@ -142,7 +142,7 @@ export default function PublicWebForm() {
                   required={field.required}
                   value={formData[field.id] || ''}
                   onChange={(e) => handleChange(field.id, e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border"
+                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm p-3 border"
                 />
               )}
             </div>
@@ -152,7 +152,7 @@ export default function PublicWebForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isSubmitting ? 'Enviando...' : (form.submitText || 'Submeter')}
             </button>

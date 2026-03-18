@@ -155,7 +155,7 @@ const NpsSurveys = () => {
               <div className="flex justify-end">
                 <button
                   onClick={() => setCreateOpen(true)}
-                  className="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 rounded-md bg-brand-600 text-white text-sm font-medium hover:bg-brand-700"
                 >
                   Criar pesquisa
                 </button>
@@ -175,7 +175,7 @@ const NpsSurveys = () => {
                           setSendSurveyId(s.id);
                           toast.success('Pesquisa selecionada para envio');
                         }}
-                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                        className="text-sm font-medium text-brand-600 hover:text-brand-700"
                       >
                         Selecionar
                       </button>
@@ -283,7 +283,7 @@ const NpsSurveys = () => {
                   disabled={!canSend || isSending}
                   className={[
                     'w-full px-4 py-2 rounded-md text-sm font-medium',
-                    canSend && !isSending ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                    canSend && !isSending ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed',
                   ].join(' ')}
                 >
                   {isSending ? 'Enviando...' : sendChannel === 'link' ? 'Gerar link' : 'Enviar'}
@@ -348,7 +348,7 @@ const NpsSurveys = () => {
               disabled={!canCreate}
               className={[
                 'px-4 py-2 rounded-md text-sm font-medium',
-                canCreate ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed',
+                canCreate ? 'bg-brand-600 text-white hover:bg-brand-700' : 'bg-gray-200 text-gray-500 cursor-not-allowed',
               ].join(' ')}
             >
               Criar

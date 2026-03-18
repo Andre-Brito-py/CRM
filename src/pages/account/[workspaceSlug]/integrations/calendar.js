@@ -176,7 +176,7 @@ const CalendarIntegration = () => {
                     <select
                       value={calendarId}
                       onChange={(e) => setCalendarId(e.target.value)}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isSubmitting || isLoading}
                     >
                       <option value="" disabled>Select a calendar</option>
@@ -197,7 +197,7 @@ const CalendarIntegration = () => {
                       value={timezone}
                       onChange={(e) => setTimezone(e.target.value)}
                       placeholder="e.g. America/Sao_Paulo"
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isSubmitting || isLoading}
                     />
                     <div className="mt-1 text-xs text-gray-500">Optional. If empty, uses calendar default.</div>
@@ -213,7 +213,7 @@ const CalendarIntegration = () => {
                       max={240}
                       value={durationMinutes}
                       onChange={(e) => setDurationMinutes(Number(e.target.value || 0))}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isSubmitting || isLoading}
                     />
                   </div>
@@ -225,7 +225,7 @@ const CalendarIntegration = () => {
                       max={30}
                       value={windowDays}
                       onChange={(e) => setWindowDays(Number(e.target.value || 0))}
-                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                       disabled={isSubmitting || isLoading}
                     />
                   </div>
@@ -233,7 +233,7 @@ const CalendarIntegration = () => {
 
                 <div className="flex flex-wrap gap-3">
                   <Button
-                    className="text-white bg-blue-600 hover:bg-blue-700"
+                    className="text-white bg-brand-600 hover:bg-brand-700"
                     disabled={isSubmitting || isLoading || !calendarId}
                     onClick={() => saveConfig({})}
                   >
@@ -278,7 +278,7 @@ const CalendarIntegration = () => {
           <Card.Footer>
             <div className="flex justify-end">
               <Button
-                className={`text-white ${connected ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                className={`text-white ${connected ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700'
                   }`}
                 disabled={isSubmitting || isLoading}
                 onClick={connected ? handleDisconnect : handleConnect}

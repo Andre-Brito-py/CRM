@@ -110,13 +110,13 @@ const Users = () => {
                               <UserIcon className="h-10 w-10 text-gray-400 p-2 bg-gray-100 rounded-full" />
                             )}
                             <div className="ml-4">
-                              <p className="text-sm font-medium text-blue-600 truncate">{user.name || 'No Name'}</p>
+                              <p className="text-sm font-medium text-brand-600 truncate">{user.name || 'No Name'}</p>
                               <p className="text-sm text-gray-500">{user.email}</p>
                             </div>
                           </div>
                           <div className="ml-2 flex-shrink-0 flex flex-col items-end">
                             <div className="flex space-x-2">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.customerPayment?.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' : user.customerPayment?.subscriptionType === 'STANDARD' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.customerPayment?.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' : user.customerPayment?.subscriptionType === 'STANDARD' ? 'bg-brand-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                 {user.customerPayment?.subscriptionType || 'FREE'}
                               </span>
                               <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.role === 'SUPERADMIN' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
@@ -175,7 +175,7 @@ const Users = () => {
                               <button
                                 onClick={() => handleImpersonate(user.id)}
                                 disabled={impersonating === user.id}
-                                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-brand-700 bg-brand-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                               >
                                 {impersonating === user.id ? 'Loading...' : (
                                   <>

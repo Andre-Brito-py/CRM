@@ -245,75 +245,88 @@ const ChatWindow = ({
 
   if (!conversation) {
     return (
-      <div className="flex flex-col items-center justify-center flex-1 h-full bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-700">{t('inbox.chat.empty.title')}</h2>
-          <p className="mt-2 text-gray-500">{t('inbox.chat.empty.subtitle')}</p>
+      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/30 h-full p-12">
+        <div className="w-24 h-24 bg-white/80 rounded-[40px] shadow-premium flex items-center justify-center mb-8 border border-zinc-100">
+          <PaperAirplaneIcon className="w-10 h-10 text-zinc-200 -rotate-45" />
         </div>
+        <p className="text-zinc-400 text-lg font-executive font-semibold tracking-tight">
+          {t('inbox.chat.empty.title')}
+        </p>
+        <p className="text-zinc-300 text-sm mt-2 font-medium">{t('inbox.chat.empty.subtitle')}</p>
       </div>
     );
-  }
-
-  return (
-    <div className="flex flex-col flex-1 h-full bg-gray-100">
+  } return (
+    <div className="flex-1 flex flex-col h-full bg-white relative">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
-        <div className="flex items-center flex-1">
+      <div className="px-8 py-6 border-b border-zinc-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
+        <div className="flex items-center gap-5">
           {onBack && (
-            <button onClick={onBack} className="mr-3 md:hidden text-gray-500 hover:text-gray-700">
+            <button onClick={onBack} className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-900 transition-colors">
               <ArrowLeftIcon className="w-6 h-6" />
             </button>
           )}
-          <div className="w-10 h-10 mr-3 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 overflow-hidden">
+          <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center border border-zinc-200/50 shadow-sm overflow-hidden bg-gradient-to-br from-white to-zinc-50">
             {conversation.contact?.image ? (
               <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
             ) : (
-              <UserCircleIcon className="w-6 h-6" />
+              <span className="text-2xl font-executive font-bold text-zinc-400">
+                {conversation.contact?.name?.charAt(0) || '?'}
+              </span>
             )}
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h3 className="text-2xl font-executive font-bold text-zinc-900 tracking-tight leading-none mb-2">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
-            </h2>
-            <p className="text-sm text-gray-500">
-              {conversation.platform} • {conversation.platform === 'EMAIL' ? (conversation.contact?.email || conversation.externalId) : (conversation.contact?.phone || conversation.externalId)}
-            </p>
+            </h3>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 bg-zinc-100 rounded-full px-2.5 py-0.5 border border-zinc-200/30">
+                <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">
+                  Online
+                </span>
+              </div>
+              <span className="text-xs font-bold text-zinc-300">/</span>
+              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.1em] leading-none">
+                {conversation.platform}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Assignee Selector */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => onToggleAutopilot?.(!conversation.autopilotEnabled)}
             disabled={!onToggleAutopilot || isTogglingAutopilot}
             className={classNames(
-              'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md border shadow-sm',
-              conversation.autopilotEnabled ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
-              (!onToggleAutopilot || isTogglingAutopilot) ? 'opacity-60 cursor-not-allowed' : ''
+              'group flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest rounded-xl border transition-all duration-300',
+              conversation.autopilotEnabled 
+                ? 'bg-brand-600 border-brand-500 text-white shadow-lg shadow-brand-500/20' 
+                : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
             )}
           >
-            {t('inbox.autopilot.label')}: {conversation.autopilotEnabled ? t('inbox.autopilot.enabled') : t('inbox.autopilot.disabled')}
+            <SparklesIcon className={`w-4 h-4 ${conversation.autopilotEnabled ? 'animate-pulse' : 'text-zinc-400 group-hover:text-brand-500'}`} />
+            Autopilot: {conversation.autopilotEnabled ? 'ON' : 'OFF'}
           </button>
-          <span className="mr-2 text-sm text-gray-500">{t('inbox.assignee.label')}</span>
+
+          <div className="h-8 w-[1px] bg-zinc-100" />
+
           <Menu as="div" className="relative inline-block text-left">
-            <div>
-              <Menu.Button className="inline-flex justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500">
-                {conversation.assignee ? (
-                  <div className="flex items-center">
-                    {conversation.assignee.image ? (
-                      <img src={conversation.assignee.image} alt="" className="w-5 h-5 mr-2 rounded-full" />
-                    ) : (
-                      <UserCircleIcon className="w-5 h-5 mr-2 text-gray-400" />
-                    )}
-                    {conversation.assignee.name}
-                  </div>
+            <Menu.Button className="flex items-center group">
+              <div className="flex flex-col items-end mr-3">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Assignee</span>
+                <span className="text-xs font-bold text-zinc-900 group-hover:text-brand-600 transition-colors uppercase tracking-tight">
+                  {conversation.assignee?.name || t('inbox.filter.unassigned')}
+                </span>
+              </div>
+              <div className="w-10 h-10 bg-zinc-50 rounded-xl border border-zinc-200/50 flex items-center justify-center group-hover:border-zinc-300 transition-all overflow-hidden">
+                {conversation.assignee?.image ? (
+                  <img src={conversation.assignee.image} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  t('inbox.filter.unassigned')
+                  <UserCircleIcon className="w-6 h-6 text-zinc-300" />
                 )}
-                <ChevronDownIcon className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
-              </Menu.Button>
-            </div>
+              </div>
+            </Menu.Button>
 
             <Transition
               as={Fragment}
@@ -324,15 +337,18 @@ const ChatWindow = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 w-56 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                <div className="py-1">
+              <Menu.Items className="absolute right-0 w-64 mt-3 origin-top-right bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
+                <div className="px-4 py-3 bg-zinc-50/50">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Select Agent</p>
+                </div>
+                <div className="py-2">
                   <Menu.Item>
                     {({ active }) => (
                       <button
                         onClick={() => onAssign(null)}
                         className={classNames(
-                          active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                          'block w-full text-left px-4 py-2 text-sm'
+                          active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-600',
+                          'block w-full text-left px-4 py-3 text-[13px] font-bold uppercase tracking-tight'
                         )}
                       >
                         {t('inbox.filter.unassigned')}
@@ -343,17 +359,19 @@ const ChatWindow = ({
                     <Menu.Item key={member.id}>
                       {({ active }) => (
                         <button
-                          onClick={() => onAssign(member.member.id)} // Assuming member object structure from API
+                          onClick={() => onAssign(member.member.id)}
                           className={classNames(
-                            active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                            'block w-full text-left px-4 py-2 text-sm flex items-center'
+                            active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-600',
+                            'flex w-full items-center px-4 py-3 text-[13px] font-bold uppercase tracking-tight gap-3'
                           )}
                         >
-                          {member.member.image ? (
-                            <img src={member.member.image} alt="" className="w-5 h-5 mr-2 rounded-full" />
-                          ) : (
-                            <UserCircleIcon className="w-5 h-5 mr-2 text-gray-400" />
-                          )}
+                          <div className="w-8 h-8 rounded-lg overflow-hidden border border-zinc-200/50 flex-shrink-0">
+                            {member.member.image ? (
+                              <img src={member.member.image} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <UserCircleIcon className="w-full h-full text-zinc-200" />
+                            )}
+                          </div>
                           {member.member.name || member.member.email}
                         </button>
                       )}
@@ -367,91 +385,85 @@ const ChatWindow = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        {conversation.messages?.map((message) => (
-          <MessageBubble
-            key={message.id}
-            message={message}
-            isMe={message.direction === 'OUTBOUND'}
-          />
-        ))}
+      <div className="flex-1 overflow-y-auto p-8 space-y-2 bg-[#f9fafb] custom-scrollbar">
+        {conversation.messages?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full opacity-40">
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">No messages yet</span>
+          </div>
+        ) : (
+          conversation.messages?.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              isMe={message.direction === 'OUTBOUND'}
+            />
+          ))
+        )}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <div className="p-4 bg-white border-t border-gray-200">
-        <form onSubmit={handleSend} className="flex space-x-4">
+      {/* Input Area */}
+      <div className="p-8 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] shrink-0">
+        {/* Unified Toolbar */}
+        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
           <Paywall
             minPlan="PREMIUM"
             fallback={
-              <div className="flex space-x-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   disabled
-                  className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-300 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 cursor-not-allowed"
                   title={t('paywall.title')}
                 >
-                  <SparklesIcon className="w-5 h-5" />
+                  <SparklesIcon className="w-3.5 h-3.5" />
+                  {t('inbox.ai.suggest')}
                 </button>
                 <button
                   type="button"
                   disabled
-                  className="p-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50 cursor-not-allowed"
+                  className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-300 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 cursor-not-allowed"
                   title={t('paywall.title')}
                 >
-                  <DocumentTextIcon className="w-5 h-5" />
+                  <DocumentTextIcon className="w-3.5 h-3.5" />
+                  {t('inbox.ai.summarize')}
                 </button>
               </div>
             }
           >
-            <div className="flex space-x-2">
+            <div className="flex items-center gap-2 shrink-0">
               <button
-                id="ai-suggest-btn"
-                type="button"
                 onClick={() => onGenerateResponse?.({ objective: aiObjective })}
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
-                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                title={t('inbox.ai.generate')}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-700 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-brand-100 hover:bg-brand-100 transition-all group"
               >
-                <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'text-blue-500 animate-pulse' : ''}`} />
+                <SparklesIcon className={`w-3.5 h-3.5 ${isGeneratingAI ? 'animate-spin' : 'group-hover:scale-110 transition-transform'}`} />
+                {isGeneratingAI ? t('common.loading') : t('inbox.ai.suggest')}
               </button>
+
               <button
-                id="ai-summarize-btn"
-                type="button"
                 onClick={handleSummarize}
                 disabled={isSummarizingAI}
-                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                title={t('inbox.ai.summarize')}
+                className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-600 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:bg-zinc-100 transition-all group"
               >
-                <DocumentTextIcon className={`w-5 h-5 ${isSummarizingAI ? 'text-blue-500 animate-pulse' : ''}`} />
+                <DocumentTextIcon className="w-3.5 h-3.5 group-hover:text-zinc-900 transition-colors" />
+                {isSummarizingAI ? t('common.loading') : t('inbox.ai.summarize')}
               </button>
-              <button
-                type="button"
-                onClick={() => setIsScheduleModalOpen(true)}
-                disabled={aiObjective !== 'schedule'}
-                className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                title={t('inbox.schedule.open')}
-              >
-                <CalendarDaysIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="ml-3 flex items-center gap-3">
-              <label className="flex items-center gap-2 text-xs text-gray-600 select-none">
-                <input
-                  type="checkbox"
-                  checked={Boolean(aiSuggestOnlyEnabled)}
-                  onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                {t('inbox.ai.suggestOnly')}
-              </label>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">{t('inbox.ai.objective.label')}</span>
+              
+              <div className="flex items-center gap-3 ml-2">
+                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 select-none cursor-pointer hover:text-zinc-600 transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(aiSuggestOnlyEnabled)}
+                    onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
+                    className="h-3.5 w-3.5 rounded border-zinc-300 text-brand-600 focus:ring-brand-500/20"
+                  />
+                  Suggest Only
+                </label>
                 <select
                   value={aiObjective || ''}
                   onChange={(e) => onAiObjectiveChange?.(e.target.value)}
-                  className="h-9 rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="h-8 rounded-lg bg-zinc-50/50 border border-zinc-100 px-2 text-[10px] font-bold uppercase tracking-tight text-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-500/10 focus:bg-white transition-all"
                 >
                   <option value="support">{t('inbox.ai.objective.support')}</option>
                   <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
@@ -462,142 +474,147 @@ const ChatWindow = ({
             </div>
           </Paywall>
 
-          <div className="relative">
-            <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <Menu.Button
-                  className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  title={t('inbox.templates.title')}
-                >
-                  <DocumentDuplicateIcon className="w-5 h-5" />
-                </Menu.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="absolute bottom-full left-0 mb-2 w-72 origin-bottom-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-                  <div className="py-1">
-                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-100 flex justify-between items-center">
-                      <span>{t('inbox.templates.title')}</span>
-                      <button
-                        type="button"
-                        onClick={() => setIsTemplateModalOpen(true)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <PlusIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {templates.length === 0 ? (
-                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                        {t('inbox.templates.empty')}
-                      </div>
-                    ) : (
-                      <div className="max-h-60 overflow-y-auto">
-                        {templates.map((template) => (
-                          <Menu.Item key={template.id}>
-                            {({ active }) => (
-                              <button
-                                type="button"
-                                onClick={() => onMessageChange(template.content)}
-                                className={classNames(
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                  'block w-full text-left px-4 py-2 text-sm'
-                                )}
-                              >
-                                <p className="font-medium">{template.name}</p>
-                                <p className="text-xs text-gray-500 truncate">{template.content}</p>
-                              </button>
-                            )}
-                          </Menu.Item>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Menu.Items>
-              </Transition>
-            </Menu>
-          </div>
+          <div className="h-4 w-[1px] bg-zinc-100 mx-2 shrink-0" />
 
-          <div className="relative">
-            <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <Menu.Button
-                  className="p-3 text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  title="Produtos"
-                >
-                  <CreditCardIcon className="w-5 h-5" />
-                </Menu.Button>
-              </div>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="absolute bottom-full left-0 mb-2 w-72 origin-bottom-left bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-                  <div className="py-1">
-                    <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 border-b border-gray-100">
-                      Produtos
-                    </div>
-                    {paymentProducts.length === 0 ? (
-                      <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                        Nenhum produto ativo
-                      </div>
-                    ) : (
-                      <div className="max-h-60 overflow-y-auto">
-                        {paymentProducts.map((product) => (
-                          <Menu.Item key={product.id}>
-                            {({ active }) => (
-                              <button
-                                type="button"
-                                onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
-                                className={classNames(
-                                  active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                  'block w-full text-left px-4 py-2 text-sm'
-                                )}
-                              >
-                                <div className="flex items-center justify-between gap-3">
-                                  <p className="font-medium truncate">{product.name}</p>
-                                  <p className="text-xs text-gray-600 whitespace-nowrap">
-                                    {formatMoney(product.price, product.currency)}
-                                  </p>
-                                </div>
-                                <p className="text-xs text-gray-500 truncate">Inserir link fixo</p>
-                              </button>
-                            )}
-                          </Menu.Item>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Menu.Items>
-              </Transition>
-            </Menu>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsScheduleModalOpen(true)}
+            disabled={aiObjective !== 'schedule'}
+            className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <CalendarDaysIcon className="w-3.5 h-3.5" />
+            {t('inbox.schedule.title')}
+          </button>
 
-          <input
-            type="text"
-            className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={t('inbox.message.placeholder')}
+          <Menu as="div" className="relative inline-block text-left shrink-0">
+            <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all">
+              <DocumentDuplicateIcon className="w-3.5 h-3.5" />
+              {t('inbox.templates.title')}
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute bottom-full left-0 mb-3 w-80 origin-bottom-left bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
+                <div className="px-4 py-3 bg-zinc-50/50 flex justify-between items-center">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('inbox.templates.title')}</p>
+                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-1 hover:bg-zinc-200 rounded-md transition-colors">
+                    <PlusIcon className="w-3 h-3 text-zinc-600" />
+                  </button>
+                </div>
+                <div className="py-2 max-h-64 overflow-y-auto custom-scrollbar">
+                  {templates.length === 0 ? (
+                    <div className="px-6 py-4 text-center">
+                      <p className="text-xs font-bold text-zinc-400 italic">{t('inbox.templates.empty')}</p>
+                    </div>
+                  ) : (
+                    templates.map((template) => (
+                      <Menu.Item key={template.id}>
+                        {({ active }) => (
+                          <button
+                            type="button"
+                            onClick={() => onMessageChange(template.content)}
+                            className={classNames(
+                              active ? 'bg-zinc-50 text-zinc-900' : 'text-zinc-600',
+                              'block w-full text-left px-4 py-3 group transition-colors'
+                            )}
+                          >
+                            <p className="text-[13px] font-bold text-zinc-900 mb-0.5">{template.name}</p>
+                            <p className="text-xs text-zinc-400 truncate font-medium">{template.content}</p>
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))
+                  )}
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+
+          <Menu as="div" className="relative inline-block text-left shrink-0">
+            <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all">
+              <CreditCardIcon className="w-3.5 h-3.5" />
+              Produtos
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute bottom-full left-0 mb-3 w-80 origin-bottom-left bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
+                <div className="px-4 py-3 bg-zinc-50/50">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Available Products</p>
+                </div>
+                <div className="py-2 max-h-64 overflow-y-auto custom-scrollbar">
+                  {paymentProducts.length === 0 ? (
+                    <div className="px-6 py-4 text-center">
+                      <p className="text-xs font-bold text-zinc-400 italic">No active products</p>
+                    </div>
+                  ) : (
+                    paymentProducts.map((product) => (
+                      <Menu.Item key={product.id}>
+                        {({ active }) => (
+                          <button
+                            type="button"
+                            onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
+                            className={classNames(
+                              active ? 'bg-zinc-50 text-zinc-900' : 'text-zinc-600',
+                              'block w-full text-left px-4 py-3 group transition-colors'
+                            )}
+                          >
+                            <div className="flex justify-between items-start gap-3 mb-0.5">
+                              <p className="text-[13px] font-bold text-zinc-900 truncate">{product.name}</p>
+                              <span className="text-[11px] font-black text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-md tabular-nums">
+                                {formatMoney(product.price, product.currency)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">Click to insert link</p>
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))
+                  )}
+                </div>
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
+
+        <form onSubmit={handleSend} className="relative group">
+          <textarea
+            rows={3}
+            className="w-full p-6 bg-zinc-50/50 border border-zinc-100 rounded-[24px] text-[15px] font-medium placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all resize-none shadow-inner"
+            placeholder={t('inbox.replyPlaceholder')}
             value={messageText || ''}
             onChange={(e) => onMessageChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend(e);
+              }
+            }}
           />
-          <button
-            type="submit"
-            disabled={!messageText?.trim()}
-            className="flex items-center justify-center px-6 py-3 text-white transition-colors bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <PaperAirplaneIcon className="w-5 h-5 transform rotate-90" />
-          </button>
+          <div className="absolute bottom-4 right-4 flex items-center gap-3">
+            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em] hidden sm:block">
+              {t('inbox.action.pressEnter')}
+            </span>
+            <button
+              type="submit"
+              disabled={!messageText?.trim()}
+              className="p-3 bg-brand-600 text-white rounded-2xl shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-30 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+            >
+              <PaperAirplaneIcon className="w-5 h-5 -rotate-45" />
+            </button>
+          </div>
         </form>
       </div>
 
@@ -639,7 +656,7 @@ const ChatWindow = ({
                       <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.name')}</label>
                       <input
                         type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
                         value={newTemplateName}
                         onChange={(e) => setNewTemplateName(e.target.value)}
                         placeholder={t('inbox.templates.create.namePlaceholder')}
@@ -648,7 +665,7 @@ const ChatWindow = ({
                     <div>
                       <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.content')}</label>
                       <textarea
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
                         rows={4}
                         value={newTemplateContent}
                         onChange={(e) => setNewTemplateContent(e.target.value)}
@@ -667,7 +684,7 @@ const ChatWindow = ({
                     </button>
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:opacity-50"
                       onClick={handleCreateTemplate}
                       disabled={!newTemplateName || !newTemplateContent}
                     >
@@ -730,7 +747,7 @@ const ChatWindow = ({
                     <CopyToClipboard text={summaryText}>
                       <button
                         type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                        className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
                         disabled={!summaryText}
                       >
                         {t('common.action.copy')}
@@ -780,7 +797,7 @@ const ChatWindow = ({
                         <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.summary')}</label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
                           value={scheduleConfig.summary || ''}
                           onChange={(e) => setScheduleConfig((p) => ({ ...p, summary: e.target.value }))}
                         />
@@ -789,7 +806,7 @@ const ChatWindow = ({
                         <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.description')}</label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border px-3 py-2"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
                           value={scheduleConfig.description || ''}
                           onChange={(e) => setScheduleConfig((p) => ({ ...p, description: e.target.value }))}
                         />
@@ -809,7 +826,7 @@ const ChatWindow = ({
                         type="button"
                         onClick={insertStep1Message}
                         disabled={!availability?.suggestions?.length}
-                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
                       >
                         {t('inbox.schedule.step1.insert')}
                       </button>
@@ -852,7 +869,7 @@ const ChatWindow = ({
                           <div>{scheduledEvent.summary || scheduleConfig.summary}</div>
                           <div>{formatSlot(scheduledEvent.start)}</div>
                           {scheduledEvent.htmlLink ? (
-                            <a href={scheduledEvent.htmlLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                            <a href={scheduledEvent.htmlLink} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
                               {t('inbox.schedule.event.openLink')}
                             </a>
                           ) : null}
@@ -862,7 +879,7 @@ const ChatWindow = ({
                           <button
                             type="button"
                             onClick={insertStep2Message}
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
                           >
                             {t('inbox.schedule.step2.insert')}
                           </button>

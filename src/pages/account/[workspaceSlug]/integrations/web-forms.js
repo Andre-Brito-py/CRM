@@ -159,7 +159,7 @@ const WebForms = () => {
         <div className="flex justify-end mb-5">
           <button
             id="btn-create-web-form"
-            className="flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            className="flex items-center px-4 py-2 text-white bg-brand-600 rounded-md hover:bg-brand-700"
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -177,7 +177,7 @@ const WebForms = () => {
             <div className="mt-6">
               <button
                 onClick={toggleModal}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-600 border border-transparent rounded-md shadow-sm hover:bg-brand-700"
               >
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                 New Form
@@ -193,7 +193,7 @@ const WebForms = () => {
                     <div>
                       <h3 className="text-lg font-medium text-gray-900">{form.name}</h3>
                       <p className="text-sm text-gray-500 mt-1">
-                        URL: <span className="text-blue-600 font-mono">/f/{form.slug}</span>
+                        URL: <span className="text-brand-600 font-mono">/f/{form.slug}</span>
                       </p>
                       <div className="mt-4 flex flex-wrap gap-2 text-xs">
                         {form.stageId && (
@@ -218,7 +218,7 @@ const WebForms = () => {
                       </button>
                       <button
                         onClick={() => copyToClipboard(form.slug)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded"
+                        className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded"
                         title="Copy Public Link"
                       >
                         <ClipboardDocumentIcon className="w-5 h-5" />
@@ -227,7 +227,7 @@ const WebForms = () => {
                         href={`/f/${form.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded inline-block"
+                        className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded inline-block"
                         title="View Public Form"
                       >
                         <EyeIcon className="w-5 h-5" />
@@ -254,7 +254,7 @@ const WebForms = () => {
               <input
                 type="text"
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                 placeholder="e.g. Contact Us"
                 value={newForm.name}
                 onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
@@ -269,7 +269,7 @@ const WebForms = () => {
                 <input
                   type="text"
                   required
-                  className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
                   placeholder="contact-us"
                   value={newForm.slug}
                   onChange={(e) => setNewForm({ ...newForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
@@ -349,7 +349,7 @@ const WebForms = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 disabled:opacity-50"
               >
                 {isSubmitting ? 'Creating...' : 'Create Form'}
               </button>

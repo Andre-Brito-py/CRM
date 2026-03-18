@@ -257,8 +257,8 @@ const Topbar = ({ menu, staticMenu }) => {
                   <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
                     <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)]"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]"></span>
                     </span>
                   )}
                 </Popover.Button>
@@ -591,7 +591,7 @@ const NavDropdown = ({
         {isActive && (
           <motion.div
             layoutId="topbar-active-indicator"
-            className="absolute inset-x-2 -bottom-[1px] h-0.5 bg-indigo-500 rounded-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+            className="absolute inset-x-2 -bottom-[1px] h-0.5 bg-brand-500 rounded-full shadow-[0_0_8px_rgba(139,92,246,0.8)]"
           />
         )}
       </button>
@@ -630,19 +630,19 @@ const NavDropdown = ({
                       setOpen(false);
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group ${active
-                      ? 'text-white bg-indigo-600/20 border border-indigo-500/30'
+                      ? 'text-white bg-brand-600/20 border border-brand-500/30'
                       : locked
                         ? 'text-zinc-600 cursor-not-allowed'
                         : 'text-zinc-400 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-indigo-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-brand-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
                     <span className="flex-1">{t(item.name)}</span>
                     {locked && (
                       <span className="text-[9px] font-bold text-zinc-600 bg-zinc-800/50 border border-white/5 rounded-md px-1.5 py-0.5">PRO</span>
                     )}
                     {active && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
                     )}
                   </Link>
                 );

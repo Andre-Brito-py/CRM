@@ -332,7 +332,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
       <AccountLayout>
         <div className="flex flex-col items-center justify-center h-full">
           <h2 className="text-2xl font-bold">Deal not found</h2>
-          <Link href={`/account/${workspaceSlug}/pipeline`} className="text-blue-600 hover:underline mt-4">
+          <Link href={`/account/${workspaceSlug}/pipeline`} className="text-brand-600 hover:underline mt-4">
             Go back to Pipeline
           </Link>
         </div>
@@ -474,7 +474,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-500">Contact</label>
-                  <div className="mt-1 text-sm text-blue-600 hover:underline">
+                  <div className="mt-1 text-sm text-brand-600 hover:underline">
                     {deal.contact ? (
                       <Link href={`/account/${workspaceSlug}/contacts/${deal.contact.id}`}>
                         {deal.contact.name || deal.contact.email}
@@ -490,7 +490,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         {deal.user.image ? (
                           <img src={deal.user.image} alt={deal.user.name} className="w-6 h-6 rounded-full object-cover" />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
+                          <div className="w-6 h-6 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-xs">
                             {deal.user.name?.charAt(0) || '?'}
                           </div>
                         )}
@@ -508,7 +508,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                 <h3 className="text-lg font-medium text-gray-900">Tasks</h3>
                 <button
                   onClick={toggleAddTaskModal}
-                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" />
                   Add Task
@@ -522,7 +522,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                       <div className="flex-shrink-0 pt-0.5">
                         <input
                           type="checkbox"
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="h-4 w-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
                           checked={task.isCompleted}
                           onChange={(e) => handleTaskComplete(task.id, e.target.checked)}
                         />
@@ -560,7 +560,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                 <h3 className="text-lg font-medium text-gray-900">Payments</h3>
                 <button
                   onClick={toggleCreatePayment}
-                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" />
                   Create
@@ -580,7 +580,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                           required
                           value={paymentForm.value}
                           onChange={(e) => setPaymentForm({ ...paymentForm, value: e.target.value })}
-                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                         />
                       </div>
                       <div>
@@ -589,7 +589,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                           type="date"
                           value={paymentForm.dueDate}
                           onChange={(e) => setPaymentForm({ ...paymentForm, dueDate: e.target.value })}
-                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                         />
                       </div>
                       <div>
@@ -597,7 +597,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <select
                           value={paymentForm.billingType}
                           onChange={(e) => setPaymentForm({ ...paymentForm, billingType: e.target.value })}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                         >
                           <option value="PIX">PIX</option>
                           <option value="BOLETO">Boleto</option>
@@ -611,7 +611,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                           type="text"
                           value={paymentForm.description}
                           onChange={(e) => setPaymentForm({ ...paymentForm, description: e.target.value })}
-                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                         />
                       </div>
                     </div>
@@ -622,7 +622,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         type="checkbox"
                         checked={paymentForm.sendWhatsApp}
                         onChange={(e) => setPaymentForm({ ...paymentForm, sendWhatsApp: e.target.checked })}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                       />
                       <label htmlFor="sendWhatsAppDealPayment" className="ml-2 block text-sm text-gray-700">
                         Send via WhatsApp
@@ -635,7 +635,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <textarea
                           value={paymentForm.whatsAppMessage}
                           onChange={(e) => setPaymentForm({ ...paymentForm, whatsAppMessage: e.target.value })}
-                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                           rows={3}
                           placeholder="Olá {{contact.firstName}}, segue o link para pagamento: {{payment.invoiceUrl}}"
                         />
@@ -653,7 +653,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                       <button
                         type="submit"
                         disabled={isCreatingPayment}
-                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                        className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
                       >
                         {isCreatingPayment ? 'Creating...' : 'Create payment'}
                       </button>
@@ -682,7 +682,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <td className="px-4 py-2 text-sm text-gray-500">{p.dueDate ? new Date(p.dueDate).toLocaleDateString() : '-'}</td>
                         <td className="px-4 py-2 text-sm">
                           {p.invoiceUrl ? (
-                            <a href={p.invoiceUrl} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                            <a href={p.invoiceUrl} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
                               Open
                             </a>
                           ) : (
@@ -709,7 +709,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                 <h3 className="text-lg font-medium text-gray-900">Activities</h3>
                 <button
                   onClick={() => setIsAddingActivity(!isAddingActivity)}
-                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-brand-700 bg-brand-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" /> Log Activity
                 </button>
@@ -725,7 +725,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <select
                           value={activityForm.type}
                           onChange={(e) => setActivityForm({ ...activityForm, type: e.target.value })}
-                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                         >
                           <option value="NOTE">Note</option>
                           <option value="CALL">Call</option>
@@ -739,7 +739,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                           type="date"
                           value={activityForm.date}
                           onChange={(e) => setActivityForm({ ...activityForm, date: e.target.value })}
-                          className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                          className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                         />
                       </div>
                     </div>
@@ -751,7 +751,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
                         placeholder="e.g. Discovery call with client"
                         required
-                        className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                        className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
                     <div>
@@ -761,20 +761,20 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         value={activityForm.content}
                         onChange={(e) => setActivityForm({ ...activityForm, content: e.target.value })}
                         placeholder="Add more details..."
-                        className="mt-1 block w-full shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm border-gray-300 rounded-md"
+                        className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
                     <div className="flex justify-end space-x-2">
                       <button
                         type="button"
                         onClick={() => setIsAddingActivity(false)}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                       >
                         Save Activity
                       </button>
@@ -800,7 +800,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                               className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white 
                               ${activity.type === 'CALL' ? 'bg-green-500' :
                                   activity.type === 'MEETING' ? 'bg-purple-500' :
-                                    activity.type === 'EMAIL' ? 'bg-blue-500' :
+                                    activity.type === 'EMAIL' ? 'bg-brand-500' :
                                       'bg-gray-500'}`}
                             >
                               <span className="text-white text-xs font-bold">{activity.type[0]}</span>

@@ -269,13 +269,13 @@ const Templates = () => {
             <input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full md:w-72 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+              className="w-full md:w-72 rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
               placeholder="Search templates..."
             />
             <select
               value={activeFolder}
               onChange={(e) => setActiveFolder(e.target.value)}
-              className="w-full md:w-56 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
+              className="w-full md:w-56 rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border bg-white"
             >
               <option value="all">All folders</option>
               {folders.map((folder) => (
@@ -285,7 +285,7 @@ const Templates = () => {
             <select
               value={activeLanguage}
               onChange={(e) => setActiveLanguage(e.target.value)}
-              className="w-full md:w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
+              className="w-full md:w-40 rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border bg-white"
             >
               <option value="all">All languages</option>
               {languages.map((lang) => (
@@ -296,7 +296,7 @@ const Templates = () => {
           <button
             id="add-template-btn"
             onClick={() => openModal()}
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-brand-600 hover:bg-brand-700"
           >
             <PlusIcon className="h-5 w-5 mr-2" />
             Add Template
@@ -374,7 +374,7 @@ const Templates = () => {
                 <select
                   value={formValues.language}
                   onChange={(e) => setFormValues((v) => ({ ...v, language: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border bg-white"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border bg-white"
                 >
                   {SUPPORTED_LANGUAGES.map((lang) => (
                     <option key={lang} value={lang}>{lang.toUpperCase()}</option>
@@ -386,7 +386,7 @@ const Templates = () => {
                 <input
                   value={formValues.folder}
                   onChange={(e) => setFormValues((v) => ({ ...v, folder: e.target.value }))}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                   placeholder="e.g. Sales/Follow-ups"
                 />
               </div>
@@ -397,7 +397,7 @@ const Templates = () => {
                 value={formValues.name}
                 onChange={(e) => setFormValues((v) => ({ ...v, name: e.target.value }))}
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                 placeholder="e.g. Welcome Message"
               />
             </div>
@@ -408,7 +408,7 @@ const Templates = () => {
                 onChange={(e) => setFormValues((v) => ({ ...v, content: e.target.value }))}
                 required
                 rows={4}
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                 placeholder="Hello, how can we help you?"
               />
               <p className="mt-1 text-xs text-gray-500">
@@ -426,7 +426,7 @@ const Templates = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50"
               >
                 {isSubmitting ? 'Saving...' : 'Save'}
               </button>

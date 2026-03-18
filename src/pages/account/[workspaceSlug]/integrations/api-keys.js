@@ -120,7 +120,7 @@ const ApiKeys = () => {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                       placeholder="e.g. Production Server, Zapier Integration"
                     />
                   </div>
@@ -135,7 +135,7 @@ const ApiKeys = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
+                      className="bg-brand-600 text-white hover:bg-brand-700"
                     >
                       {isSubmitting ? 'Generating...' : 'Generate Key'}
                     </Button>
@@ -146,7 +146,7 @@ const ApiKeys = () => {
               <div className="mt-6">
                 <Button
                   onClick={() => setIsAdding(true)}
-                  className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-50 flex items-center"
+                  className="bg-white text-brand-600 border border-brand-600 hover:bg-brand-50 flex items-center"
                 >
                   <PlusIcon className="w-4 h-4 mr-2" />
                   Generate New Key

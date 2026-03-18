@@ -91,7 +91,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           <input
             type="text"
             id="name"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -105,7 +105,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           <input
             type="number"
             id="amount"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             step="0.01"
@@ -118,7 +118,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </label>
           <select
             id="stage"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
             value={stageId}
             onChange={(e) => setStageId(e.target.value)}
             required
@@ -135,7 +135,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </label>
           <select
             id="assignee"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
             value={userId}
             onChange={(e) => setUserId(e.target.value)}
           >
@@ -153,7 +153,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
             </label>
             <select
               id="priority"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
             >
@@ -169,7 +169,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
             <input
               type="date"
               id="closeDate"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
               value={closeDate}
               onChange={(e) => setCloseDate(e.target.value)}
             />
@@ -182,7 +182,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </label>
           <select
             id="contact"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
             value={contactId}
             onChange={(e) => setContactId(e.target.value)}
           >
@@ -199,7 +199,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </label>
           <select
             id="company"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
             value={companyId}
             onChange={(e) => setCompanyId(e.target.value)}
           >
@@ -228,7 +228,7 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
           </Button>
           <Button
             type="submit"
-            className="text-white bg-blue-600 hover:bg-blue-700"
+            className="text-white bg-brand-600 hover:bg-brand-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Creating...' : 'Create Deal'}

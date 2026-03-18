@@ -110,7 +110,7 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
             <div>
               <label className="block text-sm font-medium text-zinc-700">Seu nome</label>
               <input
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={payerName}
                 onChange={(e) => setPayerName(e.target.value)}
                 required
@@ -120,7 +120,7 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
               <div>
                 <label className="block text-sm font-medium text-zinc-700">Email (opcional)</label>
                 <input
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={payerEmail}
                   onChange={(e) => setPayerEmail(e.target.value)}
                   type="email"
@@ -129,7 +129,7 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
               <div>
                 <label className="block text-sm font-medium text-zinc-700">WhatsApp/Telefone (opcional)</label>
                 <input
-                  className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   value={payerPhone}
                   onChange={(e) => setPayerPhone(e.target.value)}
                 />
@@ -138,7 +138,7 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
             <div>
               <label className="block text-sm font-medium text-zinc-700">Forma de pagamento</label>
               <select
-                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="mt-1 w-full rounded-lg border border-zinc-300 px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-brand-500"
                 value={billingType}
                 onChange={(e) => setBillingType(e.target.value)}
               >
@@ -157,7 +157,7 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
             <button
               type="submit"
               disabled={isSubmitting || !payerName.trim()}
-              className="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-brand-600 px-4 py-3 font-semibold text-white hover:bg-brand-700 disabled:opacity-50"
             >
               {isSubmitting ? 'Iniciando...' : 'Pagar agora'}
             </button>

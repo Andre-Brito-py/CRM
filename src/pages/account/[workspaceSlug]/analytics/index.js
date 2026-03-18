@@ -291,7 +291,7 @@ const Analytics = () => {
         <Content.Title title={t('Analytics')} subtitle={t('analytics.subtitle')} />
         <button
           onClick={exportToCSV}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium mb-2 shadow-sm"
+          className="px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 transition-colors text-sm font-medium mb-2 shadow-sm"
         >
           {t('analytics.export.button')}
         </button>
@@ -307,7 +307,7 @@ const Analytics = () => {
               <Card>
                 <Card.Body title={t('analytics.avgClosingTime.title')}>
                   <div className="flex flex-col items-center justify-center h-full py-6">
-                    <CountUp value={avgClosingTime || 0} className="text-5xl font-bold text-blue-600" />
+                    <CountUp value={avgClosingTime || 0} className="text-5xl font-bold text-brand-600" />
                     <span className="text-gray-500 text-lg mt-2">{t('analytics.avgClosingTime.days')}</span>
                     <p className="text-sm text-gray-400 mt-4 text-center">
                       {t('analytics.avgClosingTime.subtitle')}

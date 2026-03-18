@@ -1124,3 +1124,15 @@ model InternalChatBridgeWorkspace {
   @@index([workspaceId])
   @@map("internal_chat_bridge_workspaces")
 }
+
+model SystemError {
+  id        String   @id @default(cuid())
+  message   String   @db.Text
+  stack     String?  @db.Text
+  context   Json?    @default("{}")
+  level     String   @default("error")
+  createdAt DateTime @default(now())
+
+  @@index([level, createdAt])
+  @@map("system_errors")
+}

@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import prisma from '@/prisma/index';
 
 const hasSentryDsn = () => Boolean(process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN);
 
@@ -53,6 +54,23 @@ const sanitizeValue = (value, keyHint = '', depth = 0) => {
 
 const normalizeMeta = (meta) => sanitizeValue(meta || {}, '', 0);
 
+const persistError = async ({ level, msg, error, context }) => {
+  try {
+    const serialized = error ? serializeError(error) : null;
+    await prisma.systemError.create({
+      data: {
+        level,
+        message: serialized?.message || String(msg || 'Unknown Error'),
+        stack: serialized?.stack || null,
+        context: normalizeMeta(context || {}),
+      },
+    });
+  } catch (err) {
+    // Fail silently to avoid infinite loops or crashing the logger
+    console.error('Failed to persist system error:', err);
+  }
+};
+
 export const log = ({ level = 'info', msg, ...meta }) => {
   const entry = {
     ts: new Date().toISOString(),
@@ -63,12 +81,17 @@ export const log = ({ level = 'info', msg, ...meta }) => {
   const line = JSON.stringify(entry);
   if (level === 'error' || level === 'warn') {
     console.error(line);
+    // Persist to DB asynchronously
+    persistError({ level, msg, context: meta });
     return;
   }
   console.log(line);
 };
 
 export const reportError = (error, context = {}) => {
+  // Persist to DB
+  persistError({ level: 'error', error, context });
+
   if (!hasSentryDsn()) return;
   try {
     const meta = normalizeMeta(context);

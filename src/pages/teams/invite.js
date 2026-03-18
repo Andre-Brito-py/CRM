@@ -50,7 +50,7 @@ const Invite = ({ workspace }) => {
               <Card.Footer>
                 {data ? (
                   <Button
-                    className="text-white bg-blue-600 hover:bg-blue-500"
+                    className="text-white bg-brand-600 hover:bg-brand-500"
                     disabled={isSubmitting}
                     onClick={join}
                   >
@@ -59,7 +59,7 @@ const Invite = ({ workspace }) => {
                 ) : (
                   <Link
                     href="/auth/login"
-                    className="flex items-center justify-center px-5 py-2 space-x-3 text-white bg-blue-600 rounded hover:bg-blue-500"
+                    className="flex items-center justify-center px-5 py-2 space-x-3 text-white bg-brand-600 rounded hover:bg-brand-500"
                   >
                     Create an account
                   </Link>

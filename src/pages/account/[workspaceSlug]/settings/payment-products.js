@@ -168,7 +168,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                 {products.length} {products.length === 1 ? 'produto' : 'produtos'}
               </div>
               {isTeamOwner ? (
-                <Button className="text-white bg-blue-600 hover:bg-blue-700 flex items-center gap-2" onClick={openCreate}>
+                <Button className="text-white bg-brand-600 hover:bg-brand-700 flex items-center gap-2" onClick={openCreate}>
                   <PlusIcon className="w-4 h-4" />
                   <span>Novo produto</span>
                 </Button>
@@ -199,11 +199,11 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                       <td className="px-4 py-2 text-sm">
                         {mounted ? (
                           <div className="flex items-center gap-2">
-                            <a className="text-blue-600 hover:underline" href={linkFor(p)} target="_blank" rel="noreferrer">
+                            <a className="text-brand-600 hover:underline" href={linkFor(p)} target="_blank" rel="noreferrer">
                               Abrir
                             </a>
                             <CopyToClipboard text={linkFor(p)} onCopy={copyToClipboard}>
-                              <button type="button" className="text-gray-500 hover:text-blue-600" title="Copiar link">
+                              <button type="button" className="text-gray-500 hover:text-brand-600" title="Copiar link">
                                 <DocumentDuplicateIcon className="w-4 h-4" />
                               </button>
                             </CopyToClipboard>
@@ -301,7 +301,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                 <input
                   id="productActive"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                   checked={Boolean(form.active)}
                   onChange={(e) => setForm((s) => ({ ...s, active: e.target.checked }))}
                   disabled={isSubmitting || !isTeamOwner}
@@ -313,7 +313,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
               <Button className="bg-gray-100 hover:bg-gray-200" type="button" onClick={closeModal}>
                 Cancelar
               </Button>
-              <Button className="text-white bg-blue-600 hover:bg-blue-700" disabled={isSubmitting || !isTeamOwner}>
+              <Button className="text-white bg-brand-600 hover:bg-brand-700" disabled={isSubmitting || !isTeamOwner}>
                 {isSubmitting ? 'Salvando...' : 'Salvar'}
               </Button>
             </div>

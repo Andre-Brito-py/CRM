@@ -132,7 +132,7 @@ const ImportContacts = () => {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Name</label>
                   <select
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                     value={mapping.name}
                     onChange={(e) => handleMappingChange('name', e.target.value)}
                   >
@@ -145,7 +145,7 @@ const ImportContacts = () => {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Email</label>
                   <select
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                     value={mapping.email}
                     onChange={(e) => handleMappingChange('email', e.target.value)}
                   >
@@ -158,7 +158,7 @@ const ImportContacts = () => {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Phone</label>
                   <select
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                     value={mapping.phone}
                     onChange={(e) => handleMappingChange('phone', e.target.value)}
                   >
@@ -171,7 +171,7 @@ const ImportContacts = () => {
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Job Title</label>
                   <select
-                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                     value={mapping.jobTitle}
                     onChange={(e) => handleMappingChange('jobTitle', e.target.value)}
                   >
@@ -185,7 +185,7 @@ const ImportContacts = () => {
                   <div key={field.key} className="sm:col-span-2">
                     <label className="block text-sm font-medium text-gray-700">{field.label} ({field.type})</label>
                     <select
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                       value={mapping.customFields[field.key] || ''}
                       onChange={(e) => handleMappingChange(field.key, e.target.value, true)}
                     >
@@ -204,7 +204,7 @@ const ImportContacts = () => {
             <button
               type="button"
               onClick={() => router.back()}
-              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
+              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 mr-3"
             >
               Cancel
             </button>
@@ -212,7 +212,7 @@ const ImportContacts = () => {
               type="button"
               onClick={handleSubmit}
               disabled={isUploading || !file}
-              className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${(isUploading || !file) ? 'opacity-50 cursor-not-allowed' : ''
+              className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500 ${(isUploading || !file) ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
             >
               {isUploading ? 'Importing...' : 'Import Contacts'}

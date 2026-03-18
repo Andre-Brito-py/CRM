@@ -82,7 +82,7 @@ const WebhookDeliveriesModal = ({ isOpen, toggle, slug, webhookId }) => {
                         </p>
                         <Button
                           type="button"
-                          className="text-xs px-2 py-1 bg-white text-blue-600 border border-blue-600 hover:bg-blue-50"
+                          className="text-xs px-2 py-1 bg-white text-brand-600 border border-brand-600 hover:bg-brand-50"
                           onClick={async (e) => {
                             e.stopPropagation();
                             try {

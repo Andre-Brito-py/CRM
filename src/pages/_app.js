@@ -163,7 +163,12 @@ const App = ({ Component, pageProps }) => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setHasConsent(localStorage.getItem('closify_cookie_consent') === 'true');
+      try {
+        const prefs = JSON.parse(localStorage.getItem('closify_cookie_prefs_v2') || '{}');
+        setHasConsent(prefs.analytics === true);
+      } catch (e) {
+        setHasConsent(false);
+      }
     }
   }, []);
 

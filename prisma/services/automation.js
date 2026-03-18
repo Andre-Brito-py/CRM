@@ -370,6 +370,15 @@ const evaluateTriggerConditions = async (workspaceId, triggerConfig, eventData) 
   const operatorRaw = `${triggerConfig?.operator || 'AND'}`.trim().toUpperCase();
   const operator = operatorRaw === 'OR' ? 'OR' : 'AND';
 
+  if (triggerConfig?.triggerType === 'CONTACT_TAG_ADDED' || eventData?.eventType === 'CONTACT_TAG_ADDED') {
+    const ruleTagId = triggerConfig?.tagId;
+    const eventTagId = eventData?.tagId;
+    if (ruleTagId && eventTagId) {
+      const passed = ruleTagId === eventTagId;
+      details.push({ type: 'tag_added', passed, expected: ruleTagId, received: eventTagId });
+    }
+  }
+
   const stageId = triggerConfig?.stageId || null;
   if (stageId) {
     const eventStageId = eventData?.stageId || eventData?.deal?.stageId || null;
@@ -633,6 +642,12 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
       break;
     case 'SEND_NPS':
       await executeSendNpsAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'UPDATE_CUSTOM_FIELD':
+      await executeUpdateCustomFieldAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'STOP_AUTOMATIONS':
+      await executeStopAutomationsAction(workspaceId, actionConfig, eventData);
       break;
     default:
       console.warn(`Unknown action type: ${actionType}`);
@@ -1781,3 +1796,133 @@ const executeSendNpsAction = async (workspaceId, actionConfig, eventData) => {
     });
   }
 };
+const executeUpdateCustomFieldAction = async (workspaceId, actionConfig, eventData) => {
+  const { fieldName, fieldValue, targetType } = actionConfig; // targetType: 'CONTACT' or 'DEAL'
+  if (!fieldName) {
+    console.warn('Missing fieldName for UPDATE_CUSTOM_FIELD action');
+    return;
+  }
+
+  const renderedValue = await renderTemplateString(workspaceId, String(fieldValue || ''), eventData);
+
+  if (targetType === 'CONTACT' || (!targetType && eventData.contactId)) {
+    const contactId = eventData.contactId || eventData.contact?.id;
+    if (!contactId) return;
+
+    const contact = await prisma.contact.findUnique({ where: { id: contactId }, select: { customFields: true } });
+    const customFields = { ...(typeof contact?.customFields === 'object' ? contact.customFields : {}), [fieldName]: renderedValue };
+
+    await prisma.contact.update({
+      where: { id: contactId },
+      data: { customFields }
+    });
+  } else {
+    const dealId = eventData.dealId || eventData.deal?.id || eventData.id;
+    if (!dealId) return;
+
+    const deal = await prisma.deal.findUnique({ where: { id: dealId }, select: { customFields: true } });
+    const customFields = { ...(typeof deal?.customFields === 'object' ? deal.customFields : {}), [fieldName]: renderedValue };
+
+    await prisma.deal.update({
+      where: { id: dealId },
+      data: { customFields }
+    });
+  }
+};
+
+const executeStopAutomationsAction = async (workspaceId, actionConfig, eventData) => {
+  const contactId = eventData.contactId || eventData.contact?.id;
+  if (!contactId) return;
+
+  // Cancel pending jobs for this contact
+  const jobs = await prisma.automationJob.updateMany({
+    where: {
+      workspaceId,
+      status: 'PENDING',
+      eventData: { path: ['contactId'], equals: contactId }
+    },
+    data: {
+      status: 'CANCELLED',
+      lastError: 'stopped_by_automation'
+    }
+  });
+
+  console.log(`Stopped ${jobs.count} pending automations for contact ${contactId}`);
+};
+
+async function executeSendWhatsAppAction(workspaceId, actionConfig, eventData) {
+  const { templateId } = actionConfig;
+  const contactId = eventData.contactId || eventData.contact?.id;
+  if (!contactId || !templateId) return;
+
+  const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+  if (!contact || !contact.phone) return;
+
+  const template = await prisma.messageTemplate.findUnique({ where: { id: templateId } });
+  if (!template) return;
+
+  const body = await renderTemplateString(workspaceId, template.content, eventData);
+  await sendWhatsAppMessage(workspaceId, contact.phone, body);
+}
+
+async function executeSendEmailAction(workspaceId, actionConfig, eventData) {
+  const { subject, body, from } = actionConfig;
+  const contactId = eventData.contactId || eventData.contact?.id;
+  if (!contactId) return;
+
+  const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+  if (!contact || !contact.email) return;
+
+  const renderedSubject = await renderTemplateString(workspaceId, subject, eventData);
+  const renderedBody = await renderTemplateString(workspaceId, body, eventData);
+
+  await sendMail({
+    to: contact.email,
+    subject: renderedSubject,
+    text: renderedBody,
+    from: from || undefined
+  });
+}
+
+async function executeAssignToUserAction(workspaceId, actionConfig, eventData) {
+  const { userId } = actionConfig;
+  const conversationId = eventData.conversation?.id;
+  if (!conversationId || !userId) return;
+
+  await prisma.conversation.update({
+    where: { id: conversationId },
+    data: { assigneeId: userId }
+  });
+}
+
+async function executeSendNotificationAction(workspaceId, actionConfig, eventData) {
+  const { userIdToNotify, title, content, link } = actionConfig;
+  if (!userIdToNotify || !title) return;
+
+  const renderedTitle = await renderTemplateString(workspaceId, title, eventData);
+  const renderedContent = content ? await renderTemplateString(workspaceId, content, eventData) : null;
+  const renderedLink = link ? await renderTemplateString(workspaceId, link, eventData) : null;
+
+  await prisma.notification.create({
+    data: {
+      workspaceId,
+      userId: userIdToNotify,
+      title: renderedTitle,
+      content: renderedContent,
+      link: renderedLink,
+      status: 'UNREAD'
+    }
+  });
+}
+
+async function executeSendNpsAction(workspaceId, actionConfig, eventData) {
+  const { surveyId, channel } = actionConfig;
+  const contactId = eventData.contactId || eventData.contact?.id;
+  if (!contactId || !surveyId) return;
+
+  const contact = await prisma.contact.findUnique({ where: { id: contactId } });
+  if (!contact) return;
+
+  // Logic to generate survey link and send it...
+  // For now, we skip actual implementation of NPS sending as it depends on NPS service
+}

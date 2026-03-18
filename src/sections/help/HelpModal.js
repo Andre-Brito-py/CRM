@@ -116,7 +116,7 @@ const HELP_CATEGORIES = [
 /* ─── Step component for Tutorial cards ────────────────────────────── */
 const Step = ({ number, title, desc }) => (
   <div className="flex gap-4 items-start">
-    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shadow-lg shadow-blue-500/30">
+    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-600 text-white text-sm font-bold flex items-center justify-center shadow-lg shadow-brand-500/30">
       {number}
     </div>
     <div>
@@ -271,9 +271,9 @@ const TUTORIAL_CONTENT = {
           <Step number={8} title='Clique em "Save Rule"' desc='A regra entra em vigor imediatamente para novas ocorrências.' />
         </div>
 
-        <div className="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-700/40 rounded-xl space-y-2">
-          <p className="text-xs font-bold text-blue-700 dark:text-blue-400">📋 Exemplo prático</p>
-          <p className="text-xs text-blue-700 dark:text-blue-500 leading-relaxed">
+        <div className="mt-5 p-4 bg-brand-50 dark:bg-blue-900/20 border border-brand-100 dark:border-brand-700/40 rounded-xl space-y-2">
+          <p className="text-xs font-bold text-brand-700 dark:text-blue-400">📋 Exemplo prático</p>
+          <p className="text-xs text-brand-700 dark:text-brand-500 leading-relaxed">
             <b>Regra:</b> &quot;Roteamento de clientes VIP&quot;<br />
             <b>Gatilho:</b> Nova Mensagem Recebida<br />
             <b>Condição:</b> Tag do contato = &quot;VIP&quot;<br />
@@ -324,7 +324,7 @@ const TUTORIAL_CONTENT = {
             ['{{workspace.name}}', 'Nome da sua empresa'],
           ].map(([v, d]) => (
             <div key={v} className="flex items-center gap-3">
-              <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md font-medium">{v}</span>
+              <span className="bg-brand-100 dark:bg-blue-900/40 text-brand-700 dark:text-blue-300 px-2 py-0.5 rounded-md font-medium">{v}</span>
               <span className="text-zinc-500 dark:text-zinc-400">{d}</span>
             </div>
           ))}
@@ -374,7 +374,7 @@ const TUTORIAL_CONTENT = {
             const Icon = p.icon;
             return (
               <div key={p.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
-                <div className="text-blue-600 dark:text-blue-400 mb-2"><Icon className="w-6 h-6" /></div>
+                <div className="text-brand-600 dark:text-blue-400 mb-2"><Icon className="w-6 h-6" /></div>
                 <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mb-1">{p.name}</p>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{p.desc}</p>
               </div>
@@ -499,16 +499,16 @@ const TUTORIAL_CONTENT = {
           <Step number={4} title='Leia o painel azul de resumo' desc='O resumo aparece em destaque abaixo do cabeçalho, com:' />
         </div>
 
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-700/40 rounded-xl p-4 space-y-2">
-          <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400">
+        <div className="bg-brand-50 dark:bg-blue-900/20 border border-brand-100 dark:border-brand-700/40 rounded-xl p-4 space-y-2">
+          <div className="flex items-start gap-2 text-xs text-brand-700 dark:text-blue-400">
             <span className="mt-0.5">🎯</span>
             <span><b>Problema/Necessidade principal</b> do cliente nesta conversa</span>
           </div>
-          <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400">
+          <div className="flex items-start gap-2 text-xs text-brand-700 dark:text-blue-400">
             <span className="mt-0.5">📋</span>
             <span><b>O que foi dito e prometido</b> pelos agentes até agora</span>
           </div>
-          <div className="flex items-start gap-2 text-xs text-blue-700 dark:text-blue-400">
+          <div className="flex items-start gap-2 text-xs text-brand-700 dark:text-blue-400">
             <span className="mt-0.5">→</span>
             <span><b>Próximo passo recomendado</b> pela IA para fechar o atendimento</span>
           </div>
@@ -544,9 +544,9 @@ const TUTORIAL_CONTENT = {
           <Step number={5} title='Compartilhe a Página Pública' desc='Clique no ícone de "Olho" ou copie o link para divulgá-lo. Visitantes verão uma página atraente carregando suas perguntas.' />
         </div>
 
-        <div className="mt-5 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-700/40 rounded-xl space-y-2">
-          <p className="text-xs font-bold text-blue-700 dark:text-blue-400">🔥 Como Funciona a Captura de Leads?</p>
-          <p className="text-xs text-blue-700 dark:text-blue-500 leading-relaxed">
+        <div className="mt-5 p-4 bg-brand-50 dark:bg-blue-900/20 border border-brand-100 dark:border-brand-700/40 rounded-xl space-y-2">
+          <p className="text-xs font-bold text-brand-700 dark:text-blue-400">🔥 Como Funciona a Captura de Leads?</p>
+          <p className="text-xs text-brand-700 dark:text-brand-500 leading-relaxed">
             Se o visitante preencher um email ou telefone que já existe na base, o <b>Contato é atualizado</b> sem duplicatas. Uma <b>Nota</b> será registrada na timeline do Contato, e o <b>Deal</b> surgirá no Kanban como mágica!
           </p>
         </div>
@@ -753,14 +753,14 @@ const HelpModal = ({ isOpen, toggle }) => {
           <div className="flex gap-1 p-3 pb-0">
             <button
               onClick={() => setMode('help')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${mode === 'help' ? 'bg-blue-600 text-white shadow-md' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all ${mode === 'help' ? 'bg-brand-600 text-white shadow-md' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
             >
               {t('help.modal.title')}
             </button>
             <button
               onClick={() => setMode('tutorials')}
-              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${mode === 'tutorials' ? 'bg-blue-600 text-white shadow-md' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+              className={`flex-1 py-2 text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-1 ${mode === 'tutorials' ? 'bg-brand-600 text-white shadow-md' : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800'
                 }`}
             >
               <AcademicCapIcon className="h-3.5 w-3.5" />
@@ -775,7 +775,7 @@ const HelpModal = ({ isOpen, toggle }) => {
               <input
                 type="text"
                 placeholder={t('help.search.placeholder')}
-                className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/20"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -792,7 +792,7 @@ const HelpModal = ({ isOpen, toggle }) => {
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/25'
                     : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
@@ -811,7 +811,7 @@ const HelpModal = ({ isOpen, toggle }) => {
                   key={key}
                   onClick={() => setActiveTutorial(key)}
                   className={`flex items-start gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all text-left ${isActive
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25'
+                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/25'
                     : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
@@ -819,7 +819,7 @@ const HelpModal = ({ isOpen, toggle }) => {
                   <div className="flex flex-col">
                     <span>{tut.title}</span>
                     {tut.subtitle && (
-                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-blue-100' : 'text-zinc-500'}`}>
+                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-brand-100' : 'text-zinc-500'}`}>
                         {tut.subtitle}
                       </span>
                     )}
@@ -835,11 +835,11 @@ const HelpModal = ({ isOpen, toggle }) => {
           {mode === 'help' && (
             <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center gap-4 mb-6">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl">
+                <div className="p-3 bg-brand-100 dark:bg-blue-900/30 rounded-2xl">
                   {(() => {
                     const cat = HELP_CATEGORIES.find((c) => c.key === activeCategory);
                     const Icon = cat?.icon || QuestionMarkCircleIcon;
-                    return <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />;
+                    return <Icon className="h-6 w-6 text-brand-600 dark:text-blue-400" />;
                   })()}
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -856,7 +856,7 @@ const HelpModal = ({ isOpen, toggle }) => {
                 <p className="text-xs text-gray-400 dark:text-zinc-500 mb-2">{t('help.footer.text')}</p>
                 <button
                   onClick={() => { setMode('tutorials'); setSearchQuery(''); }}
-                  className="text-xs font-semibold text-blue-600 hover:underline"
+                  className="text-xs font-semibold text-brand-600 hover:underline"
                 >
                   📚 Ver tutoriais passo-a-passo →
                 </button>
@@ -871,8 +871,8 @@ const HelpModal = ({ isOpen, toggle }) => {
                   const Icon = TUTORIAL_CONTENT[activeTutorial]?.icon;
                   if (!Icon) return null;
                   return (
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <Icon className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    <div className="p-2 bg-brand-100 dark:bg-blue-900/30 rounded-lg">
+                      <Icon className="h-6 w-6 text-brand-600 dark:text-blue-400" />
                     </div>
                   );
                 })()}

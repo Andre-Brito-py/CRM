@@ -24,10 +24,10 @@ const Payments = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">Pagamentos</h1>
           <div className="flex items-center gap-3">
-            <Link href="/admin/payments/overdue" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+            <Link href="/admin/payments/overdue" className="text-sm font-medium text-brand-600 hover:text-brand-700">
               Atrasados
             </Link>
-            <Link href="/admin/payments/forecast" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+            <Link href="/admin/payments/forecast" className="text-sm font-medium text-brand-600 hover:text-brand-700">
               Previsão
             </Link>
           </div>
@@ -125,7 +125,7 @@ const Payments = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' :
-                              payment.subscriptionType === 'STANDARD' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                              payment.subscriptionType === 'STANDARD' ? 'bg-brand-100 text-blue-800' : 'bg-gray-100 text-gray-800'
                               }`}>
                               {payment.subscriptionType}
                             </span>

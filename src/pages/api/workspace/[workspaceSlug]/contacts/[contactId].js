@@ -1,6 +1,7 @@
 import { getSession } from 'next-auth/react';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getContact, updateContact, deleteContact } from '@/prisma/services/contact';
+import { processAutomation } from '@/prisma/services/automation';
 
 export default async function handler(req, res) {
   const session = await getSession({ req });
@@ -47,6 +48,21 @@ export default async function handler(req, res) {
         ...data,
         ...(tags ? { tags } : {}),
       });
+
+      if (tags?.connect) {
+        const tagConnect = Array.isArray(tags.connect) ? tags.connect : [tags.connect];
+        for (const t of tagConnect) {
+          if (t.id) {
+            processAutomation(workspace.id, 'CONTACT_TAG_ADDED', {
+              contactId,
+              contact,
+              tagId: t.id,
+              eventType: 'CONTACT_TAG_ADDED'
+            }).catch(console.error);
+          }
+        }
+      }
+
       res.status(200).json({ data: { contact } });
       break;
     }

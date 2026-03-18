@@ -55,7 +55,7 @@ const AddCompanyModal = ({ isOpen, toggle, slug }) => {
           <input
             type="text"
             id="name"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -68,7 +68,7 @@ const AddCompanyModal = ({ isOpen, toggle, slug }) => {
           <input
             type="text"
             id="website"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={website}
             onChange={(e) => setWebsite(e.target.value)}
             placeholder="example.com"
@@ -81,7 +81,7 @@ const AddCompanyModal = ({ isOpen, toggle, slug }) => {
           <input
             type="text"
             id="industry"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={industry}
             onChange={(e) => setIndustry(e.target.value)}
             placeholder="Technology, Retail, etc."
@@ -98,7 +98,7 @@ const AddCompanyModal = ({ isOpen, toggle, slug }) => {
           </Button>
           <Button
             type="submit"
-            className="text-white bg-blue-600 hover:bg-blue-700"
+            className="text-white bg-brand-600 hover:bg-brand-700"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Creating...' : 'Create Company'}

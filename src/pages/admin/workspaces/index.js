@@ -35,7 +35,7 @@ const Workspaces = () => {
                           <div className="flex items-center">
                             <BuildingOfficeIcon className="h-10 w-10 text-gray-400 p-2 bg-gray-100 rounded-full" />
                             <div className="ml-4">
-                              <p className="text-sm font-medium text-blue-600 truncate">{workspace.name}</p>
+                              <p className="text-sm font-medium text-brand-600 truncate">{workspace.name}</p>
                               <p className="text-sm text-gray-500">/{workspace.slug}</p>
                             </div>
                           </div>

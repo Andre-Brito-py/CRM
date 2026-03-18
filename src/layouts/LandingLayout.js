@@ -9,7 +9,9 @@ const LandingLayout = ({ children }) => {
   }, [setTheme]);
 
   return (
-    <main className="relative flex flex-col text-gray-800">{children}</main>
+    <main className="relative flex flex-col bg-white text-zinc-900 overflow-x-hidden pt-16">
+      {children}
+    </main>
   );
 };
 

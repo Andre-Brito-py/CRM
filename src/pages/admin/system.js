@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import Link from 'next/link';
-import { CheckCircleIcon, XCircleIcon, CpuChipIcon, ServerIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, CpuChipIcon, ServerIcon, ClockIcon, BugAntIcon, TrashIcon } from '@heroicons/react/24/outline';
 import formatDistance from 'date-fns/formatDistance';
 import toast from 'react-hot-toast';
 
@@ -33,6 +33,11 @@ const System = () => {
     session ? '/api/admin/system/zapier-webhooks' : null,
     fetcher,
     { refreshInterval: 15000 }
+  );
+  const { data: errorsData, mutate: mutateErrors } = useSWR(
+    session ? '/api/admin/system/errors' : null,
+    fetcher,
+    { refreshInterval: 30000 }
   );
   const [running, setRunning] = useState(null);
   const [incidentTitle, setIncidentTitle] = useState('');
@@ -65,6 +70,8 @@ const System = () => {
 
   const metrics = health?.metrics || null;
   const zapier = zapierData?.data || null;
+  const systemErrors = errorsData?.data?.errors || [];
+  const errorsPagination = errorsData?.data?.pagination || null;
 
   useEffect(() => {
     if (!zapier) return;
@@ -211,30 +218,108 @@ const System = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          )}
 
-              {/* Payments */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="p-5">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <ServerIcon className="h-6 w-6 text-rose-400" aria-hidden="true" />
-                    </div>
-                    <div className="ml-5 w-0 flex-1">
-                      <dl>
-                        <dt className="text-sm font-medium text-gray-500 truncate">Payments</dt>
-                        <dd>
-                          <div className="text-lg font-medium text-gray-900">
-                            Overdue: {metrics?.payments?.overdue ?? 0}
-                          </div>
-                        </dd>
-                      </dl>
-                    </div>
-                  </div>
+          {health && (
+            <div className="mt-8 bg-white shadow overflow-hidden sm:rounded-lg">
+              <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+                <div>
+                  <h3 className="text-lg leading-6 font-medium text-gray-900">Erros do Sistema</h3>
+                  <p className="mt-1 max-w-2xl text-sm text-gray-500">Log persistente de erros e avisos capturados.</p>
                 </div>
-                <div className="bg-gray-50 px-5 py-3">
-                  <div className="text-sm text-gray-500">
-                    Updated {formatDistance(new Date(health.timestamp), new Date(), { addSuffix: true })}
-                  </div>
+                {systemErrors.length > 0 && (
+                  <button
+                    onClick={async () => {
+                      if (!window.confirm('Tem certeza que deseja limpar todos os erros?')) return;
+                      try {
+                        const res = await api('/api/admin/system/errors?all=true', { method: 'DELETE' });
+                        if (res?.error?.msg) throw new Error(res.error.msg);
+                        toast.success('Todos os erros foram limpos');
+                        mutateErrors();
+                      } catch (e) {
+                        toast.error(e.message);
+                      }
+                    }}
+                    className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200"
+                  >
+                    <TrashIcon className="h-4 w-4 mr-1" /> Limpar tudo
+                  </button>
+                )}
+              </div>
+              <div className="border-t border-gray-200">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mensagem</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contexto</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {systemErrors.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-10 text-center text-sm text-gray-500">
+                            Nenhum erro persistido no momento.
+                          </td>
+                        </tr>
+                      ) : (
+                        systemErrors.map((err) => (
+                          <tr key={err.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${err.level === 'error' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                                {err.level.toUpperCase()}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm text-gray-900 font-medium max-w-md truncate" title={err.message}>
+                                {err.message}
+                              </div>
+                              {err.stack && (
+                                <button 
+                                  onClick={() => window.alert(err.stack)}
+                                  className="text-xs text-indigo-600 hover:text-indigo-900 mt-1"
+                                >
+                                  Ver stack trace
+                                </button>
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-xs text-gray-500 font-mono">
+                                {err.context ? JSON.stringify(parseJson(err.context) || err.context).substring(0, 100) : '-'}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {formatDistance(new Date(err.createdAt), new Date(), { addSuffix: true })}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button
+                                onClick={async () => {
+                                  try {
+                                    const res = await api('/api/admin/system/errors', { 
+                                      method: 'DELETE',
+                                      body: { id: err.id }
+                                    });
+                                    if (res?.error?.msg) throw new Error(res.error.msg);
+                                    toast.success('Erro removido');
+                                    mutateErrors();
+                                  } catch (e) {
+                                    toast.error(e.message);
+                                  }
+                                }}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Excluir
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -617,7 +702,7 @@ const System = () => {
                     <div className="text-sm font-medium text-gray-900">Últimos incidentes</div>
                     <button
                       type="button"
-                      className="text-sm text-blue-600 hover:text-blue-700"
+                      className="text-sm text-brand-600 hover:text-brand-700"
                       onClick={() => mutateIncidents()}
                     >
                       Atualizar

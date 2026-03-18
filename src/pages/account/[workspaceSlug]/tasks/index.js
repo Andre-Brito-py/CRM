@@ -99,7 +99,7 @@ const Tasks = () => {
                     <tr key={task.id}>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link href={`/account/${workspace.slug}/tasks/${task.id}`}>
-                          <a className="text-sm font-medium text-blue-600 hover:text-blue-900">
+                          <a className="text-sm font-medium text-brand-600 hover:text-blue-900">
                             {task.title}
                           </a>
                         </Link>
@@ -134,7 +134,7 @@ const Tasks = () => {
                 <div key={task.id} className="bg-white shadow rounded-lg p-4 border border-gray-200">
                   <div className="flex justify-between items-start">
                     <Link href={`/account/${workspace.slug}/tasks/${task.id}`}>
-                      <a className="text-sm font-medium text-blue-600 hover:text-blue-900 line-clamp-2">
+                      <a className="text-sm font-medium text-brand-600 hover:text-blue-900 line-clamp-2">
                         {task.title}
                       </a>
                     </Link>
@@ -192,7 +192,7 @@ const Tasks = () => {
             <h3 className="text-lg font-medium text-gray-900">{t('tasks.empty.title')}</h3>
             <p className="mt-1 text-gray-500">{t('tasks.empty.subtitle')}</p>
             <button
-              className="mt-4 flex items-center px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-500"
+              className="mt-4 flex items-center px-4 py-2 text-white bg-brand-600 rounded hover:bg-brand-500"
               onClick={toggleModal}
             >
               <PlusIcon className="w-5 h-5 mr-2" />

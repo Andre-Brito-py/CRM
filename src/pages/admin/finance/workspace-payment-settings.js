@@ -115,12 +115,12 @@ const WorkspacePaymentSettings = () => {
         <Card>
           <Card.Body title="Provider por workspace" subtitle="Selecione o gateway e sobrescreva taxas se necessário">
             {workspaceSlugFilter ? (
-              <div className="mb-4 flex items-center justify-between rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
+              <div className="mb-4 flex items-center justify-between rounded-lg border border-brand-100 bg-brand-50 px-4 py-3">
                 <div className="text-sm text-blue-900">
                   Filtro ativo: <span className="font-semibold">/{workspaceSlugFilter}</span>
                 </div>
                 <Button
-                  className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg text-sm font-bold"
+                  className="text-white bg-brand-600 hover:bg-brand-700 px-3 py-2 rounded-lg text-sm font-bold"
                   onClick={() => router.replace('/admin/finance/workspace-payment-settings')}
                 >
                   Limpar filtro
@@ -219,7 +219,7 @@ const WorkspacePaymentSettings = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             <Button
-                              className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold"
+                              className="text-white bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-lg text-sm font-bold"
                               onClick={() => save(w)}
                               disabled={disabled}
                             >

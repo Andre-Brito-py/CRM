@@ -261,7 +261,7 @@ const Billing = ({ invoices, products }) => {
                 <Card.Footer>
                   <div className="w-full flex space-x-2">
                     <Button
-                      className={`flex-1 text-white ${!product.prices.id ? 'bg-zinc-400' : 'bg-blue-600 hover:bg-blue-500'}`}
+                      className={`flex-1 text-white ${!product.prices.id ? 'bg-zinc-400' : 'bg-brand-600 hover:bg-brand-500'}`}
                       disabled={isSubmitting || !product.prices.id}
                       onClick={() => subscribe(product.prices.id)}
                     >

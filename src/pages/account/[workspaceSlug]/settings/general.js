@@ -146,7 +146,7 @@ const General = ({ isTeamOwner, workspace }) => {
               <small>Please use 16 characters at maximum</small>
               {isTeamOwner && (
                 <Button
-                  className="text-white bg-blue-600 hover:bg-blue-500"
+                  className="text-white bg-brand-600 hover:bg-brand-500"
                   disabled={!validName || isSubmitting}
                   onClick={changeName}
                 >
@@ -179,7 +179,7 @@ const General = ({ isTeamOwner, workspace }) => {
               </small>
               {isTeamOwner && (
                 <Button
-                  className="text-white bg-blue-600 hover:bg-blue-500"
+                  className="text-white bg-brand-600 hover:bg-brand-500"
                   disabled={!validSlug || isSubmitting}
                   onClick={changeSlug}
                 >
@@ -199,7 +199,7 @@ const General = ({ isTeamOwner, workspace }) => {
                   onCopy={copyToClipboard}
                   text={workspace.workspaceCode}
                 >
-                  <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-blue-600" />
+                  <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-brand-600" />
                 </CopyToClipboard>
               </div>
             </Card.Body>
@@ -244,12 +244,12 @@ const General = ({ isTeamOwner, workspace }) => {
                     { id: 'clinic', name: 'Clinic', icon: '⚕️' },
                     { id: 'agency', name: 'Agency / B2B', icon: '💼' },
                   ].map(preset => (
-                    <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-blue-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
+                    <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-brand-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
                       <span className="text-3xl mb-2">{preset.icon}</span>
                       <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{preset.name}</h4>
                       <p className="text-xs text-zinc-500 mt-2">Pipelines, Fields & Tags</p>
                       <Button
-                        className="mt-4 w-full bg-blue-600 text-white hover:bg-blue-700 text-xs py-1.5"
+                        className="mt-4 w-full bg-brand-600 text-white hover:bg-brand-700 text-xs py-1.5"
                         onClick={async () => {
                           if (confirm(`Are you sure you want to apply the ${preset.name} preset? This will add new pipelines and fields to your workspace.`)) {
                             try {

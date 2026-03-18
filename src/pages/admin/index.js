@@ -78,7 +78,7 @@ const AdminDashboard = () => {
           <div className="py-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg leading-6 font-medium text-gray-900">Recent Users</h2>
-              <Link href="/admin/users" className="text-sm font-medium text-blue-600 hover:text-blue-500">
+              <Link href="/admin/users" className="text-sm font-medium text-brand-600 hover:text-brand-500">
                 View all
               </Link>
             </div>
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.customerPayment?.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' : user.customerPayment?.subscriptionType === 'STANDARD' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${user.customerPayment?.subscriptionType === 'PREMIUM' ? 'bg-yellow-100 text-yellow-800' : user.customerPayment?.subscriptionType === 'STANDARD' ? 'bg-brand-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
                                 {user.customerPayment?.subscriptionType || 'FREE'}
                               </span>
                             </td>

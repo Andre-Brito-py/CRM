@@ -1,185 +1,104 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { CheckIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 import { useTranslation } from "react-i18next";
-
-const parseFeatures = (featuresData) => {
-  try {
-    if (!featuresData) return [];
-    if (Array.isArray(featuresData)) return featuresData;
-    if (typeof featuresData === 'string') return JSON.parse(featuresData);
-    if (typeof featuresData === 'object') {
-      return Object.entries(featuresData).map(([key, value]) => `${key}: ${value}`);
-    }
-    return [];
-  } catch (e) {
-    console.error('Error parsing features:', e);
-    return [];
-  }
-};
-
-const getCurrencyFormatter = (currency) => {
-  const normalizedCurrency = currency || 'BRL';
-  const locale = normalizedCurrency === 'BRL' ? 'pt-BR' : 'en-US';
-
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency: normalizedCurrency,
-    maximumFractionDigits: 2,
-  });
-};
+import { CheckIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Pricing = ({ products }) => {
   const { t } = useTranslation();
-  const [isAnnual, setIsAnnual] = useState(false);
+  const [isAnnual, setIsAnnual] = useState(true);
 
   return (
-    <div id="pricing" className="w-full py-32 bg-[#050505] relative overflow-hidden border-t border-zinc-900">
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-600/10 rounded-full blur-[150px]" />
-
-      <div className="relative flex flex-col items-center max-w-7xl px-6 mx-auto lg:px-8 space-y-20">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col items-center text-center max-w-3xl"
-        >
-          <h2 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-            {t("landing.pricing.title", "Plans that scale with your ambitions.")}
-          </h2>
-          <p className="mt-6 text-xl text-zinc-400 leading-relaxed">
-            {t("landing.pricing.subtitle", "Start free, upgrade when you need more power. Transparent pricing for high-performance teams.")}
-          </p>
-          
-          <div className="mt-10 flex items-center justify-center p-1.5 bg-zinc-900/60 rounded-full border border-zinc-800">
-            <button
-              onClick={() => setIsAnnual(false)}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all ${
-                !isAnnual ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              {t("landing.pricing.monthly", "Mensal")}
-            </button>
-            <button
-              onClick={() => setIsAnnual(true)}
-              className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
-                isAnnual ? 'bg-indigo-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'
-              }`}
-            >
-              {t("landing.pricing.annually", "Anual")}
-              {products?.some(p => p.annualDiscount > 0) && (
-                <span className="text-[10px] sm:text-xs uppercase tracking-wider bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">
-                  {t("landing.pricing.saveUpTo", "Economize")} {Math.max(...products.map(p => p.annualDiscount || 0))}%
-                </span>
-              )}
-            </button>
-          </div>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-6xl">
-          {products?.length > 0 ? (
-            products.map((product, index) => {
-              const slug = String(product?.slug || '').trim().toUpperCase();
-              const isMostPopular = slug ? slug === 'STANDARD' : index === 1;
-              const featuresList = parseFeatures(product.features);
-              const currencyFormatter = getCurrencyFormatter(product.currency);
-              const isFree = Number(product.price) === 0;
-              const hasAnnualPrice = product.priceAnnual != null && product.priceAnnual > 0;
-              const displayPrice = isAnnual && hasAnnualPrice ? Number(product.priceAnnual) / 12 : Number(product.price);
-              const intervalParam = isAnnual && hasAnnualPrice ? 'year' : 'month';
-              const intervalLabel = t('landing.pricing.month', '/mês');
-
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.15 }}
-                  whileHover={{ y: -8 }}
-                  className={`flex flex-col relative overflow-hidden rounded-3xl ${isMostPopular
-                    ? 'bg-zinc-900 border-2 border-indigo-500 shadow-2xl shadow-indigo-500/20 md:-mt-8 md:mb-8'
-                    : 'bg-[#0a0a0b] border border-zinc-800'
-                    }`}
-                >
-                  {isMostPopular && (
-                    <div className="absolute top-0 left-0 w-full bg-indigo-600 py-1.5 text-center text-xs font-bold text-white uppercase tracking-wider">
-                      {t("landing.pricing.popular", "Mais Popular")}
-                    </div>
-                  )}
-
-                  <div className={`p-10 ${isMostPopular ? 'pt-12' : ''} space-y-6 flex-1`}>
-                    <h3 className="text-2xl font-bold text-white">{t(`landing.pricing.plan.${product.name}.name`, product.name)}</h3>
-                    <p className="text-zinc-400 min-h-[48px]">{t(`landing.pricing.plan.${product.name}.desc`, product.description)}</p>
-
-                    <div className="flex flex-col my-8">
-                      <div className="flex items-baseline space-x-2">
-                        <span className="text-5xl font-extrabold text-white">
-                          {isFree ? t('landing.pricing.free', 'Grátis') : currencyFormatter.format(displayPrice)}
-                        </span>
-                        {!isFree && <span className="text-zinc-500 font-medium">{intervalLabel}</span>}
-                      </div>
-                      {!isFree && isAnnual && hasAnnualPrice && (
-                        <div className="flex flex-col gap-1 mt-2">
-                          <p className="text-sm text-green-400 font-medium">Cobrado {currencyFormatter.format(product.priceAnnual)} por ano</p>
-                          {product.annualDiscount > 0 && (
-                            <p className="text-xs text-green-500/80 font-bold uppercase tracking-tight">Economia de {product.annualDiscount}% no plano anual</p>
-                          )}
-                        </div>
-                      )}
-                      {!isFree && !isAnnual && hasAnnualPrice && (
-                        <p className="text-sm text-zinc-500 mt-2 opacity-0">Placeholder</p> // Maintain height
-                      )}
-                    </div>
-
-                    <Link
-                      href={{
-                        pathname: '/auth/register',
-                        query: product?.slug ? { plan: product.slug, interval: intervalParam } : undefined,
-                      }}
-                      className={`flex items-center justify-center w-full px-6 py-4 text-base font-bold rounded-xl transition-all ${isMostPopular
-                        ? 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg'
-                        : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                        }`}
-                    >
-                      {t("landing.pricing.getStarted", "Começar Agora")}
-                    </Link>
-
-                    <div className="pt-8 mt-8 border-t border-zinc-800">
-                      <p className="text-sm font-medium text-white mb-6 uppercase tracking-wider">{t("landing.pricing.included", "What's included")}</p>
-                      <ul className="space-y-4">
-                        {featuresList.length > 0 ? (
-                          featuresList.map((featureItem, i) => {
-                            const featureKey = `landing.pricing.feature.${featureItem.replace(/[^a-zA-Z0-9]/g, '')}`;
-                            return (
-                              <li key={i} className="flex items-start">
-                                <CheckIcon className={`w-5 h-5 mr-3 shrink-0 ${isMostPopular ? 'text-indigo-400' : 'text-zinc-500'}`} />
-                                <span className="text-zinc-300">{t(featureKey, featureItem)}</span>
-                              </li>
-                            );
-                          })
-                        ) : (
-                          <li className="flex items-start">
-                            <CheckIcon className={`w-5 h-5 mr-3 shrink-0 ${isMostPopular ? 'text-indigo-400' : 'text-zinc-500'}`} />
-                            <span className="text-zinc-300">Full CRM Access</span>
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })
-          ) : (
-            <div className="w-full col-span-3 text-center py-20">
-              <p className="text-zinc-500 text-xl">{t("landing.pricing.empty", "Pricing plans are currently being updated.")}</p>
+    <section id="pricing" className="w-full py-40 bg-white relative overflow-hidden font-executive border-t border-zinc-100">
+      {/* Visual Vitality - Background Glows */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full -translate-y-1/2" />
+      <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-violet-500/5 blur-[100px] rounded-full translate-y-1/2" />
+      <div className="max-w-7xl mx-auto px-8 relative z-10">
+        
+        {/* Header */}
+        <div className="text-center mb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center px-4 py-2 mb-6 text-[10px] font-black text-indigo-600 bg-indigo-50 rounded-full border border-indigo-100 tracking-[0.2em] uppercase">
+               Pricing Architecture
             </div>
-          )}
+            <h2 className="text-5xl md:text-7xl font-black text-zinc-900 tracking-tighter uppercase mb-8">
+               Planos <br />
+               <span className="text-zinc-400">Escaláveis.</span>
+            </h2>
+          </motion.div>
+        </div>
+
+        {/* Billing Toggle - Enhanced Visibility */}
+        <div className="flex flex-col items-center mb-24">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="flex items-center gap-8 bg-zinc-100/50 p-2 rounded-[24px] border border-zinc-200"
+          >
+            <button 
+              onClick={() => setIsAnnual(false)}
+              className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!isAnnual ? 'bg-white text-indigo-600 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
+            >
+              Faturamento Mensal
+            </button>
+            <button 
+              onClick={() => setIsAnnual(true)}
+              className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 ${isAnnual ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' : 'text-zinc-400 hover:text-zinc-600'}`}
+            >
+              Anual
+              <span className={`px-2 py-0.5 rounded-md text-[8px] font-black ${isAnnual ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'}`}>-20%</span>
+            </button>
+          </motion.div>
+        </div>
+
+        {/* Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+          {products?.map((plan, index) => (
+            <motion.div
+              key={plan.id || index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className={`relative p-12 bg-white rounded-[40px] border ${plan.name.toLowerCase().includes('standard') ? 'border-indigo-500 shadow-2xl scale-105 z-10' : 'border-zinc-100 shadow-xl'} transition-all`}
+            >
+              {plan.name.toLowerCase().includes('standard') && (
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 px-4 py-2 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-full">
+                  Mais Popular
+                </div>
+              )}
+              
+              <div className="mb-10">
+                <h3 className="text-xl font-black text-zinc-900 uppercase tracking-widest mb-2">{plan.name}</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-black text-zinc-900 tracking-tighter">R$ {isAnnual ? (Number(plan.priceAnnual) || Number(plan.price) * 0.8).toFixed(0) : Number(plan.price)}</span>
+                  <span className="text-zinc-400 text-sm font-bold uppercase tracking-widest">/ mês</span>
+                </div>
+              </div>
+
+              <ul className="space-y-6 mb-12">
+                {Array.isArray(plan.features) && plan.features.slice(0, 5).map((feature, i) => (
+                  <li key={i} className="flex items-start gap-4 text-sm font-medium text-zinc-500">
+                    <div className="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+                    </div>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <button className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.name.toLowerCase().includes('standard') ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}>
+                Escolher Plano
+              </button>
+            </motion.div>
+          ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

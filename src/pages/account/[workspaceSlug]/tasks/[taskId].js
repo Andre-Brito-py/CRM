@@ -136,7 +136,7 @@ const TaskDetail = () => {
               <input
                 type="text"
                 id="title"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -149,7 +149,7 @@ const TaskDetail = () => {
               <textarea
                 id="content"
                 rows={5}
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
               />
@@ -162,7 +162,7 @@ const TaskDetail = () => {
                 </label>
                 <select
                   id="assigneeId"
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                   value={assigneeId}
                   onChange={(e) => setAssigneeId(e.target.value)}
                 >
@@ -181,7 +181,7 @@ const TaskDetail = () => {
                 </label>
                 <select
                   id="priority"
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
                 >
@@ -199,7 +199,7 @@ const TaskDetail = () => {
                 </label>
                 <select
                   id="contactId"
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                   value={contactId}
                   onChange={(e) => setContactId(e.target.value)}
                 >
@@ -218,7 +218,7 @@ const TaskDetail = () => {
                 </label>
                 <select
                   id="dealId"
-                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                   value={dealId}
                   onChange={(e) => setDealId(e.target.value)}
                 >
@@ -239,7 +239,7 @@ const TaskDetail = () => {
               <input
                 type="datetime-local"
                 id="dueDate"
-                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
               />
@@ -250,7 +250,7 @@ const TaskDetail = () => {
                 <input
                   id="isCompleted"
                   type="checkbox"
-                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  className="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
                   checked={isCompleted}
                   onChange={(e) => setIsCompleted(e.target.checked)}
                 />
@@ -270,7 +270,7 @@ const TaskDetail = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-white bg-brand-600 rounded hover:bg-brand-500 disabled:opacity-50"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Saving...' : 'Save Changes'}

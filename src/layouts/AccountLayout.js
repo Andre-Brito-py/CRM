@@ -118,7 +118,7 @@ const AccountLayout = ({ children }) => {
   if (status === 'loading') return <></>;
 
   return (
-    <main className="relative flex flex-col w-screen h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900 transition-colors duration-300">
+    <main className="relative flex flex-col w-screen h-screen overflow-hidden selection:bg-brand-100 selection:text-brand-900 transition-colors duration-300">
       {/* Top navigation bar */}
       <Topbar menu={filteredMenu} staticMenu={staticMenu} />
 

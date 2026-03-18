@@ -102,7 +102,7 @@ const PaymentsSettings = ({ isTeamOwner, workspace }) => {
                 </div>
                 <div className="flex justify-end">
                   <Button
-                    className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-bold"
+                    className="text-white bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-lg text-sm font-bold"
                     disabled={isSaving || !isTeamOwner}
                     type="submit"
                   >

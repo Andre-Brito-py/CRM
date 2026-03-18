@@ -1,7 +1,20 @@
 import { useEffect, useState } from 'react';
 import { getServerSession } from 'next-auth/next';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { 
+  PlusIcon, 
+  TrashIcon, 
+  Bars2Icon, 
+  CalendarIcon, 
+  HashtagIcon, 
+  ChevronDownIcon, 
+  CheckIcon, 
+  CurrencyDollarIcon, 
+  LinkIcon, 
+  PhoneIcon,
+  QueueListIcon
+} from '@heroicons/react/24/outline';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
 import { AccountLayout } from '@/layouts/index';
@@ -11,6 +24,21 @@ import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import { authOptions } from '@/lib/server/auth';
+
+const FieldTypeIcon = ({ type, className = "w-5 h-5" }) => {
+  switch (type) {
+    case 'text': return <Bars2Icon className={className} />;
+    case 'date': return <CalendarIcon className={className} />;
+    case 'number': return <HashtagIcon className={className} />;
+    case 'select': return <ChevronDownIcon className={className} />;
+    case 'multi-select': return <QueueListIcon className={className} />;
+    case 'checkbox': return <CheckIcon className={className} />;
+    case 'currency': return <CurrencyDollarIcon className={className} />;
+    case 'url': return <LinkIcon className={className} />;
+    case 'phone': return <PhoneIcon className={className} />;
+    default: return <Bars2Icon className={className} />;
+  }
+};
 
 const CustomFields = ({ workspace }) => {
   const { t } = useTranslation();
@@ -45,7 +73,14 @@ const CustomFields = ({ workspace }) => {
   }, [workspace, setWorkspace]);
 
   const addField = () => {
-    setFields([...fields, { key: '', label: '', type: 'text' }]);
+    setFields([...fields, { 
+      key: '', 
+      label: '', 
+      type: 'text', 
+      id: Math.random().toString(36).substr(2, 9),
+      required: false,
+      area: 'both'
+    }]);
   };
 
   const removeField = (index) => {
@@ -57,11 +92,18 @@ const CustomFields = ({ workspace }) => {
   const updateField = (index, key, value) => {
     const newFields = [...fields];
     newFields[index][key] = value;
-    // Auto-generate key from label if key is empty and we're updating the label
     if (key === 'label' && !newFields[index].key) {
       newFields[index].key = value.toLowerCase().replace(/[^a-z0-9]/g, '_');
     }
     setFields(newFields);
+  };
+
+  const onDragEnd = (result) => {
+    if (!result.destination) return;
+    const items = Array.from(fields);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    setFields(items);
   };
 
   const saveFields = async () => {
@@ -71,9 +113,9 @@ const CustomFields = ({ workspace }) => {
         body: { customFieldDefinitions: fields },
         method: 'PUT',
       });
-      toast.success('Custom fields saved successfully');
+      toast.success(t('Custom fields saved successfully'));
     } catch (error) {
-      toast.error('Failed to save custom fields');
+      toast.error(t('Failed to save custom fields'));
     } finally {
       setIsSubmitting(false);
     }
@@ -83,130 +125,187 @@ const CustomFields = ({ workspace }) => {
     <AccountLayout>
       <OnboardingTour tourId="custom-fields-tour" steps={customFieldsSteps} />
       <Meta title={`Closify - ${workspace.name} | Custom Fields`} />
-      <Content.Title
-        title="Custom Fields"
-        subtitle="Define custom fields for your contacts and deals"
-      />
-      <Content.Divider />
-      <Content.Container>
-        <div id="fields-container" className="bg-white dark:bg-zinc-900 shadow sm:rounded-lg border border-zinc-200 dark:border-zinc-800">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="space-y-4">
-              {fields.map((field, index) => (
-                <div key={index} className="flex items-start space-x-4 p-6 border border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
-                  <div className="flex-1 grid grid-cols-1 gap-6 sm:grid-cols-3">
-                    <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Label</label>
-                      <input
-                        type="text"
-                        value={field.label || ''}
-                        onChange={(e) => updateField(index, 'label', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        placeholder="e.g. Birthday"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Key (Internal)</label>
-                      <input
-                        type="text"
-                        value={field.key || ''}
-                        onChange={(e) => updateField(index, 'key', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                        placeholder="e.g. birthday"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Type</label>
-                      <select
-                        value={field.type || 'text'}
-                        onChange={(e) => updateField(index, 'type', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      >
-                        <option value="text">Text</option>
-                        <option value="date">Date</option>
-                        <option value="number">Number</option>
-                        <option value="select">Select (Dropdown)</option>
-                        <option value="multi-select">Multi-Select</option>
-                        <option value="checkbox">Checkbox</option>
-                        <option value="currency">Currency</option>
-                        <option value="url">URL</option>
-                        <option value="phone">Phone</option>
-                      </select>
-                    </div>
-
-                    {(field.type === 'select' || field.type === 'multi-select') && (
-                      <div className="sm:col-span-3">
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Options (comma separated)</label>
-                        <input
-                          type="text"
-                          value={field.options || ''}
-                          onChange={(e) => updateField(index, 'options', e.target.value)}
-                          className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                          placeholder="Option 1, Option 2, Option 3"
-                        />
-                      </div>
-                    )}
-
-                    <div className="sm:col-span-1">
-                      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Visibility (Area)</label>
-                      <select
-                        value={field.area || 'both'}
-                        onChange={(e) => updateField(index, 'area', e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      >
-                        <option value="both">Both (Sales & Support)</option>
-                        <option value="sales">Sales Only</option>
-                        <option value="support">Support Only</option>
-                      </select>
-                    </div>
-
-                    <div className="sm:col-span-2 flex items-center pt-6">
-                      <div className="flex items-center h-5">
-                        <input
-                          id={`required-${index}`}
-                          type="checkbox"
-                          checked={field.required || false}
-                          onChange={(e) => updateField(index, 'required', e.target.checked)}
-                          className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-zinc-300 dark:border-zinc-700 rounded bg-white dark:bg-zinc-900"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor={`required-${index}`} className="font-medium text-zinc-700 dark:text-zinc-300">Required Field</label>
-                        <p className="text-zinc-500 dark:text-zinc-400">If checked, users must fill this field when creating/editing.</p>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => removeField(index)}
-                    className="mt-6 text-red-600 hover:text-red-800"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-4 flex justify-between">
-              <button
-                id="add-field-btn"
-                onClick={addField}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <PlusIcon className="-ml-1 mr-2 h-5 w-5 text-gray-500" />
-                Add Field
-              </button>
-
-              <button
-                onClick={saveFields}
-                disabled={isSubmitting}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
+      
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-executive font-bold text-zinc-900 tracking-tight mb-2">
+              Custom Fields
+            </h1>
+            <p className="text-zinc-500 font-medium font-executive">
+              Define custom properties to track unique data for your contacts and deals.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button
+              id="add-field-btn"
+              onClick={addField}
+              className="inline-flex items-center px-6 py-3 bg-white border border-zinc-200 text-zinc-900 font-executive font-bold rounded-2xl shadow-sm hover:bg-zinc-50 hover:border-zinc-300 transition-all active:scale-95"
+            >
+              <PlusIcon className="w-5 h-5 mr-2 text-brand-600" />
+              Add New Property
+            </button>
+            <button
+              onClick={saveFields}
+              disabled={isSubmitting}
+              className="inline-flex items-center px-8 py-3 bg-brand-600 text-white font-executive font-bold rounded-2xl shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50"
+            >
+              {isSubmitting ? t('common.action.saving') : 'Save Configuration'}
+            </button>
           </div>
         </div>
-      </Content.Container>
+
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="custom-fields">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                id="fields-container"
+                className="space-y-4"
+              >
+                {fields.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center p-20 bg-zinc-50/50 border-2 border-dashed border-zinc-200 rounded-[40px] text-center">
+                    <div className="w-20 h-20 bg-white rounded-3xl shadow-premium flex items-center justify-center mb-6">
+                      <Bars2Icon className="w-10 h-10 text-zinc-300" />
+                    </div>
+                    <h3 className="text-xl font-executive font-bold text-zinc-900 mb-2">No custom fields yet</h3>
+                    <p className="text-zinc-400 max-w-sm font-executive">Create your first custom property to start tailoring Closify to your business needs.</p>
+                  </div>
+                ) : (
+                  fields.map((field, index) => (
+                    <Draggable key={field.id || index} draggableId={String(field.id || index)} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`group bg-white p-2 rounded-[32px] border transition-all duration-300 ${
+                            snapshot.isDragging 
+                              ? 'shadow-2xl border-brand-500/30 ring-4 ring-brand-500/5 rotate-1 z-50' 
+                              : 'shadow-premium border-zinc-100 hover:border-zinc-200'
+                          }`}
+                        >
+                          <div className="flex items-start gap-4 p-4 lg:p-6">
+                            <div 
+                              {...provided.dragHandleProps}
+                              className="mt-2 p-2 text-zinc-300 hover:text-zinc-500 hover:bg-zinc-50 rounded-xl transition-colors cursor-grab active:cursor-grabbing"
+                            >
+                              <Bars2Icon className="w-6 h-6" />
+                            </div>
+
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                              <div className="lg:col-span-1">
+                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Label</label>
+                                <input
+                                  type="text"
+                                  value={field.label || ''}
+                                  onChange={(e) => updateField(index, 'label', e.target.value)}
+                                  className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[15px] font-executive font-bold focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
+                                  placeholder="e.g. Birthday"
+                                />
+                              </div>
+                              <div className="lg:col-span-1">
+                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Internal Key</label>
+                                <input
+                                  type="text"
+                                  value={field.key || ''}
+                                  onChange={(e) => updateField(index, 'key', e.target.value)}
+                                  className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-medium text-zinc-500 focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
+                                  placeholder="e.g. birthday"
+                                />
+                              </div>
+                              <div className="lg:col-span-1">
+                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Field Type</label>
+                                <div className="relative">
+                                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-600">
+                                    <FieldTypeIcon type={field.type} />
+                                  </div>
+                                  <select
+                                    value={field.type || 'text'}
+                                    onChange={(e) => updateField(index, 'type', e.target.value)}
+                                    className="w-full h-12 pl-12 pr-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-executive font-bold appearance-none focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all cursor-pointer"
+                                  >
+                                    <option value="text">Text</option>
+                                    <option value="date">Date</option>
+                                    <option value="number">Number</option>
+                                    <option value="select">Select (Dropdown)</option>
+                                    <option value="multi-select">Multi-Select</option>
+                                    <option value="checkbox">Checkbox</option>
+                                    <option value="currency">Currency</option>
+                                    <option value="url">URL</option>
+                                    <option value="phone">Phone</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="lg:col-span-1 flex items-center justify-end">
+                                <button
+                                  onClick={() => removeField(index)}
+                                  className="p-3 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                                  title="Delete field"
+                                >
+                                  <TrashIcon className="w-6 h-6" />
+                                </button>
+                              </div>
+
+                              {(field.type === 'select' || field.type === 'multi-select') && (
+                                <div className="lg:col-span-4">
+                                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Options (Comma separated)</label>
+                                  <input
+                                    type="text"
+                                    value={field.options || ''}
+                                    onChange={(e) => updateField(index, 'options', e.target.value)}
+                                    className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-medium focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
+                                    placeholder="Option 1, Option 2, Option 3"
+                                  />
+                                </div>
+                              )}
+
+                              <div className="lg:col-span-2">
+                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Visibility Range</label>
+                                <div className="flex bg-zinc-50/50 p-1 rounded-[18px] border border-zinc-100">
+                                  {['both', 'sales', 'support'].map((a) => (
+                                    <button
+                                      key={a}
+                                      onClick={() => updateField(index, 'area', a)}
+                                      className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-[14px] transition-all ${
+                                        (field.area || 'both') === a 
+                                          ? 'bg-white text-zinc-900 shadow-premium' 
+                                          : 'text-zinc-400 hover:text-zinc-600 font-executive'
+                                      }`}
+                                    >
+                                      {a === 'both' ? 'All Areas' : a}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="lg:col-span-2 flex items-center gap-4">
+                                <div className="flex-1 flex items-center">
+                                  <label className="relative flex items-center cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={field.required || false}
+                                      onChange={(e) => updateField(index, 'required', e.target.checked)}
+                                      className="sr-only peer"
+                                    />
+                                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                                    <span className="ml-4 text-[13px] font-executive font-bold text-zinc-700">Mandatory Field</span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))
+                )}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </div>
     </AccountLayout>
   );
 };

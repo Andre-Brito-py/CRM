@@ -1,97 +1,85 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from "react-i18next";
-
-const getTestimonials = (t) => [
-  {
-    quote: t("landing.testimonial.quote", "Nossas taxas de resposta no WhatsApp caíram de 45 min para 3 min. O resumo por IA nas conversas com clientes enterprise salva pelo menos 2h de cada vendedor por dia. Simplesmente o melhor sistema B2B do mercado."),
-    author: t("landing.testimonial.author", "Renato Diniz"),
-    role: t("landing.testimonial.role", "Diretor Comercial, TechVision"),
-    color: "from-indigo-500 to-purple-600"
-  },
-  {
-    quote: t("landing.testimonial1.quote", "O Form Builder mudou nossa captura de leads. Em uma semana, triplicamos a entrada de contatos qualificados sem mexer em uma linha de código."),
-    author: t("landing.testimonial1.author", "Marcos Oliveira"),
-    role: t("landing.testimonial1.role", "Head de Marketing, GrowthOps"),
-    color: "from-emerald-400 to-teal-600"
-  },
-  {
-    quote: t("landing.testimonial2.quote", "Os relatórios de NPS do Closify nos deram a clareza que faltava. Agora sabemos exatamente onde melhorar para reter nossos clientes."),
-    author: t("landing.testimonial2.author", "Juliana Costa"),
-    role: t("landing.testimonial2.role", "Customer Success Manager, SkyNet"),
-    color: "from-orange-500 to-rose-600"
-  },
-  {
-    quote: t("landing.testimonial3.quote", "A segurança e os logs de auditoria foram decisivos para nossa migração. É raro encontrar um CRM tão flexível e ao mesmo tempo tão seguro."),
-    author: t("landing.testimonial3.author", "Henrique Souza"),
-    role: t("landing.testimonial3.role", "Diretor de Operações, SafeCapital"),
-    color: "from-blue-500 to-indigo-600"
-  },
-  {
-    quote: t("landing.testimonial.quote2", "A facilidade de criar campos no-code permitiu que a gente adaptasse o funil de vendas exatamente pro nosso nicho de mercado imobiliário. O funil não é engessado como outros CRMs caríssimos."),
-    author: t("landing.testimonial.author2", "Larissa Cunha"),
-    role: t("landing.testimonial.role2", "Gerente de Expansão, VendaMais Imóveis"),
-    color: "from-pink-500 to-purple-600"
-  },
-  {
-    quote: t("landing.testimonial.quote3", "Mudar para o Closify CRM duplicou nossa capacidade de follow-up. Conseguimos ver exatamente qual cliente está 'frio' pra reaquecer com automações de disparo rápido."),
-    author: t("landing.testimonial.author3", "Mariano Silva"),
-    role: t("landing.testimonial.role3", "Founding Partner, StartLabs"),
-    color: "from-yellow-500 to-orange-600"
-  }
-];
+import { StarIcon } from '@heroicons/react/24/solid';
 
 const Testimonial = () => {
   const { t } = useTranslation();
-  const testimonials = getTestimonials(t);
+
+  const testimonials = [
+    {
+      name: "Alexandre Silva",
+      role: "Diretor Comercial na TechFlow",
+      content: "O Closify mudou completamente a forma como gerimos nossos leads de WhatsApp. A automação é impecável e a interface é extremamente profissional.",
+      image: "https://i.pravatar.cc/150?u=alex"
+    },
+    {
+      name: "Beatriz Santos",
+      role: "CEO na InnovaSales",
+      content: "A transição das planilhas para o Closify foi o melhor investimento que fizemos este ano. A visibilidade do pipeline é um divisor de águas.",
+      image: "https://i.pravatar.cc/150?u=bea"
+    },
+    {
+      name: "Ricardo Oliveira",
+      role: "Head de Vendas na GlobalReach",
+      content: "Um CRM feito para quem realmente entende de vendas. As sugestões de IA e a organização por times facilitaram muito nossa escala global.",
+      image: "https://i.pravatar.cc/150?u=ric"
+    }
+  ];
+
   return (
-    <div className="w-full py-32 bg-[#0a0a0b] relative overflow-hidden">
-      <div className="absolute top-[20%] left-[20%] w-[30%] h-[30%] bg-indigo-600/10 rounded-full blur-[120px]" />
+    <section className="w-full py-40 bg-zinc-50 relative overflow-hidden font-executive">
+      <div className="max-w-[1400px] mx-auto px-8 relative z-10">
+        
+        {/* Header */}
+        <div className="text-center mb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center px-4 py-2 mb-6 text-[10px] font-black text-brand-600 bg-brand-50 rounded-full border border-brand-100 tracking-[0.2em] uppercase">
+               Proven Results
+            </div>
+            <h2 className="text-5xl md:text-7xl font-black text-zinc-900 tracking-tighter uppercase mb-8">
+               Aprovado por <br />
+               <span className="text-zinc-400">Líderes de Vendas.</span>
+            </h2>
+          </motion.div>
+        </div>
 
-      <div className="relative flex flex-col items-center px-6 mx-auto sm:px-8 max-w-7xl">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center justify-center px-4 py-1.5 mb-6 text-sm font-medium text-emerald-400 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-            {t("landing.testimonial.badge", "100% de Aprovação")}
-          </div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-white mb-6">Equipes de vendas inteiras estão mudando para o Closify</h2>
-        </motion.div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testi, i) => (
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {testimonials.map((t, index) => (
             <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              key={index}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative px-8 py-12 bg-zinc-900/40 border border-white/5 rounded-[2rem] hover:border-white/10 transition-colors backdrop-blur-sm flex flex-col justify-between"
+              transition={{ delay: index * 0.1 }}
+              className="p-10 bg-white border border-zinc-100 rounded-[40px] shadow-2xl flex flex-col gap-8 group hover:-translate-y-2 transition-transform duration-500"
             >
-              <div className="absolute -top-4 -left-4 text-8xl text-indigo-500/10 font-serif leading-none">&ldquo;</div>
-
-              <h3 className="relative z-10 text-lg md:text-xl font-medium leading-relaxed text-zinc-300 mb-10">
-                &ldquo;{testi.quote}&rdquo;
-              </h3>
-
-              <div className="relative z-10 flex items-center space-x-4 mt-auto">
-                <div className={`w-12 h-12 bg-gradient-to-br ${testi.color} rounded-full shadow-lg border-2 border-[#0a0a0b]`} />
-                <div>
-                  <h4 className="text-lg font-bold text-white tracking-tight leading-tight">
-                    {testi.author}
-                  </h4>
-                  <span className="text-zinc-500 text-sm font-medium">
-                    {testi.role}
-                  </span>
-                </div>
+              <div className="flex gap-1">
+                 {[1,2,3,4,5].map(i => (
+                    <StarIcon key={i} className="w-5 h-5 text-brand-500" />
+                 ))}
+              </div>
+              <p className="text-zinc-600 text-lg font-medium leading-relaxed flex-1 italic">
+                 "{t.content}"
+              </p>
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-full bg-zinc-100 overflow-hidden border-2 border-brand-50">
+                    <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                 </div>
+                 <div className="text-left">
+                    <p className="text-sm font-black text-zinc-900 uppercase tracking-tight">{t.name}</p>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{t.role}</p>
+                 </div>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

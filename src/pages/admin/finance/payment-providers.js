@@ -122,7 +122,7 @@ const CredentialsModal = ({ show, toggle, provider }) => {
           >
             Cancelar
           </Button>
-          <Button type="submit" className="text-white bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+          <Button type="submit" className="text-white bg-brand-600 hover:bg-brand-700" disabled={isSubmitting}>
             {isSubmitting ? 'Salvando...' : 'Salvar'}
           </Button>
         </div>
@@ -262,7 +262,7 @@ const PaymentProviders = () => {
                                 <span
                                   className={[
                                     'px-2 py-1 rounded-md text-xs font-semibold',
-                                    p.credentials?.sandbox ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500',
+                                    p.credentials?.sandbox ? 'bg-brand-50 text-brand-700' : 'bg-gray-100 text-gray-500',
                                   ].join(' ')}
                                 >
                                   Sandbox
@@ -319,7 +319,7 @@ const PaymentProviders = () => {
                       onChange={(e) => setPlatformFeeFixed(e.target.value)}
                     />
                   </div>
-                  <Button className="w-full text-white bg-blue-600 hover:bg-blue-700" disabled={isSavingFees}>
+                  <Button className="w-full text-white bg-brand-600 hover:bg-brand-700" disabled={isSavingFees}>
                     {isSavingFees ? 'Salvando...' : 'Salvar'}
                   </Button>
                 </form>

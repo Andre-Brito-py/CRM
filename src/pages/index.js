@@ -8,6 +8,7 @@ import {
   Guides,
   Hero,
   Pricing,
+  Stats,
   Testimonial,
 } from '@/sections/index';
 import { getAllPlans } from '@/prisma/services/plan';
@@ -50,6 +51,7 @@ const Home = ({ products }) => {
         description="The ultimate CRM platform to manage your leads, sales pipelines, and WhatsApp conversations in one place."
       />
       <Hero />
+      <Stats />
       <Features />
       <Pricing products={products} />
       <Testimonial />

@@ -31,6 +31,7 @@ const Automations = () => {
   // State for modal and form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalStep, setModalStep] = useState(1);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulateResult, setSimulateResult] = useState(null);
   const [simulateInputs, setSimulateInputs] = useState({
@@ -110,6 +111,7 @@ const Automations = () => {
     if (!isModalOpen) {
       setSimulateResult(null);
       setSimulateInputs({ contactId: '', dealId: '', message: '' });
+      setModalStep(1);
       setNewRule({
         name: '',
         triggerType: 'DEAL_STAGE_CHANGED',
@@ -390,7 +392,7 @@ const Automations = () => {
           {keywords ? (
             <span>
               {t('automations.trigger.contains')}{' '}
-              <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">{keywords}</span>
+              <span className="ml-1 px-2 py-0.5 bg-brand-100 text-blue-800 rounded text-xs">{keywords}</span>
             </span>
           ) : (
             t('automations.trigger.received')
@@ -425,7 +427,7 @@ const Automations = () => {
           {keywords ? (
             <span>
               {t('automations.trigger.contains')}{' '}
-              <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">{keywords}</span>
+              <span className="ml-1 px-2 py-0.5 bg-brand-100 text-blue-800 rounded text-xs">{keywords}</span>
             </span>
           ) : (
             t('automations.trigger.sent')
@@ -516,7 +518,7 @@ const Automations = () => {
       return (
         <span>
           {t('automations.action.applyTag')}{' '}
-          <span className="ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">{tagName}</span>
+          <span className="ml-1 px-2 py-0.5 bg-brand-100 text-blue-800 rounded text-xs">{tagName}</span>
         </span>
       );
     } else if (rule.actionType === 'MULTI_ACTIONS') {
@@ -557,7 +559,7 @@ const Automations = () => {
         <div className="flex justify-end mb-5">
           <button
             id="create-rule-btn"
-            className="premium-button flex items-center px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700"
+            className="premium-button flex items-center px-4 py-2 text-white bg-brand-600 rounded-md hover:bg-brand-700"
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -573,7 +575,7 @@ const Automations = () => {
             <div className="mt-6">
               <button
                 onClick={toggleModal}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-600 border border-transparent rounded-md shadow-sm hover:bg-brand-700"
               >
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
                 {t('automations.newRule')}
@@ -670,136 +672,109 @@ const Automations = () => {
             </Card.Body>
           </Card>
         </div>
-
         <Modal
           show={isModalOpen}
           toggle={toggleModal}
-          title={t('automations.modal.title')}
+          title={
+            <div className="flex flex-col">
+              <span>{t('automations.modal.title')}</span>
+              <div className="flex items-center space-x-2 mt-2">
+                {[1, 2, 3, 4].map((s) => (
+                  <div
+                    key={s}
+                    className={`h-1.5 w-full rounded-full ${modalStep >= s ? 'bg-brand-600' : 'bg-gray-200'}`}
+                  />
+                ))}
+              </div>
+            </div>
+          }
         >
           <form onSubmit={handleCreateRule} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">{t('automations.form.ruleName')}</label>
-              <input
-                type="text"
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                placeholder={t('automations.form.ruleNamePlaceholder')}
-                value={newRule.name}
-                onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
-              />
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.trigger.title')}</h4>
-              <div className="grid grid-cols-1 gap-4">
+            {modalStep === 1 && (
+              <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.when')}</label>
-                  <select
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
-                    value={newRule.triggerType}
-                    onChange={(e) => setNewRule({
-                      ...newRule,
-                      triggerType: e.target.value,
-                      triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', hours: { start: null, end: null }, requireAutopilotEnabled: false }
-                    })}
-                  >
-                    <option value="DEAL_STAGE_CHANGED">{t('automations.trigger.option.dealStageChanged')}</option>
-                    <option value="INCOMING_MESSAGE">{t('automations.trigger.option.incomingMessage')}</option>
-                    <option value="AUTOPILOT_ENABLED">{t('automations.trigger.option.autopilotEnabled')}</option>
-                    <option value="EMAIL_SENT">{t('automations.trigger.option.emailSent')}</option>
-                    <option value="PAYMENT_CREATED">{t('automations.trigger.option.paymentCreated')}</option>
-                    <option value="PAYMENT_PAID">{t('automations.trigger.option.paymentPaid')}</option>
-                    <option value="PAYMENT_FAILED">{t('automations.trigger.option.paymentFailed')}</option>
-                    <option value="NPS_RESPONSE_RECEIVED">{t('automations.trigger.option.npsResponseReceived')}</option>
-                    <option value="NPS_PROMOTER">{t('automations.trigger.option.npsPromoter')}</option>
-                    <option value="NPS_DETRACTOR">{t('automations.trigger.option.npsDetractor')}</option>
-                    <option value="SLA_BREACH">SLA Breach</option>
-                  </select>
+                  <label className="block text-sm font-medium text-gray-700">{t('automations.form.ruleName')}</label>
+                  <input
+                    type="text"
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                    placeholder={t('automations.form.ruleNamePlaceholder')}
+                    value={newRule.name}
+                    onChange={(e) => setNewRule({ ...newRule, name: e.target.value })}
+                  />
                 </div>
 
-                {newRule.triggerType === 'DEAL_STAGE_CHANGED' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.targetStage')}</label>
-                    <select
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                      value={newRule.triggerConfig.stageId}
-                      onChange={(e) => setNewRule({
-                        ...newRule,
-                        triggerConfig: { ...newRule.triggerConfig, stageId: e.target.value }
-                      })}
-                    >
-                      <option value="">{t('automations.trigger.selectStage')}</option>
-                      {allStages.map((stage) => (
-                        <option key={stage.id} value={stage.id}>
-                          {stage.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {(newRule.triggerType === 'INCOMING_MESSAGE' || newRule.triggerType === 'EMAIL_SENT') && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.keywords')}</label>
-                    <input
-                      type="text"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                      placeholder={t('automations.trigger.keywordsPlaceholder')}
-                      value={newRule.triggerConfig.keywords || ''}
-                      onChange={(e) => setNewRule({
-                        ...newRule,
-                        triggerConfig: { ...newRule.triggerConfig, keywords: e.target.value }
-                      })}
-                    />
-                  </div>
-                )}
-
-                {newRule.triggerType === 'SLA_BREACH' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Minutes without response</label>
-                    <input
-                      type="number"
-                      min="1"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                      placeholder="e.g. 15"
-                      value={newRule.triggerConfig.minutes || 15}
-                      onChange={(e) => setNewRule({
-                        ...newRule,
-                        triggerConfig: { ...newRule.triggerConfig, minutes: Number(e.target.value) }
-                      })}
-                    />
-                  </div>
-                )}
-
                 <div className="border-t pt-4">
-                  <h5 className="text-sm font-medium text-gray-900 mb-2">{t('automations.trigger.filtersTitle')}</h5>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.operator')}</label>
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.trigger.title')}</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.when')}</label>
                       <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
-                        value={newRule.triggerConfig.operator || 'AND'}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.triggerType}
                         onChange={(e) => setNewRule({
                           ...newRule,
-                          triggerConfig: { ...newRule.triggerConfig, operator: e.target.value }
+                          triggerType: e.target.value,
+                          triggerConfig: { stageId: '', keywords: '', tagId: '', platform: '', hours: { start: null, end: null }, requireAutopilotEnabled: false }
                         })}
                       >
-                        <option value="AND">{t('automations.trigger.filter.operator.and')}</option>
-                        <option value="OR">{t('automations.trigger.filter.operator.or')}</option>
+                        <option value="DEAL_STAGE_CHANGED">{t('automations.trigger.option.dealStageChanged')}</option>
+                        <option value="CONTACT_TAG_ADDED">{t('automations.trigger.option.contactTagAdded', 'Tag adicionada ao contato')}</option>
+                        <option value="INCOMING_MESSAGE">{t('automations.trigger.option.incomingMessage')}</option>
+                        <option value="AUTOPILOT_ENABLED">{t('automations.trigger.option.autopilotEnabled')}</option>
+                        <option value="EMAIL_SENT">{t('automations.trigger.option.emailSent')}</option>
+                        <option value="PAYMENT_CREATED">{t('automations.trigger.option.paymentCreated')}</option>
+                        <option value="PAYMENT_PAID">{t('automations.trigger.option.paymentPaid')}</option>
+                        <option value="PAYMENT_FAILED">{t('automations.trigger.option.paymentFailed')}</option>
+                        <option value="NPS_RESPONSE_RECEIVED">{t('automations.trigger.option.npsResponseReceived')}</option>
+                        <option value="NPS_PROMOTER">{t('automations.trigger.option.npsPromoter')}</option>
+                        <option value="NPS_DETRACTOR">{t('automations.trigger.option.npsDetractor')}</option>
+                        <option value="SLA_BREACH">SLA Breach</option>
                       </select>
                     </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {modalStep === 2 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
+                  {newRule.triggerType === 'DEAL_STAGE_CHANGED' && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.tag')}</label>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.targetStage')}</label>
                       <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        value={newRule.triggerConfig.stageId}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          triggerConfig: { ...newRule.triggerConfig, stageId: e.target.value }
+                        })}
+                      >
+                        <option value="">{t('automations.trigger.selectStage')}</option>
+                        {allStages.map((stage) => (
+                          <option key={stage.id} value={stage.id}>
+                            {stage.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {newRule.triggerType === 'CONTACT_TAG_ADDED' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.applyTagSelect')}</label>
+                      <select
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                         value={newRule.triggerConfig.tagId || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
                           triggerConfig: { ...newRule.triggerConfig, tagId: e.target.value }
                         })}
                       >
-                        <option value="">{t('automations.trigger.filter.anyTag')}</option>
+                        <option value="">{t('automations.action.selectTag')}</option>
                         {tags.map((tag) => (
                           <option key={tag.id} value={tag.id}>
                             {tag.name}
@@ -807,229 +782,306 @@ const Automations = () => {
                         ))}
                       </select>
                     </div>
+                  )}
 
+                  {(newRule.triggerType === 'INCOMING_MESSAGE' || newRule.triggerType === 'EMAIL_SENT') && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.channel')}</label>
-                      <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
-                        value={newRule.triggerConfig.platform || ''}
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.keywords')}</label>
+                      <input
+                        type="text"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder={t('automations.trigger.keywordsPlaceholder')}
+                        value={newRule.triggerConfig.keywords || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
-                          triggerConfig: { ...newRule.triggerConfig, platform: e.target.value }
+                          triggerConfig: { ...newRule.triggerConfig, keywords: e.target.value }
                         })}
-                      >
-                        <option value="">{t('automations.trigger.filter.anyChannel')}</option>
-                        <option value="WHATSAPP">WHATSAPP</option>
-                        <option value="EMAIL">EMAIL</option>
-                        <option value="INSTAGRAM">INSTAGRAM</option>
-                      </select>
+                      />
                     </div>
+                  )}
 
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.requireAutopilot')}</label>
-                      <label className="mt-1 inline-flex items-center gap-2 text-sm text-gray-700">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(newRule.triggerConfig?.requireAutopilotEnabled)}
+                  {newRule.triggerType === 'SLA_BREACH' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Minutes without response</label>
+                      <input
+                        type="number"
+                        min="1"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder="e.g. 15"
+                        value={newRule.triggerConfig.minutes || 15}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          triggerConfig: { ...newRule.triggerConfig, minutes: Number(e.target.value) }
+                        })}
+                      />
+                    </div>
+                  )}
+
+                  <div className="border-t pt-4">
+                    <h5 className="text-sm font-medium text-gray-900 mb-2">{t('automations.trigger.filtersTitle')}</h5>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.operator')}</label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                          value={newRule.triggerConfig.operator || 'AND'}
                           onChange={(e) => setNewRule({
                             ...newRule,
-                            triggerConfig: { ...newRule.triggerConfig, requireAutopilotEnabled: e.target.checked }
+                            triggerConfig: { ...newRule.triggerConfig, operator: e.target.value }
                           })}
+                        >
+                          <option value="AND">{t('automations.trigger.filter.operator.and')}</option>
+                          <option value="OR">{t('automations.trigger.filter.operator.or')}</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.tag')}</label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                          value={newRule.triggerConfig.tagId || ''}
+                          onChange={(e) => setNewRule({
+                            ...newRule,
+                            triggerConfig: { ...newRule.triggerConfig, tagId: e.target.value }
+                          })}
+                        >
+                          <option value="">{t('automations.trigger.filter.anyTag')}</option>
+                          {tags.map((tag) => (
+                            <option key={tag.id} value={tag.id}>
+                              {tag.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.channel')}</label>
+                        <select
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                          value={newRule.triggerConfig.platform || ''}
+                          onChange={(e) => setNewRule({
+                            ...newRule,
+                            triggerConfig: { ...newRule.triggerConfig, platform: e.target.value }
+                          })}
+                        >
+                          <option value="">{t('automations.trigger.filter.anyChannel')}</option>
+                          <option value="WHATSAPP">WHATSAPP</option>
+                          <option value="EMAIL">EMAIL</option>
+                          <option value="INSTAGRAM">INSTAGRAM</option>
+                        </select>
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.requireAutopilot')}</label>
+                        <label className="mt-1 inline-flex items-center gap-2 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(newRule.triggerConfig?.requireAutopilotEnabled)}
+                            onChange={(e) => setNewRule({
+                              ...newRule,
+                              triggerConfig: { ...newRule.triggerConfig, requireAutopilotEnabled: e.target.checked }
+                            })}
+                          />
+                          {t('automations.trigger.filter.requireAutopilotHelp')}
+                        </label>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.startHour')}</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={23}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                          value={newRule.triggerConfig?.hours?.start ?? ''}
+                          onChange={(e) => {
+                            const v = e.target.value === '' ? null : Number(e.target.value);
+                            setNewRule({
+                              ...newRule,
+                              triggerConfig: { ...newRule.triggerConfig, hours: { ...(newRule.triggerConfig?.hours || {}), start: v } }
+                            });
+                          }}
                         />
-                        {t('automations.trigger.filter.requireAutopilotHelp')}
-                      </label>
-                    </div>
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.startHour')}</label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={23}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                        value={newRule.triggerConfig?.hours?.start ?? ''}
-                        onChange={(e) => {
-                          const v = e.target.value === '' ? null : Number(e.target.value);
-                          setNewRule({
-                            ...newRule,
-                            triggerConfig: { ...newRule.triggerConfig, hours: { ...(newRule.triggerConfig?.hours || {}), start: v } }
-                          });
-                        }}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.endHour')}</label>
-                      <input
-                        type="number"
-                        min={0}
-                        max={23}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                        value={newRule.triggerConfig?.hours?.end ?? ''}
-                        onChange={(e) => {
-                          const v = e.target.value === '' ? null : Number(e.target.value);
-                          setNewRule({
-                            ...newRule,
-                            triggerConfig: { ...newRule.triggerConfig, hours: { ...(newRule.triggerConfig?.hours || {}), end: v } }
-                          });
-                        }}
-                      />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">{t('automations.trigger.filter.endHour')}</label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={23}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                          value={newRule.triggerConfig?.hours?.end ?? ''}
+                          onChange={(e) => {
+                            const v = e.target.value === '' ? null : Number(e.target.value);
+                            setNewRule({
+                              ...newRule,
+                              triggerConfig: { ...newRule.triggerConfig, hours: { ...(newRule.triggerConfig?.hours || {}), end: v } }
+                            });
+                          }}
+                        />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
 
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.action.title')}</h4>
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('automations.action.doThis')}</label>
-                  <select
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
-                    value={newRule.actionType}
-                    onChange={(e) => {
-                      const next = e.target.value;
-                      const base = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', objective: '', cooldownMinutes: 0 };
-                      if (next === 'SEND_WHATSAPP') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'SEND_EMAIL') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'AUTO_REPLY_AI') setNewRule({ ...newRule, actionType: next, actionConfig: { objective: '', cooldownMinutes: 0 } });
-                      else if (next === 'ASSIGN_TO_USER') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'CREATE_TASK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'CALL_WEBHOOK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'MOVE_DEAL_STAGE') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'APPLY_TAG') setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                      else if (next === 'MULTI_ACTIONS') setNewRule({
-                        ...newRule,
-                        actionType: next,
-                        actionConfig: {
-                          actions: [
-                            { type: 'SEND_WHATSAPP', delayMinutes: 0, config: { templateId: '' } }
-                          ]
-                        }
-                      });
-                      else if (next === 'SEND_NOTIFICATION') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, userIdToNotify: '' } });
-                      else if (next === 'SEND_NPS') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, surveyId: '', channel: 'whatsapp' } });
-                      else setNewRule({ ...newRule, actionType: next, actionConfig: base });
-                    }}
-                  >
-                    <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
-                    {emailMarketingEnabled && (
-                      <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
-                    )}
-                    <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
-                    <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
-                    <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
-                    <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
-                    <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
-                    <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
-                    <option value="SEND_NOTIFICATION">Send In-App Notification</option>
-                    <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
-                    <option value="MULTI_ACTIONS">{t('automations.action.option.multiActions')}</option>
-                  </select>
-                </div>
+            {modalStep === 3 && (
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.action.title')}</h4>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.doThis')}</label>
+                      <select
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                        value={newRule.actionType}
+                        onChange={(e) => {
+                          const next = e.target.value;
+                          const base = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '', objective: '', cooldownMinutes: 0 };
+                          if (next === 'SEND_WHATSAPP') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'SEND_EMAIL') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'AUTO_REPLY_AI') setNewRule({ ...newRule, actionType: next, actionConfig: { objective: '', cooldownMinutes: 0 } });
+                          else if (next === 'ASSIGN_TO_USER') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'CREATE_TASK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'CALL_WEBHOOK') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'MOVE_DEAL_STAGE') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'APPLY_TAG') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'UPDATE_CUSTOM_FIELD') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, customFieldKey: '', customFieldValue: '' } });
+                          else if (next === 'STOP_AUTOMATIONS') setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                          else if (next === 'MULTI_ACTIONS') setNewRule({
+                            ...newRule,
+                            actionType: next,
+                            actionConfig: {
+                              actions: [
+                                { type: 'SEND_WHATSAPP', delayMinutes: 0, config: { templateId: '' } }
+                              ]
+                            }
+                          });
+                          else if (next === 'SEND_NOTIFICATION') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, userIdToNotify: '' } });
+                          else if (next === 'SEND_NPS') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, surveyId: '', channel: 'whatsapp' } });
+                          else setNewRule({ ...newRule, actionType: next, actionConfig: base });
+                        }}
+                      >
+                        <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
+                        {emailMarketingEnabled && (
+                          <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
+                        )}
+                        <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
+                        <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
+                        <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
+                        <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
+                        <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
+                        <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
+                        <option value="UPDATE_CUSTOM_FIELD">{t('automations.action.option.updateCustomField', 'Atualizar Campo Personalizado')}</option>
+                        <option value="STOP_AUTOMATIONS">{t('automations.action.option.stopAutomations', 'Parar outras automações')}</option>
+                        <option value="SEND_NOTIFICATION">Send In-App Notification</option>
+                        <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
+                        <option value="MULTI_ACTIONS">{t('automations.action.option.multiActions')}</option>
+                      </select>
+                    </div>
 
-                {newRule.actionType === 'MULTI_ACTIONS' && (
-                  <div className="space-y-3">
-                    {(Array.isArray(newRule.actionConfig?.actions) ? newRule.actionConfig.actions : []).map((action, idx) => {
-                      const type = action?.type || 'SEND_WHATSAPP';
-                      const config = action?.config || {};
-                      const delayMinutes = action?.delayMinutes ?? 0;
+                    {newRule.actionType === 'MULTI_ACTIONS' && (
+                      <div className="space-y-3">
+                        {(Array.isArray(newRule.actionConfig?.actions) ? newRule.actionConfig.actions : []).map((action, idx) => {
+                          const type = action?.type || 'SEND_WHATSAPP';
+                          const config = action?.config || {};
+                          const delayMinutes = action?.delayMinutes ?? 0;
 
-                      const setAction = (next) => {
-                        const actions = Array.isArray(newRule.actionConfig?.actions) ? [...newRule.actionConfig.actions] : [];
-                        actions[idx] = { ...actions[idx], ...next };
-                        setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, actions } });
-                      };
+                          const setAction = (next) => {
+                            const actions = Array.isArray(newRule.actionConfig?.actions) ? [...newRule.actionConfig.actions] : [];
+                            actions[idx] = { ...actions[idx], ...next };
+                            setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, actions } });
+                          };
 
-                      const setActionType = (nextType) => {
-                        const nextConfigBase = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
-                        if (nextType === 'SEND_WHATSAPP') setAction({ type: nextType, config: { templateId: '' } });
-                        else if (nextType === 'SEND_EMAIL') setAction({ type: nextType, config: { subject: '', body: '', from: '' } });
-                        else if (nextType === 'AUTO_REPLY_AI') setAction({ type: nextType, config: { objective: '', cooldownMinutes: 0 } });
-                        else if (nextType === 'ASSIGN_TO_USER') setAction({ type: nextType, config: { userId: '' } });
-                        else if (nextType === 'CREATE_TASK') setAction({ type: nextType, config: { title: '', content: '', dueInDays: 0, assigneeId: '' } });
-                        else if (nextType === 'CALL_WEBHOOK') setAction({ type: nextType, config: { eventName: '' } });
-                        else if (nextType === 'MOVE_DEAL_STAGE') setAction({ type: nextType, config: { stageId: '' } });
-                        else if (nextType === 'APPLY_TAG') setAction({ type: nextType, config: { tagId: '' } });
-                        else if (nextType === 'SEND_NOTIFICATION') setAction({ type: nextType, config: { userIdToNotify: '', title: '', content: '', link: '' } });
-                        else if (nextType === 'SEND_NPS') setAction({ type: nextType, config: { surveyId: '', channel: 'whatsapp', message: '', subject: '', body: '' } });
-                        else setAction({ type: nextType, config: nextConfigBase });
-                      };
+                          const setActionType = (nextType) => {
+                            const nextConfigBase = { templateId: '', userId: '', subject: '', body: '', from: '', title: '', content: '', dueInDays: 0, assigneeId: '', stageId: '', tagId: '' };
+                            if (nextType === 'SEND_WHATSAPP') setAction({ type: nextType, config: { templateId: '' } });
+                            else if (nextType === 'SEND_EMAIL') setAction({ type: nextType, config: { subject: '', body: '', from: '' } });
+                            else if (nextType === 'AUTO_REPLY_AI') setAction({ type: nextType, config: { objective: '', cooldownMinutes: 0 } });
+                            else if (nextType === 'ASSIGN_TO_USER') setAction({ type: nextType, config: { userId: '' } });
+                            else if (nextType === 'CREATE_TASK') setAction({ type: nextType, config: { title: '', content: '', dueInDays: 0, assigneeId: '' } });
+                            else if (nextType === 'CALL_WEBHOOK') setAction({ type: nextType, config: { eventName: '' } });
+                            else if (nextType === 'MOVE_DEAL_STAGE') setAction({ type: nextType, config: { stageId: '' } });
+                            else if (nextType === 'APPLY_TAG') setAction({ type: nextType, config: { tagId: '' } });
+                            else if (nextType === 'SEND_NOTIFICATION') setAction({ type: nextType, config: { userIdToNotify: '', title: '', content: '', link: '' } });
+                            else if (nextType === 'SEND_NPS') setAction({ type: nextType, config: { surveyId: '', channel: 'whatsapp', message: '', subject: '', body: '' } });
+                            else setAction({ type: nextType, config: nextConfigBase });
+                          };
 
-                      return (
-                        <div key={idx} className="border rounded-md p-3 space-y-3">
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <label className="block text-sm font-medium text-gray-700">{t('automations.action.multiActionsAction')}</label>
-                              <select
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
-                                value={type}
-                                onChange={(e) => setActionType(e.target.value)}
-                              >
-                                <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
-                                {emailMarketingEnabled && (
-                                  <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
-                                )}
-                                <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
-                                <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
-                                <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
-                                <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
-                                <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
-                                <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
-                                <option value="SEND_NOTIFICATION">Send Notification</option>
-                                <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
-                              </select>
-                            </div>
-                            <button
-                              type="button"
-                              className="mt-6 inline-flex items-center px-2 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
-                              onClick={() => {
-                                const actions = Array.isArray(newRule.actionConfig?.actions) ? [...newRule.actionConfig.actions] : [];
-                                actions.splice(idx, 1);
-                                setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, actions } });
-                              }}
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </button>
-                          </div>
+                          return (
+                            <div key={idx} className="border rounded-md p-3 space-y-3">
+                              <div className="flex items-center justify-between gap-3">
+                                <div className="flex-1">
+                                  <label className="block text-sm font-medium text-gray-700">{t('automations.action.multiActionsAction')}</label>
+                                  <select
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
+                                    value={type}
+                                    onChange={(e) => setActionType(e.target.value)}
+                                  >
+                                    <option value="SEND_WHATSAPP">{t('automations.action.option.sendWhatsApp')}</option>
+                                    {emailMarketingEnabled && (
+                                      <option value="SEND_EMAIL">{t('automations.action.option.sendEmail')}</option>
+                                    )}
+                                    <option value="AUTO_REPLY_AI">{t('automations.action.option.autoReplyAi')}</option>
+                                    <option value="ASSIGN_TO_USER">{t('automations.action.option.assignToUser')}</option>
+                                    <option value="CREATE_TASK">{t('automations.action.option.createTask')}</option>
+                                    <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
+                                    <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
+                                    <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
+                                    <option value="SEND_NOTIFICATION">Send Notification</option>
+                                    <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
+                                  </select>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="mt-6 inline-flex items-center px-2 py-2 rounded-md border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+                                  onClick={() => {
+                                    const actions = Array.isArray(newRule.actionConfig?.actions) ? [...newRule.actionConfig.actions] : [];
+                                    actions.splice(idx, 1);
+                                    setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, actions } });
+                                  }}
+                                >
+                                  <TrashIcon className="h-4 w-4" />
+                                </button>
+                              </div>
 
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700">{t('automations.action.delayMinutes')}</label>
-                            <input
-                              type="number"
-                              min={0}
-                              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                              value={delayMinutes}
-                              onChange={(e) => setAction({ delayMinutes: Number(e.target.value || 0) })}
-                            />
-                          </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">{t('automations.action.delayMinutes')}</label>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                                  value={delayMinutes}
+                                  onChange={(e) => setAction({ delayMinutes: Number(e.target.value || 0) })}
+                                />
+                              </div>
 
-                          {type === 'SEND_WHATSAPP' && (
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700">{t('automations.action.template')}</label>
-                              <select
-                                required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                                value={config.templateId || ''}
-                                onChange={(e) => setAction({ config: { ...config, templateId: e.target.value } })}
-                              >
-                                <option value="">{t('automations.action.selectTemplate')}</option>
-                                {templates.map((template) => (
-                                  <option key={template.id} value={template.id}>
-                                    {template.name}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          )}
+                              {type === 'SEND_WHATSAPP' && (
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700">{t('automations.action.template')}</label>
+                                  <select
+                                    required
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                                    value={config.templateId || ''}
+                                    onChange={(e) => setAction({ config: { ...config, templateId: e.target.value } })}
+                                  >
+                                    <option value="">{t('automations.action.selectTemplate')}</option>
+                                    {templates.map((template) => (
+                                      <option key={template.id} value={template.id}>
+                                        {template.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
 
                           {type === 'SEND_EMAIL' && (
                             <>
                               <div>
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailTemplate')}</label>
                                 <select
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.templateId || ''}
                                   onChange={(e) => {
                                     const templateId = e.target.value;
@@ -1057,7 +1109,7 @@ const Automations = () => {
                                 <input
                                   type="text"
                                   required
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.subject || ''}
                                   onChange={(e) => setAction({ config: { ...config, subject: e.target.value } })}
                                 />
@@ -1068,7 +1120,7 @@ const Automations = () => {
                                 <textarea
                                   rows={5}
                                   required
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.body || ''}
                                   onChange={(e) => setAction({ config: { ...config, body: e.target.value } })}
                                 />
@@ -1078,7 +1130,7 @@ const Automations = () => {
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailFrom')}</label>
                                 <input
                                   type="email"
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.from || ''}
                                   onChange={(e) => setAction({ config: { ...config, from: e.target.value } })}
                                 />
@@ -1091,7 +1143,7 @@ const Automations = () => {
                               <div className="sm:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiObjective')}</label>
                                 <select
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                   value={config.objective || ''}
                                   onChange={(e) => setAction({ config: { ...config, objective: e.target.value } })}
                                 >
@@ -1107,7 +1159,7 @@ const Automations = () => {
                                 <input
                                   type="number"
                                   min={0}
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={Number(config.cooldownMinutes || 0)}
                                   onChange={(e) => setAction({ config: { ...config, cooldownMinutes: Number(e.target.value || 0) } })}
                                 />
@@ -1121,7 +1173,7 @@ const Automations = () => {
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.selectSurvey', 'Selecionar Pesquisa')}</label>
                                 <select
                                   required
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                   value={config.surveyId || ''}
                                   onChange={(e) => setAction({ config: { ...config, surveyId: e.target.value } })}
                                 >
@@ -1137,7 +1189,7 @@ const Automations = () => {
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.channel', 'Canal')}</label>
                                 <select
                                   required
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                   value={config.channel || 'whatsapp'}
                                   onChange={(e) => setAction({ config: { ...config, channel: e.target.value } })}
                                 >
@@ -1150,7 +1202,7 @@ const Automations = () => {
                                   <label className="block text-sm font-medium text-gray-700">{t('automations.action.message', 'Mensagem (Opcional)')}</label>
                                   <textarea
                                     rows={3}
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                     placeholder={t('automations.action.messagePlaceholder', 'Olá {{contact.firstName}}, pode nos avaliar?')}
                                     value={config.message || ''}
                                     onChange={(e) => setAction({ config: { ...config, message: e.target.value } })}
@@ -1163,7 +1215,7 @@ const Automations = () => {
                                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject', 'Assunto do E-mail')}</label>
                                     <input
                                       type="text"
-                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                       placeholder={t('automations.action.emailSubjectPlaceholder', 'Sua opinião é importante')}
                                       value={config.subject || ''}
                                       onChange={(e) => setAction({ config: { ...config, subject: e.target.value } })}
@@ -1173,7 +1225,7 @@ const Automations = () => {
                                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody', 'Corpo do E-mail (Opcional)')}</label>
                                     <textarea
                                       rows={3}
-                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                       placeholder={t('automations.action.emailBodyPlaceholder', 'Olá {{contact.firstName}}, como foi sua experiência?')}
                                       value={config.body || ''}
                                       onChange={(e) => setAction({ config: { ...config, body: e.target.value } })}
@@ -1189,7 +1241,7 @@ const Automations = () => {
                               <label className="block text-sm font-medium text-gray-700">{t('automations.action.assignTo')}</label>
                               <select
                                 required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                 value={config.userId || ''}
                                 onChange={(e) => setAction({ config: { ...config, userId: e.target.value } })}
                               >
@@ -1209,7 +1261,7 @@ const Automations = () => {
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.taskTitle')}</label>
                                 <input
                                   type="text"
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.title || ''}
                                   onChange={(e) => setAction({ config: { ...config, title: e.target.value } })}
                                 />
@@ -1217,7 +1269,7 @@ const Automations = () => {
                               <div className="sm:col-span-2">
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.taskContent')}</label>
                                 <textarea
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   rows={3}
                                   value={config.content || ''}
                                   onChange={(e) => setAction({ config: { ...config, content: e.target.value } })}
@@ -1228,7 +1280,7 @@ const Automations = () => {
                                 <input
                                   type="number"
                                   min={0}
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                   value={config.dueInDays ?? 0}
                                   onChange={(e) => setAction({ config: { ...config, dueInDays: Number(e.target.value || 0) } })}
                                 />
@@ -1236,7 +1288,7 @@ const Automations = () => {
                               <div>
                                 <label className="block text-sm font-medium text-gray-700">{t('automations.action.taskAssignee')}</label>
                                 <select
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                   value={config.assigneeId || ''}
                                   onChange={(e) => setAction({ config: { ...config, assigneeId: e.target.value } })}
                                 >
@@ -1256,7 +1308,7 @@ const Automations = () => {
                               <label className="block text-sm font-medium text-gray-700">{t('automations.action.webhookEvent')}</label>
                               <input
                                 type="text"
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                                 value={config.eventName || ''}
                                 onChange={(e) => setAction({ config: { ...config, eventName: e.target.value } })}
                               />
@@ -1268,7 +1320,7 @@ const Automations = () => {
                               <label className="block text-sm font-medium text-gray-700">{t('automations.action.moveDealStageTo')}</label>
                               <select
                                 required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                 value={config.stageId || ''}
                                 onChange={(e) => setAction({ config: { ...config, stageId: e.target.value } })}
                               >
@@ -1287,7 +1339,7 @@ const Automations = () => {
                               <label className="block text-sm font-medium text-gray-700">{t('automations.action.applyTagSelect')}</label>
                               <select
                                 required
-                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                                 value={config.tagId || ''}
                                 onChange={(e) => setAction({ config: { ...config, tagId: e.target.value } })}
                               >
@@ -1324,7 +1376,7 @@ const Automations = () => {
                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.template')}</label>
                     <select
                       required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                       value={newRule.actionConfig.templateId}
                       onChange={(e) => setNewRule({
                         ...newRule,
@@ -1346,7 +1398,7 @@ const Automations = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailTemplate')}</label>
                       <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         value={newRule.actionConfig.templateId || ''}
                         onChange={(e) => {
                           const templateId = e.target.value;
@@ -1375,7 +1427,7 @@ const Automations = () => {
                       <input
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         value={newRule.actionConfig.subject || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1389,7 +1441,7 @@ const Automations = () => {
                       <textarea
                         rows={5}
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         value={newRule.actionConfig.body || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1402,7 +1454,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailFrom')}</label>
                       <input
                         type="email"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         value={newRule.actionConfig.from || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1418,7 +1470,7 @@ const Automations = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.aiObjective')}</label>
                       <select
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                         value={newRule.actionConfig.objective || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1437,7 +1489,7 @@ const Automations = () => {
                       <input
                         type="number"
                         min={0}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         value={Number(newRule.actionConfig.cooldownMinutes || 0)}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1453,7 +1505,7 @@ const Automations = () => {
                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.assignTo')}</label>
                     <select
                       required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                       value={newRule.actionConfig.userId}
                       onChange={(e) => setNewRule({
                         ...newRule,
@@ -1477,7 +1529,7 @@ const Automations = () => {
                       <input
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         placeholder={t('automations.action.taskTitlePlaceholder')}
                         value={newRule.actionConfig.title || ''}
                         onChange={(e) => setNewRule({
@@ -1491,7 +1543,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.taskContent')}</label>
                       <textarea
                         rows={3}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         placeholder={t('automations.action.taskContentPlaceholder')}
                         value={newRule.actionConfig.content || ''}
                         onChange={(e) => setNewRule({
@@ -1507,7 +1559,7 @@ const Automations = () => {
                         <input
                           type="number"
                           min={0}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                           value={newRule.actionConfig.dueInDays || 0}
                           onChange={(e) => setNewRule({
                             ...newRule,
@@ -1519,7 +1571,7 @@ const Automations = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700">{t('automations.action.taskAssignee')}</label>
                         <select
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                           value={newRule.actionConfig.assigneeId || ''}
                           onChange={(e) => setNewRule({
                             ...newRule,
@@ -1549,7 +1601,7 @@ const Automations = () => {
                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.moveDealStageTo')}</label>
                     <select
                       required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                       value={newRule.actionConfig.stageId || ''}
                       onChange={(e) => setNewRule({
                         ...newRule,
@@ -1574,7 +1626,7 @@ const Automations = () => {
                     <label className="block text-sm font-medium text-gray-700">{t('automations.action.applyTagSelect')}</label>
                     <select
                       required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                       value={newRule.actionConfig.tagId || ''}
                       onChange={(e) => setNewRule({
                         ...newRule,
@@ -1600,7 +1652,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">User to notify</label>
                       <select
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                         value={newRule.actionConfig.userIdToNotify || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1620,7 +1672,7 @@ const Automations = () => {
                       <input
                         type="text"
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         placeholder="e.g. New deal created: {{deal.name}}"
                         value={newRule.actionConfig.title || ''}
                         onChange={(e) => setNewRule({
@@ -1633,7 +1685,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">Notification Content (Optional)</label>
                       <textarea
                         rows={2}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         placeholder="e.g. A new deal has been assigned to you."
                         value={newRule.actionConfig.content || ''}
                         onChange={(e) => setNewRule({
@@ -1646,7 +1698,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">Click Link (Optional)</label>
                       <input
                         type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                         placeholder="e.g. /account/workspace-slug/deals"
                         value={newRule.actionConfig.link || ''}
                         onChange={(e) => setNewRule({
@@ -1658,13 +1710,46 @@ const Automations = () => {
                   </div>
                 )}
 
+                {newRule.actionType === 'UPDATE_CUSTOM_FIELD' && (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.customFieldKey')}</label>
+                      <input
+                        type="text"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder="e.g. data_nascimento"
+                        value={newRule.actionConfig.customFieldKey || ''}
+                        onChange={(e) => setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, customFieldKey: e.target.value } })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.action.customFieldValue')}</label>
+                      <input
+                        type="text"
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder="e.g. 2024-01-01"
+                        value={newRule.actionConfig.customFieldValue || ''}
+                        onChange={(e) => setNewRule({ ...newRule, actionConfig: { ...newRule.actionConfig, customFieldValue: e.target.value } })}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {newRule.actionType === 'STOP_AUTOMATIONS' && (
+                  <div className="text-sm text-gray-600">
+                    {t('automations.action.stopAutomationsHint')}
+                  </div>
+                )}
+
                 {newRule.actionType === 'SEND_NPS' && (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.selectSurvey', 'Selecionar Pesquisa')}</label>
                       <select
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                         value={newRule.actionConfig.surveyId || ''}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1683,7 +1768,7 @@ const Automations = () => {
                       <label className="block text-sm font-medium text-gray-700">{t('automations.action.channel', 'Canal')}</label>
                       <select
                         required
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 bg-white"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 bg-white"
                         value={newRule.actionConfig.channel || 'whatsapp'}
                         onChange={(e) => setNewRule({
                           ...newRule,
@@ -1699,7 +1784,7 @@ const Automations = () => {
                         <label className="block text-sm font-medium text-gray-700">{t('automations.action.message', 'Mensagem (Opcional)')}</label>
                         <textarea
                           rows={3}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                           placeholder={t('automations.action.messagePlaceholder', 'Olá {{contact.firstName}}, pode nos avaliar?')}
                           value={newRule.actionConfig.message || ''}
                           onChange={(e) => setNewRule({
@@ -1715,7 +1800,7 @@ const Automations = () => {
                           <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailSubject', 'Assunto do E-mail')}</label>
                           <input
                             type="text"
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                             placeholder={t('automations.action.emailSubjectPlaceholder', 'Sua opinião é importante')}
                             value={newRule.actionConfig.subject || ''}
                             onChange={(e) => setNewRule({
@@ -1728,7 +1813,7 @@ const Automations = () => {
                           <label className="block text-sm font-medium text-gray-700">{t('automations.action.emailBody', 'Corpo do E-mail (Opcional)')}</label>
                           <textarea
                             rows={3}
-                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
+                            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
                             placeholder={t('automations.action.emailBodyPlaceholder', 'Olá {{contact.firstName}}, como foi sua experiência?')}
                             value={newRule.actionConfig.body || ''}
                             onChange={(e) => setNewRule({
@@ -1740,88 +1825,116 @@ const Automations = () => {
                       </>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.simulate.title')}</h4>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.contactId')}</label>
-                  <input
-                    type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                    value={simulateInputs.contactId}
-                    onChange={(e) => setSimulateInputs({ ...simulateInputs, contactId: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.dealId')}</label>
-                  <input
-                    type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                    value={simulateInputs.dealId}
-                    onChange={(e) => setSimulateInputs({ ...simulateInputs, dealId: e.target.value })}
-                  />
                 </div>
               </div>
-
-              {newRule.triggerType === 'INCOMING_MESSAGE' ? (
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.message')}</label>
-                  <textarea
-                    rows={3}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2"
-                    value={simulateInputs.message}
-                    onChange={(e) => setSimulateInputs({ ...simulateInputs, message: e.target.value })}
-                  />
-                </div>
-              ) : null}
-
-              {simulateResult ? (
-                <div className="mt-4 grid grid-cols-1 gap-4">
-                  <div>
-                    <div className="text-xs font-medium text-gray-700">{t('automations.simulate.evaluation')}</div>
-                    <pre className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded-md p-3 overflow-auto">
-                      {JSON.stringify(simulateResult.evaluation, null, 2)}
-                    </pre>
-                  </div>
-                  <div>
-                    <div className="text-xs font-medium text-gray-700">{t('automations.simulate.preview')}</div>
-                    <pre className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded-md p-3 overflow-auto">
-                      {JSON.stringify(simulateResult.preview, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-4 text-sm text-gray-500">{t('automations.simulate.hint')}</div>
-              )}
             </div>
+          )}
 
-            <div className="mt-5 sm:mt-6 flex justify-end space-x-2">
+          {modalStep === 4 && (
+              <div className="space-y-4">
+                <div className="border-t pt-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">{t('automations.simulate.title')}</h4>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.contactId')}</label>
+                      <input
+                        type="text"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        value={simulateInputs.contactId}
+                        onChange={(e) => setSimulateInputs({ ...simulateInputs, contactId: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.dealId')}</label>
+                      <input
+                        type="text"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        value={simulateInputs.dealId}
+                        onChange={(e) => setSimulateInputs({ ...simulateInputs, dealId: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {newRule.triggerType === 'INCOMING_MESSAGE' ? (
+                    <div className="mt-4">
+                      <label className="block text-sm font-medium text-gray-700">{t('automations.simulate.message')}</label>
+                      <textarea
+                        rows={3}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        value={simulateInputs.message}
+                        onChange={(e) => setSimulateInputs({ ...simulateInputs, message: e.target.value })}
+                      />
+                    </div>
+                  ) : null}
+
+                  {simulateResult ? (
+                    <div className="mt-4 grid grid-cols-1 gap-4">
+                      <div>
+                        <div className="text-xs font-medium text-gray-700">{t('automations.simulate.evaluation')}</div>
+                        <pre className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded-md p-3 overflow-auto">
+                          {JSON.stringify(simulateResult.evaluation, null, 2)}
+                        </pre>
+                      </div>
+                      <div>
+                        <div className="text-xs font-medium text-gray-700">{t('automations.simulate.preview')}</div>
+                        <pre className="mt-1 text-xs bg-gray-50 border border-gray-200 rounded-md p-3 overflow-auto">
+                          {JSON.stringify(simulateResult.preview, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 text-sm text-gray-500">{t('automations.simulate.hint')}</div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="mt-5 sm:mt-6 flex justify-end space-x-2 border-t pt-4">
               <button
                 type="button"
-                className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
+                className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:text-sm"
                 onClick={toggleModal}
               >
                 {t('common.action.cancel')}
               </button>
-              <button
-                type="button"
-                disabled={isSimulating || isSubmitting}
-                className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50"
-                onClick={handleSimulateRule}
-              >
-                {isSimulating ? t('automations.simulate.simulating') : t('automations.simulate.button')}
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50"
-              >
-                {isSubmitting ? t('automations.creating') : t('automations.createRule')}
-              </button>
+
+              {modalStep > 1 && (
+                <button
+                  type="button"
+                  className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:text-sm"
+                  onClick={() => setModalStep(modalStep - 1)}
+                >
+                  {t('onboarding.tour.btn.prev')}
+                </button>
+              )}
+
+              {modalStep < 4 ? (
+                <button
+                  type="button"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:text-sm"
+                  onClick={() => setModalStep(modalStep + 1)}
+                >
+                  {t('onboarding.tour.btn.next')}
+                </button>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    disabled={isSimulating || isSubmitting}
+                    className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50"
+                    onClick={handleSimulateRule}
+                  >
+                    {isSimulating ? t('automations.simulate.simulating') : t('automations.simulate.button')}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50"
+                  >
+                    {isSubmitting ? t('automations.creating') : t('automations.createRule')}
+                  </button>
+                </>
+              )}
             </div>
           </form>
         </Modal>

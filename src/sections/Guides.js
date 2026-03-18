@@ -3,7 +3,7 @@ const Guides = () => {
     <div className="w-full py-10">
       <div className="relative flex flex-col px-5 mx-auto space-y-5 md:w-3/4">
         <div className="flex flex-col items-center">
-          <h6 className="font-bold text-center text-blue-600 uppercase">
+          <h6 className="font-bold text-center text-brand-600 uppercase">
             Guides
           </h6>
           <h2 className="text-4xl font-bold text-center">

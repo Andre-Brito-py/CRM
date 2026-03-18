@@ -6,5 +6,16 @@ import Guides from './Guides';
 import Hero from './Hero';
 import Pricing from './Pricing';
 import Testimonial from './Testimonial';
+import Stats from './Stats';
 
-export { CallToAction, FAQ, Features, Footer, Guides, Hero, Pricing, Testimonial };
+export {
+  CallToAction,
+  FAQ,
+  Features,
+  Footer,
+  Guides,
+  Hero,
+  Pricing,
+  Stats,
+  Testimonial,
+};

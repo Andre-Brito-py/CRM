@@ -25,10 +25,10 @@ const OverduePayments = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">Pagamentos em atraso</h1>
           <div className="flex items-center gap-3">
-            <Link href="/admin/payments" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+            <Link href="/admin/payments" className="text-sm font-medium text-brand-600 hover:text-brand-700">
               Pagamentos
             </Link>
-            <Link href="/admin/payments/forecast" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+            <Link href="/admin/payments/forecast" className="text-sm font-medium text-brand-600 hover:text-brand-700">
               Previsão
             </Link>
           </div>
@@ -113,7 +113,7 @@ const OverduePayments = () => {
                                   href={link}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-blue-600 hover:text-blue-700 font-medium"
+                                  className="text-brand-600 hover:text-brand-700 font-medium"
                                 >
                                   Abrir
                                 </a>

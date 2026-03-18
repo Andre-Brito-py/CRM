@@ -6,6 +6,27 @@ Plataforma CRM multi-tenant com foco em operação comercial e atendimento omnic
 - 2026-03-17: correção do dashboard do Super Admin (contadores/estatísticas) e padronização da autenticação/role nas rotas `/api/admin/*`.
 - 2026-03-17: melhoria de layout/visibilidade no Chat Interno (evita sobreposição em telas menores).
 
+## 💎 Diferenciais Premium (Corporate Experience)
+A Closify foi totalmente redesenhada para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium (Antigravity-inspired).
+
+### 🚀 Landing Page Cinematográfica (High-Conversion)
+Uma interface imersiva projetada para converter leads em clientes.
+- **Mouse-Following Particles:** Animações interativas que seguem o cursor, criando profundidade visual.
+- **Bento Grid Layout:** Features apresentadas de forma organizada e moderna, destacando Automação de WhatsApp e Gestão de Equipe.
+- **Pricing Dinâmico:** Gestão de planos via Super Admin com suporte a toggle Mensal/Anual e descontos inteligentes.
+
+### 📥 Inbox Omnichannel Unificado
+Centralize WhatsApp e E-mail em uma interface limpa, profissional e intuitiva. Gerencie conversas com resumos de IA e sugestões inteligentes.
+![Inbox Premium](/public/images/readme/omnichannel_inbox_premium.png)
+
+### 📊 Pipeline com Glassmorphism
+Visualize seus negócios através de um Kanban moderno, com efeitos de vidro fosco, indicadores de probabilidade por IA e cards detalhados.
+![Pipeline Premium](/public/images/readme/pipeline_board_premium.png)
+
+### 🛠️ Custom Fields & DnD
+Adapte o CRM ao seu negócio com campos personalizados de diversos tipos e organize tudo via Drag-and-Drop de alta performance.
+![Custom Fields Premium](/public/images/readme/custom_fields_premium.png)
+
 ## O que eu estou construindo (em uma frase)
 Um CRM omnichannel para vender, atender e acompanhar clientes sem virar refém de planilha.
 
@@ -415,6 +436,11 @@ Como isso funciona internamente (resumo):
 - **Estratégia de Marketing (Mensalidade Anual):** Na página de cadastro, agora exibimos o valor da "mensalidade proporcional" para planos anuais (ex: R$ 119,20/mês em vez de R$ 1.430,40/ano), reduzindo a fricção cognitiva e aumentando a percepção de valor.
 - **Auditoria de Termos de Uso (LGPD/GDPR):** Inserção restritiva em `terms.js` protegendo a plataforma contra chargebacks e garantindo legalidade no modelo "Pay-as-you-go" (Overage Limit por IA) e taxação/split de Gateways de pagamentos utilizados via plataforma. Modelagem legal "No Refunds for Annuals cancelation". Atualização de versão de política impondo aceite da base de clientes na próxima autenticação.
 - **Global Cookie Consent (Glassmorphism Banner):** Banner elegante global cobrindo consentimento de cookies da infraestrutura com fallback em `localStorage`. Retirada do tracking nativo do `_app.js` (Google Analytics), vinculando o disparo estatístico estritamente ao aceite condicionado do pop-up para alinhar à GDPR e LGPD europeia/brasileira.
+
+### 2026-03-18
+- **Unificação de Marca (Executive Lilac):** Rebranding completo de ponta a ponta (Landing Page, Layouts internos, Pipeline, Settings e Help Center), substituindo as paletas default/teal pela identidade visual roxa profissional e imersiva com partículas interativas.
+- **Compliance Estrito de Cookies (GDPR/LGPD):** Evolução do Cookie Consent para um modelo granular e extensível. Usuários agora podem expandir um modal de configuração ("Configurar"), escolhendo quais categorias de cookies desejam aceitar ("Analytics", "Marketing" ou apenas "Essenciais"). O estado de consentimento foi migrado para uma persistência robusta em JSON no `localStorage` (v2), totalmente reativa via React Context e `_app.js`.
+- **Refinamentos Visuais de UI/UX:** Correções no layout e navegação, assegurando melhor visibilidade de modais e responsividade das topbars em telas de demonstração.
 
 ---
 

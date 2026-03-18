@@ -142,7 +142,7 @@ const Webhooks = () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => setViewDeliveriesId(webhook.id)}
-                          className="text-blue-600 hover:text-blue-800 p-2"
+                          className="text-brand-600 hover:text-blue-800 p-2"
                           aria-label="View deliveries"
                           title="View Deliveries"
                         >
@@ -182,7 +182,7 @@ const Webhooks = () => {
                       required
                       value={newUrl}
                       onChange={(e) => setNewUrl(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                       placeholder="https://api.yourapp.com/webhooks"
                     />
                   </div>
@@ -192,7 +192,7 @@ const Webhooks = () => {
                       type="text"
                       value={newEventsText}
                       onChange={(e) => setNewEventsText(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm px-3 py-2 border"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm px-3 py-2 border"
                       placeholder="*, INCOMING_MESSAGE, DEAL_STAGE_CHANGED"
                     />
                     <p className="mt-1 text-xs text-gray-500">Comma-separated. Use * to receive all events.</p>
@@ -208,7 +208,7 @@ const Webhooks = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="bg-blue-600 text-white hover:bg-blue-700"
+                      className="bg-brand-600 text-white hover:bg-brand-700"
                     >
                       {isSubmitting ? 'Adding...' : 'Add Webhook'}
                     </Button>
@@ -219,7 +219,7 @@ const Webhooks = () => {
               <div className="mt-6">
                 <Button
                   onClick={() => setIsAdding(true)}
-                  className="bg-white text-blue-600 border border-blue-600 hover:bg-blue-50 flex items-center"
+                  className="bg-white text-brand-600 border border-brand-600 hover:bg-brand-50 flex items-center"
                 >
                   <PlusIcon className="w-4 h-4 mr-2" />
                   Add Webhook

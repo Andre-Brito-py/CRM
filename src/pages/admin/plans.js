@@ -167,41 +167,41 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Name</label>
             <input type="text" name="name" required value={formData.name} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Slug</label>
             <input type="text" name="slug" required value={formData.slug} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700">Description</label>
           <textarea name="description" rows={2} value={formData.description} onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Monthly Price</label>
             <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 underline decoration-blue-500">Discount (%)</label>
+            <label className="block text-sm font-medium text-gray-700 underline decoration-brand-500">Discount (%)</label>
             <input type="number" name="annualDiscount" min="0" max="100" step="1" value={formData.annualDiscount} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-blue-100 bg-blue-50/30 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2 font-bold text-blue-600" />
+              className="mt-1 block w-full rounded-md border-brand-100 bg-brand-50/30 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 font-bold text-brand-600" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Annual Price</label>
             <input type="number" name="priceAnnual" min="0" step="0.01" value={formData.priceAnnual} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Currency</label>
             <input type="text" name="currency" required value={formData.currency} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
         </div>
 
@@ -209,12 +209,12 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Monthly)</label>
             <input type="text" name="stripePriceId" value={formData.stripePriceId} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Annual)</label>
             <input type="text" name="stripePriceIdAnnual" value={formData.stripePriceIdAnnual} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2" />
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
         </div>
 
@@ -231,7 +231,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             </div>
             <div className="flex items-center pt-6">
               <input id="isActiveCheck" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
+                className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded" />
               <label htmlFor="isActiveCheck" className="ml-2 block text-sm text-gray-900 font-medium">Active</label>
             </div>
           </div>
@@ -253,7 +253,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
               <div key={name}>
                 <label className="block text-xs font-medium text-gray-600">{label}</label>
                 <input type="number" name={name} min="0" value={formData[name]} onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm border p-1.5 text-blue-600 font-bold" />
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 text-sm border p-1.5 text-brand-600 font-bold" />
               </div>
             ))}
           </div>
@@ -301,7 +301,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <Button type="button" className="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50" onClick={toggle}>
             Cancel
           </Button>
-          <Button type="submit" className="text-white bg-blue-600 hover:bg-blue-700" disabled={isSubmitting}>
+          <Button type="submit" className="text-white bg-brand-600 hover:bg-brand-700" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Save Plan'}
           </Button>
         </div>
@@ -366,7 +366,7 @@ const Plans = () => {
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex justify-between items-center">
           <h1 className="text-2xl font-semibold text-gray-900">Subscription Plans</h1>
-          <Button onClick={handleCreate} className="text-white bg-blue-600 hover:bg-blue-700 flex items-center">
+          <Button onClick={handleCreate} className="text-white bg-brand-600 hover:bg-brand-700 flex items-center">
             <PlusIcon className="w-5 h-5 mr-2" />
             Create Plan
           </Button>
@@ -389,7 +389,7 @@ const Plans = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div>
-                              <p className="text-sm font-medium text-blue-600 truncate">{plan.name}</p>
+                              <p className="text-sm font-medium text-brand-600 truncate">{plan.name}</p>
                               <p className="text-sm text-gray-500">{plan.description || 'No description'}</p>
                             </div>
                           </div>
@@ -409,13 +409,13 @@ const Plans = () => {
                                     {trialDays}d trial
                                   </span>
                                 )}
-                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-brand-100 text-blue-800">
                                   {moduleCount}/{AVAILABLE_MODULES.length} modules
                                 </span>
                               </div>
                             </div>
                             <div className="flex space-x-2">
-                              <button onClick={() => handleEdit(plan)} className="p-2 text-gray-400 hover:text-blue-500 transition-colors">
+                              <button onClick={() => handleEdit(plan)} className="p-2 text-gray-400 hover:text-brand-500 transition-colors">
                                 <PencilIcon className="w-5 h-5" />
                               </button>
                               <button onClick={() => handleDelete(plan.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors">

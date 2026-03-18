@@ -131,7 +131,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
           {/* Create button */}
           <button
             id="create-workspace-btn"
-            className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold text-white premium-gradient rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-[1.01] transition-all"
+            className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold text-white premium-gradient rounded-xl shadow-lg shadow-brand-500/20 hover:scale-[1.01] transition-all"
             onClick={() => setModalState(true)}
           >
             <PlusIcon className="w-3.5 h-3.5 flex-shrink-0" />
@@ -172,7 +172,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                           <span className={`flex-1 truncate ${selected ? 'font-semibold text-white' : ''}`}>
                             {ws.name}
                           </span>
-                          {selected && <CheckIcon className="w-3.5 h-3.5 text-indigo-400" />}
+                          {selected && <CheckIcon className="w-3.5 h-3.5 text-brand-400" />}
                         </>
                       )}
                     </Listbox.Option>
@@ -224,7 +224,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                       }}
                       prefetch={false}
                       className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${active
-                        ? 'text-white bg-indigo-600/15 border-indigo-500/30 shadow-[0_0_20px_rgba(79,70,229,0.08)]'
+                        ? 'text-white bg-brand-600/15 border-brand-500/30 shadow-[0_0_20px_rgba(139,92,246,0.08)]'
                         : locked
                           ? 'text-zinc-600 cursor-not-allowed grayscale'
                           : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -233,11 +233,11 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                       {active && (
                         <motion.div
                           layoutId="context-sidebar-pill"
-                          className="absolute left-0 w-0.5 h-5 bg-indigo-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.8)]"
+                          className="absolute left-0 w-0.5 h-5 bg-brand-500 rounded-r-full shadow-[0_0_12px_rgba(139,92,246,0.8)]"
                         />
                       )}
                       <Icon
-                        className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-indigo-400' : 'text-zinc-500'
+                        className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-brand-400' : 'text-zinc-500'
                           }`}
                       />
                       <span className="flex-1 truncate">{t(item.name)}</span>
@@ -248,7 +248,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                         </div>
                       )}
                       {active && !locked && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse shadow-[0_0_6px_rgba(129,140,248,0.8)]" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse shadow-[0_0_6px_rgba(139,92,246,0.8)]" />
                       )}
                     </Link>
                   </motion.div>
@@ -270,7 +270,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
               {t('workspace.action.name.label')}
             </h3>
             <input
-              className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none text-zinc-900 dark:text-white"
+              className="w-full px-4 py-3 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 transition-all outline-none text-zinc-900 dark:text-white"
               disabled={isSubmitting}
               placeholder={t('workspace.suggesion.label')}
               onChange={(e) => setName(e.target.value)}
@@ -279,7 +279,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
             />
           </div>
           <Button
-            className="w-full py-4 text-white premium-gradient rounded-xl shadow-xl shadow-indigo-500/25 disabled:opacity-50"
+            className="w-full py-4 text-white premium-gradient rounded-xl shadow-xl shadow-brand-500/25 disabled:opacity-50"
             disabled={!validName || isSubmitting}
             onClick={createWorkspace}
           >

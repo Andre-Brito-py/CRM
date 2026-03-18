@@ -81,7 +81,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
           <input
             type="text"
             id="title"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -94,7 +94,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
           <textarea
             id="content"
             rows={3}
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={content}
             onChange={(e) => setContent(e.target.value)}
           />
@@ -105,7 +105,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
           </label>
           <select
             id="assigneeId"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={assigneeId}
             onChange={(e) => setAssigneeId(e.target.value)}
           >
@@ -125,7 +125,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
             </label>
             <select
               id="contactId"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
               value={contactId}
               onChange={(e) => setContactId(e.target.value)}
               disabled={!!initialContactId}
@@ -144,7 +144,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
             </label>
             <select
               id="dealId"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
               value={dealId}
               onChange={(e) => setDealId(e.target.value)}
               disabled={!!initialDealId}
@@ -166,7 +166,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
           <input
             type="datetime-local"
             id="dueDate"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -177,7 +177,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
           </label>
           <select
             id="priority"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
             value={priority}
             onChange={(e) => setPriority(e.target.value)}
           >
@@ -189,7 +189,7 @@ const AddTaskModal = ({ isOpen, toggle, slug, initialContactId, initialDealId })
         <div className="flex justify-end pt-2">
           <button
             type="submit"
-            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-500 disabled:opacity-50"
+            className="px-4 py-2 text-white bg-brand-600 rounded hover:bg-brand-500 disabled:opacity-50"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Creating...' : 'Create Task'}

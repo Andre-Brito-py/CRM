@@ -57,7 +57,6 @@ const DemoPage = ({ plan }) => {
   const [showCTA, setShowCTA] = useState(false);
 
   useEffect(() => {
-    // Show trial CTA after 10 seconds of interaction
     const timer = setTimeout(() => setShowCTA(true), 15000);
     return () => clearTimeout(timer);
   }, []);
@@ -79,141 +78,147 @@ const DemoPage = ({ plan }) => {
 
   const currencyFormatter = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
-    currency: plan?.currency || 'BRL',
+    currency: 'BRL',
   });
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-executive antialiased">
       <Head>
-        <title>Demo Interativa | Closify CRM</title>
-        <meta name="description" content="Experimente o Closify CRM em tempo real." />
+        <title>Closify | Interactive Demo</title>
+        <meta name="description" content="Experience the future of CRM with Closify's premium interface." />
       </Head>
 
-      {/* Top Navigation Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-[1600px] mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors group">
+      {/* Modern Premium Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-zinc-100">
+        <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <Link href="/" className="flex items-center gap-2.5 text-zinc-400 hover:text-brand-600 transition-all group">
               <ArrowLeftIcon className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-              <span className="text-sm font-bold uppercase tracking-widest">Sair da Demo</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Exit Demo</span>
             </Link>
-            <div className="h-4 w-px bg-slate-200 hidden md:block" />
-            <img src="/images/logo-full.png" alt="Closify" className="h-7 w-auto" />
+            <div className="h-6 w-px bg-zinc-100 hidden md:block" />
+            <img src="/images/logo-full.png" alt="Closify" className="h-8 w-auto brightness-0" />
           </div>
 
-          <div className="flex items-center gap-4">
-             <div className="hidden md:flex items-center px-3 py-1 bg-indigo-50 rounded-full border border-indigo-100 italic transition-all animate-pulse">
-                <SparklesIcon className="w-4 h-4 text-indigo-600 mr-2" />
-                <span className="text-xs font-bold text-indigo-600">Ambiente de Demonstração Interativo</span>
+          <div className="flex items-center gap-6">
+             <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-50/50 rounded-2xl border border-brand-100/50">
+                <SparklesIcon className="w-4 h-4 text-brand-600 animate-pulse" />
+                <span className="text-[11px] font-black text-brand-700 uppercase tracking-widest">Premium Sandbox Mode</span>
              </div>
              <Link 
               href="/auth/register" 
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-indigo-200 transition-all active:scale-95"
+              className="bg-zinc-900 text-white px-8 py-3 rounded-2xl text-[13px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-xl shadow-zinc-200"
              >
-                Começar Teste Grátis
+                Start Free Trial
              </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex pt-16 h-screen overflow-hidden">
+      {/* App Shell */}
+      <main className="flex-1 flex pt-20 h-screen overflow-hidden">
         
-        {/* Sidebar Mockup */}
-        <aside className="hidden lg:flex w-64 bg-white border-r border-slate-200 flex-col p-6 space-y-8">
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Principal</p>
+        {/* Sleek Sidebar */}
+        <aside className="hidden lg:flex w-72 bg-white border-r border-zinc-100 flex-col p-8 space-y-10">
+          <div className="space-y-2">
+            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em] mb-6 ml-4">Architecture</p>
             {[
-              { icon: ChartBarIcon, name: 'Dashboard', active: true },
+              { icon: ChartBarIcon, name: 'Analytics', active: true },
               { icon: UserGroupIcon, name: 'Pipeline', active: false },
-              { icon: SparklesIcon, name: 'IA Insights', active: false },
-              { icon: CurrencyDollarIcon, name: 'Vendas', active: false },
+              { icon: SparklesIcon, name: 'AI Insights', active: false },
+              { icon: CurrencyDollarIcon, name: 'Deals', active: false },
             ].map((item) => (
               <div 
                 key={item.name} 
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-not-allowed group ${item.active ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}
+                className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all cursor-not-allowed group ${item.active ? 'bg-zinc-50 text-brand-600 font-bold' : 'text-zinc-400 hover:text-zinc-600'}`}
               >
-                <item.icon className={`w-5 h-5 ${item.active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
-                <span className="text-sm font-bold tracking-tight">{item.name}</span>
+                <item.icon className={`w-5 h-5 ${item.active ? 'text-brand-600' : 'text-zinc-300 group-hover:text-zinc-400'}`} />
+                <span className="text-[15px] font-bold tracking-tight">{item.name}</span>
               </div>
             ))}
           </div>
 
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Configurações</p>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 cursor-not-allowed italic">
-                <span className="text-sm font-medium">Outros módulos...</span>
+          <div className="mt-auto relative group">
+            <div className="p-6 bg-zinc-900 rounded-[32px] overflow-hidden relative shadow-2xl">
+              <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none -mt-4 -mr-4"><SparklesIcon className="w-24 h-24 text-white" /></div>
+              <div className="relative z-10">
+                <div className="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-brand-500/40">
+                  <SparklesIcon className="w-6 h-6 text-white" />
+                </div>
+                <p className="text-white font-black text-xs uppercase tracking-widest mb-2">Upgrade to Pro</p>
+                <p className="text-zinc-400 text-[11px] leading-relaxed mb-6 font-medium">
+                  Unlock advanced AI automation and unlimited pipelines for your growth.
+                </p>
+                <Link href="/auth/register" className="w-full bg-white text-zinc-900 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-brand-50 transition-all flex items-center justify-center shadow-lg active:scale-95">
+                  View Pricing
+                </Link>
+              </div>
             </div>
-          </div>
-
-          <div className="mt-auto p-4 bg-slate-900 rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-2 opacity-20"><SparklesIcon className="w-12 h-12 text-white" /></div>
-            <p className="text-white font-bold text-xs relative z-10 mb-1">Upgrade Disponível</p>
-            <p className="text-slate-400 text-[10px] relative z-10 leading-relaxed mb-3">
-                Assine o plano <span className="text-white font-bold">{plan?.name || 'Pro'}</span> por apenas <span className="text-indigo-400 font-bold">{plan ? currencyFormatter.format(plan.price) : 'R$ 99'}/{plan?.interval === 'year' ? 'ano' : 'mês'}</span>.
-            </p>
-            <Link href="/auth/register" className="w-full bg-white text-slate-900 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-colors relative z-10 flex items-center justify-center">
-              Ver Planos
-            </Link>
           </div>
         </aside>
 
-        {/* content window */}
-        <div className="flex-1 flex flex-col bg-[#f8fafc] overflow-hidden">
+        {/* Dynamic Canvas */}
+        <div className="flex-1 flex flex-col bg-[#F9FAFB] overflow-hidden relative">
+          <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
           
-          {/* Dashboard Header */}
-          <div className="p-8 pb-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          {/* Section Header */}
+          <div className="p-10 pb-4 relative z-10">
+            <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
               <div>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Visão Geral do Pipeline</h1>
-                <p className="text-slate-500 mt-1 font-medium">Arraste os cards para simular o movimento de vendas real.</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-brand-500/10 text-brand-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-brand-500/20">Active Workspace</div>
+                </div>
+                <h1 className="text-4xl font-black text-zinc-900 tracking-tight mb-2">Omni-Pipeline Control</h1>
+                <p className="text-zinc-400 font-medium">Coordinate your global operations with real-time drag-and-drop orchestration.</p>
               </div>
-              <div className="flex gap-4">
-                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                  <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
-                    <ArrowTrendingUpIcon className="w-6 h-6 text-emerald-600" />
+              <div className="flex gap-6">
+                <div className="bg-white/40 backdrop-blur-md p-5 rounded-[28px] border border-zinc-100 shadow-xl shadow-zinc-200/50 flex items-center gap-5 min-w-[200px]">
+                  <div className="w-12 h-12 bg-white rounded-2xl shadow-premium flex items-center justify-center ring-1 ring-zinc-50">
+                    <ArrowTrendingUpIcon className="w-6 h-6 text-brand-600" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Receita Estimada</p>
-                    <p className="text-xl font-black text-slate-900 leading-none">R$ 112.500</p>
+                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">Live Revenue</p>
+                    <p className="text-2xl font-black text-zinc-900 tabular-nums leading-none">R$ 112.5k</p>
                   </div>
                 </div>
-                <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-                  <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                    <ClockIcon className="w-6 h-6 text-indigo-600" />
+                <div className="bg-white/40 backdrop-blur-md p-5 rounded-[28px] border border-zinc-100 shadow-xl shadow-zinc-200/50 flex items-center gap-5 min-w-[200px]">
+                  <div className="w-12 h-12 bg-white rounded-2xl shadow-premium flex items-center justify-center ring-1 ring-zinc-50">
+                    <ClockIcon className="w-6 h-6 text-zinc-400" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">SLA Médio</p>
-                    <p className="text-xl font-black text-slate-900 leading-none">4.2 min</p>
+                    <p className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-1">Global SLA</p>
+                    <p className="text-2xl font-black text-zinc-900 tabular-nums leading-none">4.2m</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Draggable Board */}
-          <div className="flex-1 p-8 pt-4 overflow-hidden">
+          {/* Premium Board Canvas */}
+          <div className="flex-1 p-10 pt-4 overflow-hidden relative z-10">
             <DragDropContext onDragEnd={onDragEnd}>
-              <div className="flex h-full gap-6 overflow-x-auto pb-4 custom-scrollbar">
+              <div className="flex h-full gap-8 overflow-x-auto pb-6 custom-scrollbar items-start">
                 {stages.map((stage) => (
                   <Droppable key={stage.id} droppableId={stage.id}>
-                    {(provided) => (
+                    {(provided, snapshot) => (
                       <div 
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className="flex flex-col w-80 bg-slate-200/40 rounded-3xl p-3 h-full min-w-[320px] transition-colors border border-dashed border-slate-300"
+                        className={`flex flex-col w-[340px] bg-white/40 backdrop-blur-xl rounded-[40px] p-4 h-full min-w-[340px] transition-all duration-500 border border-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.02)] ${
+                          snapshot.isDraggingOver ? 'bg-brand-50/30' : ''
+                        }`}
                       >
-                        <div className="flex items-center justify-between mb-4 px-3">
-                          <div className="flex items-center gap-2">
-                             <div className={`w-2 h-2 rounded-full ${stage.color}`} />
-                             <h3 className="font-black text-slate-900 tracking-tight text-sm uppercase">{stage.name}</h3>
+                        <div className="flex items-center justify-between mb-6 px-4 pt-2">
+                          <div className="flex items-center gap-3">
+                             <div className="w-1.5 h-6 bg-brand-500 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.4)]" />
+                             <h3 className="font-black text-zinc-900 tracking-tight text-lg leading-none">{stage.name}</h3>
                           </div>
-                          <span className="text-[10px] font-black text-slate-400 bg-white px-2 py-1 rounded-lg border border-slate-200">
+                          <span className="text-[10px] font-black text-zinc-400 bg-white px-3 py-1.5 rounded-xl border border-zinc-100 shadow-sm uppercase tracking-widest">
                             {stage.deals.length}
                           </span>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto space-y-3 px-1 custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto rounded-[32px] p-2 custom-scrollbar space-y-5">
                           {stage.deals.map((deal, index) => (
                             <Draggable key={deal.id} draggableId={deal.id} index={index}>
                               {(provided, snapshot) => (
@@ -221,25 +226,45 @@ const DemoPage = ({ plan }) => {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`bg-white p-5 rounded-2xl border border-slate-200 shadow-sm group hover:border-indigo-400 hover:shadow-lg hover:shadow-indigo-500/5 transition-all cursor-grab active:cursor-grabbing ${snapshot.isDragging ? 'rotate-2 shadow-2xl ring-2 ring-indigo-500/20' : ''}`}
+                                  className={`bg-white group p-6 rounded-[28px] border transition-all duration-300 ${
+                                    snapshot.isDragging 
+                                      ? 'shadow-2xl border-brand-500/30 ring-8 ring-brand-500/5 rotate-3 scale-105 z-50 bg-white/95 backdrop-blur-sm' 
+                                      : 'shadow-premium border-zinc-100 hover:border-zinc-200 hover:-translate-y-1 hover:shadow-2xl'
+                                  }`}
                                 >
-                                  <h4 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{deal.name}</h4>
-                                  <div className="mt-4 flex items-center justify-between">
-                                    <p className="text-xs font-black text-slate-900">
-                                      {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.amount)}
-                                    </p>
-                                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
-                                      deal.priority === 'HIGH' ? 'bg-red-50 text-red-600' :
-                                      deal.priority === 'MEDIUM' ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
-                                    }`}>
-                                      {deal.priority}
-                                    </span>
+                                  <div className="mb-4 flex flex-wrap gap-2">
+                                    <div className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100/50 rounded-full flex items-center gap-2 shadow-sm">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                      <span className="text-[10px] font-black uppercase tracking-widest">85% Fit</span>
+                                    </div>
+                                    {deal.priority === 'HIGH' && (
+                                      <div className="px-2.5 py-1 bg-zinc-900 text-white rounded-full shadow-lg shadow-zinc-900/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                        🔥 Urgent
+                                      </div>
+                                    )}
                                   </div>
-                                  <div className="mt-3 pt-3 border-t border-slate-50 flex items-center gap-2">
-                                     <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-400">
+
+                                  <h4 className="font-black text-zinc-900 text-[16px] mb-3 leading-tight group-hover:text-brand-600 transition-colors uppercase tracking-tight">{deal.name}</h4>
+                                  
+                                  <div className="flex justify-between items-end mt-4">
+                                    <div className="flex flex-col">
+                                      <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-0.5">Valuation</span>
+                                      <span className="text-[16px] font-bold text-zinc-900 tabular-nums">
+                                        {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(deal.amount)}
+                                      </span>
+                                    </div>
+                                    <div className="flex -space-x-1">
+                                      <div className="w-7 h-7 bg-zinc-50 rounded-xl border border-zinc-100 flex items-center justify-center font-black text-[10px] text-zinc-400">
                                         {deal.company.charAt(0)}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-5 pt-5 border-t border-zinc-50 flex items-center gap-3">
+                                     <div className="w-5 h-5 rounded-full bg-brand-50 flex items-center justify-center">
+                                       <SparklesIcon className="w-3 h-3 text-brand-600" />
                                      </div>
-                                     <span className="text-[10px] font-bold text-slate-400 truncate">{deal.company}</span>
+                                     <span className="text-[10px] font-bold text-zinc-400 truncate tracking-tight uppercase">AI analyzed recently</span>
                                   </div>
                                 </div>
                               )}
@@ -257,27 +282,27 @@ const DemoPage = ({ plan }) => {
         </div>
       </main>
 
-      {/* Floating CTA Overlay */}
+      {/* High-Impact CTA Overlay */}
       <AnimatePresence>
         {showCTA && (
           <motion.div 
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] w-full max-w-lg px-4"
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[60] w-full max-w-2xl px-6"
           >
-            <div className="bg-slate-900 text-white p-6 rounded-[32px] shadow-2xl shadow-indigo-500/30 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-purple-500/20" />
-              <div className="relative z-10 text-center sm:text-left">
-                <p className="text-lg font-black tracking-tight leading-tight mb-1">Gostou do que viu?</p>
-                <p className="text-slate-400 text-sm">Crie sua conta real e conecte seu WhatsApp em menos de 2 minutos.</p>
+            <div className="bg-zinc-900 text-white p-8 rounded-[40px] shadow-[0_32px_64px_rgba(0,0,0,0.3)] flex flex-col md:flex-row items-center gap-8 relative overflow-hidden border border-white/5">
+              <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(20,184,166,0.1),transparent)] animate-spin-slow" />
+              <div className="relative z-10 text-center md:text-left flex-1">
+                <p className="text-2xl font-black tracking-tight leading-tight mb-2">Ready for the upgrade?</p>
+                <p className="text-zinc-400 text-sm font-medium">Deploy your own Closify instance in less than 2 minutes and start scaling with precision.</p>
               </div>
               <Link 
                 href="/auth/register"
-                className="relative z-10 bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs whitespace-nowrap transition-transform active:scale-95 flex items-center gap-2"
+                className="relative z-10 bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-[20px] font-black uppercase tracking-[0.15em] text-xs whitespace-nowrap transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand-500/30"
               >
-                Ativar Teste Grátis
-                <ChevronRightIcon className="w-4 h-4" />
+                Start Trial
+                <ChevronRightIcon className="w-5 h-5" />
               </Link>
             </div>
           </motion.div>

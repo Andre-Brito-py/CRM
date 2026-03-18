@@ -158,7 +158,7 @@ const EmailIntegration = () => {
           <Card.Footer>
             <div className="flex justify-end">
               <Button
-                className={`text-white ${enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                className={`text-white ${enabled ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700'
                   }`}
                 disabled={isSubmitting || isLoading}
                 onClick={toggleIntegration}

@@ -158,7 +158,7 @@ const Team = ({ isTeamOwner, workspace }) => {
                   onCopy={copyToClipboard}
                   text={workspace.inviteLink}
                 >
-                  <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-blue-600" />
+                  <DocumentDuplicateIcon className="w-5 h-5 cursor-pointer hover:text-brand-600" />
                 </CopyToClipboard>
               </div>
             </Card.Body>
@@ -237,7 +237,7 @@ const Team = ({ isTeamOwner, workspace }) => {
                   All invited team members will be set to <strong>Pending</strong>
                 </small>
                 <Button
-                  className="text-white bg-blue-600 hover:bg-blue-500"
+                  className="text-white bg-brand-600 hover:bg-brand-500"
                   disabled={validateEmails || isSubmitting}
                   onClick={invite}
                 >
@@ -285,7 +285,7 @@ const Team = ({ isTeamOwner, workspace }) => {
                                 member.status === InvitationStatus.ACCEPTED
                                   ? 'bg-green-200 text-green-600'
                                   : member.status === InvitationStatus.PENDING
-                                    ? 'bg-blue-200 text-blue-600'
+                                    ? 'bg-blue-200 text-brand-600'
                                     : 'bg-red-200 text-red-600',
                               ].join(' ')}
                             >
@@ -318,7 +318,7 @@ const Team = ({ isTeamOwner, workspace }) => {
                                       <div className="p-2">
                                         <Menu.Item>
                                           <button
-                                            className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-blue-600 hover:text-white"
+                                            className="flex items-center w-full px-2 py-2 space-x-2 text-sm text-gray-800 rounded hover:bg-brand-600 hover:text-white"
                                             onClick={() => changeRole(member.id)}
                                           >
                                             <span>

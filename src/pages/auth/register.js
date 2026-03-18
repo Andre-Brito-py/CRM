@@ -207,7 +207,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                     <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/5">
                         <p className="text-gray-400 italic mb-4">&quot;O Closify mudou a forma como encaramos nosso pipeline. A agilidade que ganhamos no dia a dia é impressionante.&quot;</p>
                         <div className="flex items-center">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-500 mr-3" />
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-400 to-brand-500 mr-3" />
                             <div>
                                 <p className="text-white font-bold text-sm">Mariana Rocha</p>
                                 <p className="text-gray-500 text-xs text-uppercase tracking-wider">COO @ FastGrowth</p>
