@@ -75,7 +75,7 @@ const Pricing = ({ products }) => {
               <div className="mb-10">
                 <h3 className="text-xl font-black text-zinc-900 uppercase tracking-widest mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-zinc-900 tracking-tighter">R$ {isAnnual ? (Number(plan.priceAnnual) || Number(plan.price) * 0.8).toFixed(0) : Number(plan.price)}</span>
+                  <span className="text-4xl font-black text-zinc-900 tracking-tighter">R$ {isAnnual ? (Number(plan.priceAnnual) ? (Number(plan.priceAnnual) / 12) : Number(plan.price) * 0.8).toFixed(0) : Number(plan.price)}</span>
                   <span className="text-zinc-400 text-sm font-bold uppercase tracking-widest">/ mês</span>
                 </div>
               </div>
