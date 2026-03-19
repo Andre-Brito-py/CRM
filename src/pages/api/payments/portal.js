@@ -1,6 +1,6 @@
 import { validateSession } from '@/config/api-validation';
 import getStripe from '@/lib/server/stripe';
-import { getPayment } from '@/prisma/services/customer';
+import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 import { getSystemConfig } from '@/lib/server/config';
 import { log, reportError } from '@/lib/server/logger';
 
@@ -20,7 +20,18 @@ const handler = async (req, res) => {
       return;
     }
 
-    const customerPayment = await getPayment(session.user?.email);
+    const email = session.user?.email || null;
+    const userId = session.user?.userId || session.user?.id || null;
+    if (!email || !userId) {
+      res.status(401).json({ errors: { error: { msg: 'Unauthorized' } } });
+      return;
+    }
+
+    let customerPayment = await getPayment(email);
+    if (!customerPayment) {
+      await createPaymentAccount(email, userId);
+      customerPayment = await getPayment(email);
+    }
     if (!customerPayment?.paymentId) {
       res.status(400).json({ errors: { error: { msg: 'Customer payment account not found' } } });
       return;

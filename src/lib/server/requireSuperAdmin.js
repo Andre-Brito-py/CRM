@@ -16,16 +16,29 @@ export const requireSuperAdmin = async (req, res) => {
     return null;
   }
 
-  if (session?.user?.role !== 'SUPERADMIN') {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-    if (!user || user.role !== 'SUPERADMIN') {
-      res.status(403).json({ error: { msg: 'Forbidden' } });
-      return null;
-    }
-    session.user.role = 'SUPERADMIN';
+  const require2fa = (() => {
+    const raw = String(process.env.SUPERADMIN_REQUIRE_2FA ?? '').trim().toLowerCase();
+    if (raw === 'true' || raw === '1' || raw === 'yes' || raw === 'on') return true;
+    if (raw === 'false' || raw === '0' || raw === 'no' || raw === 'off') return false;
+    return process.env.NODE_ENV === 'production';
+  })();
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, twoFactorEnabled: true },
+  });
+
+  if (!dbUser || dbUser.role !== 'SUPERADMIN') {
+    res.status(403).json({ error: { msg: 'Forbidden' } });
+    return null;
   }
+
+  if (require2fa && !dbUser.twoFactorEnabled) {
+    res.status(403).json({ error: { msg: '2FA_REQUIRED' } });
+    return null;
+  }
+
+  session.user.role = 'SUPERADMIN';
+  session.user.twoFactorEnabled = Boolean(dbUser.twoFactorEnabled);
   return session;
 };

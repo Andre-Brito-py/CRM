@@ -217,7 +217,7 @@ const buildBaseAuthOptions = () => {
             select: { id: true, email: true, role: true },
           });
           if (!dbUser?.email) return true;
-          if (dbUser.role === 'SUPERADMIN') return true;
+          if (dbUser.role === 'SUPERADMIN') return false;
 
           let customerPayment = await getPayment(dbUser.email);
           if (!customerPayment) {

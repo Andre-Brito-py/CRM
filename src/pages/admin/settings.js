@@ -184,6 +184,7 @@ const AdminSettings = () => {
   const [stripeValidationEnabled, setStripeValidationEnabled] = useState(false);
   const [isPortalSettingUp, setIsPortalSettingUp] = useState(false);
   const [portalSetupResult, setPortalSetupResult] = useState(null);
+  const [isSuperAdminBillingOpening, setIsSuperAdminBillingOpening] = useState(false);
   const [stripeReplaySubmitting, setStripeReplaySubmitting] = useState(false);
   const [stripeReplayResult, setStripeReplayResult] = useState(null);
   const [stripeReplayEventId, setStripeReplayEventId] = useState('');
@@ -231,6 +232,28 @@ const AdminSettings = () => {
       toast.error('Falha ao configurar Billing Portal');
     } finally {
       setIsPortalSettingUp(false);
+    }
+  };
+
+  const openSuperAdminBillingPortal = async () => {
+    setIsSuperAdminBillingOpening(true);
+    try {
+      const response = await fetch('/api/payments/portal', { method: 'POST' });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        toast.error(result?.errors?.error?.msg || result?.error?.msg || 'Falha ao abrir Billing Portal');
+        return;
+      }
+      const url = result?.data?.url || null;
+      if (!url) {
+        toast.error('Billing Portal indisponível');
+        return;
+      }
+      window.location.href = url;
+    } catch {
+      toast.error('Falha ao abrir Billing Portal');
+    } finally {
+      setIsSuperAdminBillingOpening(false);
     }
   };
 
@@ -437,6 +460,26 @@ const AdminSettings = () => {
 
       <Content.Container>
         <div className="space-y-6">
+          <Card>
+            <Card.Body
+              title="Cobrança do Super Admin"
+              subtitle="Gerencie o cartão do Super Admin para custos de uso (overage)"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-gray-700">
+                  O Super Admin paga o próprio consumo quando ele é o dono do workspace que gerou o uso.
+                </div>
+                <button
+                  type="button"
+                  disabled={isSuperAdminBillingOpening}
+                  onClick={openSuperAdminBillingPortal}
+                  className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-50"
+                >
+                  {isSuperAdminBillingOpening ? 'Abrindo...' : 'Gerenciar cartão'}
+                </button>
+              </div>
+            </Card.Body>
+          </Card>
           {CATALOG.map((section) => (
             <Card key={section.title}>
               <Card.Body title={section.title} subtitle="Salva no banco e aplica em runtime">

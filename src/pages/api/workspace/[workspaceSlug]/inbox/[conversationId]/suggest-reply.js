@@ -1,6 +1,7 @@
 import { validateSession } from '@/config/api-validation/index';
 import { getConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
+import { createPaymentAccount, getPayment } from '@/prisma/services/customer';
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
@@ -77,13 +78,22 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     },
   });
 
-  const stripeCustomerId = creator?.customerPayment?.paymentId || null;
+  let stripeCustomerId = creator?.customerPayment?.paymentId || null;
+  let subscriptionId = creator?.customerPayment?.providerSubscriptionId || null;
+  if (!stripeCustomerId && creator?.email) {
+    let customerPayment = await getPayment(creator.email);
+    if (!customerPayment) {
+      await createPaymentAccount(creator.email, creator.id);
+      customerPayment = await getPayment(creator.email);
+    }
+    stripeCustomerId = customerPayment?.paymentId || null;
+    subscriptionId = customerPayment?.providerSubscriptionId || null;
+  }
   if (!stripeCustomerId) return null;
 
   const stripe = await getStripe();
   let currency = 'usd';
 
-  const subscriptionId = creator?.customerPayment?.providerSubscriptionId || null;
   if (subscriptionId) {
     try {
       const sub = await stripe.subscriptions.retrieve(String(subscriptionId));
