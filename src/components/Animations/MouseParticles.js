@@ -1,15 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium Lilac (Indigo 400ish)
   const canvasRef = useRef(null);
-  const mouseRef = useRef({ x: -1000, y: -1000, lastX: -1000, lastY: -1000, moving: false });
-  const timeoutRef = useRef(null);
+  const mouseRef = useRef({ x: -1000, y: -1000, lastMoveTs: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
     let animationFrameId;
 
     let width = window.innerWidth;
@@ -17,6 +18,9 @@ const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium 
 
     const particles = [];
     const particleCount = 180; // Denser for better visibility
+    const maxDistance = 250;
+    const maxDistanceSq = maxDistance * maxDistance;
+    const stoppedThresholdMs = 100;
 
     class Particle {
       constructor() {
@@ -34,24 +38,23 @@ const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium 
         this.density = (Math.random() * 40) + 10;
       }
 
-      update() {
+      update(isMouseMoving) {
         // Only react if mouse is moving
-        if (mouseRef.current.moving) {
-          let dx = mouseRef.current.x - this.x;
-          let dy = mouseRef.current.y - this.y;
-          let distance = Math.sqrt(dx * dx + dy * dy);
-          
-          let maxDistance = 250; 
-          if (distance < maxDistance) {
-            let force = (maxDistance - distance) / maxDistance;
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            
+        if (isMouseMoving) {
+          const dx = mouseRef.current.x - this.x;
+          const dy = mouseRef.current.y - this.y;
+          const distanceSq = (dx * dx) + (dy * dy);
+
+          if (distanceSq > 0 && distanceSq < maxDistanceSq) {
+            const distance = Math.sqrt(distanceSq);
+            const invDistance = 1 / distance;
+            const force = (maxDistance - distance) / maxDistance;
+            const forceDirectionX = dx * invDistance;
+            const forceDirectionY = dy * invDistance;
+
             this.x += forceDirectionX * force * this.density * 0.6;
             this.y += forceDirectionY * force * this.density * 0.6;
-          } else {
-            this.returnToBase();
-          }
+          } else this.returnToBase();
         } else {
           // Slow drift when mouse is still
           this.x += this.speedX;
@@ -78,13 +81,9 @@ const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium 
       }
 
       draw() {
-        ctx.fillStyle = color;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = color;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
-        ctx.shadowBlur = 0; // Reset for performance
       }
     }
 
@@ -95,24 +94,28 @@ const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium 
       }
     };
 
-    const animate = () => {
+    const animate = (now) => {
+      const isMouseMoving = (now - (mouseRef.current.lastMoveTs || 0)) < stoppedThresholdMs;
+
       ctx.clearRect(0, 0, width, height);
-      particles.forEach(p => {
-        p.update();
+      ctx.fillStyle = color;
+      ctx.shadowBlur = 15;
+      ctx.shadowColor = color;
+
+      for (let i = 0; i < particles.length; i += 1) {
+        const p = particles[i];
+        p.update(isMouseMoving);
         p.draw();
-      });
+      }
+
+      ctx.shadowBlur = 0;
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    const handleMouseMove = (e) => {
+    const handlePointerMove = (e) => {
       mouseRef.current.x = e.clientX;
       mouseRef.current.y = e.clientY;
-      mouseRef.current.moving = true;
-
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => {
-        mouseRef.current.moving = false;
-      }, 100); // Threshold for "stopped"
+      mouseRef.current.lastMoveTs = performance.now();
     };
 
     const handleResize = () => {
@@ -123,18 +126,31 @@ const MouseParticles = ({ color = 'rgba(129, 140, 248, 0.7)' }) => { // Premium 
       init();
     };
 
+    const handleVisibilityChange = () => {
+      if (!document.hidden && !animationFrameId) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      if (document.hidden && animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
+      }
+    };
+
     canvas.width = width;
     canvas.height = height;
     init();
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('pointermove', handlePointerMove, { passive: true });
+    window.addEventListener('resize', handleResize, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
   }, [color]);
 
