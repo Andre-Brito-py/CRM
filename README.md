@@ -6,12 +6,12 @@ Plataforma B2B multi-tenant com foco em operação comercial de alta performance
 
 ---
 
-## 🧭 Por que isso existe (Motivação)
+## Por que isso existe (Motivação)
 - **Construção de Negócio:** Quero alavancar um produto SaaS B2B rentável.
 - **Domínio Tecnológico:** Preciso de uma plataforma que eu controle 100% (código, produto, dados e evolução).
 - **Resolver uma Dor Real:** A meta é simples: simplificar o caos comercial de milhares de PMEs com uma experiência premium, rápida e sólida.
 
-## 💎 Diferenciais Premium (Corporate Experience)
+## Diferenciais Premium (Corporate Experience)
 A Closify foi totalmente redesenhada em **Março/2026** (Executive Lilac Rebranding) para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium.
 
 - **Landing Page Cinematográfica (High-Conversion):** Interface imersiva projetada para converter leads com animações guiadas pelo mouse e *Pricing Dinâmico* gerido 100% via Super Admin (com suporte a descontos anuais).
@@ -19,7 +19,7 @@ A Closify foi totalmente redesenhada em **Março/2026** (Executive Lilac Rebrand
 - **Pipeline com Glassmorphism:** Visualize seus negócios através de um Kanban moderno, com efeitos de vidro fosco, indicadores de probabilidade (AI Fit) e filtros drag-and-drop rápidos.
 - **Custom Fields & Formulários Públicos (Web Forms):** Adapte o CRM com campos personalizados dinâmicos e crie Páginas de Captura de Leads nativas (Form Builder) num piscar de olhos.
 
-## ⚙️ Plataforma No-Code (Adaptável ao Negócio)
+## Plataforma No-Code (Adaptável ao Negócio)
 A ideia aqui é que **o CRM não é engessado**. Cada workspace consegue criar fluxos próprios sem pedir feature nova:
 - **Workflows (Automações por Regra):** Gatilhos + condições + ações, suporte a ações encadeadas e delays (ex: se "Proposta Enviada", disparar WP em 2 dias e notificar App).
 - **Webhooks & Zapier v2:** Assinatura HMAC com rotação de segredo, Catch Hooks e integração nativa com o Zapier via eventos do produto (ex: Pagamento criado, Novo Lead, Mudança no Pipeline, NPS Promotor).
@@ -28,7 +28,7 @@ A ideia aqui é que **o CRM não é engessado**. Cada workspace consegue criar f
 
 ---
 
-## 🧱 Arquitetura e Engenharia (Tech Stack)
+## Arquitetura e Engenharia (Tech Stack)
 
 ### Regras Internas da Casa (Pra eu não me sabotar)
 1. *Zero credenciais hardcoded*. Tudo via \`.env\` ou cofres criptografados no banco (SystemConfig).
@@ -43,7 +43,7 @@ A ideia aqui é que **o CRM não é engessado**. Cada workspace consegue criar f
 
 ---
 
-## 🚀 Como Rodar e Testar
+## Como Rodar e Testar
 
 ### Ambiente Local (Dev)
 Requisitos: Node.js 18+, Postgres Database (local ou Neon direct string).
@@ -73,7 +73,7 @@ O `.env` em produção requer apenas o básico: `DATABASE_URL`, `NEXTAUTH_SECRET
 
 ---
 
-## 📜 Diário de Bordo (Changelog de Dev)
+## Diário de Bordo (Changelog de Dev)
 
 Para não perder a linha de evolução, aqui estão os saltos da plataforma consolidados:
 
@@ -91,7 +91,7 @@ Para não perder a linha de evolução, aqui estão os saltos da plataforma cons
 
 ---
 
-## 📄 Licença
+## Licença
 
 Este projeto comercial é mantido e licenciado sob a **MIT License** — veja o arquivo [LICENSE](LICENSE) para detalhes de cópia e direitos.
 
