@@ -63,6 +63,26 @@ npm run dev
 ```
 > **Nota:** Se o Next.js mudar de porta sozinho (3001/3002), o `NEXTAUTH_URL` fixo no `.env` do localhost pode gerar tela branca de CSRF. Deixe dinâmico em dev.
 
+### Troubleshooting (Erros comuns)
+
+**1) Server Error: `Cannot find module './chunks/vendor-chunks/next.js'`**
+
+Isso quase sempre é cache/artefato corrompido do build do Next. Limpe a pasta `.next` e suba novamente:
+
+```bash
+# PowerShell (Windows)
+Remove-Item -Recurse -Force .next
+npm run dev
+```
+
+**2) `listen EADDRINUSE: address already in use` (porta ocupada)**
+
+Suba em outra porta:
+
+```bash
+npm run dev -- --port 3001
+```
+
 ### Configuração de Deploy (Go-Live na Vercel + Neon)
 - **Banco de Dados (Neon):** Utilize a *Connection String Pooled* na Vercel para suporte serverless impecável (PgBouncer automático). Use a *Direct String* local apenas para rodar `prisma db push` / `migrate deploy`.
 - **Migração em Produção:** Lembre de apontar no CLI local a url *direct* e rodar `DATABASE_URL="postgresql://...NEON_DIRECT..." npm run prisma:migrate:deploy` seguido de `npx prisma db seed`.

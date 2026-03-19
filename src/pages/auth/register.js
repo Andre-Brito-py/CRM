@@ -364,8 +364,11 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                     {showFreePlan && <option value="">Plano Free</option>}
                                     {(plans || [])
                                         .filter((p) => Boolean(p?.isActive))
-                                        .filter((p) => String(p?.slug || '').toUpperCase() !== 'FREE')
-                                        .filter((p) => (showFreePlan ? true : Number(p?.price || 0) > 0))
+                                        .filter((p) => !(
+                                            Boolean(p?.features?.isFreePlan) ||
+                                            String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+                                            Number(p?.price || 0) === 0
+                                        ))
                                         .sort((a, b) => Number(a.price) - Number(b.price))
                                         .map((plan) => {
                                             const isAnnual = formData.interval === 'year';
@@ -444,7 +447,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                         >
                             {isSubmitting
                                 ? 'Processando cadastro...'
-                                : (!canSubmit ? 'Selecione um plano' : (isPaidPlan ? 'Assinar e Criar minha conta' : 'Criar minha conta gratuita'))}
+                                : (!canSubmit ? 'Selecione um plano' : (isPaidPlan ? 'Assinar e Criar minha conta' : (showFreePlan ? 'Criar minha conta gratuita' : 'Criar minha conta')))}
                         </Button>
                     </form>
 
@@ -475,12 +478,7 @@ export const getServerSideProps = async (context) => {
 
     try {
         const { getAllPlans } = await import('@/prisma/services/plan');
-        const { default: prisma } = await import('@/prisma/index');
         const plans = await getAllPlans();
-        const cfg = await prisma.systemConfig.findUnique({ where: { key: 'PLANS_SHOW_FREE' } });
-        const showFreePlan = cfg?.value == null
-            ? true
-            : ['true', '1', 'yes', 'on'].includes(String(cfg.value).trim().toLowerCase());
         const safePlans = (plans || []).map((plan) => ({
             id: plan.id,
             name: plan.name,
@@ -496,6 +494,13 @@ export const getServerSideProps = async (context) => {
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),
         }));
+        const showFreePlan = safePlans
+            .filter((p) => Boolean(p?.isActive))
+            .some((p) => (
+                Boolean(p?.features?.isFreePlan) ||
+                String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+                Number(p?.price || 0) === 0
+            ));
         return { props: { plans: safePlans, initialPlanSlug, initialInterval, showFreePlan } };
     } catch (error) {
         return { props: { plans: [], initialPlanSlug, initialInterval: 'month', showFreePlan: true } };

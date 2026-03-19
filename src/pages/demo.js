@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useTranslation } from "react-i18next";
 import Logo from '@/components/Logo';
-import { 
-  ChartBarIcon, 
-  UserGroupIcon, 
-  ArrowLeftIcon, 
+import {
+  ChartBarIcon,
+  UserGroupIcon,
+  ArrowLeftIcon,
   CheckCircleIcon,
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
@@ -54,7 +54,7 @@ const initialStages = [
   }
 ];
 
-const DemoPage = ({ plan }) => {
+const DemoPage = ({ plan, hasFreePlan }) => {
   const { t } = useTranslation();
   const [stages, setStages] = useState(initialStages);
   const [showCTA, setShowCTA] = useState(false);
@@ -72,7 +72,7 @@ const DemoPage = ({ plan }) => {
     const newStages = [...stages];
     const sourceStage = newStages.find(s => s.id === source.droppableId);
     const destStage = newStages.find(s => s.id === destination.droppableId);
-    
+
     const [movedDeal] = sourceStage.deals.splice(source.index, 1);
     destStage.deals.splice(destination.index, 0, movedDeal);
 
@@ -104,23 +104,25 @@ const DemoPage = ({ plan }) => {
           </div>
 
           <div className="flex items-center gap-6">
-             <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-50/50 rounded-2xl border border-brand-100/50">
-                <SparklesIcon className="w-4 h-4 text-brand-600 animate-pulse" />
-                <span className="text-[11px] font-black text-brand-700 uppercase tracking-widest">{t('demo.sandboxMode', 'Modo Sandbox Premium')}</span>
-             </div>
-             <Link 
-              href="/auth/register" 
+            <div className="hidden lg:flex items-center gap-3 px-4 py-2 bg-brand-50/50 rounded-2xl border border-brand-100/50">
+              <SparklesIcon className="w-4 h-4 text-brand-600 animate-pulse" />
+              <span className="text-[11px] font-black text-brand-700 uppercase tracking-widest">{t('demo.sandboxMode', 'Modo Sandbox Premium')}</span>
+            </div>
+            <Link
+              href="/auth/register"
               className="bg-zinc-900 text-white px-8 py-3 rounded-2xl text-[13px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-xl shadow-zinc-200"
-             >
-                {t('demo.startFreeTrial', 'Iniciar Teste Grátis')}
-             </Link>
+            >
+              {hasFreePlan
+                ? t('demo.primaryCtaFree', 'Iniciar Teste Grátis')
+                : t('demo.primaryCta', 'Criar conta')}
+            </Link>
           </div>
         </div>
       </header>
 
       {/* App Shell */}
       <main className="flex-1 flex pt-20 h-screen overflow-hidden">
-        
+
         {/* Sleek Sidebar */}
         <aside className="hidden lg:flex w-72 bg-white border-r border-zinc-100 flex-col p-8 space-y-10">
           <div className="space-y-2">
@@ -131,8 +133,8 @@ const DemoPage = ({ plan }) => {
               { icon: SparklesIcon, name: t('demo.nav.aiInsights', 'Insights por IA'), active: false },
               { icon: CurrencyDollarIcon, name: t('demo.nav.deals', 'Negócios'), active: false },
             ].map((item) => (
-              <div 
-                key={item.name} 
+              <div
+                key={item.name}
                 className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all cursor-not-allowed group ${item.active ? 'bg-zinc-50 text-brand-600 font-bold' : 'text-zinc-400 hover:text-zinc-600'}`}
               >
                 <item.icon className={`w-5 h-5 ${item.active ? 'text-brand-600' : 'text-zinc-300 group-hover:text-zinc-400'}`} />
@@ -163,7 +165,7 @@ const DemoPage = ({ plan }) => {
         {/* Dynamic Canvas */}
         <div className="flex-1 flex flex-col bg-[#F9FAFB] overflow-hidden relative">
           <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
-          
+
           {/* Section Header */}
           <div className="p-10 pb-4 relative z-10">
             <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
@@ -204,17 +206,16 @@ const DemoPage = ({ plan }) => {
                 {stages.map((stage) => (
                   <Droppable key={stage.id} droppableId={stage.id}>
                     {(provided, snapshot) => (
-                      <div 
+                      <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className={`flex flex-col w-[340px] bg-white/40 backdrop-blur-xl rounded-[40px] p-4 h-full min-w-[340px] transition-all duration-500 border border-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.02)] ${
-                          snapshot.isDraggingOver ? 'bg-brand-50/30' : ''
-                        }`}
+                        className={`flex flex-col w-[340px] bg-white/40 backdrop-blur-xl rounded-[40px] p-4 h-full min-w-[340px] transition-all duration-500 border border-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.02)] ${snapshot.isDraggingOver ? 'bg-brand-50/30' : ''
+                          }`}
                       >
                         <div className="flex items-center justify-between mb-6 px-4 pt-2">
                           <div className="flex items-center gap-3">
-                             <div className="w-1.5 h-6 bg-brand-500 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.4)]" />
-                             <h3 className="font-black text-zinc-900 tracking-tight text-lg leading-none">{stage.name}</h3>
+                            <div className="w-1.5 h-6 bg-brand-500 rounded-full shadow-[0_0_12px_rgba(20,184,166,0.4)]" />
+                            <h3 className="font-black text-zinc-900 tracking-tight text-lg leading-none">{stage.name}</h3>
                           </div>
                           <span className="text-[10px] font-black text-zinc-400 bg-white px-3 py-1.5 rounded-xl border border-zinc-100 shadow-sm uppercase tracking-widest">
                             {stage.deals.length}
@@ -229,11 +230,10 @@ const DemoPage = ({ plan }) => {
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}
-                                  className={`bg-white group p-6 rounded-[28px] border transition-all duration-300 ${
-                                    snapshot.isDragging 
-                                      ? 'shadow-2xl border-brand-500/30 ring-8 ring-brand-500/5 rotate-3 scale-105 z-50 bg-white/95 backdrop-blur-sm' 
-                                      : 'shadow-premium border-zinc-100 hover:border-zinc-200 hover:-translate-y-1 hover:shadow-2xl'
-                                  }`}
+                                  className={`bg-white group p-6 rounded-[28px] border transition-all duration-300 ${snapshot.isDragging
+                                    ? 'shadow-2xl border-brand-500/30 ring-8 ring-brand-500/5 rotate-3 scale-105 z-50 bg-white/95 backdrop-blur-sm'
+                                    : 'shadow-premium border-zinc-100 hover:border-zinc-200 hover:-translate-y-1 hover:shadow-2xl'
+                                    }`}
                                 >
                                   <div className="mb-4 flex flex-wrap gap-2">
                                     <div className="px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100/50 rounded-full flex items-center gap-2 shadow-sm">
@@ -248,7 +248,7 @@ const DemoPage = ({ plan }) => {
                                   </div>
 
                                   <h4 className="font-black text-zinc-900 text-[16px] mb-3 leading-tight group-hover:text-brand-600 transition-colors uppercase tracking-tight">{deal.name}</h4>
-                                  
+
                                   <div className="flex justify-between items-end mt-4">
                                     <div className="flex flex-col">
                                       <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest mb-0.5">Valuation</span>
@@ -264,10 +264,10 @@ const DemoPage = ({ plan }) => {
                                   </div>
 
                                   <div className="mt-5 pt-5 border-t border-zinc-50 flex items-center gap-3">
-                                     <div className="w-5 h-5 rounded-full bg-brand-50 flex items-center justify-center">
-                                       <SparklesIcon className="w-3 h-3 text-brand-600" />
-                                     </div>
-                                     <span className="text-[10px] font-bold text-zinc-400 truncate tracking-tight uppercase">AI analyzed recently</span>
+                                    <div className="w-5 h-5 rounded-full bg-brand-50 flex items-center justify-center">
+                                      <SparklesIcon className="w-3 h-3 text-brand-600" />
+                                    </div>
+                                    <span className="text-[10px] font-bold text-zinc-400 truncate tracking-tight uppercase">AI analyzed recently</span>
                                   </div>
                                 </div>
                               )}
@@ -288,7 +288,7 @@ const DemoPage = ({ plan }) => {
       {/* High-Impact CTA Overlay */}
       <AnimatePresence>
         {showCTA && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
@@ -300,7 +300,7 @@ const DemoPage = ({ plan }) => {
                 <p className="text-2xl font-black tracking-tight leading-tight mb-2">{t('demo.readyForUpgrade', 'Pronto para o upgrade?')}</p>
                 <p className="text-zinc-400 text-sm font-medium">{t('demo.deployInstance', 'Implemente sua própria instância do Closify em menos de 2 minutos e escale com precisão.')}</p>
               </div>
-              <Link 
+              <Link
                 href="/auth/register"
                 className="relative z-10 bg-brand-500 hover:bg-brand-600 text-white px-10 py-4 rounded-[20px] font-black uppercase tracking-[0.15em] text-xs whitespace-nowrap transition-all active:scale-95 flex items-center gap-3 shadow-xl shadow-brand-500/30"
               >
@@ -338,11 +338,19 @@ export const getServerSideProps = async () => {
   try {
     const { getAllPlans } = await import('@/prisma/services/plan');
     const plans = await getAllPlans();
-    // Get the first active paid plan to showcase in the sidebar
-    const premiumPlan = plans.find(p => p.isActive && Number(p.price) > 0) || null;
-    
+    const activePlans = (plans || []).filter((p) => Boolean(p?.isActive));
+    const hasFreePlan = activePlans.some((p) => (
+      Boolean(p?.features?.isFreePlan) ||
+      String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+      Number(p?.price || 0) === 0
+    ));
+
+    const premiumPlan =
+      activePlans.find((p) => Number(p?.price || 0) > 0) || null;
+
     return {
       props: {
+        hasFreePlan,
         plan: premiumPlan ? {
           name: premiumPlan.name,
           price: Number(premiumPlan.price),
@@ -353,6 +361,6 @@ export const getServerSideProps = async () => {
       }
     };
   } catch (e) {
-    return { props: { plan: null } };
+    return { props: { plan: null, hasFreePlan: true } };
   }
 };

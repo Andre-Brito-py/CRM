@@ -104,7 +104,7 @@ const Pricing = ({ products, promo }) => {
               </ul>
 
               <button className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.name.toLowerCase().includes('standard') ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}>
-                Escolher Plano
+                {plan?.isFreePlan ? 'Começar grátis' : 'Escolher Plano'}
               </button>
             </motion.div>
           ))}

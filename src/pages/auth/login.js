@@ -10,7 +10,7 @@ import Meta from '@/components/Meta/index';
 import { useTranslation } from "react-i18next";
 import { redirectToCheckout } from '@/lib/client/stripe';
 
-const Login = () => {
+const Login = ({ hasFreePlan }) => {
   const { status } = useSession();
   const router = useRouter();
   const { t } = useTranslation();
@@ -461,7 +461,7 @@ const Login = () => {
             <p className="text-base text-gray-600">
               Ainda não tem uma conta?{' '}
               <Link href="/auth/register" className="font-bold text-indigo-600 hover:text-indigo-500 transition-colors decoration-2 hover:underline underline-offset-8">
-                Crie sua conta gratuita agora
+                {hasFreePlan ? t('auth.login.createFreeAccount', 'Crie sua conta gratuita agora') : t('auth.login.createAccount', 'Crie sua conta agora')}
               </Link>
             </p>
           </div>
@@ -472,3 +472,20 @@ const Login = () => {
 };
 
 export default Login;
+
+export const getServerSideProps = async () => {
+  try {
+    const { getAllPlans } = await import('@/prisma/services/plan');
+    const plans = await getAllPlans();
+    const hasFreePlan = (plans || [])
+      .filter((p) => Boolean(p?.isActive))
+      .some((p) => (
+        Boolean(p?.features?.isFreePlan) ||
+        String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+        Number(p?.price || 0) === 0
+      ));
+    return { props: { hasFreePlan } };
+  } catch {
+    return { props: { hasFreePlan: true } };
+  }
+};

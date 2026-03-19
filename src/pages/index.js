@@ -49,20 +49,20 @@ const isTruthyValue = (value) => {
   return v === 'true' || v === '1' || v === 'yes' || v === 'on';
 };
 
-const Home = ({ products, promo }) => {
+const Home = ({ products, promo, hasFreePlan }) => {
   return (
     <LandingLayout>
       <Meta
         title="Closify CRM - Omnichannel Sales & Customer Management"
         description="The ultimate CRM platform to manage your leads, sales pipelines, and WhatsApp conversations in one place."
       />
-      <Hero />
+      <Hero hasFreePlan={hasFreePlan} />
       <Stats />
       <Features />
       <Pricing products={products} promo={promo} />
       <Testimonial />
       <FAQ />
-      <CallToAction />
+      <CallToAction hasFreePlan={hasFreePlan} />
       <Footer />
     </LandingLayout>
   );
@@ -106,7 +106,7 @@ const formatPlanFeatures = (features) => {
 export const getStaticProps = async () => {
   let products = [];
   let promo = { enabled: false, code: '', text: '' };
-  let showFree = true;
+  let hasFreePlan = false;
   try {
     const [plans, configs] = await Promise.all([
       getAllPlans(),
@@ -114,7 +114,6 @@ export const getStaticProps = async () => {
         where: {
           key: {
             in: [
-              'PLANS_SHOW_FREE',
               'LANDING_PROMO_ENABLED',
               'LANDING_PROMO_CODE',
               'LANDING_PROMO_TEXT',
@@ -125,12 +124,10 @@ export const getStaticProps = async () => {
     ]);
 
     const map = new Map((configs || []).map((c) => [String(c.key || '').toUpperCase(), c.value ?? '']));
-    const showFreeRaw = map.get('PLANS_SHOW_FREE');
     const promoEnabledRaw = map.get('LANDING_PROMO_ENABLED');
     const promoCodeRaw = map.get('LANDING_PROMO_CODE');
     const promoTextRaw = map.get('LANDING_PROMO_TEXT');
 
-    showFree = showFreeRaw == null ? true : isTruthyValue(showFreeRaw);
     promo = {
       enabled: promoEnabledRaw == null ? false : isTruthyValue(promoEnabledRaw),
       code: String(promoCodeRaw || ''),
@@ -153,22 +150,19 @@ export const getStaticProps = async () => {
           String(plan?.slug || '').trim().toUpperCase() === 'FREE' ||
           Number(plan?.price || 0) === 0,
       }))
-      .filter((p) => (showFree ? true : !p.isFreePlan))
       .sort((a, b) => a.price - b.price);
+
+    hasFreePlan = products.some((p) => Boolean(p?.isFreePlan));
   } catch (e) {
     products = [];
   }
 
   if (!products?.length) {
     products = DEFAULT_PRODUCTS;
-  }
-  if (!showFree) {
-    products = (products || []).filter(
+    hasFreePlan = products.some(
       (p) =>
-        !(
-          String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
-          Number(p?.price || 0) === 0
-        )
+        String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+        Number(p?.price || 0) === 0
     );
   }
 
@@ -176,6 +170,7 @@ export const getStaticProps = async () => {
     props: {
       products,
       promo,
+      hasFreePlan,
     },
     revalidate: 60, // Revalidate every 60 seconds
   };
