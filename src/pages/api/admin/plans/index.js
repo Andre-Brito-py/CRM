@@ -40,6 +40,7 @@ export default async function handler(req, res) {
     const { name, slug, price, priceAnnual, annualDiscount, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
 
     try {
+      const isFreePlan = Boolean(features?.isFreePlan);
       const desiredType = normalizePlanType(slug);
       let syncedPrice = Number(price || 0);
       let syncedPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
@@ -49,7 +50,13 @@ export default async function handler(req, res) {
       let finalStripePriceId = stripePriceId || null;
       let finalStripePriceIdAnnual = stripePriceIdAnnual || null;
 
-      if (stripePriceId || stripePriceIdAnnual) {
+      if (isFreePlan) {
+        syncedPrice = 0;
+        syncedPriceAnnual = null;
+        syncedDiscount = null;
+        finalStripePriceId = null;
+        finalStripePriceIdAnnual = null;
+      } else if (stripePriceId || stripePriceIdAnnual) {
         let stripePrice = null;
         try {
           const stripe = await getStripe();

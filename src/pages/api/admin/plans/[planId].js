@@ -34,6 +34,7 @@ export default async function handler(req, res) {
         select: { stripePriceId: true, stripePriceIdAnnual: true },
       });
 
+      const isFreePlan = Boolean(features?.isFreePlan);
       const desiredType = normalizePlanType(slug);
       const desiredPrice = Number(price || 0);
       const desiredPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
@@ -49,15 +50,21 @@ export default async function handler(req, res) {
       let finalStripePriceId = existing?.stripePriceId || null;
       let finalStripePriceIdAnnual = existing?.stripePriceIdAnnual || null;
 
-      const incomingStripePriceId = stripePriceId ? String(stripePriceId).trim() : null;
+      const incomingStripePriceId = isFreePlan ? null : (stripePriceId ? String(stripePriceId).trim() : null);
       const stripePriceIdChanged = incomingStripePriceId && incomingStripePriceId !== String(existing?.stripePriceId || '');
-      const incomingStripePriceIdAnnual = stripePriceIdAnnual ? String(stripePriceIdAnnual).trim() : null;
+      const incomingStripePriceIdAnnual = isFreePlan ? null : (stripePriceIdAnnual ? String(stripePriceIdAnnual).trim() : null);
       const stripePriceIdAnnualChanged = incomingStripePriceIdAnnual && incomingStripePriceIdAnnual !== String(existing?.stripePriceIdAnnual || '');
 
       let productId = null;
-      const stripe = await getStripe().catch(() => null);
+      const stripe = isFreePlan ? null : await getStripe().catch(() => null);
 
-      if (stripe) {
+      if (isFreePlan) {
+        syncedPrice = 0;
+        syncedPriceAnnual = null;
+        syncedDiscount = null;
+        finalStripePriceId = null;
+        finalStripePriceIdAnnual = null;
+      } else if (stripe) {
         if (stripePriceIdChanged) {
           const stripePrice = await stripe.prices.retrieve(incomingStripePriceId).catch(() => null);
           if (stripePrice) {

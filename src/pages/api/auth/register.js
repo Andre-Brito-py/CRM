@@ -206,6 +206,18 @@ const handler = async (req, res) => {
             ? await (async () => {
                 const price = await stripe.prices.retrieve(planPriceId);
                 const product = await stripe.products.retrieve(price.product);
+                const planType = String(product?.metadata?.type || 'STANDARD').trim().toUpperCase() || 'STANDARD';
+                let trialPeriodDays = null;
+                try {
+                    const plan = await prisma.plan.findUnique({
+                        where: { slug: planType },
+                        select: { features: true },
+                    });
+                    const days = Number(plan?.features?.freeTrialDays || 0);
+                    if (Number.isFinite(days) && days > 0) {
+                        trialPeriodDays = Math.max(0, Math.floor(days));
+                    }
+                } catch { }
                 return await stripe.checkout.sessions.create({
                     customer: customerPayment.paymentId,
                     mode: 'subscription',
@@ -216,6 +228,9 @@ const handler = async (req, res) => {
                     billing_address_collection: automaticTaxEnabled ? 'required' : (normalizedBillingAddressCollection || undefined),
                     automatic_tax: automaticTaxEnabled ? { enabled: true } : undefined,
                     tax_id_collection: taxIdCollectionEnabled ? { enabled: true } : undefined,
+                    subscription_data: trialPeriodDays
+                        ? { trial_period_days: trialPeriodDays }
+                        : undefined,
                     customer_update: {
                         name: 'auto',
                         address: 'auto',
@@ -224,7 +239,7 @@ const handler = async (req, res) => {
                     cancel_url: `${appUrl}/auth/register?paid=cancelled`,
                     metadata: {
                         customerId: customerPayment.customerId,
-                        type: product?.metadata?.type || 'STANDARD',
+                        type: planType,
                         automaticTax: automaticTaxEnabled ? 'true' : 'false',
                         taxIdCollection: taxIdCollectionEnabled ? 'true' : 'false',
                     },

@@ -12,6 +12,7 @@ import {
   Testimonial,
 } from '@/sections/index';
 import { getAllPlans } from '@/prisma/services/plan';
+import prisma from '@/prisma/index';
 
 const DEFAULT_PRODUCTS = [
   {
@@ -43,7 +44,12 @@ const DEFAULT_PRODUCTS = [
   },
 ];
 
-const Home = ({ products }) => {
+const isTruthyValue = (value) => {
+  const v = String(value ?? '').trim().toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+};
+
+const Home = ({ products, promo }) => {
   return (
     <LandingLayout>
       <Meta
@@ -53,7 +59,7 @@ const Home = ({ products }) => {
       <Hero />
       <Stats />
       <Features />
-      <Pricing products={products} />
+      <Pricing products={products} promo={promo} />
       <Testimonial />
       <FAQ />
       <CallToAction />
@@ -67,7 +73,7 @@ const formatPlanFeatures = (features) => {
   if (!features || typeof features !== 'object') return [];
 
   const list = [];
-  
+
   if (features.maxUsers) {
     list.push(`${features.maxUsers} Assentos`);
   } else {
@@ -84,7 +90,7 @@ const formatPlanFeatures = (features) => {
   if (mods.inbox !== false) list.push('WhatsApp Omnichannel');
   if (mods.pipeline !== false) list.push('Pipeline de Vendas');
   if (mods.ai_assistant !== false) list.push('Assistente de IA Integrado');
-  
+
   if (mods.automations !== false && features.maxAutomations) {
     list.push(`${features.maxAutomations} Automações Ativas`);
   } else if (mods.automations !== false) {
@@ -99,8 +105,38 @@ const formatPlanFeatures = (features) => {
 
 export const getStaticProps = async () => {
   let products = [];
+  let promo = { enabled: false, code: '', text: '' };
+  let showFree = true;
   try {
-    const plans = await getAllPlans();
+    const [plans, configs] = await Promise.all([
+      getAllPlans(),
+      prisma.systemConfig.findMany({
+        where: {
+          key: {
+            in: [
+              'PLANS_SHOW_FREE',
+              'LANDING_PROMO_ENABLED',
+              'LANDING_PROMO_CODE',
+              'LANDING_PROMO_TEXT',
+            ],
+          },
+        },
+      }),
+    ]);
+
+    const map = new Map((configs || []).map((c) => [String(c.key || '').toUpperCase(), c.value ?? '']));
+    const showFreeRaw = map.get('PLANS_SHOW_FREE');
+    const promoEnabledRaw = map.get('LANDING_PROMO_ENABLED');
+    const promoCodeRaw = map.get('LANDING_PROMO_CODE');
+    const promoTextRaw = map.get('LANDING_PROMO_TEXT');
+
+    showFree = showFreeRaw == null ? true : isTruthyValue(showFreeRaw);
+    promo = {
+      enabled: promoEnabledRaw == null ? false : isTruthyValue(promoEnabledRaw),
+      code: String(promoCodeRaw || ''),
+      text: String(promoTextRaw || ''),
+    };
+
     products = plans
       .filter((plan) => plan.isActive)
       .map((plan) => ({
@@ -112,7 +148,12 @@ export const getStaticProps = async () => {
         currency: plan.currency,
         interval: plan.interval,
         features: formatPlanFeatures(plan.features),
+        isFreePlan:
+          Boolean(plan?.features?.isFreePlan) ||
+          String(plan?.slug || '').trim().toUpperCase() === 'FREE' ||
+          Number(plan?.price || 0) === 0,
       }))
+      .filter((p) => (showFree ? true : !p.isFreePlan))
       .sort((a, b) => a.price - b.price);
   } catch (e) {
     products = [];
@@ -121,10 +162,20 @@ export const getStaticProps = async () => {
   if (!products?.length) {
     products = DEFAULT_PRODUCTS;
   }
+  if (!showFree) {
+    products = (products || []).filter(
+      (p) =>
+        !(
+          String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
+          Number(p?.price || 0) === 0
+        )
+    );
+  }
 
   return {
     props: {
       products,
+      promo,
     },
     revalidate: 60, // Revalidate every 60 seconds
   };

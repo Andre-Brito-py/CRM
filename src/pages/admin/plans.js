@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -34,6 +35,11 @@ const AVAILABLE_MODULES = [
 const DEFAULT_MODULES = {};
 AVAILABLE_MODULES.forEach(m => { DEFAULT_MODULES[m.key] = true; });
 
+const isTruthyValue = (value) => {
+  const v = String(value ?? '').trim().toLowerCase();
+  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
+};
+
 // -----------------------------------------------------------------
 // Modal de criação/edição de Plano
 // -----------------------------------------------------------------
@@ -53,6 +59,10 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     currency: plan?.currency || 'USD',
     stripePriceId: plan?.stripePriceId || '',
     stripePriceIdAnnual: plan?.stripePriceIdAnnual || '',
+    isFreePlan:
+      Boolean(plan?.features?.isFreePlan) ||
+      String(plan?.slug || '').trim().toUpperCase() === 'FREE' ||
+      Number(plan?.price || 0) === 0,
     maxUsers: plan?.features?.maxUsers ?? 5,
     maxPendingInvites:
       plan?.features?.maxPendingInvites ??
@@ -80,12 +90,21 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     setFormData(prev => {
       const newData = {
         ...prev,
         [name]: type === 'checkbox' ? checked : value,
       };
+
+      if (name === 'isFreePlan' && checked) {
+        newData.price = 0;
+        newData.priceAnnual = '';
+        newData.annualDiscount = '';
+        newData.stripePriceId = '';
+        newData.stripePriceIdAnnual = '';
+        newData.freeTrialDays = 0;
+      }
 
       // Auto-calculate annual price if monthly price or discount changes
       if (name === 'price' || name === 'annualDiscount') {
@@ -123,6 +142,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
       };
 
       const features = {
+        isFreePlan: Boolean(formData.isFreePlan),
         maxUsers: normalizeLimit(formData.maxUsers, 5),
         maxPendingInvites: normalizeLimit(formData.maxPendingInvites, 50),
         maxContacts: Number(formData.maxContacts) || 1000,
@@ -134,17 +154,26 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         allowedModules,
       };
 
+      const isFreePlan = Boolean(formData.isFreePlan);
+      const normalizedPrice = isFreePlan ? 0 : parseFloat(formData.price);
+      const normalizedPriceAnnual = isFreePlan
+        ? null
+        : (formData.priceAnnual ? parseFloat(formData.priceAnnual) : null);
+      const normalizedAnnualDiscount = isFreePlan
+        ? null
+        : (formData.annualDiscount ? parseFloat(formData.annualDiscount) : null);
+
       await onSave({
         name: formData.name,
         slug: formData.slug,
         description: formData.description,
-        price: parseFloat(formData.price),
-        priceAnnual: formData.priceAnnual ? parseFloat(formData.priceAnnual) : null,
-        annualDiscount: formData.annualDiscount ? parseFloat(formData.annualDiscount) : null,
+        price: normalizedPrice,
+        priceAnnual: normalizedPriceAnnual,
+        annualDiscount: normalizedAnnualDiscount,
         currency: formData.currency,
         interval: 'month',
-        stripePriceId: formData.stripePriceId,
-        stripePriceIdAnnual: formData.stripePriceIdAnnual,
+        stripePriceId: isFreePlan ? '' : formData.stripePriceId,
+        stripePriceIdAnnual: isFreePlan ? '' : formData.stripePriceIdAnnual,
         isActive: formData.isActive,
         features,
       });
@@ -186,16 +215,19 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           <div>
             <label className="block text-sm font-medium text-gray-700">Monthly Price</label>
             <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleChange}
+              disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 underline decoration-brand-500">Discount (%)</label>
             <input type="number" name="annualDiscount" min="0" max="100" step="1" value={formData.annualDiscount} onChange={handleChange}
+              disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-brand-100 bg-brand-50/30 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 font-bold text-brand-600" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Annual Price</label>
             <input type="number" name="priceAnnual" min="0" step="0.01" value={formData.priceAnnual} onChange={handleChange}
+              disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
@@ -205,15 +237,33 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           </div>
         </div>
 
+        <div className="border-t border-gray-200 pt-4">
+          <div className="flex items-center gap-3">
+            <input
+              id="isFreePlan"
+              name="isFreePlan"
+              type="checkbox"
+              checked={Boolean(formData.isFreePlan)}
+              onChange={handleChange}
+              className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+            />
+            <label htmlFor="isFreePlan" className="block text-sm text-gray-900 font-medium">
+              Marcar como plano Free
+            </label>
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Monthly)</label>
             <input type="text" name="stripePriceId" value={formData.stripePriceId} onChange={handleChange}
+              disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Stripe Price ID (Annual)</label>
             <input type="text" name="stripePriceIdAnnual" value={formData.stripePriceIdAnnual} onChange={handleChange}
+              disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
           </div>
         </div>
@@ -225,9 +275,10 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
               <label className="block text-sm font-semibold text-amber-700">
                 ⏳ Free Trial (days)
               </label>
-              <p className="text-xs text-gray-500 mb-1">0 = sem trial. Após esse período, o usuário precisa fazer upgrade.</p>
+              <p className="text-xs text-gray-500 mb-1">0 = sem trial. Após esse período, a cobrança inicia automaticamente (Stripe).</p>
               <input type="number" name="freeTrialDays" min="0" value={formData.freeTrialDays} onChange={handleChange}
-                className="block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm border p-2 text-amber-700 font-bold bg-amber-50" />
+                disabled={Boolean(formData.isFreePlan)}
+                className="block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm border p-2 text-amber-700 font-bold bg-amber-50 disabled:opacity-60 disabled:cursor-not-allowed" />
             </div>
             <div className="flex items-center pt-6">
               <input id="isActiveCheck" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleChange}
@@ -316,11 +367,62 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
 const Plans = () => {
   const { data: session } = useSession();
   const { data, mutate } = useSWR(session ? '/api/admin/plans' : null, fetcher);
+  const { data: settingsData, mutate: mutateSettings } = useSWR(
+    session ? '/api/admin/settings' : null,
+    fetcher
+  );
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [plansShowFree, setPlansShowFree] = useState(true);
+  const [landingPromoEnabled, setLandingPromoEnabled] = useState(false);
+  const [landingPromoCode, setLandingPromoCode] = useState('');
+  const [landingPromoText, setLandingPromoText] = useState('');
+  const [savingLanding, setSavingLanding] = useState(false);
 
   const plans = data?.data?.plans || [];
   const isLoading = !data;
+
+  useEffect(() => {
+    const configs = settingsData?.data?.configs || [];
+    const map = new Map(configs.map((c) => [String(c.key || '').toUpperCase(), c.value ?? '']));
+    const showFreeRaw = map.get('PLANS_SHOW_FREE');
+    const promoEnabledRaw = map.get('LANDING_PROMO_ENABLED');
+    const promoCodeRaw = map.get('LANDING_PROMO_CODE');
+    const promoTextRaw = map.get('LANDING_PROMO_TEXT');
+
+    setPlansShowFree(showFreeRaw == null ? true : isTruthyValue(showFreeRaw));
+    setLandingPromoEnabled(promoEnabledRaw == null ? false : isTruthyValue(promoEnabledRaw));
+    setLandingPromoCode(String(promoCodeRaw || ''));
+    setLandingPromoText(String(promoTextRaw || ''));
+  }, [settingsData]);
+
+  const saveLandingSettings = async () => {
+    setSavingLanding(true);
+    try {
+      await api('/api/admin/settings', {
+        method: 'POST',
+        body: { key: 'PLANS_SHOW_FREE', value: plansShowFree ? 'true' : 'false', category: 'PLANS' },
+      });
+      await api('/api/admin/settings', {
+        method: 'POST',
+        body: { key: 'LANDING_PROMO_ENABLED', value: landingPromoEnabled ? 'true' : 'false', category: 'MARKETING' },
+      });
+      await api('/api/admin/settings', {
+        method: 'POST',
+        body: { key: 'LANDING_PROMO_CODE', value: String(landingPromoCode || '').trim(), category: 'MARKETING' },
+      });
+      await api('/api/admin/settings', {
+        method: 'POST',
+        body: { key: 'LANDING_PROMO_TEXT', value: String(landingPromoText || '').trim(), category: 'MARKETING' },
+      });
+      toast.success('Configurações atualizadas');
+      mutateSettings();
+    } catch (error) {
+      toast.error('Falha ao salvar configurações');
+    } finally {
+      setSavingLanding(false);
+    }
+  };
 
   const handleCreate = () => {
     setSelectedPlan(null);
@@ -370,6 +472,91 @@ const Plans = () => {
             <PlusIcon className="w-5 h-5 mr-2" />
             Create Plan
           </Button>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-6">
+          <div className="bg-white shadow sm:rounded-md border border-gray-100 p-4 md:p-6 space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Landing Page</p>
+                <p className="text-xs text-gray-500">Controle promoções e visibilidade do plano Free.</p>
+              </div>
+              <Button
+                onClick={saveLandingSettings}
+                className="text-white bg-zinc-900 hover:bg-zinc-800"
+                disabled={savingLanding}
+              >
+                {savingLanding ? 'Salvando...' : 'Salvar'}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="rounded-xl border border-gray-100 p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-900">Plano Free</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="plansShowFree"
+                      type="checkbox"
+                      checked={plansShowFree}
+                      onChange={(e) => setPlansShowFree(e.target.checked)}
+                      className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="plansShowFree" className="text-sm text-gray-700">
+                      Exibir na Landing
+                    </label>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Se desativado, o Free não aparece na Landing e nem no cadastro.
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-100 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-900">Promoções</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      id="landingPromoEnabled"
+                      type="checkbox"
+                      checked={landingPromoEnabled}
+                      onChange={(e) => setLandingPromoEnabled(e.target.checked)}
+                      className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="landingPromoEnabled" className="text-sm text-gray-700">
+                      Ativar
+                    </label>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Código (opcional)</label>
+                    <input
+                      type="text"
+                      value={landingPromoCode}
+                      onChange={(e) => setLandingPromoCode(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                      placeholder="Ex: VERAO20"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600">Texto (opcional)</label>
+                    <input
+                      type="text"
+                      value={landingPromoText}
+                      onChange={(e) => setLandingPromoText(e.target.value)}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                      placeholder="Ex: Ganhe 20% OFF no primeiro mês."
+                    />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <Link href="/admin/finance/coupons" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+                      Gerenciar cupons e códigos
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-6">
           <div className="bg-white shadow overflow-hidden sm:rounded-md">

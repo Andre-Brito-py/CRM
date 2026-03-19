@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Pricing = ({ products }) => {
+const Pricing = ({ products, promo }) => {
   const { t } = useTranslation();
   const [isAnnual, setIsAnnual] = useState(true);
 
@@ -13,7 +13,7 @@ const Pricing = ({ products }) => {
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full -translate-y-1/2" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-violet-500/5 blur-[100px] rounded-full translate-y-1/2" />
       <div className="max-w-7xl mx-auto px-8 relative z-10">
-        
+
         {/* Header */}
         <div className="text-center mb-24">
           <motion.div
@@ -22,30 +22,42 @@ const Pricing = ({ products }) => {
             viewport={{ once: true }}
           >
             <div className="inline-flex items-center px-4 py-2 mb-6 text-[10px] font-black text-indigo-600 bg-indigo-50 rounded-full border border-indigo-100 tracking-[0.2em] uppercase">
-               Pricing Architecture
+              Pricing Architecture
             </div>
             <h2 className="text-5xl md:text-7xl font-black text-zinc-900 tracking-tighter uppercase mb-8">
-               Planos <br />
-               <span className="text-zinc-400">Escaláveis.</span>
+              Planos <br />
+              <span className="text-zinc-400">Escaláveis.</span>
             </h2>
+            {promo?.enabled && (String(promo?.code || '').trim() || String(promo?.text || '').trim()) && (
+              <div className="flex justify-center mt-10">
+                <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700">
+                  {String(promo?.code || '').trim() && (
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em]">Código {String(promo.code).trim()}</span>
+                  )}
+                  {String(promo?.text || '').trim() && (
+                    <span className="text-xs font-semibold tracking-tight text-indigo-700">{String(promo.text).trim()}</span>
+                  )}
+                </div>
+              </div>
+            )}
           </motion.div>
         </div>
 
         {/* Billing Toggle - Enhanced Visibility */}
         <div className="flex flex-col items-center mb-24">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="flex items-center gap-8 bg-zinc-100/50 p-2 rounded-[24px] border border-zinc-200"
           >
-            <button 
+            <button
               onClick={() => setIsAnnual(false)}
               className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!isAnnual ? 'bg-white text-indigo-600 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'}`}
             >
               Faturamento Mensal
             </button>
-            <button 
+            <button
               onClick={() => setIsAnnual(true)}
               className={`px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 ${isAnnual ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-200' : 'text-zinc-400 hover:text-zinc-600'}`}
             >
@@ -71,7 +83,7 @@ const Pricing = ({ products }) => {
                   Mais Popular
                 </div>
               )}
-              
+
               <div className="mb-10">
                 <h3 className="text-xl font-black text-zinc-900 uppercase tracking-widest mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1">

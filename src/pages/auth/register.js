@@ -8,7 +8,7 @@ import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { redirectToCheckout } from '@/lib/client/stripe';
 
-const Register = ({ plans, initialPlanSlug, initialInterval }) => {
+const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => {
     const router = useRouter();
     const [isSubmitting, setSubmittingState] = useState(false);
     const [isRedirecting, setRedirectingState] = useState(false);
@@ -60,6 +60,23 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
         }
     }, [routerIsReady, routerPlan, routerInterval]);
 
+    useEffect(() => {
+        if (showFreePlan) return;
+        setFormData((prev) => {
+            const normalized = String(prev.planSlug || '').trim().toUpperCase();
+            const isEmptyOrFree = !normalized || normalized === 'FREE';
+            if (!isEmptyOrFree) return prev;
+
+            const paidPlans = (plans || [])
+                .filter((p) => Boolean(p?.isActive))
+                .filter((p) => Number(p?.price || 0) > 0)
+                .sort((a, b) => Number(a.price) - Number(b.price));
+            const fallback = paidPlans[0];
+            if (!fallback?.slug) return prev;
+            return { ...prev, planSlug: String(fallback.slug).toUpperCase() };
+        });
+    }, [showFreePlan, plans]);
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
@@ -71,6 +88,12 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
 
         const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
         const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
+
+        if (!showFreePlan && !selectedPlan) {
+            toast.error('Selecione um plano para continuar');
+            setSubmittingState(false);
+            return;
+        }
 
         const isAnnual = formData.interval === 'year';
         let planPriceId = null;
@@ -151,6 +174,8 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
     const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
     const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
     const isPaidPlan = selectedPlan ? Number(selectedPlan.price) > 0 : false;
+    const canSubmit = showFreePlan ? true : Boolean(selectedPlan);
+    const trialDays = selectedPlan?.features?.freeTrialDays != null ? Number(selectedPlan.features.freeTrialDays) : 0;
 
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-white overflow-hidden">
@@ -187,7 +212,9 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                         </h2>
                         <ul className="space-y-5">
                             {[
-                                "Acesso total à plataforma (14 dias grátis)",
+                                isPaidPlan && trialDays > 0
+                                    ? `Acesso total por ${trialDays} dias (teste grátis)`
+                                    : "Acesso total à plataforma",
                                 "Inbox Omnichannel ilimitado",
                                 "IA para transcrição e resumos",
                                 "Form Builder e réguas No-code"
@@ -334,10 +361,11 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                                     value={formData.planSlug}
                                     onChange={handleInputChange}
                                 >
-                                    <option value="">Plano Free</option>
+                                    {showFreePlan && <option value="">Plano Free</option>}
                                     {(plans || [])
                                         .filter((p) => Boolean(p?.isActive))
                                         .filter((p) => String(p?.slug || '').toUpperCase() !== 'FREE')
+                                        .filter((p) => (showFreePlan ? true : Number(p?.price || 0) > 0))
                                         .sort((a, b) => Number(a.price) - Number(b.price))
                                         .map((plan) => {
                                             const isAnnual = formData.interval === 'year';
@@ -378,8 +406,13 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
                             )}
 
                             <p className="text-xs text-gray-400 ml-1">
-                                Para garantir a segurança da plataforma e validar sua identidade, é necessário cadastrar um cartão (Stripe), mesmo no plano gratuito.
+                                Para garantir a segurança da plataforma e validar sua identidade, é necessário cadastrar um cartão (Stripe){showFreePlan ? ', mesmo no plano gratuito' : ''}.
                             </p>
+                            {isPaidPlan && trialDays > 0 && (
+                                <p className="text-xs text-gray-500 ml-1">
+                                    Você terá {trialDays} {trialDays === 1 ? 'dia' : 'dias'} de teste. Após esse período, a cobrança inicia automaticamente.
+                                </p>
+                            )}
                         </div>
 
                         <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/50 space-y-4">
@@ -406,10 +439,12 @@ const Register = ({ plans, initialPlanSlug, initialInterval }) => {
 
                         <Button
                             className="w-full py-4.5 justify-center bg-gray-900 hover:bg-black text-white rounded-2xl shadow-xl transition-all font-black text-lg active:scale-[0.98]"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !canSubmit}
                             type="submit"
                         >
-                            {isSubmitting ? 'Processando cadastro...' : (isPaidPlan ? 'Assinar e Criar minha conta' : 'Criar minha conta gratuita')}
+                            {isSubmitting
+                                ? 'Processando cadastro...'
+                                : (!canSubmit ? 'Selecione um plano' : (isPaidPlan ? 'Assinar e Criar minha conta' : 'Criar minha conta gratuita'))}
                         </Button>
                     </form>
 
@@ -440,7 +475,12 @@ export const getServerSideProps = async (context) => {
 
     try {
         const { getAllPlans } = await import('@/prisma/services/plan');
+        const { default: prisma } = await import('@/prisma/index');
         const plans = await getAllPlans();
+        const cfg = await prisma.systemConfig.findUnique({ where: { key: 'PLANS_SHOW_FREE' } });
+        const showFreePlan = cfg?.value == null
+            ? true
+            : ['true', '1', 'yes', 'on'].includes(String(cfg.value).trim().toLowerCase());
         const safePlans = (plans || []).map((plan) => ({
             id: plan.id,
             name: plan.name,
@@ -456,8 +496,8 @@ export const getServerSideProps = async (context) => {
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),
         }));
-        return { props: { plans: safePlans, initialPlanSlug, initialInterval } };
+        return { props: { plans: safePlans, initialPlanSlug, initialInterval, showFreePlan } };
     } catch (error) {
-        return { props: { plans: [], initialPlanSlug, initialInterval: 'month' } };
+        return { props: { plans: [], initialPlanSlug, initialInterval: 'month', showFreePlan: true } };
     }
 };

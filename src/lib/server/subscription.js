@@ -1,4 +1,5 @@
 import prisma from '@/prisma/index';
+import getStripe from '@/lib/server/stripe';
 
 // -----------------------------------------------------------------
 // Módulos padrão para planos legados (sem features.allowedModules)
@@ -173,6 +174,39 @@ export const getTrialStatus = async (workspaceId) => {
     if (!limits.freeTrialDays || limits.freeTrialDays <= 0) {
         return { expired: false, daysLeft: null, trialExpiresAt: null, hasTrial: false };
     }
+
+    try {
+        const workspace = await prisma.workspace.findUnique({
+            where: { id: workspaceId },
+            select: { creator: { select: { email: true } } },
+        });
+        const email = workspace?.creator?.email || null;
+        if (email) {
+            const customerPayment = await prisma.customerPayment.findUnique({
+                where: { email },
+                select: { providerSubscriptionId: true },
+            });
+            const subId = customerPayment?.providerSubscriptionId ? String(customerPayment.providerSubscriptionId) : null;
+            if (subId) {
+                const stripe = await getStripe().catch(() => null);
+                if (stripe) {
+                    const sub = await stripe.subscriptions.retrieve(subId).catch(() => null);
+                    const trialEnd = sub?.trial_end ? new Date(Number(sub.trial_end) * 1000) : null;
+                    if (trialEnd && sub?.status === 'trialing') {
+                        const now = new Date();
+                        const diff = trialEnd.getTime() - now.getTime();
+                        const daysLeft = Math.max(0, Math.ceil(diff / (24 * 60 * 60 * 1000)));
+                        return {
+                            expired: diff <= 0,
+                            daysLeft,
+                            trialExpiresAt: trialEnd.toISOString(),
+                            hasTrial: true,
+                        };
+                    }
+                }
+            }
+        }
+    } catch { }
 
     const now = new Date();
     const expiresAt = limits.trialExpiresAt ? new Date(limits.trialExpiresAt) : null;
