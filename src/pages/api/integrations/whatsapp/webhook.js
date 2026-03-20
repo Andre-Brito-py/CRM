@@ -4,6 +4,7 @@ import { createActivity } from '@/prisma/services/activity';
 import { log, reportError } from '@/lib/server/logger';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { getSystemConfig } from '@/lib/server/config';
+import { processAutopilotReply } from '@/lib/server/autopilot';
 
 const clampText = (value, max) => {
   const s = String(value ?? '');
@@ -555,5 +556,25 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
       error: err,
     });
     reportError(err, { route: 'automation:INCOMING_MESSAGE', workspaceId: workspace.id, conversationId: conversation.id, messageId: message.id });
+  }
+
+  // 7. Autopilot Auto-Reply (AI Chatbot)
+  if (conversation.autopilotEnabled) {
+    processAutopilotReply({ workspace, conversation, contact, message }).catch((err) => {
+      log({
+        level: 'error',
+        msg: 'autopilot_reply_processing_failed',
+        workspaceId: workspace.id,
+        conversationId: conversation.id,
+        messageId: message.id,
+        error: err,
+      });
+      reportError(err, {
+        route: 'autopilot:processIncomingMessage',
+        workspaceId: workspace.id,
+        conversationId: conversation.id,
+        messageId: message.id,
+      });
+    });
   }
 }

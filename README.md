@@ -108,6 +108,7 @@ Para não perder a linha de evolução, aqui estão os saltos da plataforma cons
 - **UI/UX & Dinamismo:** Preços da Landing Page calculados e renderizados de forma "Ao Vivo" conectados ao JSON dos Planos (Super Admin). Modais globais de Cookie Consent configuráveis pelo cliente, reativados usando Contextos da React v18 e migrados do G-Analytics nativo em prol de scripts condicionados à LGPD.
 - **Múltiplos Ciclos de Faturamento (SaaS):** Adição de lógica mensal e descontos inteligentes (percentuais dinâmicos) na assinatura anual, exibidos na interface de preços em *Real-Time* com gatilho de convencimento cognitivo (preço proporcional no mês equivalente para planos anuais).
 - **Robustez de UX Pública:** A tela de login uniu estética e modernismo e ganhou "visão dupla" com imagem. A "Interactive Demo" se blindou de anomalias (incluindo host de imagens não liberadas do Next.js Avatar) e traduções `react-i18next` dinâmicas completas foram implementadas para os leads gringos nas suas propagandas/call-to-actions.
+- **AI Chatbot Autopilot:** Introdução de um chatbot multimodal 100% autônomo. A IA atende os clientes 24/7 lendo o contexto de negócio da empresa, recomendando links de Produtos/Checkouts, enviando Formulários de Triagem (Web Forms) de forma inteligente e transcrevendo áudios ou lendo imagens no WhatsApp, tudo debitando da cota transparente do cliente integradamente via Stripe.
 
 ---
 

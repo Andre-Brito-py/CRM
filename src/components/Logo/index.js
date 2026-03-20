@@ -1,7 +1,7 @@
 import SmartTransparentImage from '@/components/SmartTransparentImage/index';
 import Link from 'next/link';
 
-const Logo = ({ variant = 'full', className = '', href = '/', forceLight = false }) => {
+const Logo = ({ variant = 'full', className = '', href = '/account', forceLight = false }) => {
     const isFull = variant === 'full';
     const src = isFull ? '/images/logo-full.png' : '/images/logo-symbol.png';
     const alt = 'Closify Logo';

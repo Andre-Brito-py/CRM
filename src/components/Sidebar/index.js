@@ -54,7 +54,7 @@ const Sidebar = ({ menu }) => {
   return (
     <aside id="sidebar-nav" className="sticky z-40 flex flex-col glass-dark md:overflow-y-auto md:w-1/4 md:min-w-[280px] md:h-screen overscroll-contain transition-all duration-500 shadow-2xl shadow-black/50 border-r border-white/5">
       <div className="relative flex items-center justify-between px-8 py-10 border-b border-white/5 font-executive">
-        <Logo variant="full" forceLight={true} className="scale-110 transition-transform duration-500 hover:scale-[1.12]" />
+        <Logo variant="full" forceLight={true} href="/account" className="scale-110 transition-transform duration-500 hover:scale-[1.12]" />
         <button className="md:hidden text-zinc-400 hover:text-white transition-colors" onClick={toggleMenu}>
           {showMenu ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
         </button>
