@@ -7,6 +7,8 @@ import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
 import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 import getStripe from '@/lib/server/stripe';
+import { detectAiLanguage, getLanguageSystemInstruction } from '@/lib/server/ai-utils';
+
 
 export const config = {
   api: {
@@ -242,10 +244,14 @@ const handler = async (req, res) => {
       return `Deal ID: ${d.id}, Name: ${d.name}, Amount: ${d.amount}, Stage: ${d.stage.name}, Last Messages:\n${lastMessages}`;
     }).join('\n\n');
 
+    const language = detectAiLanguage(req);
+
     const prompt = `
       Analyze this sales pipeline and provide:
       1. Strategic insights (short, max 3 points).
       2. For each deal, predict the success probability (0-100%) and identify if it needs urgent follow-up.
+
+      ${getLanguageSystemInstruction(language)}
 
       Company Context:
       ${workspace.aiContext || 'No specific context provided.'}
@@ -266,7 +272,7 @@ const handler = async (req, res) => {
       Only return the JSON.
     `;
 
-    const systemMessage = 'You are an expert sales analyst and manager.';
+    const systemMessage = `You are an expert sales analyst and manager. Response language: ${language}.`;
     const overageSettings = await getAiOverageSettings();
     let quota = null;
     let overage = null;

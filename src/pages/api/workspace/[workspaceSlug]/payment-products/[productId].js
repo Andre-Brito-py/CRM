@@ -45,9 +45,11 @@ export default async function handler(req, res) {
     }
 
     try {
-      const { name, description, currency, price, active } = req.body || {};
-
+      const { name, description, currency, price, imageUrl, active } = req.body || {};
       const data = {};
+      if (imageUrl !== undefined) {
+        data.imageUrl = imageUrl ? String(imageUrl) : null;
+      }
       if (name != null) {
         const parsedName = `${name || ''}`.trim();
         if (!parsedName) return res.status(400).json({ error: { msg: 'Invalid name' } });

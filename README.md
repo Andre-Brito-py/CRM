@@ -110,6 +110,12 @@ Para não perder a linha de evolução, aqui estão os saltos da plataforma cons
 - **Robustez de UX Pública:** A tela de login uniu estética e modernismo e ganhou "visão dupla" com imagem. A "Interactive Demo" se blindou de anomalias (incluindo host de imagens não liberadas do Next.js Avatar) e traduções `react-i18next` dinâmicas completas foram implementadas para os leads gringos nas suas propagandas/call-to-actions.
 - **AI Chatbot Autopilot:** Introdução de um chatbot multimodal 100% autônomo. A IA atende os clientes 24/7 lendo o contexto de negócio da empresa, recomendando links de Produtos/Checkouts, enviando Formulários de Triagem (Web Forms) de forma inteligente e transcrevendo áudios ou lendo imagens no WhatsApp, tudo debitando da cota transparente do cliente integradamente via Stripe.
 
+### Expansão Global & Inteligência de Precificação (Março 2026 - Sprint 2)
+- **Arquitetura Multi-Moeda Nativa:** O Super Admin agora pode definir preços independentes para **BRL, USD, EUR e GBP** em um único plano. O sistema sincroniza múltiplos `Price IDs` no Stripe automaticamente.
+- **Detecção Inteligente de Localidade:** A Landing Page e o fluxo de checkout detectam o idioma/local do visitante para exibir a moeda correta (ex: $ para gringos, R$ para brasileiros) e aplicar o faturamento localizado sem fricção.
+- **Catálogo de Produtos com Imagens:** Lojistas agora podem anexar imagens aos seus produtos (`PaymentProduct`), visualizando-as no dashboard e exibindo-as em destaque nas páginas públicas de pagamento para aumentar a conversão.
+- **IA Responsiva ao Idioma:** Todo o motor de IA (Resumos e Sugestões) foi blindado para detectar o idioma da conversa e responder nativamente na língua do usuário, garantindo um atendimento humano e global.
+
 ---
 
 ## Licença

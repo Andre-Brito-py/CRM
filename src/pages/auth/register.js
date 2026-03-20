@@ -41,25 +41,27 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
     const routerIsReady = Boolean(router?.isReady);
     const routerPlan = router?.query?.plan;
     const routerInterval = router?.query?.interval;
+    const routerPriceId = router?.query?.priceId;
 
     useEffect(() => {
         if (!routerIsReady) return;
         const rawPlan = routerPlan;
         const rawInterval = routerInterval;
+        const rawPriceId = routerPriceId;
 
         const normalizedPlan = String(Array.isArray(rawPlan) ? rawPlan[0] : rawPlan || '')
             .trim()
             .toUpperCase();
 
         const normalizedInterval = String(Array.isArray(rawInterval) ? rawInterval[0] : rawInterval || '').trim().toLowerCase() === 'year' ? 'year' : 'month';
+        const normalizedPriceId = String(Array.isArray(rawPriceId) ? rawPriceId[0] : rawPriceId || '').trim();
 
         if (normalizedPlan) {
             setFormData((prev) => {
-                if (prev.planSlug === normalizedPlan && prev.interval === normalizedInterval) return prev;
-                return { ...prev, planSlug: normalizedPlan, interval: normalizedInterval };
+                return { ...prev, planSlug: normalizedPlan, interval: normalizedInterval, priceId: normalizedPriceId };
             });
         }
-    }, [routerIsReady, routerPlan, routerInterval]);
+    }, [routerIsReady, routerPlan, routerInterval, routerPriceId]);
 
     useEffect(() => {
         if (showFreePlan) return;
@@ -97,13 +99,19 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
         }
 
         const isAnnual = formData.interval === 'year';
-        let planPriceId = null;
+        let planPriceId = formData.priceId || null;
 
-        if (selectedPlan) {
-            if (isAnnual && selectedPlan.stripePriceIdAnnual) {
-                planPriceId = String(selectedPlan.stripePriceIdAnnual);
-            } else if (selectedPlan.stripePriceId) {
-                planPriceId = String(selectedPlan.stripePriceId);
+        if (selectedPlan && !planPriceId) {
+            // Find price based on language
+            const targetCurrency = getDefaultCurrencyForLang(window.navigator.language);
+            const priceObj = selectedPlan.prices?.find(p => p.currency === targetCurrency) || 
+                             selectedPlan.prices?.find(p => p.currency === 'USD') || 
+                             selectedPlan.prices?.[0];
+
+            if (isAnnual) {
+                planPriceId = priceObj ? priceObj.stripePriceIdAnnual : selectedPlan.stripePriceIdAnnual;
+            } else {
+                planPriceId = priceObj ? priceObj.stripePriceId : selectedPlan.stripePriceId;
             }
         }
 
@@ -506,6 +514,7 @@ export const getServerSideProps = async (context) => {
             interval: plan.interval,
             stripePriceId: plan.stripePriceId ?? null,
             stripePriceIdAnnual: plan.stripePriceIdAnnual ?? null,
+            prices: plan.prices || [],
             annualDiscount: plan.annualDiscount ?? 0,
             features: plan.features ?? null,
             isActive: Boolean(plan.isActive),

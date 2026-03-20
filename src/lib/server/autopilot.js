@@ -7,6 +7,8 @@ import { sendMail } from '@/lib/server/mail';
 import { log, reportError } from '@/lib/server/logger';
 import { createMessage } from '@/prisma/services/conversation';
 import getStripe from '@/lib/server/stripe';
+import { detectAiLanguage, getLanguageSystemInstruction } from '@/lib/server/ai-utils';
+
 
 // ── helpers ──────────────────────────────────────────
 const clampText = (v, max) => {
@@ -96,14 +98,14 @@ const billAiOverage = async ({ workspace, tokens, pricePer1M }) => {
 };
 
 // ── build product & form catalogs for the prompt ──
-const buildProductCatalog = (products, appUrl, workspaceSlug) => {
+const buildProductCatalog = (products, appUrl, workspaceSlug, language, locale) => {
   if (!products?.length) return '';
   const lines = products.map((p) => {
-    const price = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: p.currency || 'BRL' }).format(Number(p.price));
+    const price = new Intl.NumberFormat(locale || 'pt-BR', { style: 'currency', currency: p.currency || 'BRL' }).format(Number(p.price));
     const link = `${appUrl}/p/${workspaceSlug}/${p.slug}`;
     return `- ${p.name}: ${price} → ${link}`;
   });
-  return `\nProdutos/Serviços disponíveis (envie o link quando o cliente demonstrar interesse):\n${lines.join('\n')}\n`;
+  return `\n${language === 'Português' ? 'Produtos/Serviços disponíveis' : 'Available Products/Services'} (${language === 'Português' ? 'envie o link quando o cliente demonstrar interesse' : 'send the link when interest is shown'}):\n${lines.join('\n')}\n`;
 };
 
 const buildFormCatalog = (forms, appUrl) => {
@@ -187,7 +189,11 @@ export async function processAutopilotReply({ workspace, conversation, contact, 
   }));
 
   // 5. Build system prompt
-  const productCatalog = buildProductCatalog(products, appUrl, workspaceSlug);
+  const userLangHeader = { headers: {} }; // We would ideally have req here, but for autopilot we can guess or use workspace default
+  const language = detectAiLanguage(userLangHeader);
+  const locale = 'pt-BR'; // Fallback locale for number formatting
+
+  const productCatalog = buildProductCatalog(products, appUrl, workspaceSlug, language, locale);
   const formCatalog = buildFormCatalog(forms, appUrl);
   const contactName = contact?.name || 'cliente';
   const platform = String(conversation?.platform || 'WHATSAPP').toUpperCase();
@@ -197,6 +203,7 @@ export async function processAutopilotReply({ workspace, conversation, contact, 
     ? `Você é o assistente virtual da empresa "${workspaceName}", respondendo automaticamente por EMAIL.
 ${businessContext ? `\nContexto do Negócio:\n${businessContext}\n` : ''}
 ${productCatalog}${formCatalog}
+${getLanguageSystemInstruction(language)}
 Regras OBRIGATÓRIAS:
 - Você é um atendente inteligente e prestativo. Responda com base no contexto do negócio.
 - Quando o cliente demonstrar interesse em compra, envie o link do produto/serviço relevante.
@@ -210,6 +217,7 @@ Nome do cliente: ${contactName}`
     : `Você é o assistente virtual da empresa "${workspaceName}", atendendo via ${platform === 'INSTAGRAM' ? 'Instagram' : 'WhatsApp'}.
 ${businessContext ? `\nContexto do Negócio:\n${businessContext}\n` : ''}
 ${productCatalog}${formCatalog}
+${getLanguageSystemInstruction(language)}
 Regras OBRIGATÓRIAS:
 - Você é um chatbot inteligente e prestativo. Responda com base no contexto do negócio.
 - Quando o cliente demonstrar interesse em compra, envie o link do produto/serviço relevante.

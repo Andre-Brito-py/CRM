@@ -74,12 +74,49 @@ const AdminDashboard = () => {
             ) : (
               <>
                 <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Platform Revenue</h2>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
-                  <StatCard title="Total ARR (Approx)" value={formatCurrency(profits.mrr * 12)} icon={PresentationChartLineIcon} color="blue" />
-                  <StatCard title="SaaS MRR" value={formatCurrency(profits.mrr)} icon={CurrencyDollarIcon} color="green" />
-                  <StatCard title="Marketplace Fees" value={formatCurrency(profits.marketplaceFees)} icon={CreditCardIcon} color="indigo" />
-                  <StatCard title="AI Overages" value={formatCurrency(profits.aiOverages)} icon={ServerIcon} color="purple" />
-                </div>
+                {profits.currencies && Object.keys(profits.currencies).length > 0 ? (
+                  Object.entries(profits.currencies).map(([currency, data]) => (
+                    <div key={currency} className="mb-10 last:mb-0">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">{currency}</span>
+                        <div className="h-px flex-1 bg-gray-100" />
+                      </div>
+                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        <StatCard 
+                          title={`Total ARR (${currency})`} 
+                          value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(data.mrr * 12)} 
+                          icon={PresentationChartLineIcon} 
+                          color="blue" 
+                        />
+                        <StatCard 
+                          title={`SaaS MRR (${currency})`} 
+                          value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(data.mrr)} 
+                          icon={CurrencyDollarIcon} 
+                          color="green" 
+                        />
+                        <StatCard 
+                          title={`Marketplace Fees (${currency})`} 
+                          value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(data.marketplaceFees)} 
+                          icon={CreditCardIcon} 
+                          color="indigo" 
+                        />
+                        <StatCard 
+                          title={`AI Overages (${currency})`} 
+                          value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency, maximumFractionDigits: 0 }).format(data.aiOverages)} 
+                          icon={ServerIcon} 
+                          color="purple" 
+                        />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                    <StatCard title="Total ARR (Approx)" value={formatCurrency(profits.mrr * 12)} icon={PresentationChartLineIcon} color="blue" />
+                    <StatCard title="SaaS MRR" value={formatCurrency(profits.mrr)} icon={CurrencyDollarIcon} color="green" />
+                    <StatCard title="Marketplace Fees" value={formatCurrency(profits.marketplaceFees)} icon={CreditCardIcon} color="indigo" />
+                    <StatCard title="AI Overages" value={formatCurrency(profits.aiOverages)} icon={ServerIcon} color="purple" />
+                  </div>
+                )}
                 
                 <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Platform Growth</h2>
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">

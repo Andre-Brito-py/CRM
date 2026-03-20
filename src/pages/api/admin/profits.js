@@ -8,9 +8,9 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     try {
-      // 1. Calculate Monthly Recurring Revenue (MRR) from Stripe
+      // 1. Calculate Monthly Recurring Revenue (MRR) grouped by currency
       const stripe = await getStripe();
-      let mrr = 0;
+      const mrrByCurrency = {};
       let hasMore = true;
       let startingAfter = undefined;
       
@@ -19,17 +19,20 @@ export default async function handler(req, res) {
           status: 'active',
           limit: 100,
           starting_after: startingAfter,
+          expand: ['data.items.data.price'],
         });
         
         subscriptions.data.forEach(sub => {
           const price = sub.items.data[0]?.price;
           if (price) {
+            const currency = String(price.currency || 'usd').toUpperCase();
             let amount = price.unit_amount || 0;
             // Normalize to monthly equivalent
             if (price.recurring?.interval === 'year') {
               amount = amount / 12;
             }
-            mrr += (amount / 100);
+            const monthlyAmount = amount / 100;
+            mrrByCurrency[currency] = (mrrByCurrency[currency] || 0) + monthlyAmount;
           }
         });
         
@@ -39,8 +42,9 @@ export default async function handler(req, res) {
         }
       }
 
-      // 2. Calculate Platform Fees (Marketplace splits)
-      const platformFeesResult = await prisma.payment.aggregate({
+      // 2. Calculate Platform Fees grouped by currency
+      const platformFees = await prisma.payment.groupBy({
+        by: ['currency'],
         _sum: { platformFee: true },
         where: {
           status: 'PAID',
@@ -48,10 +52,16 @@ export default async function handler(req, res) {
           platformFee: { gt: 0 }
         }
       });
-      const marketplaceFees = Number(platformFeesResult._sum.platformFee) || 0;
 
-      // 3. Calculate AI Overage Billing
-      const aiUsageResult = await prisma.aiUsageEvent.aggregate({
+      const feesByCurrency = {};
+      platformFees.forEach(f => {
+        const curr = String(f.currency || 'BRL').toUpperCase();
+        feesByCurrency[curr] = Number(f._sum.platformFee) || 0;
+      });
+
+      // 3. Calculate AI Overage Billing grouped by currency
+      const aiUsage = await prisma.aiUsageEvent.groupBy({
+        by: ['billedCurrency'],
         _sum: { billedAmount: true },
         where: {
           overageMode: true,
@@ -59,14 +69,38 @@ export default async function handler(req, res) {
         }
       });
       
-      const aiOverages = (Number(aiUsageResult._sum.billedAmount) || 0) / 100; // Stripe amounts are in cents
+      const aiOveragesByCurrency = {};
+      aiUsage.forEach(a => {
+        const curr = String(a.billedCurrency || 'USD').toUpperCase();
+        aiOveragesByCurrency[curr] = (Number(a._sum.billedAmount) || 0) / 100;
+      });
+
+      // Aggregate all currencies found
+      const allCurrencies = new Set([
+        ...Object.keys(mrrByCurrency),
+        ...Object.keys(feesByCurrency),
+        ...Object.keys(aiOveragesByCurrency)
+      ]);
+
+      const totalsByCurrency = {};
+      allCurrencies.forEach(curr => {
+        const mrr = mrrByCurrency[curr] || 0;
+        const fees = feesByCurrency[curr] || 0;
+        const ai = aiOveragesByCurrency[curr] || 0;
+        totalsByCurrency[curr] = {
+          mrr,
+          marketplaceFees: fees,
+          aiOverages: ai,
+          totalProfit: mrr + fees + ai
+        };
+      });
 
       res.status(200).json({
         data: {
-          mrr,
-          marketplaceFees,
-          aiOverages,
-          totalProfit: mrr + marketplaceFees + aiOverages
+          currencies: totalsByCurrency,
+          // Fallback legacy support (can be deprecated later)
+          mrr: mrrByCurrency['BRL'] || mrrByCurrency['USD'] || 0,
+          totalProfit: (mrrByCurrency['BRL'] || 0) + (feesByCurrency['BRL'] || 0) + (aiOveragesByCurrency['BRL'] || 0)
         },
       });
     } catch (error) {

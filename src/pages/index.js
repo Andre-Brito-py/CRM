@@ -144,6 +144,7 @@ export const getStaticProps = async () => {
         priceAnnual: plan.priceAnnual ? Number(plan.priceAnnual) : null,
         currency: plan.currency,
         interval: plan.interval,
+        prices: plan.prices || [],
         features: formatPlanFeatures(plan.features),
         isFreePlan:
           Boolean(plan?.features?.isFreePlan) ||

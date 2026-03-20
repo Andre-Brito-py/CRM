@@ -38,7 +38,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', price: '', active: true });
+  const [form, setForm] = useState({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true });
 
   useEffect(() => {
     setWorkspace(workspace);
@@ -55,7 +55,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: '', slug: '', description: '', price: '', active: true });
+    setForm({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true });
     setShowModal(true);
   };
 
@@ -66,6 +66,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
       slug: product?.slug || '',
       description: product?.description || '',
       price: product?.price != null ? String(product.price) : '',
+      imageUrl: product?.imageUrl || '',
       active: Boolean(product?.active),
     });
     setShowModal(true);
@@ -91,6 +92,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
       slug: form.slug,
       description: form.description || null,
       price: form.price,
+      imageUrl: form.imageUrl || null,
       active: form.active,
     };
 
@@ -282,6 +284,24 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                 onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
                 disabled={isSubmitting || !isTeamOwner}
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">URL da Imagem (opcional)</label>
+              <div className="mt-1 flex gap-4 items-start">
+                <input
+                  className="block w-full rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
+                  value={form.imageUrl}
+                  onChange={(e) => setForm((s) => ({ ...s, imageUrl: e.target.value }))}
+                  disabled={isSubmitting || !isTeamOwner}
+                  placeholder="https://exemplo.com/imagem.png"
+                />
+                {form.imageUrl && (
+                  <div className="w-16 h-16 rounded-md border border-gray-200 overflow-hidden flex-shrink-0 bg-gray-50 flex items-center justify-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={form.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                  </div>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>

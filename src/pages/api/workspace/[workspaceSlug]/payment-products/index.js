@@ -82,6 +82,7 @@ export default async function handler(req, res) {
         description,
         currency = 'BRL',
         price,
+        imageUrl,
         active = true,
       } = req.body || {};
 
@@ -110,6 +111,7 @@ export default async function handler(req, res) {
           description: description ? String(description) : null,
           currency: String(currency || 'BRL').toUpperCase(),
           price: parsedPrice,
+          imageUrl: imageUrl ? String(imageUrl) : null,
           active: Boolean(active),
         },
       });

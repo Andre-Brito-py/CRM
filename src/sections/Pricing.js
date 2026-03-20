@@ -1,11 +1,41 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 import { CheckIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
+import { formatCurrency, getDefaultCurrencyForLang } from '@/lib/common/currency';
 
 const Pricing = ({ products, promo }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isAnnual, setIsAnnual] = useState(true);
+
+  const formattedProducts = useMemo(() => {
+    const targetCurrency = getDefaultCurrencyForLang(i18n.language);
+
+    return (products || []).map(plan => {
+      // Find the best price for this plan
+      let selectedPrice = null;
+      if (plan.prices && plan.prices.length > 0) {
+        selectedPrice = plan.prices.find(p => p.currency === targetCurrency) ||
+                        plan.prices.find(p => p.currency === 'USD') ||
+                        plan.prices[0];
+      }
+
+      const basePrice = selectedPrice ? (selectedPrice.amount || 0) : Number(plan.price || 0);
+      const basePriceAnnual = selectedPrice ? (selectedPrice.amountAnnual || 0) : Number(plan.priceAnnual || 0);
+      const baseCurrency = selectedPrice ? selectedPrice.currency : (plan.currency || 'USD');
+
+      const monthlyPrice = isAnnual 
+        ? (basePriceAnnual ? (basePriceAnnual / 12) : basePrice * 0.8)
+        : basePrice;
+        
+      return {
+        ...plan,
+        selectedPriceId: isAnnual ? selectedPrice?.stripePriceIdAnnual : selectedPrice?.stripePriceId,
+        displayPrice: formatCurrency(monthlyPrice, baseCurrency, i18n.language)
+      };
+    });
+  }, [products, isAnnual, i18n.language]);
 
   return (
     <section id="pricing" className="w-full py-40 bg-white relative overflow-hidden font-executive border-t border-zinc-100">
@@ -13,9 +43,8 @@ const Pricing = ({ products, promo }) => {
       <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full -translate-y-1/2" />
       <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-violet-500/5 blur-[100px] rounded-full translate-y-1/2" />
       <div className="max-w-7xl mx-auto px-8 relative z-10">
-
-        {/* Header */}
-        <div className="text-center mb-24">
+      {/* ... rest of the component header ... */}
+      <div className="text-center mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -69,7 +98,7 @@ const Pricing = ({ products, promo }) => {
 
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-          {products?.map((plan, index) => (
+          {formattedProducts?.map((plan, index) => (
             <motion.div
               key={plan.id || index}
               initial={{ opacity: 0, y: 30 }}
@@ -87,7 +116,7 @@ const Pricing = ({ products, promo }) => {
               <div className="mb-10">
                 <h3 className="text-xl font-black text-zinc-900 uppercase tracking-widest mb-2">{plan.name}</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-black text-zinc-900 tracking-tighter">R$ {isAnnual ? (Number(plan.priceAnnual) ? (Number(plan.priceAnnual) / 12) : Number(plan.price) * 0.8).toFixed(0) : Number(plan.price)}</span>
+                  <span className="text-4xl font-black text-zinc-900 tracking-tighter">{plan.displayPrice}</span>
                   <span className="text-zinc-400 text-sm font-bold uppercase tracking-widest">/ mês</span>
                 </div>
               </div>
@@ -103,9 +132,12 @@ const Pricing = ({ products, promo }) => {
                 ))}
               </ul>
 
-              <button className={`w-full py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.name.toLowerCase().includes('standard') ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}>
+              <Link 
+                href={`/auth/register?plan=${plan.slug}&interval=${isAnnual ? 'year' : 'month'}${plan.selectedPriceId ? `&priceId=${plan.selectedPriceId}` : ''}`}
+                className={`w-full block text-center py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.name.toLowerCase().includes('standard') ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}
+              >
                 {plan?.isFreePlan ? 'Começar grátis' : 'Escolher Plano'}
-              </button>
+              </Link>
             </motion.div>
           ))}
         </div>

@@ -16,6 +16,7 @@ import {
   SparklesIcon,
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
+import { formatCurrency, getDefaultCurrencyForLang } from '@/lib/common/currency';
 
 // Mock Data for the Interactive Board
 const initialStages = [
@@ -55,7 +56,7 @@ const initialStages = [
 ];
 
 const DemoPage = ({ plan, hasFreePlan }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [stages, setStages] = useState(initialStages);
   const [showCTA, setShowCTA] = useState(false);
 
@@ -79,10 +80,8 @@ const DemoPage = ({ plan, hasFreePlan }) => {
     setStages(newStages);
   };
 
-  const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  });
+  const currencyCode = getDefaultCurrencyForLang(i18n.language);
+  const formatValue = (amount) => formatCurrency(amount, currencyCode, i18n.language);
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-executive antialiased">

@@ -26,168 +26,119 @@ export default async function handler(req, res) {
   const { planId } = req.query;
 
   if (req.method === 'PUT') {
-    const { name, slug, price, priceAnnual, annualDiscount, currency, features, stripePriceId, stripePriceIdAnnual, description, isActive } = req.body;
+    const { name, slug, prices, features, description, isActive } = req.body;
 
     try {
       const existing = await prisma.plan.findUnique({
         where: { id: planId },
-        select: { stripePriceId: true, stripePriceIdAnnual: true },
+        include: { prices: true },
       });
+
+      if (!existing) {
+        res.status(404).json({ error: { msg: 'Plan not found' } });
+        return;
+      }
 
       const isFreePlan = Boolean(features?.isFreePlan);
       const desiredType = normalizePlanType(slug);
-      const desiredPrice = Number(price || 0);
-      const desiredPriceAnnual = priceAnnual != null ? Number(priceAnnual) : null;
-      const desiredDiscount = annualDiscount != null ? Number(annualDiscount) : null;
-      const desiredCurrency = normalizeCurrency(currency);
-      const desiredInterval = 'month';
-
-      let syncedPrice = desiredPrice;
-      let syncedPriceAnnual = desiredPriceAnnual;
-      let syncedDiscount = desiredDiscount;
-      let syncedCurrency = desiredCurrency;
-      let syncedInterval = desiredInterval;
-      let finalStripePriceId = existing?.stripePriceId || null;
-      let finalStripePriceIdAnnual = existing?.stripePriceIdAnnual || null;
-
-      const incomingStripePriceId = isFreePlan ? null : (stripePriceId ? String(stripePriceId).trim() : null);
-      const stripePriceIdChanged = incomingStripePriceId && incomingStripePriceId !== String(existing?.stripePriceId || '');
-      const incomingStripePriceIdAnnual = isFreePlan ? null : (stripePriceIdAnnual ? String(stripePriceIdAnnual).trim() : null);
-      const stripePriceIdAnnualChanged = incomingStripePriceIdAnnual && incomingStripePriceIdAnnual !== String(existing?.stripePriceIdAnnual || '');
-
-      let productId = null;
-      const stripe = isFreePlan ? null : await getStripe().catch(() => null);
+      const finalPrices = [];
 
       if (isFreePlan) {
-        syncedPrice = 0;
-        syncedPriceAnnual = null;
-        syncedDiscount = null;
-        finalStripePriceId = null;
-        finalStripePriceIdAnnual = null;
-      } else if (stripe) {
-        if (stripePriceIdChanged) {
-          const stripePrice = await stripe.prices.retrieve(incomingStripePriceId).catch(() => null);
-          if (stripePrice) {
-            syncedPrice = Number(stripePrice.unit_amount || 0) / 100;
-            syncedCurrency = normalizeCurrency(stripePrice.currency || desiredCurrency || 'USD');
-            syncedInterval = stripePrice.recurring?.interval || 'month';
-            finalStripePriceId = incomingStripePriceId;
-            productId = stripePrice.product;
-          }
-        } else if (finalStripePriceId) {
-          const currentPrice = await stripe.prices.retrieve(finalStripePriceId).catch(() => null);
-          if (currentPrice) {
-            productId = currentPrice.product;
-            const desiredUnitAmount = toCents(desiredPrice);
-            if (desiredUnitAmount > 0 && currentPrice.unit_amount !== desiredUnitAmount) {
-              const created = await stripe.prices.create({
-                unit_amount: desiredUnitAmount,
-                currency: String(desiredCurrency).toLowerCase(),
-                recurring: { interval: 'month' },
-                product: currentPrice.product,
-              });
-              stripe.prices.update(finalStripePriceId, { active: false }).catch(() => { });
-              finalStripePriceId = created.id;
-              syncedPrice = desiredPrice;
-            } else {
-              syncedPrice = Number(currentPrice.unit_amount || 0) / 100;
-              syncedCurrency = normalizeCurrency(currentPrice.currency || desiredCurrency || 'USD');
-              syncedInterval = 'month';
-            }
-          }
+        // Free plan has no prices in Stripe
+      } else if (Array.isArray(prices) && prices.length > 0) {
+        let stripe = null;
+        try {
+          stripe = await getStripe();
+        } catch (error) {
+          res.status(400).json({ error: { msg: 'Stripe não configurado' } });
+          return;
         }
 
-        if (stripePriceIdAnnualChanged) {
-          const stripePriceA = await stripe.prices.retrieve(incomingStripePriceIdAnnual).catch(() => null);
-          if (stripePriceA) {
-            syncedPriceAnnual = Number(stripePriceA.unit_amount || 0) / 100;
-            finalStripePriceIdAnnual = incomingStripePriceIdAnnual;
-            if (!productId) productId = stripePriceA.product;
-          }
-        } else if (finalStripePriceIdAnnual && syncedPriceAnnual != null && syncedPriceAnnual > 0) {
-          const currentPriceA = await stripe.prices.retrieve(finalStripePriceIdAnnual).catch(() => null);
-          if (currentPriceA) {
-            if (!productId) productId = currentPriceA.product;
-            const desiredUnitAmountA = toCents(desiredPriceAnnual);
-            if (currentPriceA.unit_amount !== desiredUnitAmountA) {
-              const createdA = await stripe.prices.create({
-                unit_amount: desiredUnitAmountA,
-                currency: String(desiredCurrency).toLowerCase(),
-                recurring: { interval: 'year' },
-                product: currentPriceA.product,
-              });
-              stripe.prices.update(finalStripePriceIdAnnual, { active: false }).catch(() => { });
-              finalStripePriceIdAnnual = createdA.id;
-              syncedPriceAnnual = desiredPriceAnnual;
-            } else {
-              syncedPriceAnnual = Number(currentPriceA.unit_amount || 0) / 100;
-            }
-          }
+        let productId = null;
+        const firstPriceId = existing.prices.find(p => p.stripePriceId)?.stripePriceId;
+        if (firstPriceId) {
+          const sp = await stripe.prices.retrieve(firstPriceId).catch(() => null);
+          if (sp) productId = sp.product;
         }
 
-        // Se ainda não temos productId e precisamos criar preços
-        if (!productId && (toCents(desiredPrice) > 0 || (syncedPriceAnnual && toCents(syncedPriceAnnual) > 0))) {
+        if (!productId) {
           const product = await stripe.products.create({
             name: String(name || 'Plano'),
             metadata: desiredType ? { type: desiredType } : undefined,
           });
           productId = product.id;
+        } else {
+          await stripe.products.update(productId, {
+            name: String(name || 'Plano'),
+            metadata: desiredType ? { type: desiredType } : undefined,
+          }).catch(() => {});
+        }
 
-          if (toCents(desiredPrice) > 0) {
+        for (const p of prices) {
+          let fStripePriceId = p.stripePriceId || null;
+          let fStripePriceIdAnnual = p.stripePriceIdAnnual || null;
+          const pAmount = Number(p.price || p.amount || 0);
+          const pAmountAnnual = (p.priceAnnual !== undefined) ? p.priceAnnual : p.amountAnnual;
+          const pCurrency = normalizeCurrency(p.currency);
+
+          const existingPrice = existing.prices.find(ep => ep.currency === pCurrency);
+          const priceChanged = existingPrice ? (existingPrice.amount !== pAmount) : true;
+          const annualPriceChanged = existingPrice ? (existingPrice.amountAnnual !== Number(pAmountAnnual || 0)) : true;
+
+          if ((priceChanged || !fStripePriceId) && toCents(pAmount) > 0) {
             const created = await stripe.prices.create({
-              unit_amount: toCents(desiredPrice),
-              currency: String(desiredCurrency).toLowerCase(),
+              unit_amount: toCents(pAmount),
+              currency: pCurrency.toLowerCase(),
               recurring: { interval: 'month' },
               product: productId,
             });
-            finalStripePriceId = created.id;
-            syncedPrice = desiredPrice;
+            if (fStripePriceId) stripe.prices.update(fStripePriceId, { active: false }).catch(() => {});
+            fStripePriceId = created.id;
           }
 
-          if (syncedPriceAnnual && toCents(syncedPriceAnnual) > 0) {
+          if ((annualPriceChanged || !fStripePriceIdAnnual) && pAmountAnnual && toCents(pAmountAnnual) > 0) {
             const createdAnnual = await stripe.prices.create({
-              unit_amount: toCents(syncedPriceAnnual),
-              currency: String(desiredCurrency).toLowerCase(),
+              unit_amount: toCents(pAmountAnnual),
+              currency: pCurrency.toLowerCase(),
               recurring: { interval: 'year' },
               product: productId,
             });
-            finalStripePriceIdAnnual = createdAnnual.id;
+            if (fStripePriceIdAnnual) stripe.prices.update(fStripePriceIdAnnual, { active: false }).catch(() => {});
+            fStripePriceIdAnnual = createdAnnual.id;
           }
-        } else if (productId && !finalStripePriceIdAnnual && syncedPriceAnnual && toCents(syncedPriceAnnual) > 0) {
-          // Add annual price to existing product if it didn't exist
-          const createdAnnual = await stripe.prices.create({
-            unit_amount: toCents(syncedPriceAnnual),
-            currency: String(desiredCurrency).toLowerCase(),
-            recurring: { interval: 'year' },
-            product: productId,
-          });
-          finalStripePriceIdAnnual = createdAnnual.id;
-        }
 
-        if (desiredType && productId) {
-          stripe.products.update(productId, {
-            name: String(name || 'Plano'),
-            metadata: { type: desiredType },
-          }).catch(() => { });
+          finalPrices.push({
+            currency: pCurrency,
+            amount: pAmount,
+            amountAnnual: pAmountAnnual ? Number(pAmountAnnual) : null,
+            stripePriceId: fStripePriceId,
+            stripePriceIdAnnual: fStripePriceIdAnnual,
+          });
         }
       }
 
-      const plan = await prisma.plan.update({
-        where: { id: planId },
-        data: {
-          name,
-          slug,
-          price: syncedPrice,
-          priceAnnual: syncedPriceAnnual,
-          annualDiscount: syncedDiscount,
-          interval: syncedInterval,
-          currency: syncedCurrency,
-          features,
-          stripePriceId: finalStripePriceId,
-          stripePriceIdAnnual: finalStripePriceIdAnnual,
-          description,
-          isActive,
-        },
+      const plan = await prisma.$transaction(async (tx) => {
+        await tx.planPrice.deleteMany({ where: { planId } });
+
+        return await tx.plan.update({
+          where: { id: planId },
+          data: {
+            name,
+            slug,
+            price: finalPrices[0]?.amount || 0,
+            priceAnnual: finalPrices[0]?.amountAnnual || null,
+            currency: finalPrices[0]?.currency || 'USD',
+            stripePriceId: finalPrices[0]?.stripePriceId || null,
+            stripePriceIdAnnual: finalPrices[0]?.stripePriceIdAnnual || null,
+            features,
+            description,
+            isActive: typeof isActive === 'boolean' ? isActive : true,
+            prices: {
+              create: finalPrices,
+            },
+          },
+          include: { prices: true },
+        });
       });
 
       await createPlatformAuditActivity(
@@ -195,9 +146,9 @@ export default async function handler(req, res) {
         session.user.email,
         {
           action: 'PLAN_UPDATE',
-          title: 'Plan updated',
+          title: 'Plan updated (Multi-currency)',
           target: { planId },
-          metadata: { slug: plan.slug, interval: plan.interval, price: plan.price, priceAnnual: plan.priceAnnual, annualDiscount: plan.annualDiscount, currency: plan.currency, isActive: plan.isActive },
+          metadata: { slug: plan.slug, priceCount: finalPrices.length, isActive: plan.isActive },
         },
         req
       );

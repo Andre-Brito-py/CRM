@@ -36,6 +36,9 @@ export const deletePlan = async (id) => {
 
 export const getAllPlans = async () => {
   return await prisma.plan.findMany({
+    include: {
+      prices: true,
+    },
     orderBy: {
       createdAt: 'desc',
     },

@@ -10,6 +10,7 @@ import fetcher from '@/lib/client/fetcher';
 import api from '@/lib/common/api';
 import Modal from '@/components/Modal/index';
 import Button from '@/components/Button/index';
+import { formatCurrency } from '@/lib/common/currency';
 
 // -----------------------------------------------------------------
 // Módulos disponíveis no sistema (label legível + key interna)
@@ -49,16 +50,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     plan?.features?.maxAiTokens24h ??
     (plan?.features?.maxAiRequests24h ? Number(plan.features.maxAiRequests24h) * 2500 : 30000);
 
-  const [formData, setFormData] = useState({
-    name: plan?.name || '',
-    slug: plan?.slug || '',
-    description: plan?.description || '',
-    price: plan?.price || 0,
-    priceAnnual: plan?.priceAnnual || 0,
-    annualDiscount: plan?.annualDiscount || 0,
-    currency: plan?.currency || 'USD',
-    stripePriceId: plan?.stripePriceId || '',
-    stripePriceIdAnnual: plan?.stripePriceIdAnnual || '',
+  const initialFeatures = {
     isFreePlan:
       Boolean(plan?.features?.isFreePlan) ||
       String(plan?.slug || '').trim().toUpperCase() === 'FREE' ||
@@ -76,6 +68,14 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     maxUploads24h: plan?.features?.maxUploads24h ?? 30,
     freeTrialDays: plan?.features?.freeTrialDays ?? 0,
     isActive: plan ? plan.isActive : true,
+  };
+
+  const [formData, setFormData] = useState({
+    name: plan?.name || '',
+    slug: plan?.slug || '',
+    description: plan?.description || '',
+    prices: plan?.prices || (plan ? [] : [{ currency: 'USD', amount: 0, amountAnnual: null, stripePriceId: '', stripePriceIdAnnual: '' }]),
+    ...initialFeatures,
   });
 
   const [allowedModules, setAllowedModules] = useState(() => {
@@ -87,6 +87,24 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handlePriceChange = (index, field, value) => {
+    const newPrices = [...formData.prices];
+    newPrices[index] = { ...newPrices[index], [field]: value };
+    setFormData({ ...formData, prices: newPrices });
+  };
+
+  const addPriceRow = () => {
+    setFormData({
+      ...formData,
+      prices: [...formData.prices, { currency: 'USD', amount: 0, amountAnnual: null, stripePriceId: '', stripePriceIdAnnual: '' }]
+    });
+  };
+
+  const removePriceRow = (index) => {
+    const newPrices = formData.prices.filter((_, i) => i !== index);
+    setFormData({ ...formData, prices: newPrices });
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -167,13 +185,11 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         name: formData.name,
         slug: formData.slug,
         description: formData.description,
-        price: normalizedPrice,
-        priceAnnual: normalizedPriceAnnual,
-        annualDiscount: normalizedAnnualDiscount,
-        currency: formData.currency,
-        interval: 'month',
-        stripePriceId: isFreePlan ? '' : formData.stripePriceId,
-        stripePriceIdAnnual: isFreePlan ? '' : formData.stripePriceIdAnnual,
+        prices: isFreePlan ? [] : formData.prices.map(p => ({
+          ...p,
+          amount: parseFloat(p.amount || p.price || 0),
+          amountAnnual: p.amountAnnual || p.priceAnnual ? parseFloat(p.amountAnnual || p.priceAnnual) : null,
+        })),
         isActive: formData.isActive,
         features,
       });
@@ -211,30 +227,52 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Monthly Price</label>
-            <input type="number" name="price" required min="0" step="0.01" value={formData.price} onChange={handleChange}
-              disabled={Boolean(formData.isFreePlan)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
+        <div className="space-y-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <div className="flex justify-between items-center">
+            <h4 className="text-sm font-bold text-gray-900">Preços por Moeda</h4>
+            <button type="button" onClick={addPriceRow} disabled={Boolean(formData.isFreePlan)}
+              className="text-xs font-semibold text-brand-600 hover:text-brand-700 bg-white px-2 py-1 rounded border border-brand-200 shadow-sm disabled:opacity-50">
+              + Adicionar Moeda
+            </button>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 underline decoration-brand-500">Discount (%)</label>
-            <input type="number" name="annualDiscount" min="0" max="100" step="1" value={formData.annualDiscount} onChange={handleChange}
-              disabled={Boolean(formData.isFreePlan)}
-              className="mt-1 block w-full rounded-md border-brand-100 bg-brand-50/30 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2 font-bold text-brand-600" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Annual Price</label>
-            <input type="number" name="priceAnnual" min="0" step="0.01" value={formData.priceAnnual} onChange={handleChange}
-              disabled={Boolean(formData.isFreePlan)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Currency</label>
-            <input type="text" name="currency" required value={formData.currency} onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
-          </div>
+
+          {!formData.isFreePlan && formData.prices.map((p, idx) => (
+            <div key={idx} className="grid grid-cols-12 gap-2 items-end border-b border-gray-200 pb-3 last:border-0 last:pb-0">
+              <div className="col-span-2">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Moeda</label>
+                <select value={p.currency} onChange={(e) => handlePriceChange(idx, 'currency', e.target.value)}
+                  className="block w-full rounded border-gray-300 text-sm p-1">
+                  <option value="BRL">BRL</option>
+                  <option value="USD">USD</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                </select>
+              </div>
+              <div className="col-span-3">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Mensal</label>
+                <input type="number" step="0.01" value={p.amount || p.price || 0} onChange={(e) => handlePriceChange(idx, 'amount', e.target.value)}
+                  className="block w-full rounded border-gray-300 text-sm p-1" />
+              </div>
+              <div className="col-span-3">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1">Anual</label>
+                <input type="number" step="0.01" value={p.amountAnnual || p.priceAnnual || ''} onChange={(e) => handlePriceChange(idx, 'amountAnnual', e.target.value)}
+                  className="block w-full rounded border-gray-300 text-sm p-1" placeholder="Vazio" />
+              </div>
+              <div className="col-span-3">
+                <label className="block text-[10px] uppercase font-bold text-gray-500 mb-1 italic">Stripe Price ID (Opcional)</label>
+                <input type="text" value={p.stripePriceId || ''} onChange={(e) => handlePriceChange(idx, 'stripePriceId', e.target.value)}
+                  className="block w-full rounded border-gray-300 text-xs p-1 font-mono" placeholder="price_..." />
+              </div>
+              <div className="col-span-1 flex justify-center pb-1">
+                <button type="button" onClick={() => removePriceRow(idx)} className="text-red-500 hover:text-red-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {formData.isFreePlan && <p className="text-sm text-gray-500 italic">Planos gratuitos não possuem preços.</p>}
+          {!formData.isFreePlan && formData.prices.length === 0 && <p className="text-sm text-red-500 italic">Adicione ao menos um preço para este plano.</p>}
         </div>
 
         <div className="border-t border-gray-200 pt-4">
@@ -582,11 +620,21 @@ const Plans = () => {
                           </div>
                           <div className="flex items-center space-x-4">
                             <div className="text-right space-y-1">
-                              <p className="text-sm font-bold text-gray-900">
-                                {new Intl.NumberFormat('en-US', { style: 'currency', currency: plan.currency }).format(plan.price)}
-                                <span className="text-gray-500 font-normal"> / mo</span>
-                                {plan.priceAnnual > 0 && <span className="ml-2 text-indigo-600">({new Intl.NumberFormat('en-US', { style: 'currency', currency: plan.currency }).format(plan.priceAnnual)} / yr)</span>}
-                              </p>
+                              <div className="space-y-1">
+                                {(plan.prices && plan.prices.length > 0) ? plan.prices.map((p, pIdx) => (
+                                  <p key={pIdx} className="text-sm font-bold text-gray-900 border-b border-gray-100 pb-1 last:border-0">
+                                    {formatCurrency(p.amount, p.currency, 'pt-BR')}
+                                    <span className="text-gray-500 font-normal"> / mo</span>
+                                    {p.amountAnnual > 0 && <span className="ml-2 text-brand-600 font-medium">({formatCurrency(p.amountAnnual, p.currency, 'pt-BR')} / yr)</span>}
+                                  </p>
+                                )) : (
+                                  <p className="text-sm font-bold text-gray-900">
+                                    {formatCurrency(plan.price, plan.currency, 'pt-BR')}
+                                    <span className="text-gray-500 font-normal"> / mo</span>
+                                    {plan.priceAnnual > 0 && <span className="ml-2 text-indigo-600">({formatCurrency(plan.priceAnnual, plan.currency, 'pt-BR')} / yr)</span>}
+                                  </p>
+                                )}
+                              </div>
                               <div className="flex items-center justify-end gap-2">
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${plan.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                                   {plan.isActive ? 'Active' : 'Inactive'}

@@ -76,6 +76,14 @@ const PublicProductPayment = ({ workspaceSlug, workspaceName, product, status })
     <div className="min-h-screen bg-zinc-50 px-4 py-10">
       <Meta title={title} />
       <div className="max-w-xl mx-auto">
+        {product.imageUrl && (
+          <div className="mb-8 flex justify-center">
+            <div className="w-full max-w-[200px] aspect-square rounded-2xl border border-zinc-200 shadow-sm overflow-hidden bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+            </div>
+          </div>
+        )}
         <div className="text-center">
           <div className="text-xs font-semibold tracking-wide uppercase text-zinc-500">
             {workspaceName || 'Pagamento'}

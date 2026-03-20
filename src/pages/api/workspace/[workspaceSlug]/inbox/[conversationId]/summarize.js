@@ -7,6 +7,8 @@ import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
 import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 import getStripe from '@/lib/server/stripe';
+import { detectAiLanguage, getLanguageSystemInstruction } from '@/lib/server/ai-utils';
+
 
 export const config = {
   api: {
@@ -234,9 +236,13 @@ const handler = async (req, res) => {
       });
     }
 
+    const language = detectAiLanguage(req);
+
     const prompt = `
       Resuma esta conversa de atendimento ao cliente em 3-5 pontos concisos. 
       Identifique: (1) o problema ou necessidade principal, (2) o que foi dito/prometido, e (3) o próximo passo recomendado.
+      
+      ${getLanguageSystemInstruction(language)}
       
       Contexto da Empresa:
       ${workspace.aiContext || 'Não fornecido.'}
@@ -244,7 +250,7 @@ const handler = async (req, res) => {
       Transcrição:
       ${transcript}
     `;
-    const systemMessage = 'Você é um agente de suporte senior analisando conversas. Responda sempre em Português.';
+    const systemMessage = `Você é um agente de suporte senior analisando conversas. Responda sempre em ${language}.`;
 
     const overageSettings = await getAiOverageSettings();
     let quota = null;
