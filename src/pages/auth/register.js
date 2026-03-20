@@ -16,6 +16,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        companyName: '',
         password: '',
         confirmPassword: '',
         planSlug: initialPlanSlug || '',
@@ -126,6 +127,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                     name: formData.name,
                     email: formData.email,
                     password: formData.password,
+                    companyName: formData.companyName,
                     termsAccepted: true,
                     planPriceId,
                 }),
@@ -307,6 +309,21 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                 />
                             </div>
                             <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="companyName">Nome da Empresa</label>
+                                <input
+                                    className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
+                                    name="companyName"
+                                    id="companyName"
+                                    type="text"
+                                    placeholder="Ex: Acme Corp"
+                                    value={formData.companyName}
+                                    onChange={handleInputChange}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
                                 <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="email">Email profissional</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
@@ -318,7 +335,6 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                     onChange={handleInputChange}
                                     required
                                 />
-                            </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

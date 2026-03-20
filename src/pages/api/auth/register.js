@@ -59,7 +59,7 @@ const handler = async (req, res) => {
             return res.status(201).json(successPayload);
         }
 
-        const { name, email, password } = req.body || {};
+        const { name, email, password, companyName } = req.body || {};
         const termsAccepted = req.body?.termsAccepted === true;
         const planPriceId = req.body?.planPriceId ? String(req.body.planPriceId) : null;
         const normalizedEmail = String(email || '').trim().toLowerCase();
@@ -117,6 +117,18 @@ const handler = async (req, res) => {
                 twoFactorEnabled: false,
             },
         });
+
+        if (companyName && String(companyName).trim().length > 0) {
+            try {
+                const { createWorkspace } = await import('@/prisma/services/workspace');
+                const slugify = (await import('slugify')).default;
+                let baseSlug = slugify(String(companyName).trim().toLowerCase(), { strict: true });
+                if (!baseSlug) baseSlug = crypto.randomBytes(4).toString('hex');
+                await createWorkspace(user.id, normalizedEmail, String(companyName).trim(), baseSlug);
+            } catch (err) {
+                log({ level: 'warn', msg: 'auth_register_workspace_create_failed', error: err });
+            }
+        }
 
         const token = crypto.randomBytes(32).toString('hex');
         await prisma.emailVerificationToken.deleteMany({

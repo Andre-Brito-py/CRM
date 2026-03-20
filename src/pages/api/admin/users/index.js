@@ -40,6 +40,9 @@ export default async function handler(req, res) {
           customerPayment: {
             select: { subscriptionType: true },
           },
+          createdWorkspace: {
+            select: { name: true },
+          },
           _count: {
             select: { createdWorkspace: true },
           },
