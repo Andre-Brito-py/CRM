@@ -234,6 +234,16 @@ const Workspace = () => {
         color: 'indigo',
       },
       {
+        title: 'Average Ticket',
+        value: new Intl.NumberFormat('pt-BR', {
+          style: 'currency',
+          currency: 'BRL',
+          maximumFractionDigits: 0,
+        }).format(dashboardData?.stats?.averageTicket || 0),
+        icon: ChartBarIcon,
+        color: 'blue',
+      },
+      {
         title: 'Payments Paid',
         value: new Intl.NumberFormat('pt-BR', {
           style: 'currency',

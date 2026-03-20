@@ -2,7 +2,7 @@ import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { UserGroupIcon, BuildingOfficeIcon, CreditCardIcon, ServerIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { UserGroupIcon, BuildingOfficeIcon, CreditCardIcon, ServerIcon, ArrowDownTrayIcon, CurrencyDollarIcon, PresentationChartLineIcon } from '@heroicons/react/24/outline';
 
 import AdminLayout from '@/layouts/AdminLayout';
 import fetcher from '@/lib/client/fetcher';
@@ -31,10 +31,12 @@ const AdminDashboard = () => {
   const { data: session } = useSession();
   const { data, error } = useSWR(session ? '/api/admin/stats' : null, fetcher);
   const { data: userData } = useSWR(session ? '/api/admin/users' : null, fetcher);
+  const { data: profitsData } = useSWR(session ? '/api/admin/profits' : null, fetcher);
 
   const stats = data?.data || { users: 0, workspaces: 0, payments: 0, uptime: 0 };
+  const profits = profitsData?.data || { mrr: 0, marketplaceFees: 0, aiOverages: 0, totalProfit: 0 };
   const users = userData?.data?.users || [];
-  const isLoading = !data && !error;
+  const isLoading = (!data && !error) || !profitsData;
 
   const formatUptime = (seconds) => {
     const d = Math.floor(seconds / (3600 * 24));
@@ -42,6 +44,9 @@ const AdminDashboard = () => {
     const m = Math.floor(seconds % 3600 / 60);
     return `${d}d ${h}h ${m}m`;
   };
+
+  const formatCurrency = (value) => 
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value || 0);
 
   return (
     <AdminLayout>
@@ -62,17 +67,28 @@ const AdminDashboard = () => {
           <div className="py-4">
             {isLoading ? (
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-4">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
                   <div key={i} className="bg-gray-100 h-24 rounded-lg animate-pulse"></div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                <StatCard title="Total Users" value={stats.users} icon={UserGroupIcon} color="blue" />
-                <StatCard title="Total Workspaces" value={stats.workspaces} icon={BuildingOfficeIcon} color="green" />
-                <StatCard title="Total Payments" value={stats.payments} icon={CreditCardIcon} color="purple" />
-                <StatCard title="System Uptime" value={formatUptime(stats.uptime)} icon={ServerIcon} color="gray" />
-              </div>
+              <>
+                <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Platform Revenue</h2>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+                  <StatCard title="Total ARR (Approx)" value={formatCurrency(profits.mrr * 12)} icon={PresentationChartLineIcon} color="blue" />
+                  <StatCard title="SaaS MRR" value={formatCurrency(profits.mrr)} icon={CurrencyDollarIcon} color="green" />
+                  <StatCard title="Marketplace Fees" value={formatCurrency(profits.marketplaceFees)} icon={CreditCardIcon} color="indigo" />
+                  <StatCard title="AI Overages" value={formatCurrency(profits.aiOverages)} icon={ServerIcon} color="purple" />
+                </div>
+                
+                <h2 className="text-lg leading-6 font-medium text-gray-900 mb-4">Platform Growth</h2>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                  <StatCard title="Total Users" value={stats.users} icon={UserGroupIcon} color="blue" />
+                  <StatCard title="Total Workspaces" value={stats.workspaces} icon={BuildingOfficeIcon} color="green" />
+                  <StatCard title="Total Payments" value={stats.payments} icon={CreditCardIcon} color="purple" />
+                  <StatCard title="System Uptime" value={formatUptime(stats.uptime)} icon={ServerIcon} color="gray" />
+                </div>
+              </>
             )}
           </div>
           <div className="py-6">

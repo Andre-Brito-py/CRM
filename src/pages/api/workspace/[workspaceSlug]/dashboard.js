@@ -306,6 +306,7 @@ const handler = async (req, res) => {
       stats.paymentsPaidAmount = Number(paymentsPaidResult._sum.value) || 0;
       stats.paymentsPending = paymentsPendingResult._count._all;
       stats.paymentsPendingAmount = Number(paymentsPendingResult._sum.value) || 0;
+      stats.averageTicket = stats.paymentsPaid > 0 ? stats.paymentsPaidAmount / stats.paymentsPaid : 0;
     }
 
     res.status(200).json({
