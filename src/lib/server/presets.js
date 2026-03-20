@@ -20,7 +20,9 @@ export const INDUSTRY_PRESETS = [
     customFields: [
       { key: 'property_type', label: 'Tipo de Imóvel', type: 'select', options: 'Apartamento, Casa, Terreno, Comercial', area: 'both' },
       { key: 'budget', label: 'Orçamento (Budget)', type: 'currency', required: false, area: 'sales' },
-      { key: 'neighborhood', label: 'Bairro de Interesse', type: 'text', area: 'both' }
+      { key: 'neighborhood', label: 'Bairro de Interesse', type: 'text', area: 'both' },
+      { key: 'financing_status', label: 'Status Financiamento', type: 'select', options: 'Aprovado, Em Análise, Não Solicitado, Pagamento à Vista', area: 'sales' },
+      { key: 'monthly_income', label: 'Renda Mensal (Família)', type: 'currency', area: 'sales' }
     ],
     tags: [
       { name: 'Comprador' },
@@ -177,6 +179,68 @@ export const INDUSTRY_PRESETS = [
       { name: 'Comercial' },
       { name: 'Rural' },
       { name: 'Urgente' }
+    ]
+  },
+  {
+    id: 'aesthetics',
+    name: 'Clínica de Estética / Odonto',
+    description: 'Criado para clínicas de estética, harmonização facial, odonto e bem-estar.',
+    icon: 'SparklesIcon',
+    pipelines: [
+      {
+        name: 'Tratamentos e Avaliações',
+        stages: [
+          { name: 'Interessado (WhatsApp)', color: '#3b82f6' },
+          { name: 'Avaliação Agendada', color: '#8b5cf6' },
+          { name: 'Orçamento Apresentado', color: '#f59e0b' },
+          { name: 'Tratamento em Andamento', color: '#10b981' },
+          { name: 'Tratamento Concluído', color: '#059669' },
+          { name: 'Retorno (Follow-up)', color: '#6366f1' }
+        ]
+      }
+    ],
+    customFields: [
+      { key: 'desired_procedure', label: 'Procedimento Desejado', type: 'text', area: 'both' },
+      { key: 'has_allergies', label: 'Possui Alergias?', type: 'select', options: 'Sim, Não', area: 'support' },
+      { key: 'previous_treatments', label: 'Já fez tratamento similar?', type: 'text', area: 'sales' },
+      { key: 'appointment_date', label: 'Data da Avaliação', type: 'date', area: 'both' }
+    ],
+    tags: [
+      { name: 'Botox' },
+      { name: 'Harmonização' },
+      { name: 'Limpeza de Pele' },
+      { name: 'Lipo' }
+    ]
+  },
+  {
+    id: 'dealership',
+    name: 'Concessionária e Veículos',
+    description: 'Operação comercial de vendas de carros novos, seminovos e repasses.',
+    icon: 'TruckIcon',
+    pipelines: [
+      {
+        name: 'Venda de Veículos',
+        stages: [
+          { name: 'Lead Internet (Site/Wpp)', color: '#3b82f6' },
+          { name: 'Atendimento na Loja', color: '#8b5cf6' },
+          { name: 'Test Drive Agendado', color: '#f59e0b' },
+          { name: 'Ficha de Financiamento', color: '#6366f1' },
+          { name: 'Carro Entregue', color: '#10b981' },
+          { name: 'Lead Frio', color: '#ef4444' }
+        ]
+      }
+    ],
+    customFields: [
+      { key: 'car_model_interest', label: 'Veículo de Interesse', type: 'text', area: 'both' },
+      { key: 'has_trade_in', label: 'Carro na Troca?', type: 'select', options: 'Sim, Não', area: 'sales' },
+      { key: 'trade_in_details', label: 'Detalhes do Usado (Modelo/Ano)', type: 'text', area: 'sales' },
+      { key: 'down_payment', label: 'Valor de Entrada (R$)', type: 'currency', area: 'sales' }
+    ],
+    tags: [
+      { name: 'Seminovo' },
+      { name: 'Zero KM' },
+      { name: 'Financiamento 100%' },
+      { name: 'Repasse' }
     ]
   }
 ];

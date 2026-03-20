@@ -243,6 +243,8 @@ const General = ({ isTeamOwner, workspace }) => {
                     { id: 'real_estate', name: 'Real Estate', icon: '🏠' },
                     { id: 'clinic', name: 'Clinic', icon: '⚕️' },
                     { id: 'agency', name: 'Agency / B2B', icon: '💼' },
+                    { id: 'aesthetics', name: 'Aesthetics', icon: '✨' },
+                    { id: 'dealership', name: 'Dealership', icon: '🚗' },
                     { id: 'infoproducts', name: 'Infoproducts', icon: '🎓' },
                     { id: 'solar_energy', name: 'Solar Energy', icon: '☀️' },
                     { id: 'restaurant', name: 'Restaurant', icon: '🍽️' },
