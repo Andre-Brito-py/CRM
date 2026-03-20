@@ -243,6 +243,9 @@ const General = ({ isTeamOwner, workspace }) => {
                     { id: 'real_estate', name: 'Real Estate', icon: '🏠' },
                     { id: 'clinic', name: 'Clinic', icon: '⚕️' },
                     { id: 'agency', name: 'Agency / B2B', icon: '💼' },
+                    { id: 'infoproducts', name: 'Infoproducts', icon: '🎓' },
+                    { id: 'solar_energy', name: 'Solar Energy', icon: '☀️' },
+                    { id: 'restaurant', name: 'Restaurant', icon: '🍽️' },
                   ].map(preset => (
                     <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-brand-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
                       <span className="text-3xl mb-2">{preset.icon}</span>

@@ -118,5 +118,65 @@ export const INDUSTRY_PRESETS = [
       { name: 'VIP' },
       { name: 'Casamento' }
     ]
+  },
+  {
+    id: 'infoproducts',
+    name: 'Infoprodutos / Edtech',
+    description: 'Focado em vendas de cursos, preenchimento de carrinhos abandonados e suporte a alunos.',
+    icon: 'AcademicCapIcon',
+    pipelines: [
+      {
+        name: 'Vendas de Infoprodutos',
+        stages: [
+          { name: 'Lead Frio', color: '#94a3b8' },
+          { name: 'Engajamento', color: '#3b82f6' },
+          { name: 'Carrinho Abandonado', color: '#f59e0b' },
+          { name: 'Recuperação de Boleto/Pix', color: '#ef4444' },
+          { name: 'Fechado (Ganho)', color: '#10b981' },
+          { name: 'Perdido', color: '#64748b' }
+        ]
+      }
+    ],
+    customFields: [
+      { key: 'product_interest', label: 'Produto de Interesse', type: 'text', area: 'both' },
+      { key: 'utm_source', label: 'Origem (Tráfego)', type: 'text', area: 'both' },
+      { key: 'payment_method', label: 'Método de Pagamento', type: 'select', options: 'Cartão de Crédito, Pix, Boleto', area: 'sales' }
+    ],
+    tags: [
+      { name: 'Afiliado' },
+      { name: 'Orgânico' },
+      { name: 'Mentoria' },
+      { name: 'Desistente' }
+    ]
+  },
+  {
+    id: 'solar_energy',
+    name: 'Energia Solar / B2B',
+    description: 'Gestão de orçamentos e execução de projetos fotovoltaicos residenciais e comerciais.',
+    icon: 'SunIcon',
+    pipelines: [
+      {
+        name: 'Projetos Fotovoltaicos',
+        stages: [
+          { name: 'Novos Leads', color: '#3b82f6' },
+          { name: 'Visita Técnica / Medição', color: '#8b5cf6' },
+          { name: 'Proposta Apresentada', color: '#f59e0b' },
+          { name: 'Aprovação de Crédito', color: '#6366f1' },
+          { name: 'Obra em Andamento', color: '#10b981' },
+          { name: 'Projeto Concluído', color: '#059669' }
+        ]
+      }
+    ],
+    customFields: [
+      { key: 'avg_consumption', label: 'Consumo Médio (R$)', type: 'currency', area: 'sales' },
+      { key: 'roof_type', label: 'Tipo de Telhado', type: 'text', area: 'both' },
+      { key: 'utility_company', label: 'Concessionária', type: 'text', area: 'both' }
+    ],
+    tags: [
+      { name: 'Residencial' },
+      { name: 'Comercial' },
+      { name: 'Rural' },
+      { name: 'Urgente' }
+    ]
   }
 ];
