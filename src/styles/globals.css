@@ -89,6 +89,32 @@
     border-color: rgba(99, 102, 241, 0.4);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
   }
+
+  .text-premium-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500;
+  }
+
+  .shadow-glow-indigo {
+    box-shadow: 0 0 20px -5px rgba(99, 102, 241, 0.5);
+  }
+
+  .shadow-glow-emerald {
+    box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.5);
+  }
+
+  .glass-premium {
+    @apply backdrop-blur-xl border border-white/20 shadow-glass;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  }
+
+  .dark .glass-premium {
+    @apply border-white/5;
+    background: linear-gradient(135deg, rgba(24, 24, 27, 0.4), rgba(9, 9, 11, 0.2));
+  }
+
+  .avatar-premium {
+    @apply transition-all duration-300 ring-2 ring-transparent hover:ring-indigo-500/50 hover:scale-105;
+  }
 }
 
 /* Driver.js Elite Overhaul */

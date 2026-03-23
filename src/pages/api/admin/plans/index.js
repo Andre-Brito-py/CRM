@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       res.status(500).json({ error: { msg: 'Failed to fetch plans' } });
     }
   } else if (req.method === 'POST') {
-    const { name, slug, prices, features, description, isActive } = req.body;
+    const { name, slug, prices, features, description, isActive, cancellationFeePercentage } = req.body;
 
     try {
       const isFreePlan = Boolean(features?.isFreePlan);
@@ -113,6 +113,7 @@ export default async function handler(req, res) {
           stripePriceIdAnnual: finalPrices[0]?.stripePriceIdAnnual || null,
           features,
           description,
+          cancellationFeePercentage: parseFloat(cancellationFeePercentage || 0),
           isActive: typeof isActive === 'boolean' ? isActive : true,
           prices: {
             create: finalPrices,

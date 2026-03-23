@@ -103,6 +103,17 @@ const formatPlanFeatures = (features) => {
   return list;
 };
 
+const toPublicPrices = (prices) => {
+  if (!Array.isArray(prices)) return [];
+  return prices.map((p) => ({
+    currency: p?.currency ? String(p.currency) : null,
+    amount: p?.amount == null ? null : Number(p.amount),
+    amountAnnual: p?.amountAnnual == null ? null : Number(p.amountAnnual),
+    stripePriceId: p?.stripePriceId ? String(p.stripePriceId) : null,
+    stripePriceIdAnnual: p?.stripePriceIdAnnual ? String(p.stripePriceIdAnnual) : null,
+  }));
+};
+
 export const getStaticProps = async () => {
   let products = [];
   let promo = { enabled: false, code: '', text: '' };
@@ -144,7 +155,7 @@ export const getStaticProps = async () => {
         priceAnnual: plan.priceAnnual ? Number(plan.priceAnnual) : null,
         currency: plan.currency,
         interval: plan.interval,
-        prices: plan.prices || [],
+        prices: toPublicPrices(plan.prices),
         features: formatPlanFeatures(plan.features),
         isFreePlan:
           Boolean(plan?.features?.isFreePlan) ||

@@ -1,13 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import toast from 'react-hot-toast';
-import { PlusIcon, TrashIcon, PencilIcon } from '@heroicons/react/24/outline';
+import { 
+  PlusIcon, 
+  TrashIcon, 
+  PencilIcon, 
+  ChatBubbleLeftRightIcon,
+  ArrowUpRightIcon,
+  ArrowDownLeftIcon,
+  LinkIcon,
+  CheckCircleIcon,
+  XCircleIcon
+} from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import AccountLayout from '@/layouts/AccountLayout';
 import Button from '@/components/Button/index';
-import Modal from '@/components/Modal/index';
+// import Modal from '@/components/Modal/index'; // We'll use headlessui directly if possible for better control
+import { Dialog, Transition } from '@headlessui/react';
 import Card from '@/components/Card/index';
 import api from '@/lib/common/api';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
@@ -190,7 +202,12 @@ const WhatsAppSettings = () => {
   if (isLoading) {
     return (
       <AccountLayout>
-        <div className="flex items-center justify-center h-full">{t('common.loading')}</div>
+        <div className="flex items-center justify-center h-screen bg-[#fdfdfe]">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-zinc-100 border-t-zinc-900 rounded-full animate-spin" />
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em]">{t('common.loading')}</span>
+          </div>
+        </div>
       </AccountLayout>
     );
   }
@@ -221,226 +238,386 @@ const WhatsAppSettings = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="whatsapp-tour" steps={whatsappSteps} />
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 flex justify-between items-center">
+      <div className="py-12 bg-[#fdfdfe] min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">{t('WhatsApp Cloud API')}</h1>
-            <p className="mt-1 text-sm text-gray-500">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-green-500 rounded-[14px] flex items-center justify-center shadow-glow-emerald/30">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[11px] font-black text-green-600 uppercase tracking-[0.2em]">{t('whatsapp.integration')}</span>
+            </div>
+            <h1 className="text-4xl font-executive font-extrabold text-zinc-950 tracking-tighter leading-none mb-4">
+              WhatsApp Cloud
+            </h1>
+            <p className="text-zinc-500 font-medium text-lg max-w-2xl leading-relaxed">
               {t('whatsapp.settings.subtitle')}
             </p>
           </div>
-          <Button id="whatsapp-add-btn" className="bg-brand-600 hover:bg-brand-700 text-white shadow-premium" onClick={openNewModal}>
-            <PlusIcon className="w-5 h-5 mr-2" /> {t('whatsapp.settings.addNumber')}
-          </Button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            id="whatsapp-add-btn" 
+            className="group flex items-center gap-3 px-8 py-4 bg-zinc-950 text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-premium hover:shadow-premium-lg transition-all" 
+            onClick={openNewModal}
+          >
+            <PlusIcon className="w-5 h-5 transition-transform group-hover:rotate-90" /> 
+            {t('whatsapp.settings.addNumber')}
+          </motion.button>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 mt-8">
-          <Card>
-            <div className="p-6">
-              <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 lg:px-10 mt-8 space-y-10">
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            <div className="xl:col-span-2 bg-white rounded-[32px] p-10 border border-zinc-100 shadow-premium overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-green-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50" />
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10 relative z-10">
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">{t('analytics.whatsapp.title')}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{t('analytics.whatsapp.last30Days')}</p>
+                  <h3 className="text-2xl font-executive font-extrabold text-zinc-900 tracking-tighter">{t('analytics.whatsapp.title')}</h3>
+                  <p className="text-zinc-400 font-medium mt-1">{t('analytics.whatsapp.last30Days')}</p>
                 </div>
-                <div className="flex space-x-6">
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.inbound')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.inbound} />
-                    </div>
+                <div className="flex items-center gap-10">
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                      <ArrowDownLeftIcon className="w-3 h-3 text-emerald-500" />
+                      {t('analytics.whatsapp.inbound')}
+                    </p>
+                    <CountUp value={messageTotals.inbound} className="text-3xl font-executive font-extrabold text-zinc-950 tracking-tight" />
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.outbound')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.outbound} />
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.total')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.total} />
-                    </div>
+                  <div className="w-[1px] h-10 bg-zinc-100" />
+                  <div className="text-center">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2 flex items-center justify-center gap-1.5">
+                      <ArrowUpRightIcon className="w-3 h-3 text-blue-500" />
+                      {t('analytics.whatsapp.outbound')}
+                    </p>
+                    <CountUp value={messageTotals.outbound} className="text-3xl font-executive font-extrabold text-zinc-950 tracking-tight" />
                   </div>
                 </div>
               </div>
 
               {mounted ? (
-                <div className="h-64 mt-5">
+                <div className="h-72 w-full mt-5 relative z-10">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#16a34a" isAnimationActive animationDuration={900} />
-                      <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#2563eb" isAnimationActive animationDuration={900} />
+                    <BarChart data={whatsappTrendChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorInbound" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                        </linearGradient>
+                        <linearGradient id="colorOutbound" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
+                      <XAxis 
+                        dataKey="day" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }} 
+                        dy={10}
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }} 
+                      />
+                      <Tooltip 
+                        cursor={{ fill: '#f8fafc' }}
+                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', padding: '12px' }}
+                      />
+                      <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                      <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive animationDuration={1200} />
+                      <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive animationDuration={1200} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               ) : null}
             </div>
-          </Card>
 
-          {integrations.length === 0 ? (
-            <div className="text-center p-12 glass shadow-premium rounded-2xl border border-white/20">
-              <h3 className="text-lg font-medium text-gray-900">{t('whatsapp.settings.empty.title')}</h3>
-              <p className="mt-1 text-gray-500">{t('whatsapp.settings.empty.subtitle')}</p>
+            <div className="bg-zinc-950 rounded-[32px] p-10 text-white relative overflow-hidden shadow-premium flex flex-col justify-between">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -mr-24 -mt-24" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                  <LinkIcon className="w-6 h-6 text-emerald-400" />
+                </div>
+                <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-4">Connection Guide</h3>
+                <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                  Connect your business numbers via Meta's Cloud API to start receiving messages directly in Closify.
+                </p>
+                <ul className="space-y-4">
+                  {[
+                    'Create a Meta App',
+                    'Configure Webhooks',
+                    'Generate Access Token'
+                  ].map((step, i) => (
+                    <li key={i} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-zinc-300">
+                      <span className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[10px] text-zinc-500 border border-white/5">{i+1}</span>
+                      {step}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="mt-10 relative z-10">
+                <div className="text-center p-6 bg-white/5 rounded-[24px] border border-white/10 backdrop-blur-sm">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">{t('analytics.whatsapp.total')}</p>
+                  <p className="text-4xl font-executive font-extrabold tracking-tight">
+                    <CountUp value={messageTotals.total} />
+                  </p>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {integrations.map((integration) => (
-                <Card key={integration.id}>
-                  <div className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                          <span className="text-green-600 text-xl">📱</span>
+          </div>
+
+          <div className="pt-10">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-executive font-extrabold text-zinc-900 tracking-tighter">Your Connections</h2>
+              <div className="px-4 py-1.5 bg-zinc-100 rounded-full border border-zinc-200/50">
+                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{integrations.length} Active</span>
+              </div>
+            </div>
+
+            {integrations.length === 0 ? (
+              <div className="text-center py-24 bg-white rounded-[40px] border border-zinc-100 shadow-premium-sm relative overflow-hidden group">
+                <div className="absolute inset-0 bg-grid-zinc-100/50 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]" />
+                <div className="relative z-10">
+                  <div className="w-20 h-20 bg-zinc-50 rounded-[32px] flex items-center justify-center mx-auto mb-8 border border-zinc-100 group-hover:scale-110 transition-transform duration-500">
+                    <ChatBubbleLeftRightIcon className="w-8 h-8 text-zinc-200" />
+                  </div>
+                  <h3 className="text-2xl font-executive font-extrabold text-zinc-900 tracking-tighter mb-2">{t('whatsapp.settings.empty.title')}</h3>
+                  <p className="text-zinc-400 font-medium max-w-sm mx-auto mb-10">{t('whatsapp.settings.empty.subtitle')}</p>
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={openNewModal}
+                    className="px-8 py-4 bg-brand-600 premium-gradient text-white rounded-[22px] text-xs font-black uppercase tracking-widest shadow-glow-emerald"
+                  >
+                    Get Started
+                  </motion.button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {integrations.map((integration) => (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    key={integration.id} 
+                    className="bg-white rounded-[32px] p-8 border border-zinc-100 shadow-premium-sm hover:shadow-premium transition-all duration-500 relative group overflow-hidden"
+                  >
+                    <div className="flex justify-between items-start mb-8">
+                      <div className="flex items-center gap-5">
+                        <div className={`w-14 h-14 rounded-[22px] flex items-center justify-center border transition-colors duration-500 ${integration.enabled ? 'bg-emerald-50 border-emerald-100' : 'bg-zinc-50 border-zinc-100'}`}>
+                          <ChatBubbleLeftRightIcon className={`w-7 h-7 ${integration.enabled ? 'text-emerald-500' : 'text-zinc-400'}`} />
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900 text-lg">{integration.name}</h3>
-                          <div className="flex items-center mt-1">
-                            <span className={`w-2 h-2 rounded-full mr-2 ${integration.enabled ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                            <span className="text-sm text-gray-500">{integration.enabled ? t('common.status.active') : t('common.status.disabled')}</span>
+                          <h3 className="text-lg font-executive font-extrabold text-zinc-900 tracking-tight leading-none mb-2">{integration.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <span className={`w-1.5 h-1.5 rounded-full ${integration.enabled ? 'bg-emerald-500 shadow-glow-emerald animate-pulse-subtle' : 'bg-red-500'}`} />
+                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                              {integration.enabled ? t('common.status.active') : t('common.status.disabled')}
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex space-x-2">
-                        <button onClick={() => openEditModal(integration)} className="text-gray-400 hover:text-brand-600 transition">
-                          <PencilIcon className="w-5 h-5" />
+                      <div className="flex gap-2">
+                        <button onClick={() => openEditModal(integration)} className="p-2.5 text-zinc-400 hover:text-zinc-950 hover:bg-zinc-50 rounded-xl transition-all">
+                          <PencilIcon className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(integration.id)} className="text-gray-400 hover:text-red-600 transition">
-                          <TrashIcon className="w-5 h-5" />
+                        <button onClick={() => handleDelete(integration.id)} className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                          <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-sm text-gray-500"><span className="font-medium text-gray-700">{t('whatsapp.settings.card.phoneId')}</span> {integration.credentials?.phoneNumberId}</p>
-                      <p className="text-sm text-gray-500 mt-1"><span className="font-medium text-gray-700">{t('whatsapp.settings.card.added')}</span> {new Date(integration.createdAt).toLocaleDateString(locale)}</p>
+                    <div className="space-y-4 pt-6 mt-2 border-t border-zinc-50 relative z-10">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('whatsapp.settings.card.phoneId')}</span>
+                        <span className="text-xs font-black text-zinc-900 tabular-nums">{integration.credentials?.phoneNumberId}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('whatsapp.settings.card.added')}</span>
+                        <span className="text-xs font-black text-zinc-500 uppercase tracking-tight">{new Date(integration.createdAt).toLocaleDateString(locale)}</span>
+                      </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <Modal show={showModal} toggle={() => setShowModal(false)}>
-        <div className="p-6">
-          <h3 className="text-xl font-bold mb-4 text-gray-900 tracking-tight">{currentEditId ? t('whatsapp.settings.modal.editTitle') : t('whatsapp.settings.modal.connectTitle')}</h3>
-          <form onSubmit={handleCreateOrUpdate} className="space-y-4">
-            <div className="flex items-start mb-6">
-              <div className="flex items-center h-5">
-                <input
-                  id="enabled"
-                  name="enabled"
-                  type="checkbox"
-                  checked={config.enabled}
-                  onChange={handleChange}
-                  className="focus:ring-brand-500 h-4 w-4 text-brand-600 border-gray-300 rounded"
-                />
-              </div>
-              <div className="ml-3 text-sm">
-                <label htmlFor="enabled" className="font-medium text-gray-700 cursor-pointer">
-                  {t('whatsapp.settings.modal.enable')}
-                </label>
-              </div>
-            </div>
+      <Transition.Root show={showModal} as={Fragment}>
+        <Dialog as="div" className="relative z-[100]" onClose={setShowModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm transition-opacity" />
+          </Transition.Child>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.friendlyName')}</label>
-              <input
-                type="text"
-                name="name"
-                value={config.name}
-                onChange={handleChange}
-                placeholder={t('whatsapp.settings.modal.friendlyNamePlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-                required
-              />
-            </div>
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-[32px] bg-white text-left shadow-premium transition-all sm:my-8 sm:w-full sm:max-w-xl border border-zinc-100">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50" />
+                  
+                  <div className="bg-white px-8 pb-8 pt-10 relative z-10">
+                    <div className="sm:flex sm:items-start mb-8">
+                      <div className="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-[18px] bg-emerald-50 sm:mx-0 border border-emerald-100 shadow-glow-emerald/10">
+                        <LinkIcon className="h-7 w-7 text-emerald-600" aria-hidden="true" />
+                      </div>
+                      <div className="mt-3 text-center sm:ml-6 sm:mt-0 sm:text-left">
+                        <Dialog.Title as="h3" className="text-2xl font-executive font-extrabold leading-none text-zinc-950 tracking-tighter mb-2">
+                          {currentEditId ? t('whatsapp.settings.modal.editTitle') : t('whatsapp.settings.modal.connectTitle')}
+                        </Dialog.Title>
+                        <p className="text-sm text-zinc-400 font-medium">
+                          {t('whatsapp.settings.modal.subtitle', 'Configure your WhatsApp Cloud API credentials below.')}
+                        </p>
+                      </div>
+                    </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.webhookUrl')} <span className="text-xs text-gray-400 font-normal">({t('whatsapp.settings.modal.webhookHint')})</span></label>
-              <div id="whatsapp-webhook-url" className="mt-1 flex rounded-md shadow-sm">
-                <input
-                  type="text"
-                  readOnly
-                  value={webhookUrl}
-                  className="flex-1 focus:ring-brand-500 focus:border-brand-500 block w-full min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300 bg-gray-50 text-gray-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(webhookUrl);
-                    toast.success(t('common.copied'));
-                  }}
-                  className="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 rounded-r-md bg-gray-50 text-gray-500 sm:text-sm hover:bg-gray-100"
-                >
-                  {t('common.action.copy')}
-                </button>
-              </div>
-            </div>
+                    <form onSubmit={handleCreateOrUpdate} className="space-y-6">
+                      <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                        <div className="flex items-center h-5">
+                          <input
+                            id="enabled"
+                            name="enabled"
+                            type="checkbox"
+                            checked={config.enabled}
+                            onChange={handleChange}
+                            className="h-5 w-5 rounded-lg border-zinc-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer"
+                          />
+                        </div>
+                        <label htmlFor="enabled" className="text-sm font-black text-zinc-500 uppercase tracking-widest cursor-pointer ml-1">
+                          {t('whatsapp.settings.modal.enable')}
+                        </label>
+                      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.verifyToken')}</label>
-              <input
-                type="text"
-                name="verifyToken"
-                value={config.verifyToken}
-                onChange={handleChange}
-                placeholder={t('whatsapp.settings.modal.verifyTokenPlaceholder')}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-                required
-              />
-            </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.friendlyName')}</label>
+                        <input
+                          type="text"
+                          name="name"
+                          value={config.name}
+                          onChange={handleChange}
+                          placeholder={t('whatsapp.settings.modal.friendlyNamePlaceholder')}
+                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
+                          required
+                        />
+                      </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.phoneNumberId')}</label>
-                <input
-                  type="text"
-                  name="phoneNumberId"
-                  value={config.phoneNumberId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.businessAccountId')}</label>
-                <input
-                  type="text"
-                  name="businessAccountId"
-                  value={config.businessAccountId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-                />
-              </div>
-            </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">
+                          {t('whatsapp.settings.modal.webhookUrl')} 
+                        </label>
+                        <div id="whatsapp-webhook-url" className="flex gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={webhookUrl}
+                            className="flex-1 px-5 py-3.5 bg-zinc-100/50 border border-zinc-100 rounded-[18px] text-zinc-400 font-black tracking-tight text-xs focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText(webhookUrl);
+                              toast.success(t('common.copied'));
+                            }}
+                            className="px-5 py-3.5 bg-zinc-950 text-white rounded-[18px] text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-premium"
+                          >
+                            {t('common.action.copy')}
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 font-medium ml-3">{t('whatsapp.settings.modal.webhookHint')}</p>
+                      </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('whatsapp.settings.modal.accessToken')}</label>
-              <input
-                type="password"
-                name="accessToken"
-                value={config.accessToken}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-                required
-              />
-            </div>
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.verifyToken')}</label>
+                        <input
+                          type="text"
+                          name="verifyToken"
+                          value={config.verifyToken}
+                          onChange={handleChange}
+                          placeholder={t('whatsapp.settings.modal.verifyTokenPlaceholder')}
+                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
+                          required
+                        />
+                      </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t mt-6">
-              <Button type="button" className="text-gray-700 bg-gray-100 hover:bg-gray-200" onClick={() => setShowModal(false)}>{t('common.action.cancel')}</Button>
-              <Button type="submit" className="text-white bg-brand-600 hover:bg-brand-700" disabled={isSaving}>
-                {isSaving ? t('common.saving') : t('whatsapp.settings.modal.save')}
-              </Button>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.phoneNumberId')}</label>
+                          <input
+                            type="text"
+                            name="phoneNumberId"
+                            value={config.phoneNumberId}
+                            onChange={handleChange}
+                            className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300 text-center tabular-nums font-black"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.businessAccountId')}</label>
+                          <input
+                            type="text"
+                            name="businessAccountId"
+                            value={config.businessAccountId}
+                            onChange={handleChange}
+                            className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300 text-center tabular-nums font-black"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pb-2">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.accessToken')}</label>
+                        <input
+                          type="password"
+                          name="accessToken"
+                          value={config.accessToken}
+                          onChange={handleChange}
+                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
+                          required
+                        />
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-zinc-50">
+                        <button
+                          type="button"
+                          className="flex-1 px-8 py-4 bg-zinc-100 text-zinc-500 rounded-[22px] text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
+                          onClick={() => setShowModal(false)}
+                        >
+                          {t('common.action.cancel')}
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={isSaving}
+                          className="flex-1 px-8 py-4 bg-zinc-950 text-white rounded-[22px] text-xs font-black uppercase tracking-widest hover:shadow-premium-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-premium flex items-center justify-center gap-2"
+                        >
+                          {isSaving && <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />}
+                          {isSaving ? t('common.saving') : t('whatsapp.settings.modal.save')}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
-          </form>
-        </div>
-      </Modal>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </AccountLayout>
   );
 };

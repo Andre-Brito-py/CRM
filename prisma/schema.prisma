@@ -912,6 +912,7 @@ model Plan {
   description   String?
   price         Float
   priceAnnual   Float?
+  cancellationFeePercentage Float? @default(0)
   annualDiscount Float?
   currency      String                 @default("USD")
   interval      String                 @default("month")

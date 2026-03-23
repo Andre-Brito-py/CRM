@@ -27,6 +27,9 @@ const Billing = ({ invoices, products }) => {
   const [isSubmitting, setSubmittingState] = useState(false);
   const [showModal, setModalVisibility] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [showCancelModal, setCancelModalVisibility] = useState(false);
+  const [cancelPreview, setCancelPreview] = useState(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   const billingSteps = [
     {
@@ -123,6 +126,39 @@ const Billing = ({ invoices, products }) => {
         toast.success('Solicitação processada.');
       }
     });
+  };
+
+  const handleCancelClick = async () => {
+    setSubmittingState(true);
+    try {
+      const response = await api('/api/payments/subscription/cancel-preview', { method: 'GET' });
+      if (response?.data) {
+        setCancelPreview(response.data);
+        setCancelModalVisibility(true);
+        setModalVisibility(false);
+      }
+    } catch (error) {
+      toast.error('Não foi possível carregar a prévia do cancelamento');
+    } finally {
+      setSubmittingState(false);
+    }
+  };
+
+  const confirmCancellation = async () => {
+    setIsCancelling(true);
+    try {
+      const response = await api('/api/payments/subscription/cancel-confirm', { method: 'POST' });
+      if (response?.data?.success) {
+        toast.success('Assinatura cancelada com sucesso');
+        setCancelModalVisibility(false);
+        // Refresh page or update status
+        window.location.reload();
+      }
+    } catch (error) {
+      toast.error('Erro ao processar cancelamento');
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const toggleModal = () => setModalVisibility(!showModal);
@@ -233,6 +269,15 @@ const Billing = ({ invoices, products }) => {
             >
               Open Billing Portal
             </Button>
+            {currentSubscription !== 'FREE' && (
+              <button
+                className="ml-4 text-sm text-red-600 hover:text-red-500 font-medium underline underline-offset-4"
+                disabled={isSubmitting}
+                onClick={handleCancelClick}
+              >
+                Cancelar Assinatura
+              </button>
+            )}
           </div>
           <div className="flex space-x-5">
             {products.map((product, index) => (
@@ -284,6 +329,60 @@ const Billing = ({ invoices, products }) => {
                 </Card.Footer>
               </Card>
             ))}
+          </div>
+        </Modal>
+
+        <Modal
+          show={showCancelModal}
+          title="Confirmar Cancelamento"
+          toggle={() => setCancelModalVisibility(false)}
+        >
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-zinc-600 leading-relaxed font-executive">
+              Você está prestes a cancelar sua assinatura <strong>{currentSubscription}</strong>.
+            </p>
+
+            {cancelPreview?.isAnnual && cancelPreview?.fee > 0 && (
+              <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-red-900">
+                <div className="text-sm font-bold flex items-center">
+                  <span className="mr-2">⚠️</span> Taxa de Cancelamento Antecipado
+                </div>
+                <div className="text-sm mt-1">
+                  Como você possui um plano anual com {cancelPreview.remainingMonths} meses restantes,
+                  será aplicada uma multa de <strong>{cancelPreview.feePercentage}%</strong> sobre o valor mensal equivalente.
+                </div>
+                <div className="mt-3 text-lg font-bold text-red-700">
+                  Valor da Taxa: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: cancelPreview.currency }).format(cancelPreview.fee)}
+                </div>
+                <p className="text-[10px] mt-2 text-red-600 uppercase tracking-widest font-bold">Cobrança única via Stripe</p>
+              </div>
+            )}
+
+            {!cancelPreview?.isAnnual && (
+              <p className="text-sm text-zinc-500 bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic">
+                Sua assinatura mensal será encerrada ao final do período atual.
+              </p>
+            )}
+
+            <p className="text-sm text-zinc-600 leading-relaxed font-executive">
+              Deseja realmente prosseguir? Esta ação não pode ser desfeita e você perderá acesso aos recursos premium imediatamente após o processamento.
+            </p>
+          </div>
+          <div className="mt-6 flex items-center space-x-3">
+            <Button
+              className="flex-1 text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all font-bold py-3"
+              disabled={isCancelling}
+              onClick={confirmCancellation}
+            >
+              {isCancelling ? 'Processando...' : 'Confirmar e Cancelar'}
+            </Button>
+            <Button
+              className="px-6 text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-all font-bold py-3"
+              disabled={isCancelling}
+              onClick={() => setCancelModalVisibility(false)}
+            >
+              Voltar
+            </Button>
           </div>
         </Modal>
       </Content.Container>

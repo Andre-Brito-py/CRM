@@ -75,6 +75,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     slug: plan?.slug || '',
     description: plan?.description || '',
     prices: plan?.prices || (plan ? [] : [{ currency: 'USD', amount: 0, amountAnnual: null, stripePriceId: '', stripePriceIdAnnual: '' }]),
+    cancellationFeePercentage: plan?.cancellationFeePercentage || 0,
     ...initialFeatures,
   });
 
@@ -191,6 +192,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
           amountAnnual: p.amountAnnual || p.priceAnnual ? parseFloat(p.amountAnnual || p.priceAnnual) : null,
         })),
         isActive: formData.isActive,
+        cancellationFeePercentage: formData.cancellationFeePercentage,
         features,
       });
       toggle();
@@ -303,6 +305,30 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
             <input type="text" name="stripePriceIdAnnual" value={formData.stripePriceIdAnnual} onChange={handleChange}
               disabled={Boolean(formData.isFreePlan)}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2" />
+          </div>
+        </div>
+
+        <div className="border-t border-gray-200 pt-4">
+          <label className="block text-sm font-semibold text-red-600">
+            🚫 Taxa de Cancelamento Antecipado (%)
+          </label>
+          <p className="text-xs text-gray-500 mb-1">
+            Percentual cobrado sobre os meses restantes caso o plano anual seja cancelado antes do término.
+          </p>
+          <div className="relative mt-1 max-w-[200px]">
+            <input
+              type="number"
+              name="cancellationFeePercentage"
+              min="0"
+              max="100"
+              step="1"
+              value={formData.cancellationFeePercentage}
+              onChange={handleChange}
+              className="block w-full rounded-md border-red-300 shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm border p-2 text-red-700 font-bold pr-8"
+            />
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <span className="text-gray-500 sm:text-sm">%</span>
+            </div>
           </div>
         </div>
 
@@ -647,6 +673,11 @@ const Plans = () => {
                                 <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-brand-100 text-blue-800">
                                   {moduleCount}/{AVAILABLE_MODULES.length} modules
                                 </span>
+                                {plan.cancellationFeePercentage > 0 && (
+                                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    {plan.cancellationFeePercentage}% cancel fee
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <div className="flex space-x-2">

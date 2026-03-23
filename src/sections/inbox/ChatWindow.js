@@ -1,5 +1,19 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
-import { PaperAirplaneIcon, UserCircleIcon, ChevronDownIcon, DocumentDuplicateIcon, PlusIcon, SparklesIcon, ArrowLeftIcon, DocumentTextIcon, CreditCardIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
+import { 
+  PaperAirplaneIcon, 
+  UserCircleIcon, 
+  ChevronDownIcon, 
+  DocumentDuplicateIcon, 
+  PlusIcon, 
+  SparklesIcon, 
+  ArrowLeftIcon, 
+  DocumentTextIcon, 
+  CreditCardIcon, 
+  CalendarDaysIcon,
+  EnvelopeIcon,
+  ChatBubbleLeftRightIcon,
+  CameraIcon
+} from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
 import { useTranslation } from 'react-i18next';
@@ -7,6 +21,7 @@ import Paywall from '@/components/Paywall';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
 import api from '@/lib/common/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -18,6 +33,15 @@ const formatMoney = (value, currency = 'BRL') =>
     currency: String(currency || 'BRL').toUpperCase(),
     maximumFractionDigits: 2,
   }).format(Number(value || 0));
+
+const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
+  switch (String(platform).toUpperCase()) {
+    case 'WHATSAPP': return <ChatBubbleLeftRightIcon className={`${className} text-green-500`} />;
+    case 'EMAIL': return <EnvelopeIcon className={`${className} text-blue-500`} />;
+    case 'INSTAGRAM': return <CameraIcon className={`${className} text-pink-500`} />;
+    default: return <ChatBubbleLeftRightIcon className={`${className} text-zinc-400`} />;
+  }
+};
 
 const ChatWindow = ({
   conversation,
@@ -245,87 +269,109 @@ const ChatWindow = ({
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/30 h-full p-12">
-        <div className="w-24 h-24 bg-white/80 rounded-[40px] shadow-premium flex items-center justify-center mb-8 border border-zinc-100">
-          <PaperAirplaneIcon className="w-10 h-10 text-zinc-200 -rotate-45" />
-        </div>
-        <p className="text-zinc-400 text-lg font-executive font-semibold tracking-tight">
+      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/20 h-full p-12 text-center">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="w-32 h-32 bg-white rounded-[48px] shadow-premium flex items-center justify-center mb-10 border border-zinc-100"
+        >
+          <PaperAirplaneIcon className="w-12 h-12 text-zinc-200 -rotate-45" />
+        </motion.div>
+        <h2 className="text-zinc-900 text-3xl font-executive font-extrabold tracking-tighter mb-3">
           {t('inbox.chat.empty.title')}
+        </h2>
+        <p className="text-zinc-400 text-lg font-executive font-medium max-w-sm mx-auto leading-relaxed">
+          {t('inbox.chat.empty.subtitle')}
         </p>
-        <p className="text-zinc-300 text-sm mt-2 font-medium">{t('inbox.chat.empty.subtitle')}</p>
       </div>
     );
-  } return (
+  }
+
+  return (
     <div className="flex-1 flex flex-col h-full bg-white relative">
       {/* Header */}
-      <div className="px-8 py-6 border-b border-zinc-100 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10 shrink-0">
-        <div className="flex items-center gap-5">
+      <div className="px-10 py-8 border-b border-zinc-100/80 flex justify-between items-center bg-white/60 backdrop-blur-xl sticky top-0 z-30 shrink-0">
+        <div className="flex items-center gap-7">
           {onBack && (
-            <button onClick={onBack} className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+            <motion.button 
+              whileHover={{ x: -2 }}
+              onClick={onBack} 
+              className="md:hidden p-3 -ml-4 text-zinc-400 hover:text-zinc-900 transition-colors"
+            >
               <ArrowLeftIcon className="w-6 h-6" />
-            </button>
+            </motion.button>
           )}
-          <div className="w-14 h-14 bg-zinc-100 rounded-2xl flex items-center justify-center border border-zinc-200/50 shadow-sm overflow-hidden bg-gradient-to-br from-white to-zinc-50">
+          <div className="w-16 h-16 bg-zinc-100 rounded-[22px] flex items-center justify-center border-2 border-white shadow-xl overflow-hidden avatar-premium relative">
             {conversation.contact?.image ? (
               <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-2xl font-executive font-bold text-zinc-400">
+              <span className="text-3xl font-executive font-extrabold text-zinc-400">
                 {conversation.contact?.name?.charAt(0) || '?'}
               </span>
             )}
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center border-2 border-white shadow-md z-10">
+              <PlatformIcon platform={conversation.platform} className="w-3 h-3" />
+            </div>
           </div>
           <div>
-            <h3 className="text-2xl font-executive font-bold text-zinc-900 tracking-tight leading-none mb-2">
+            <h3 className="text-2xl font-executive font-extrabold text-zinc-950 tracking-tighter leading-none mb-3">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h3>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5 bg-zinc-100 rounded-full px-2.5 py-0.5 border border-zinc-200/30">
-                <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none">
-                  Online
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-emerald-50 rounded-full px-3 py-1 border border-emerald-100/50">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse-subtle" />
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
+                  Active
                 </span>
               </div>
-              <span className="text-xs font-bold text-zinc-300">/</span>
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.1em] leading-none">
-                {conversation.platform}
-              </span>
+              <span className="text-xs font-black text-zinc-200">/</span>
+              <div className="flex items-center gap-2">
+                <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.15em] leading-none">
+                  {conversation.platform}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button
+        <div className="flex items-center gap-6">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onToggleAutopilot?.(!conversation.autopilotEnabled)}
             disabled={!onToggleAutopilot || isTogglingAutopilot}
             className={classNames(
-              'group flex items-center gap-2 px-5 py-2.5 text-xs font-bold uppercase tracking-widest rounded-xl border transition-all duration-300',
+              'group flex items-center gap-3 px-6 py-3 text-xs font-black uppercase tracking-widest rounded-[18px] border-2 transition-all duration-500',
               conversation.autopilotEnabled 
-                ? 'bg-brand-600 border-brand-500 text-white shadow-lg shadow-brand-500/20' 
-                : 'bg-white border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50'
+                ? 'bg-brand-600 border-brand-500 text-white shadow-glow-indigo/30' 
+                : 'bg-white border-zinc-100 text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 shadow-premium-sm'
             )}
           >
             <SparklesIcon className={`w-4 h-4 ${conversation.autopilotEnabled ? 'animate-pulse' : 'text-zinc-400 group-hover:text-brand-500'}`} />
-            Autopilot: {conversation.autopilotEnabled ? 'ON' : 'OFF'}
-          </button>
+            <span className="hidden lg:inline">Autopilot:</span> {conversation.autopilotEnabled ? 'ON' : 'OFF'}
+          </motion.button>
 
-          <div className="h-8 w-[1px] bg-zinc-100" />
+          <div className="h-10 w-[1px] bg-zinc-100 mx-1" />
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="flex items-center group">
-              <div className="flex flex-col items-end mr-3">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Assignee</span>
-                <span className="text-xs font-bold text-zinc-900 group-hover:text-brand-600 transition-colors uppercase tracking-tight">
-                  {conversation.assignee?.name || t('inbox.filter.unassigned')}
-                </span>
-              </div>
-              <div className="w-10 h-10 bg-zinc-50 rounded-xl border border-zinc-200/50 flex items-center justify-center group-hover:border-zinc-300 transition-all overflow-hidden">
+            <Menu.Button className="flex items-center group bg-white/50 p-1.5 pr-4 rounded-[20px] border border-zinc-100 hover:bg-white hover:shadow-premium-sm transition-all duration-300">
+              <div className="w-11 h-11 bg-zinc-50 rounded-[14px] border border-zinc-200/50 flex items-center justify-center group-hover:border-zinc-300 transition-all overflow-hidden avatar-premium mr-4">
                 {conversation.assignee?.image ? (
                   <img src={conversation.assignee.image} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <UserCircleIcon className="w-6 h-6 text-zinc-300" />
+                  <UserCircleIcon className="w-7 h-7 text-zinc-300" />
                 )}
               </div>
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Owner</span>
+                <span className="text-xs font-black text-zinc-900 group-hover:text-brand-600 transition-colors uppercase tracking-[0.05em]">
+                  {conversation.assignee?.name || t('inbox.filter.unassigned')}
+                </span>
+              </div>
+              <ChevronDownIcon className="w-4 h-4 ml-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
             </Menu.Button>
 
             <Transition
@@ -383,87 +429,99 @@ const ChatWindow = ({
           </Menu>
         </div>
       </div>
-
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-2 bg-[#f9fafb] custom-scrollbar">
-        {conversation.messages?.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full opacity-40">
-            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400">No messages yet</span>
-          </div>
-        ) : (
-          conversation.messages?.map((message) => (
-            <MessageBubble
-              key={message.id}
-              message={message}
-              isMe={message.direction === 'OUTBOUND'}
-            />
-          ))
-        )}
+      <div className="flex-1 overflow-y-auto p-10 space-y-2 bg-[#fdfdfe] custom-scrollbar relative">
+        <div className="absolute inset-0 bg-grid-zinc-100/50 [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none" />
+        <AnimatePresence mode="popLayout">
+          {conversation.messages?.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center h-full opacity-30"
+            >
+              <span className="text-[12px] font-black uppercase tracking-[0.3em] text-zinc-400">No signals received</span>
+            </motion.div>
+          ) : (
+            conversation.messages?.map((message) => (
+              <MessageBubble
+                key={message.id}
+                message={message}
+                isMe={message.direction === 'OUTBOUND'}
+              />
+            ))
+          )}
+        </AnimatePresence>
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-8 bg-white border-t border-zinc-100 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] shrink-0">
+      <div className="p-10 bg-white border-t border-zinc-100/80 shadow-[0_-8px_40px_rgba(0,0,0,0.03)] shrink-0 z-20">
         {/* Unified Toolbar */}
-        <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-3 scrollbar-hide">
           <Paywall
             minPlan="PREMIUM"
             fallback={
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-3 shrink-0">
                 <button
                   type="button"
                   disabled
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-300 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 cursor-not-allowed"
-                  title={t('paywall.title')}
+                  className="flex items-center gap-2.5 px-5 py-2.5 bg-zinc-50 text-zinc-300 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-100 cursor-not-allowed"
                 >
-                  <SparklesIcon className="w-3.5 h-3.5" />
+                  <SparklesIcon className="w-4 h-4" />
                   {t('inbox.ai.suggest')}
                 </button>
                 <button
                   type="button"
                   disabled
-                  className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-300 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 cursor-not-allowed"
-                  title={t('paywall.title')}
+                  className="flex items-center gap-2.5 px-5 py-2.5 bg-zinc-50 text-zinc-300 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-100 cursor-not-allowed"
                 >
-                  <DocumentTextIcon className="w-3.5 h-3.5" />
+                  <DocumentTextIcon className="w-4 h-4" />
                   {t('inbox.ai.summarize')}
                 </button>
               </div>
             }
           >
-            <div className="flex items-center gap-2 shrink-0">
-              <button
+            <div className="flex items-center gap-3 shrink-0">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onGenerateResponse?.({ objective: aiObjective })}
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
-                className="flex items-center gap-2 px-4 py-2 bg-brand-50 text-brand-700 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-brand-100 hover:bg-brand-100 transition-all group"
+                className={`flex items-center gap-2.5 px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300 ${
+                  aiSuggestOnlyEnabled 
+                    ? 'bg-brand-50 border-brand-100 text-brand-700 hover:bg-brand-100 hover:shadow-glow-emerald/20' 
+                    : 'bg-zinc-50 border-zinc-100 text-zinc-300'
+                }`}
               >
-                <SparklesIcon className={`w-3.5 h-3.5 ${isGeneratingAI ? 'animate-spin' : 'group-hover:scale-110 transition-transform'}`} />
+                <SparklesIcon className={`w-4 h-4 ${isGeneratingAI ? 'animate-spin' : ''}`} />
                 {isGeneratingAI ? t('common.loading') : t('inbox.ai.suggest')}
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={handleSummarize}
                 disabled={isSummarizingAI}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-50 text-zinc-600 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:bg-zinc-100 transition-all group"
+                className="flex items-center gap-2.5 px-6 py-2.5 bg-white text-zinc-600 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-200/60 hover:border-zinc-300 hover:text-zinc-900 transition-all shadow-premium-sm"
               >
-                <DocumentTextIcon className="w-3.5 h-3.5 group-hover:text-zinc-900 transition-colors" />
+                <DocumentTextIcon className="w-4 h-4" />
                 {isSummarizingAI ? t('common.loading') : t('inbox.ai.summarize')}
-              </button>
+              </motion.button>
               
-              <div className="flex items-center gap-3 ml-2">
-                <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 select-none cursor-pointer hover:text-zinc-600 transition-colors">
+              <div className="flex items-center gap-4 ml-3 p-1 bg-zinc-50/50 rounded-[18px] border border-zinc-100">
+                <label className="flex items-center gap-2.5 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-zinc-400 select-none cursor-pointer hover:text-zinc-700 transition-colors">
                   <input
                     type="checkbox"
                     checked={Boolean(aiSuggestOnlyEnabled)}
                     onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
-                    className="h-3.5 w-3.5 rounded border-zinc-300 text-brand-600 focus:ring-brand-500/20"
+                    className="h-4 w-4 rounded-lg border-zinc-300 text-brand-600 focus:ring-brand-500/20 transition-all"
                   />
-                  Suggest Only
+                  Suggest
                 </label>
                 <select
                   value={aiObjective || ''}
                   onChange={(e) => onAiObjectiveChange?.(e.target.value)}
-                  className="h-8 rounded-lg bg-zinc-50/50 border border-zinc-100 px-2 text-[10px] font-bold uppercase tracking-tight text-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-500/10 focus:bg-white transition-all"
+                  className="h-9 rounded-[14px] bg-white border border-zinc-100 px-3 text-[10px] font-black uppercase tracking-widest text-zinc-600 focus:outline-none focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all font-executive shadow-premium-sm"
                 >
                   <option value="support">{t('inbox.ai.objective.support')}</option>
                   <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
@@ -474,42 +532,44 @@ const ChatWindow = ({
             </div>
           </Paywall>
 
-          <div className="h-4 w-[1px] bg-zinc-100 mx-2 shrink-0" />
+          <div className="h-6 w-[1px] bg-zinc-100 mx-3 shrink-0" />
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
             disabled={aiObjective !== 'schedule'}
-            className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="flex items-center gap-2.5 px-6 py-2.5 bg-white text-zinc-500 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-200/60 hover:border-zinc-300 hover:text-zinc-950 transition-all shrink-0 disabled:opacity-30 shadow-premium-sm"
           >
-            <CalendarDaysIcon className="w-3.5 h-3.5" />
+            <CalendarDaysIcon className="w-4 h-4" />
             {t('inbox.schedule.title')}
-          </button>
+          </motion.button>
 
           <Menu as="div" className="relative inline-block text-left shrink-0">
-            <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all">
-              <DocumentDuplicateIcon className="w-3.5 h-3.5" />
+            <Menu.Button className="flex items-center gap-2.5 px-6 py-2.5 bg-white text-zinc-500 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-200/60 hover:border-zinc-300 hover:text-zinc-950 transition-all shadow-premium-sm">
+              <DocumentDuplicateIcon className="w-4 h-4" />
               {t('inbox.templates.title')}
             </Menu.Button>
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
+              enter="transition ease-out duration-200"
+              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enterTo="transform opacity-100 scale-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="transform opacity-100 scale-100 translate-y-0"
+              leaveTo="transform opacity-0 scale-95 translate-y-2"
             >
-              <Menu.Items className="absolute bottom-full left-0 mb-3 w-80 origin-bottom-left bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
-                <div className="px-4 py-3 bg-zinc-50/50 flex justify-between items-center">
+              <Menu.Items className="absolute bottom-full left-0 mb-4 w-80 origin-bottom-left bg-white rounded-[24px] shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-50">
+                <div className="px-6 py-4 bg-zinc-50/50 flex justify-between items-center">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('inbox.templates.title')}</p>
-                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-1 hover:bg-zinc-200 rounded-md transition-colors">
-                    <PlusIcon className="w-3 h-3 text-zinc-600" />
+                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-1.5 hover:bg-zinc-200 rounded-lg transition-all">
+                    <PlusIcon className="w-3.5 h-3.5 text-zinc-600" />
                   </button>
                 </div>
-                <div className="py-2 max-h-64 overflow-y-auto custom-scrollbar">
+                <div className="py-2 max-h-72 overflow-y-auto custom-scrollbar">
                   {templates.length === 0 ? (
-                    <div className="px-6 py-4 text-center">
+                    <div className="px-8 py-6 text-center">
                       <p className="text-xs font-bold text-zinc-400 italic">{t('inbox.templates.empty')}</p>
                     </div>
                   ) : (
@@ -520,12 +580,12 @@ const ChatWindow = ({
                             type="button"
                             onClick={() => onMessageChange(template.content)}
                             className={classNames(
-                              active ? 'bg-zinc-50 text-zinc-900' : 'text-zinc-600',
-                              'block w-full text-left px-4 py-3 group transition-colors'
+                              active ? 'bg-zinc-50' : '',
+                              'block w-full text-left px-6 py-4 group transition-all duration-300'
                             )}
                           >
-                            <p className="text-[13px] font-bold text-zinc-900 mb-0.5">{template.name}</p>
-                            <p className="text-xs text-zinc-400 truncate font-medium">{template.content}</p>
+                            <p className={`text-[14px] font-extrabold mb-1 transition-colors ${active ? 'text-brand-600' : 'text-zinc-900'}`}>{template.name}</p>
+                            <p className="text-[11px] font-medium text-zinc-400 truncate tracking-tight">{template.content}</p>
                           </button>
                         )}
                       </Menu.Item>
@@ -537,26 +597,26 @@ const ChatWindow = ({
           </Menu>
 
           <Menu as="div" className="relative inline-block text-left shrink-0">
-            <Menu.Button className="flex items-center gap-2 px-4 py-2 bg-white text-zinc-500 rounded-xl text-[11px] font-bold uppercase tracking-wider border border-zinc-100 hover:border-zinc-300 hover:text-zinc-900 transition-all">
-              <CreditCardIcon className="w-3.5 h-3.5" />
+            <Menu.Button className="flex items-center gap-2.5 px-6 py-2.5 bg-white text-zinc-500 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-200/60 hover:border-zinc-300 hover:text-zinc-950 transition-all shadow-premium-sm">
+              <CreditCardIcon className="w-4 h-4" />
               Produtos
             </Menu.Button>
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="transform opacity-0 scale-95"
-              enterTo="transform opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="transform opacity-100 scale-100"
-              leaveTo="transform opacity-0 scale-95"
+              enter="transition ease-out duration-200"
+              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enterTo="transform opacity-100 scale-100 translate-y-0"
+              leave="transition ease-in duration-150"
+              leaveFrom="transform opacity-100 scale-100 translate-y-0"
+              leaveTo="transform opacity-0 scale-95 translate-y-2"
             >
-              <Menu.Items className="absolute bottom-full left-0 mb-3 w-80 origin-bottom-left bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
-                <div className="px-4 py-3 bg-zinc-50/50">
+              <Menu.Items className="absolute bottom-full left-0 mb-4 w-80 origin-bottom-left bg-white rounded-[24px] shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-50">
+                <div className="px-6 py-4 bg-zinc-50/50">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Available Products</p>
                 </div>
-                <div className="py-2 max-h-64 overflow-y-auto custom-scrollbar">
+                <div className="py-2 max-h-72 overflow-y-auto custom-scrollbar">
                   {paymentProducts.length === 0 ? (
-                    <div className="px-6 py-4 text-center">
+                    <div className="px-8 py-6 text-center">
                       <p className="text-xs font-bold text-zinc-400 italic">No active products</p>
                     </div>
                   ) : (
@@ -567,17 +627,17 @@ const ChatWindow = ({
                             type="button"
                             onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
                             className={classNames(
-                              active ? 'bg-zinc-50 text-zinc-900' : 'text-zinc-600',
-                              'block w-full text-left px-4 py-3 group transition-colors'
+                              active ? 'bg-zinc-50' : '',
+                              'block w-full text-left px-6 py-4 group transition-all duration-300'
                             )}
                           >
-                            <div className="flex justify-between items-start gap-3 mb-0.5">
-                              <p className="text-[13px] font-bold text-zinc-900 truncate">{product.name}</p>
-                              <span className="text-[11px] font-black text-brand-600 bg-brand-50 px-1.5 py-0.5 rounded-md tabular-nums">
+                            <div className="flex justify-between items-start gap-4 mb-1.5">
+                              <p className={`text-[14px] font-extrabold truncate transition-colors ${active ? 'text-brand-600' : 'text-zinc-900'}`}>{product.name}</p>
+                              <span className="text-[12px] font-black text-brand-600 bg-brand-50 px-2 py-0.5 rounded-lg tabular-nums">
                                 {formatMoney(product.price, product.currency)}
                               </span>
                             </div>
-                            <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-widest">Click to insert link</p>
+                            <p className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em]">Click to insert link</p>
                           </button>
                         )}
                       </Menu.Item>
@@ -592,7 +652,7 @@ const ChatWindow = ({
         <form onSubmit={handleSend} className="relative group">
           <textarea
             rows={3}
-            className="w-full p-6 bg-zinc-50/50 border border-zinc-100 rounded-[24px] text-[15px] font-medium placeholder:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all resize-none shadow-inner"
+            className="w-full px-8 py-7 bg-zinc-50/50 border border-zinc-100/80 rounded-[32px] text-[16px] font-medium placeholder:text-zinc-300 focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all resize-none shadow-inner font-executive leading-relaxed"
             placeholder={t('inbox.replyPlaceholder')}
             value={messageText || ''}
             onChange={(e) => onMessageChange(e.target.value)}
@@ -603,20 +663,23 @@ const ChatWindow = ({
               }
             }}
           />
-          <div className="absolute bottom-4 right-4 flex items-center gap-3">
-            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em] hidden sm:block">
+          <div className="absolute bottom-6 right-6 flex items-center gap-5">
+            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em] hidden sm:block">
               {t('inbox.action.pressEnter')}
             </span>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: -5 }}
+              whileTap={{ scale: 0.9 }}
               type="submit"
               disabled={!messageText?.trim()}
-              className="p-3 bg-brand-600 text-white rounded-2xl shadow-lg shadow-brand-500/20 hover:bg-brand-700 disabled:opacity-30 disabled:shadow-none transition-all hover:scale-105 active:scale-95"
+              className="p-4 bg-brand-600 premium-gradient text-white rounded-[22px] shadow-glow-emerald disabled:opacity-30 disabled:shadow-none transition-all"
             >
-              <PaperAirplaneIcon className="w-5 h-5 -rotate-45" />
-            </button>
+              <PaperAirplaneIcon className="w-6 h-6 -rotate-45" />
+            </motion.button>
           </div>
         </form>
       </div>
+
 
       {/* Create Template Modal */}
       <Transition appear show={isTemplateModalOpen} as={Fragment}>
@@ -630,43 +693,47 @@ const ChatWindow = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-full items-center justify-center p-6 text-center">
               <Transition.Child
                 as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
+                enter="ease-out duration-400"
+                enterFrom="opacity-0 scale-95 translate-y-8"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="ease-in duration-300"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 translate-y-8"
               >
-                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    {t('inbox.templates.create.title')}
-                  </Dialog.Title>
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.name')}</label>
+                <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-[40px] bg-white p-12 text-left align-middle shadow-premium transition-all border border-zinc-100">
+                  <div className="mb-10 text-center">
+                    <div className="w-20 h-20 bg-brand-50 rounded-[32px] flex items-center justify-center mx-auto mb-6 border border-brand-100/50 shadow-glow-emerald/10">
+                      <DocumentDuplicateIcon className="w-10 h-10 text-brand-600" />
+                    </div>
+                    <Dialog.Title as="h3" className="text-3xl font-executive font-extrabold text-zinc-900 tracking-tighter">
+                      {t('inbox.templates.create.title')}
+                    </Dialog.Title>
+                    <p className="text-zinc-400 font-medium mt-2 text-[15px]">{t('inbox.templates.create.subtitle') || 'Create reusable message responses'}</p>
+                  </div>
+
+                  <div className="space-y-8">
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">{t('inbox.templates.create.name')}</label>
                       <input
                         type="text"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
+                        className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-[22px] text-[15px] font-medium focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all font-executive"
                         value={newTemplateName}
                         onChange={(e) => setNewTemplateName(e.target.value)}
                         placeholder={t('inbox.templates.create.namePlaceholder')}
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">{t('inbox.templates.create.content')}</label>
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">{t('inbox.templates.create.content')}</label>
                       <textarea
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
-                        rows={4}
+                        className="w-full px-6 py-5 bg-zinc-50 border border-zinc-100 rounded-[28px] text-[15px] font-medium focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all resize-none font-executive leading-relaxed"
+                        rows={6}
                         value={newTemplateContent}
                         onChange={(e) => setNewTemplateContent(e.target.value)}
                         placeholder={t('inbox.templates.create.contentPlaceholder')}
@@ -674,21 +741,23 @@ const ChatWindow = ({
                     </div>
                   </div>
 
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
+                  <div className="mt-12 flex flex-col sm:flex-row-reverse gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                      onClick={() => setIsTemplateModalOpen(false)}
-                    >
-                      {t('common.action.cancel')}
-                    </button>
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 disabled:opacity-50"
+                      className="flex-1 py-4 bg-brand-600 premium-gradient text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-40"
                       onClick={handleCreateTemplate}
                       disabled={!newTemplateName || !newTemplateContent}
                     >
                       {t('common.action.create')}
+                    </motion.button>
+                    <button
+                      type="button"
+                      className="flex-1 py-4 bg-white text-zinc-400 rounded-[22px] text-sm font-black uppercase tracking-widest border border-zinc-100 hover:bg-zinc-50 transition-all"
+                      onClick={() => setIsTemplateModalOpen(false)}
+                    >
+                      {t('common.action.cancel')}
                     </button>
                   </div>
                 </Dialog.Panel>
@@ -698,6 +767,7 @@ const ChatWindow = ({
         </Dialog>
       </Transition>
 
+      {/* AI Summary Modal */}
       <Transition appear show={isSummaryModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setIsSummaryModalOpen(false)}>
           <Transition.Child
@@ -709,50 +779,61 @@ const ChatWindow = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-md" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-full items-center justify-center p-6 text-center">
               <Transition.Child
                 as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
+                enter="ease-out duration-400"
+                enterFrom="opacity-0 scale-95 translate-y-8"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="ease-in duration-300"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 translate-y-8"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title
-                    as="h3"
-                    className="text-lg font-medium leading-6 text-gray-900"
-                  >
-                    {t('inbox.ai.summaryTitle')}
-                  </Dialog.Title>
-                  <div className="mt-4">
-                    <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 border border-gray-100 rounded-lg p-4 max-h-[60vh] overflow-auto">
+                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-[40px] bg-white p-12 text-left align-middle shadow-premium transition-all border border-zinc-100 relative">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50/50 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
+                  
+                  <div className="mb-10 flex items-center gap-6 relative z-10">
+                    <div className="w-20 h-20 bg-brand-600 premium-gradient rounded-[32px] flex items-center justify-center border border-brand-500 shadow-glow-emerald/30">
+                      <SparklesIcon className="w-10 h-10 text-white animate-pulse" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-3xl font-executive font-extrabold text-zinc-900 tracking-tighter">
+                        AI Insights Engine
+                      </Dialog.Title>
+                      <p className="text-zinc-400 font-medium text-[15px] mt-1 italic">Executive conversation analysis</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 relative z-10 bg-zinc-50/50 rounded-[32px] border border-zinc-100 p-8 shadow-inner overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-20" />
+                    <pre className="whitespace-pre-wrap text-[15px] font-medium text-zinc-700 font-executive leading-[1.8] max-h-[50vh] overflow-auto custom-scrollbar pr-4 italic">
                       {summaryText}
                     </pre>
                   </div>
 
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-                      onClick={() => setIsSummaryModalOpen(false)}
-                    >
-                      {t('common.action.cancel')}
-                    </button>
-                    <CopyToClipboard text={summaryText}>
-                      <button
+                  <div className="mt-12 flex flex-col sm:flex-row-reverse gap-4 relative z-10">
+                    <CopyToClipboard text={summaryText} onCopy={() => toast.success(t('common.copied'))}>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
-                        className="inline-flex justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+                        className="flex-1 py-4 bg-brand-600 premium-gradient text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-50"
                         disabled={!summaryText}
                       >
                         {t('common.action.copy')}
-                      </button>
+                      </motion.button>
                     </CopyToClipboard>
+                    <button
+                      type="button"
+                      className="flex-1 py-4 bg-white text-zinc-400 rounded-[22px] text-sm font-black uppercase tracking-widest border border-zinc-100 hover:bg-zinc-50 transition-all"
+                      onClick={() => setIsSummaryModalOpen(false)}
+                    >
+                      {t('common.action.close') || 'Dismiss'}
+                    </button>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -761,6 +842,7 @@ const ChatWindow = ({
         </Dialog>
       </Transition>
 
+      {/* Schedule Modal */}
       <Transition appear show={isScheduleModalOpen} as={Fragment}>
         <Dialog as="div" className="relative z-50" onClose={() => setIsScheduleModalOpen(false)}>
           <Transition.Child
@@ -772,142 +854,191 @@ const ChatWindow = ({
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black bg-opacity-25" />
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-md" />
           </Transition.Child>
 
           <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4 text-center">
+            <div className="flex min-h-full items-center justify-center p-6 text-center">
               <Transition.Child
                 as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 scale-95"
-                enterTo="opacity-100 scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 scale-100"
-                leaveTo="opacity-0 scale-95"
+                enter="ease-out duration-400"
+                enterFrom="opacity-0 scale-95 translate-y-8"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="ease-in duration-300"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 translate-y-8"
               >
-                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                  <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    {t('inbox.schedule.title')}
-                  </Dialog.Title>
+                <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-[40px] bg-white p-12 text-left align-middle shadow-premium transition-all border border-zinc-100">
+                  <div className="mb-10 flex items-center gap-6">
+                    <div className="w-16 h-16 bg-blue-50 rounded-[24px] flex items-center justify-center border border-blue-100 shadow-sm">
+                      <CalendarDaysIcon className="w-9 h-9 text-blue-600" />
+                    </div>
+                    <div>
+                      <Dialog.Title as="h3" className="text-3xl font-executive font-extrabold text-zinc-900 tracking-tighter">
+                        Smart Scheduler
+                      </Dialog.Title>
+                      <p className="text-zinc-400 font-medium text-[15px] mt-1">Google Calendar Integration</p>
+                    </div>
+                  </div>
 
-                  <div className="mt-4 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.summary')}</label>
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-2.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-1">{t('inbox.schedule.summary')}</label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
+                          className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-[22px] text-[15px] font-bold focus:outline-none focus:ring-8 focus:ring-blue-500/5 focus:bg-white focus:border-blue-500/30 transition-all font-executive"
                           value={scheduleConfig.summary || ''}
                           onChange={(e) => setScheduleConfig((p) => ({ ...p, summary: e.target.value }))}
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">{t('inbox.schedule.description')}</label>
+                      <div className="space-y-2.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest pl-1">{t('inbox.schedule.description')}</label>
                         <input
                           type="text"
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border px-3 py-2"
+                          className="w-full px-6 py-4 bg-zinc-50 border border-zinc-100 rounded-[22px] text-[15px] font-medium focus:outline-none focus:ring-8 focus:ring-blue-500/5 focus:bg-white focus:border-blue-500/30 transition-all font-executive"
                           value={scheduleConfig.description || ''}
                           onChange={(e) => setScheduleConfig((p) => ({ ...p, description: e.target.value }))}
                         />
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-3">
-                      <button
+                    <div className="flex flex-wrap gap-4 pt-2">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={checkAvailability}
                         disabled={isCheckingAvailability}
-                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+                        className="flex-1 min-w-[200px] py-4 bg-zinc-900 text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-xl disabled:opacity-50"
                       >
                         {isCheckingAvailability ? t('common.loading') : t('inbox.schedule.availability.check')}
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={insertStep1Message}
                         disabled={!availability?.suggestions?.length}
-                        className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-50"
+                        className="flex-1 min-w-[200px] py-4 bg-brand-600 premium-gradient text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-50"
                       >
                         {t('inbox.schedule.step1.insert')}
-                      </button>
+                      </motion.button>
                     </div>
 
-                    {availability?.suggestions?.length ? (
-                      <div className="rounded-lg border border-gray-200 bg-white p-4">
-                        <div className="text-sm font-medium text-gray-900 mb-2">{t('inbox.schedule.slots')}</div>
-                        <div className="space-y-2">
-                          {availability.suggestions.map((s) => (
-                            <label key={s.start} className="flex items-center gap-2 text-sm text-gray-700">
-                              <input
-                                type="radio"
-                                name="slot"
-                                value={s.start}
-                                checked={selectedSlotStart === s.start}
-                                onChange={(e) => setSelectedSlotStart(e.target.value)}
-                              />
-                              <span>{formatSlot(s.start)} → {formatSlot(s.end)}</span>
-                            </label>
-                          ))}
-                        </div>
-                        <div className="mt-3 flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={createEvent}
-                            disabled={!selectedSlotStart || isScheduling}
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
-                          >
-                            {isScheduling ? t('common.loading') : t('inbox.schedule.event.create')}
-                          </button>
-                        </div>
-                      </div>
-                    ) : null}
+                    <AnimatePresence>
+                      {availability?.suggestions?.length && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-[32px] border border-zinc-100 bg-zinc-50/50 p-8 space-y-6"
+                        >
+                          <div className="text-xs font-black text-zinc-400 uppercase tracking-widest flex items-center gap-3">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-glow-indigo" />
+                            {t('inbox.schedule.slots')}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {availability.suggestions.map((s) => (
+                              <label key={s.start} className={`group flex items-center gap-4 px-6 py-4 bg-white border rounded-[22px] cursor-pointer transition-all duration-300 ${
+                                selectedSlotStart === s.start ? 'border-blue-500 shadow-glow-indigo ring-1 ring-blue-500/20' : 'border-zinc-100 hover:border-zinc-200 shadow-premium-sm'
+                              }`}>
+                                <input
+                                  type="radio"
+                                  name="slot"
+                                  value={s.start}
+                                  checked={selectedSlotStart === s.start}
+                                  onChange={(e) => setSelectedSlotStart(e.target.value)}
+                                  className="h-5 w-5 text-blue-600 focus:ring-blue-500 transition-all border-zinc-200"
+                                />
+                                <div className="flex flex-col">
+                                  <span className={`text-[13px] font-black uppercase tracking-tight transition-colors ${selectedSlotStart === s.start ? 'text-blue-700' : 'text-zinc-600'}`}>
+                                    {formatSlot(s.start).split(',')[0]}
+                                  </span>
+                                  <span className="text-xs font-bold text-zinc-400">
+                                    {formatSlot(s.start).split(',')[1]}
+                                  </span>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                          <div className="pt-2">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="button"
+                              onClick={createEvent}
+                              disabled={!selectedSlotStart || isScheduling}
+                              className="w-full py-5 bg-emerald-600 premium-gradient text-white rounded-[24px] text-sm font-black uppercase tracking-widest shadow-glow-emerald disabled:opacity-50"
+                            >
+                              {isScheduling ? t('common.loading') : t('inbox.schedule.event.create')}
+                            </motion.button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
-                    {scheduledEvent?.id ? (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div className="text-sm font-medium text-gray-900 mb-2">{t('inbox.schedule.event.createdTitle')}</div>
-                        <div className="text-sm text-gray-700 space-y-1">
-                          <div>{scheduledEvent.summary || scheduleConfig.summary}</div>
-                          <div>{formatSlot(scheduledEvent.start)}</div>
-                          {scheduledEvent.htmlLink ? (
-                            <a href={scheduledEvent.htmlLink} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
-                              {t('inbox.schedule.event.openLink')}
-                            </a>
-                          ) : null}
-                        </div>
+                    {scheduledEvent?.id && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.98 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="rounded-[32px] border border-emerald-100 bg-emerald-50/30 p-8 relative overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full -mr-16 -mt-16 blur-xl" />
+                        <div className="relative z-10">
+                          <div className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-4 flex items-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald" />
+                            {t('inbox.schedule.event.createdTitle')}
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <div className="text-xl font-executive font-extrabold text-zinc-900 tracking-tight">{scheduledEvent.summary || scheduleConfig.summary}</div>
+                            <div className="text-[15px] font-bold text-zinc-500 italic">{formatSlot(scheduledEvent.start)}</div>
+                            {scheduledEvent.htmlLink && (
+                              <a href={scheduledEvent.htmlLink} target="_blank" rel="noreferrer" className="text-sm font-black uppercase tracking-widest text-blue-600 hover:text-blue-700 mt-2 transition-colors">
+                                {t('inbox.schedule.event.openLink')}
+                              </a>
+                            )}
+                          </div>
 
-                        <div className="mt-3 flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={insertStep2Message}
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-                          >
-                            {t('inbox.schedule.step2.insert')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={rescheduleEvent}
-                            disabled={!selectedSlotStart || isRescheduling}
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
-                          >
-                            {isRescheduling ? t('common.loading') : t('inbox.schedule.event.reschedule')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={cancelEvent}
-                            disabled={isCanceling}
-                            className="inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-                          >
-                            {isCanceling ? t('common.loading') : t('inbox.schedule.event.cancel')}
-                          </button>
+                          <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="button"
+                              onClick={insertStep2Message}
+                              className="flex-1 py-4 bg-brand-600 premium-gradient text-white rounded-[20px] text-[11px] font-black uppercase tracking-widest shadow-glow-emerald"
+                            >
+                              {t('inbox.schedule.step2.insert')}
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="button"
+                              onClick={rescheduleEvent}
+                              disabled={!selectedSlotStart || isRescheduling}
+                              className="flex-1 py-4 bg-zinc-900 text-white rounded-[20px] text-[11px] font-black uppercase tracking-widest shadow-xl disabled:opacity-50"
+                            >
+                              {isRescheduling ? t('common.loading') : t('inbox.schedule.event.reschedule')}
+                            </motion.button>
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="button"
+                              onClick={cancelEvent}
+                              disabled={isCanceling}
+                              className="flex-1 py-4 bg-white text-red-600 border border-red-100 rounded-[20px] text-[11px] font-black uppercase tracking-widest hover:bg-red-50 transition-all disabled:opacity-50"
+                            >
+                              {isCanceling ? t('common.loading') : t('inbox.schedule.event.cancel')}
+                            </motion.button>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
+                      </motion.div>
+                    )}
                   </div>
 
-                  <div className="mt-6 flex justify-end space-x-3">
+                  <div className="mt-12 flex justify-end relative z-10">
                     <button
                       type="button"
-                      className="inline-flex justify-center rounded-md border border-transparent bg-gray-100 px-4 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+                      className="px-8 py-4 bg-zinc-50 text-zinc-400 rounded-[20px] text-xs font-black uppercase tracking-widest hover:bg-zinc-100 transition-all border border-zinc-100"
                       onClick={() => setIsScheduleModalOpen(false)}
                     >
                       {t('common.action.cancel')}
