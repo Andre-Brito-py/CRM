@@ -153,7 +153,7 @@ const GmailIntegration = () => {
                     <div>
                       <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-2 text-center md:text-left">Privacy & Security</h3>
                       <p className="text-white/50 text-sm leading-relaxed font-medium mb-0 text-center md:text-left">
-                        We use Google's OAuth 2.0 protocol. Your password is never stored and data is encrypted end-to-end.
+                        We use Google&apos;s OAuth 2.0 protocol. Your password is never stored and data is encrypted end-to-end.
                       </p>
                     </div>
                   </div>
