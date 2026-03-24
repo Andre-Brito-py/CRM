@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslation } from "react-i18next";
 import { CheckIcon } from '@heroicons/react/24/solid';
@@ -8,14 +8,28 @@ import { formatCurrency, getDefaultCurrencyForLang } from '@/lib/common/currency
 const Pricing = ({ products, promo }) => {
   const { t, i18n } = useTranslation();
   const [isAnnual, setIsAnnual] = useState(true);
+  const [clientCurrency, setClientCurrency] = useState(null);
+
+  useEffect(() => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      if (tz.includes('America/Sao_Paulo') || tz.includes('America/Fortaleza') || tz.includes('America/Rio_Branco') || tz.includes('America/Manaus') || tz.includes('America/Campo_Grande') || tz.includes('America/Maceio') || tz.includes('America/Cuiaba') || tz.includes('America/Porto_Velho') || tz.includes('America/Boa_Vista') || tz.includes('America/Eirunepe') || tz.includes('America/Araguaina') || tz.includes('America/Bahia') || tz.includes('America/Recife') || tz.includes('America/Belem')) {
+        setClientCurrency('BRL');
+      } else if (tz.includes('Europe/London') || tz.includes('Europe/Belfast')) {
+        setClientCurrency('GBP');
+      } else if (tz.includes('Europe/')) {
+        setClientCurrency('EUR');
+      }
+    } catch(e) {}
+  }, []);
 
   const formattedProducts = useMemo(() => {
-    const targetCurrency = getDefaultCurrencyForLang(i18n.language);
+    const targetCurrency = clientCurrency || getDefaultCurrencyForLang(i18n.language);
 
     return (products || []).map(plan => {
       // Find the best price for this plan
       let selectedPrice = null;
-      if (plan.prices && plan.prices.length > 0) {
+      if (plan.currency !== targetCurrency && plan.prices && plan.prices.length > 0) {
         selectedPrice = plan.prices.find(p => p.currency === targetCurrency) ||
                         plan.prices.find(p => p.currency === 'USD') ||
                         plan.prices[0];
@@ -35,7 +49,7 @@ const Pricing = ({ products, promo }) => {
         displayPrice: formatCurrency(monthlyPrice, baseCurrency, i18n.language)
       };
     });
-  }, [products, isAnnual, i18n.language]);
+  }, [products, isAnnual, i18n.language, clientCurrency]);
 
   return (
     <section id="pricing" className="w-full py-40 bg-white relative overflow-hidden font-executive border-t border-zinc-100">
