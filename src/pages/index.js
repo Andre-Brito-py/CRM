@@ -53,7 +53,7 @@ const Home = ({ products, promo, hasFreePlan }) => {
   return (
     <LandingLayout>
       <Meta
-        title="Closify CRM - Omnichannel Sales & Customer Management"
+        title="Vysify CRM - Omnichannel Sales & Customer Management"
         description="The ultimate CRM platform to manage your leads, sales pipelines, and WhatsApp conversations in one place."
       />
       <Hero hasFreePlan={hasFreePlan} />

@@ -1,4 +1,4 @@
-# Closify CRM
+# Vysify CRM
 
 Um CRM omnichannel projetado para vender, atender e acompanhar clientes sem virar refém de planilha. 
 
@@ -12,7 +12,7 @@ Plataforma B2B multi-tenant com foco em operação comercial de alta performance
 - **Resolver uma Dor Real:** A meta é simples: simplificar o caos comercial de milhares de PMEs com uma experiência premium, rápida e sólida.
 
 ## Diferenciais Premium (Corporate Experience)
-A Closify foi totalmente redesenhada em **Março/2026** (Executive Lilac Rebranding) para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium.
+A Vysify foi totalmente redesenhada em **Março/2026** (Executive Lilac Rebranding) para oferecer uma experiência de ponta, unindo funcionalidade robusta com uma estética corporativa premium.
 
 - **Landing Page Cinematográfica (High-Conversion):** Interface imersiva projetada para converter leads com animações guiadas pelo mouse e *Pricing Dinâmico* gerido 100% via Super Admin (com suporte a descontos anuais).
 - **Inbox Omnichannel Unificado:** Centralize WhatsApp e E-mail em uma interface limpa. Gerencie conversas com resumos de Inteligência Artificial e sugestões automáticas de respostas em tempo real.
@@ -115,6 +115,12 @@ Para não perder a linha de evolução, aqui estão os saltos da plataforma cons
 - **Detecção Inteligente de Localidade:** A Landing Page e o fluxo de checkout detectam o idioma/local do visitante para exibir a moeda correta (ex: $ para gringos, R$ para brasileiros) e aplicar o faturamento localizado sem fricção.
 - **Catálogo de Produtos com Imagens:** Lojistas agora podem anexar imagens aos seus produtos (`PaymentProduct`), visualizando-as no dashboard e exibindo-as em destaque nas páginas públicas de pagamento para aumentar a conversão.
 - **IA Responsiva ao Idioma:** Todo o motor de IA (Resumos e Sugestões) foi blindado para detectar o idioma da conversa e responder nativamente na língua do usuário, garantindo um atendimento humano e global.
+
+### Rebranding "Vysify" & Correções de UI (Março 2026 - Sprint 3)
+- **Rebranding Total:** Transição completa do nome "Closify" para "Vysify" em todas as rotas da plataforma, incluindo textos legais (Termos de Uso e Privacidade).
+- **Nova Identidade Visual:** Substituição da logo por um novo símbolo 3D premium (um "V" dinâmico prateado/periwinkle). O componente React renderiza o texto dinamicamente ao lado do símbolo com suporte inteligente para fundo transparente.
+- **Mockups Corporativos:** Remoção de promessas de faturamento e marcas antigas das imagens de showcase da Landing Page para refletir uma pegada mais corporativa.
+- **Estabilidade UX:** Correção definitiva do fluxo de logout (botão "Sair") e a consistência da codificação de acentos (UTF-8) garantida por toda a aplicação.
 
 ---
 

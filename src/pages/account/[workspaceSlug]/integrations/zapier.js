@@ -56,7 +56,7 @@ const ZapierIntegration = () => {
 
   return (
     <AccountLayout>
-      <Meta title="Closify - Zapier Integration" />
+      <Meta title="Vysify - Zapier Integration" />
       <Content.Title
         title="Zapier Integration"
         subtitle="Automate your workflow with 5000+ apps"
@@ -66,7 +66,7 @@ const ZapierIntegration = () => {
         <Card>
           <Card.Body
             title="Zapier"
-            subtitle="Connect Closify to thousands of other apps with Zapier."
+            subtitle="Connect Vysify to thousands of other apps with Zapier."
           >
             <div className="flex items-center space-x-4 mb-6">
               <div className="bg-orange-500 p-3 rounded-full text-white">
@@ -93,7 +93,7 @@ const ZapierIntegration = () => {
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-green-700">
-                        Integration enabled. You can now use Closify triggers and actions in Zapier.
+                        Integration enabled. You can now use Vysify triggers and actions in Zapier.
                       </p>
                     </div>
                   </div>
@@ -121,7 +121,7 @@ const ZapierIntegration = () => {
                     </CopyToClipboard>
                   </div>
                   <p className="mt-2 text-xs text-gray-500">
-                    Use this key when asked to authenticate Closify in Zapier.
+                    Use this key when asked to authenticate Vysify in Zapier.
                   </p>
                 </div>
               </div>
@@ -130,7 +130,7 @@ const ZapierIntegration = () => {
             <div className="mt-6">
               <h4 className="text-sm font-medium text-gray-900">Popular Zaps</h4>
               <ul className="mt-2 list-disc list-inside text-sm text-gray-500 space-y-1">
-                <li>Create Closify contacts from Google Forms</li>
+                <li>Create Vysify contacts from Google Forms</li>
                 <li>Add new leads to Mailchimp</li>
                 <li>Send Slack notifications for new deals</li>
                 <li>Create Trello cards from tasks</li>

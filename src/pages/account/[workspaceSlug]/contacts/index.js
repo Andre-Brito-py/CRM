@@ -49,7 +49,7 @@ const Contacts = () => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="contacts-tour" steps={contactSteps} />
-      <Meta title={`Closify - ${workspace?.name} | Contacts`} />
+      <Meta title={`Vysify - ${workspace?.name} | Contacts`} />
       <Content.Title
         title={t('Contacts')}
         subtitle="Manage your leads and customers"

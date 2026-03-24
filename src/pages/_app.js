@@ -164,7 +164,7 @@ const App = ({ Component, pageProps }) => {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
-        const prefs = JSON.parse(localStorage.getItem('closify_cookie_prefs_v2') || '{}');
+        const prefs = JSON.parse(localStorage.getItem('vysify_cookie_prefs_v2') || '{}');
         setHasConsent(prefs.analytics === true);
       } catch (e) {
         setHasConsent(false);

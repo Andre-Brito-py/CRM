@@ -243,7 +243,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${contact.name}`} />
+      <Meta title={`Vysify - ${contact.name}`} />
       <Content.Title
         title={contact.name}
         subtitle={contact.jobTitle || t('contacts.noJobTitle')}

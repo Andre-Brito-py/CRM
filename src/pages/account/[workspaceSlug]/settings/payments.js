@@ -74,7 +74,7 @@ const PaymentsSettings = ({ isTeamOwner, workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${workspace.name} | Pagamentos`} />
+      <Meta title={`Vysify - ${workspace.name} | Pagamentos`} />
       <Content.Title
         title="Pagamentos"
         subtitle="Cadastre sua conta recebedora para receber repasses corretamente"

@@ -940,9 +940,9 @@ const executeCallWebhookAction = async (workspaceId, eventType, actionConfig, ev
         method: 'POST',
         headers: {
           'content-type': 'application/json',
-          'x-closify-event': payload.event,
-          'x-closify-timestamp': timestamp,
-          'x-closify-signature': `sha256=${signature}`,
+          'x-vysify-event': payload.event,
+          'x-vysify-timestamp': timestamp,
+          'x-vysify-signature': `sha256=${signature}`,
         },
         body: rawBody,
         signal: controller.signal,

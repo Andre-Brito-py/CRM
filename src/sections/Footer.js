@@ -51,7 +51,7 @@ const Footer = () => {
       </div>
 
       <div className="max-w-[1400px] mx-auto px-8 mt-24 pt-12 border-t border-zinc-100 flex flex-col md:flex-row items-center justify-between gap-6">
-         <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">© 2026 Closify. Built for scale.</p>
+         <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">© 2026 Vysify. Built for scale.</p>
          <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Sistemas operacionais</span>

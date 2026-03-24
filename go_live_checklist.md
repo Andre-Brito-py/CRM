@@ -1,4 +1,4 @@
-# Go-Live Checklist - Closify
+# Go-Live Checklist - Vysify
 
 Preparar o lançamento de um projeto SaaS exige atenção a detalhes críticos de segurança, performance e experiência do usuário. Aqui está seu checklist personalizado:
 
@@ -7,13 +7,13 @@ Preparar o lançamento de um projeto SaaS exige atenção a detalhes críticos d
 > Certifique-se de que todas as variáveis `process.env` estão configuradas no seu provedor de hospedagem (ex: Vercel).
 
 - [ ] **DATABASE_URL**: Apontando para o banco de produção (evite usar o mesmo de dev).
-- [ ] **NEXTAUTH_URL**: Deve ser o seu domínio oficial (ex: `https://app.closify.com.br`).
+- [ ] **NEXTAUTH_URL**: Deve ser o seu domínio oficial (ex: `https://app.vysify.com.br`).
 - [ ] **NEXTAUTH_SECRET**: Uma chave forte e secreta.
 - [ ] **APP_URL**: Definida corretamente para que links em e-mails e webhooks funcionem.
 
 ## 2. E-mails e Comunicação
 - [ ] **Provedor SMTP Real**: Substitua as configurações de log/teste por um serviço como SendGrid, Postmark ou Amazon SES.
-- [ ] **EMAIL_FROM**: Use um e-mail do seu domínio (ex: `suporte@closify.com.br`).
+- [ ] **EMAIL_FROM**: Use um e-mail do seu domínio (ex: `suporte@vysify.com.br`).
 - [ ] **SPF/DKIM/DMARC**: Configure os registros DNS do seu domínio para garantir que os e-mails não caiam no spam.
 
 ## 3. Pagamentos e Assinaturas (Stripe)
@@ -32,4 +32,4 @@ Preparar o lançamento de um projeto SaaS exige atenção a detalhes críticos d
 - [ ] **Monitoramento de Erros**: Considere instalar o **Sentry** para capturar erros em tempo real que os usuários possam encontrar.
 
 ---
-🚀 **Boa sorte com o lançamento!** O Closify está pronto para brilhar.
+🚀 **Boa sorte com o lançamento!** O Vysify está pronto para brilhar.

@@ -176,7 +176,7 @@ const createEmailProvider = () =>
       if (!existingUser) return;
       await sendMail({
         html: html({ email, url, from: emailFrom }),
-        subject: `[Closify] Sign in to ${host}`,
+        subject: `[Vysify] Sign in to ${host}`,
         text: text({ email, url, from: emailFrom }),
         to: email,
       });

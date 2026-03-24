@@ -1,4 +1,4 @@
-# 📋 Relatório Completo de Features — Closify CRM
+# 📋 Relatório Completo de Features — Vysify CRM
 
 > Análise detalhada de todas as funcionalidades da plataforma, explicando o que faz, como funciona e por que é relevante para seus clientes.
 
@@ -201,7 +201,7 @@ Medir satisfação é **essencial para retenção**. Clientes detratores podem s
 
 ### 11.5 Zapier
 **Localização:** [zapier.js](file:///c:/Users/Usuário/Documents/novo/nextacular/src/pages/account/[workspaceSlug]/integrations/zapier.js)
-- Integração nativa para conectar Closify com +5.000 apps (Google Sheets, Slack, Mailchimp, etc.)
+- Integração nativa para conectar Vysify com +5.000 apps (Google Sheets, Slack, Mailchimp, etc.)
 - **Relevância:** PMEs podem criar workflows entre ferramentas sem código
 
 ### 11.6 Webhooks (Avançado)
@@ -278,7 +278,7 @@ Resolve o **maior problema de CRMs genéricos: o setup inicial**. Em vez de gast
 - **Painel de pagamentos** — Status de cada cobrança (pago, pendente, atrasado)
 
 ### Por que é relevante:
-Transforma o Closify em uma **ferramenta all-in-one** — o cliente não precisa de outra plataforma para cobrar. A fee automática cria uma **fonte de receita variável** para o SaaS (quanto mais o cliente vende, mais a plataforma ganha).
+Transforma o Vysify em uma **ferramenta all-in-one** — o cliente não precisa de outra plataforma para cobrar. A fee automática cria uma **fonte de receita variável** para o SaaS (quanto mais o cliente vende, mais a plataforma ganha).
 
 ---
 
@@ -450,4 +450,4 @@ O primeiro uso é decisivo para retenção. Um tour bem feito garante que o clie
 | **Plataforma** | Super Admin, Multi-tenant, LGPD, Security | Operação SaaS robusta |
 | **Experiência** | Demo, Landing Page, PWA, i18n, Onboarding | Conversão e retenção |
 
-> **A Closify não é apenas um CRM — é uma plataforma comercial completa que permite que PMEs vendam, atendam e acompanhem clientes sem depender de planilhas, múltiplas ferramentas ou desenvolvedores.**
+> **A Vysify não é apenas um CRM — é uma plataforma comercial completa que permite que PMEs vendam, atendam e acompanhem clientes sem depender de planilhas, múltiplas ferramentas ou desenvolvedores.**

@@ -36,8 +36,8 @@ module.exports = withSentryConfig(
   moduleExports,
   {
     silent: true,
-    org: process.env.SENTRY_ORG || "closify",
-    project: process.env.SENTRY_PROJECT || "closify",
+    org: process.env.SENTRY_ORG || "vysify",
+    project: process.env.SENTRY_PROJECT || "vysify",
   },
   {
     widenClientFileUpload: true,

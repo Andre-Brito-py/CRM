@@ -32,12 +32,12 @@ const SmartTransparentImage = ({ src, alt, width, className = '', tolerance = 40
                 const g = data[i + 1];
                 const b = data[i + 2];
 
-                // Remove near-white pixels: if all channels are high, make transparent
+                // Remove near-white pixels completely
                 const minChannel = Math.min(r, g, b);
-                if (minChannel > 255 - tolerance) {
-                    // Fade out near-white pixels gradually
-                    const factor = (minChannel - (255 - tolerance)) / tolerance;
-                    data[i + 3] = Math.round(data[i + 3] * (1 - factor));
+                // The main logo color is periwinkle (minChannel ~ 132). 
+                // Any pixel with minChannel > 180 is likely background/anti-aliasing of the background.
+                if (minChannel > (255 - tolerance)) {
+                    data[i + 3] = 0; // Make fully transparent
                 }
             }
 

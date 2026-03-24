@@ -124,7 +124,7 @@ const CustomFields = ({ workspace }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="custom-fields-tour" steps={customFieldsSteps} />
-      <Meta title={`Closify - ${workspace.name} | Custom Fields`} />
+      <Meta title={`Vysify - ${workspace.name} | Custom Fields`} />
       
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -170,7 +170,7 @@ const CustomFields = ({ workspace }) => {
                       <Bars2Icon className="w-10 h-10 text-zinc-300" />
                     </div>
                     <h3 className="text-xl font-executive font-bold text-zinc-900 mb-2">No custom fields yet</h3>
-                    <p className="text-zinc-400 max-w-sm font-executive">Create your first custom property to start tailoring Closify to your business needs.</p>
+                    <p className="text-zinc-400 max-w-sm font-executive">Create your first custom property to start tailoring Vysify to your business needs.</p>
                   </div>
                 ) : (
                   fields.map((field, index) => (

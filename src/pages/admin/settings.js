@@ -451,7 +451,7 @@ const AdminSettings = () => {
 
   return (
     <AdminLayout>
-      <Meta title="Closify - Admin Settings" />
+      <Meta title="Vysify - Admin Settings" />
       <Content.Title
         title="Configurações de API"
         subtitle="Chaves e integrações em runtime (sem re-deploy)"

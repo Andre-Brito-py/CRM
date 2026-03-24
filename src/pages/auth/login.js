@@ -155,7 +155,7 @@ const Login = ({ hasFreePlan }) => {
 
   return (
     <div className="flex min-h-screen w-full bg-white">
-      <Meta title="Closify | Login" description="Sign in to your account." />
+      <Meta title="Vysify | Login" description="Sign in to your account." />
       <Toaster position="bottom-center" toastOptions={{ duration: 10000 }} />
 
       {/* Left side: branding/image style with modern gradients and mockup preview */}
@@ -168,7 +168,7 @@ const Login = ({ hasFreePlan }) => {
           <div className="mb-12">
             <Link href="/" className="inline-flex items-center gap-2 group">
               <span className="text-2xl font-black tracking-tight text-white group-hover:opacity-80 transition-opacity">
-                Clos<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ify</span>
+                Vys<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ify</span>
               </span>
             </Link>
           </div>
@@ -190,7 +190,7 @@ const Login = ({ hasFreePlan }) => {
         </div>
 
         <div className="relative z-10 flex justify-between items-center text-sm text-gray-500 mt-8">
-          <p>© 2026 Closify CRM. All rights reserved.</p>
+          <p>© 2026 Vysify CRM. All rights reserved.</p>
           <div className="flex space-x-6">
             <Link href="/terms" className="hover:text-white transition-colors">Termos</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">Privacidade</Link>
@@ -204,14 +204,14 @@ const Login = ({ hasFreePlan }) => {
         {/* Subtle top-right logo — desktop only */}
         <div className="absolute top-6 right-8 hidden lg:block">
           <Link href="/">
-            <img src="/images/logo-full.png" alt="Closify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
+            <img src="/images/logo-full.png" alt="Vysify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
           </Link>
         </div>
 
         <div className="w-full max-w-md space-y-8 animate-in fade-in slide-in-from-right-4 duration-700">
           <div className="lg:hidden mb-12 text-center">
             <Link href="/">
-              <img src="/images/logo-full.png" alt="Closify Logo" className="h-8 w-auto mx-auto mb-4 cursor-pointer" />
+              <img src="/images/logo-full.png" alt="Vysify Logo" className="h-8 w-auto mx-auto mb-4 cursor-pointer" />
             </Link>
           </div>
 
@@ -274,7 +274,7 @@ const Login = ({ hasFreePlan }) => {
                   disabled={status === 'loading' || !isEmailValid || !password || isSubmitting}
                   type="submit"
                 >
-                  {isSubmitting ? 'Iniciando sessão...' : 'Entrar no Closify'}
+                  {isSubmitting ? 'Iniciando sessão...' : 'Entrar no Vysify'}
                 </Button>
               </form>
 

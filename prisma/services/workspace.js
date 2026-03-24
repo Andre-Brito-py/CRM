@@ -41,7 +41,7 @@ export const createWorkspace = async (creatorId, email, name, slug) => {
   });
   await sendMail({
     html: createHtml({ code: workspace.inviteCode, name }),
-    subject: `[Closify] Workspace created: ${name}`,
+    subject: `[Vysify] Workspace created: ${name}`,
     text: createText({ code: workspace.inviteCode, name }),
     to: email,
   });

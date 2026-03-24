@@ -10,13 +10,13 @@ const Testimonial = () => {
     {
       name: "Alexandre Silva",
       role: "Diretor Comercial na TechFlow",
-      content: "O Closify mudou completamente a forma como gerimos nossos leads de WhatsApp. A automação é impecável e a interface é extremamente profissional.",
+      content: "O Vysify mudou completamente a forma como gerimos nossos leads de WhatsApp. A automação é impecável e a interface é extremamente profissional.",
       image: "https://i.pravatar.cc/150?u=alex"
     },
     {
       name: "Beatriz Santos",
       role: "CEO na InnovaSales",
-      content: "A transição das planilhas para o Closify foi o melhor investimento que fizemos este ano. A visibilidade do pipeline é um divisor de águas.",
+      content: "A transição das planilhas para o Vysify foi o melhor investimento que fizemos este ano. A visibilidade do pipeline é um divisor de águas.",
       image: "https://i.pravatar.cc/150?u=bea"
     },
     {

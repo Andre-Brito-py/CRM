@@ -13,7 +13,7 @@ const FAQ = () => {
 
   const faqs = [
     {
-      question: "O Closify integra com quais plataformas?",
+      question: "O Vysify integra com quais plataformas?",
       answer: "Integramos nativamente com WhatsApp, E-mail (Gmail/Outlook) e via Webhooks com milhares de outras ferramentas através de parceiros como Zapier."
     },
     {
@@ -26,7 +26,7 @@ const FAQ = () => {
     },
     {
        question: "Posso adicionar campos personalizados (Custom Fields)?",
-       answer: "Sim! O Closify adapta-se ao seu nicho. Crie campos de texto, números, arquivos, links ou múltiplas opções para armazenar informações exatas que o seu negócio exige."
+       answer: "Sim! O Vysify adapta-se ao seu nicho. Crie campos de texto, números, arquivos, links ou múltiplas opções para armazenar informações exatas que o seu negócio exige."
     },
     {
        question: "Meus dados estão seguros?",
@@ -34,7 +34,7 @@ const FAQ = () => {
     },
     {
        question: "Posso gerenciar múltiplos times?",
-       answer: "Sim, o Closify permite criar diferentes espaços de trabalho (workspaces) e gerenciar permissões específicas para cada membro da sua equipe."
+       answer: "Sim, o Vysify permite criar diferentes espaços de trabalho (workspaces) e gerenciar permissões específicas para cada membro da sua equipe."
     }
   ];
 

@@ -3,36 +3,34 @@ import Link from 'next/link';
 
 const Logo = ({ variant = 'full', className = '', href = '/account', forceLight = false }) => {
     const isFull = variant === 'full';
-    const src = isFull ? '/images/logo-full.png' : '/images/logo-symbol.png';
-    const alt = 'Closify Logo';
+    const alt = 'Vysify Logo';
 
-    const width = isFull ? 160 : 40;
+    const width = 40;
 
     const content = (
-        <div className={`flex items-center ${className}`}>
+        <div className={`flex items-center gap-2.5 ${className}`}>
             <div className="relative logo-container transition-all duration-300">
                 <SmartTransparentImage
-                    src={src}
+                    src="/images/logo-symbol.png"
                     alt={alt}
                     width={width}
                     className="logo-canvas"
-                    tolerance={40}
+                    tolerance={100}
                 />
             </div>
+            {isFull && (
+                <span className={`text-[26px] font-black tracking-tighter ${forceLight ? 'text-white' : 'text-[#4A4B75]'} logo-text`}>
+                    Vysify
+                </span>
+            )}
             <style jsx>{`
                 .logo-canvas {
-                    filter: brightness(0.1); /* Near-black for light backgrounds */
+                    filter: saturate(1.2);
                 }
                 
-                :global(aside) .logo-canvas {
-                    filter: brightness(0) invert(1) !important; /* Crisp white for dark sidebar */
+                :global(aside) .logo-text {
+                    color: white !important;
                 }
-
-                ${forceLight ? `
-                    .logo-canvas {
-                        filter: brightness(0) invert(1) !important;
-                    }
-                ` : ''}
             `}</style>
         </div>
     );

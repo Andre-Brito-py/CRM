@@ -16,7 +16,7 @@ export const formatCurrency = (amount, currencyCode = 'BRL', locale = null) => {
     return new Intl.NumberFormat(currentLocale, {
       style: 'currency',
       currency: currency,
-      maximumFractionDigits: 0, // Closify geralmente usa valores arredondados nos planos
+      maximumFractionDigits: 0, // Vysify geralmente usa valores arredondados nos planos
     }).format(amount || 0);
   } catch (error) {
     // Fallback básico caso o Intl falhe ou o código da moeda seja inválido

@@ -107,7 +107,7 @@ const Domain = ({ isTeamOwner, workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${workspace.name} | Domains`} />
+      <Meta title={`Vysify - ${workspace.name} | Domains`} />
       <Content.Title
         title={t("settings.domain.subdomain.management")}
         subtitle={t("settings.domain.subdomain.management.description")}

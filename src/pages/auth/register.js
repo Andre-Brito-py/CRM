@@ -189,7 +189,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
 
     return (
         <div className="flex flex-col lg:flex-row min-h-screen bg-white overflow-hidden">
-            <Meta title="Closify - Register" description="Create a new account on Closify." />
+            <Meta title="Vysify - Register" description="Create a new account on Vysify." />
             <Toaster position="bottom-center" />
 
             {isRedirecting && (
@@ -197,7 +197,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                     <div className="relative mb-8">
                         <div className="h-24 w-24 rounded-full border-4 border-emerald-100 border-t-emerald-600 animate-spin" />
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <img src="/images/logo-symbol.png" alt="Closify" className="h-10 w-auto" />
+                            <img src="/images/logo-symbol.png" alt="Vysify" className="h-10 w-auto" />
                         </div>
                     </div>
                     <h2 className="text-2xl font-black text-gray-900 mb-2">Quase lá!</h2>
@@ -212,13 +212,13 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                 <div className="relative z-10">
                     <Link href="/" className="inline-flex items-center gap-2 group">
                         <span className="text-2xl font-black tracking-tight text-white group-hover:opacity-80 transition-opacity mb-16 inline-block">
-                            Clos<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">ify</span>
+                            Vys<span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">ify</span>
                         </span>
                     </Link>
 
                     <div className="space-y-8">
                         <h2 className="text-5xl font-extrabold text-white leading-tight">
-                            Comece sua jornada <br /> com o <span className="text-emerald-400">Closify CRM</span>
+                            Comece sua jornada <br /> com o <span className="text-emerald-400">Vysify CRM</span>
                         </h2>
                         <ul className="space-y-5">
                             {[
@@ -242,7 +242,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
 
                 <div className="relative z-10">
                     <div className="p-6 bg-white/5 backdrop-blur-sm rounded-2xl border border-white/5">
-                        <p className="text-gray-400 italic mb-4">&quot;O Closify mudou a forma como encaramos nosso pipeline. A agilidade que ganhamos no dia a dia é impressionante.&quot;</p>
+                        <p className="text-gray-400 italic mb-4">&quot;O Vysify mudou a forma como encaramos nosso pipeline. A agilidade que ganhamos no dia a dia é impressionante.&quot;</p>
                         <div className="flex items-center">
                             <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-400 to-brand-500 mr-3" />
                             <div>
@@ -259,13 +259,13 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                 {/* Subtle top-right logo — desktop only */}
                 <div className="absolute top-6 right-8 hidden lg:block">
                     <Link href="/">
-                        <img src="/images/logo-full.png" alt="Closify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
+                        <img src="/images/logo-full.png" alt="Vysify" className="h-7 w-auto opacity-50 hover:opacity-90 transition-opacity duration-300 cursor-pointer" />
                     </Link>
                 </div>
 
                 <div className="w-full max-w-xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="lg:hidden text-center mb-8">
-                        <img src="/images/logo-full.png" alt="Closify Logo" className="h-8 w-auto mx-auto mb-4" />
+                        <img src="/images/logo-full.png" alt="Vysify Logo" className="h-8 w-auto mx-auto mb-4" />
                     </div>
 
                     <div className="text-left">

@@ -156,7 +156,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${workspace.name} | Produtos`} />
+      <Meta title={`Vysify - ${workspace.name} | Produtos`} />
       <Content.Title title="Produtos" subtitle="Crie links fixos para cobrar clientes via WhatsApp" />
       <Content.Divider />
       <Content.Container>

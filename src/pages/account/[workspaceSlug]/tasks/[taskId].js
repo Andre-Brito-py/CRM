@@ -120,7 +120,7 @@ const TaskDetail = () => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${workspace?.name} | ${data.task.title}`} />
+      <Meta title={`Vysify - ${workspace?.name} | ${data.task.title}`} />
       <Content.Title
         title="Task Details"
         subtitle="View and update task information"

@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
       const payload = JSON.stringify({
         title: title || 'Test Notification',
-        body: body || 'This is a test notification from Closify.',
+        body: body || 'This is a test notification from Vysify.',
         url: url || '/',
       });
 

@@ -165,7 +165,7 @@ const GmailIntegration = () => {
                 <h3 className="text-xl font-executive font-extrabold text-zinc-900 tracking-tighter mb-6">Quick Guide</h3>
                 <div className="space-y-6">
                   {[
-                    { step: '01', title: 'Sign in', desc: 'Authorize Closify to access your corporate Gmail inbox.' },
+                    { step: '01', title: 'Sign in', desc: 'Authorize Vysify to access your corporate Gmail inbox.' },
                     { step: '02', title: 'Configure', desc: 'Select which labels or folders you want to synchronize.' },
                     { step: '03', title: 'Enjoy', desc: 'Your email history will start appearing in contact profiles.' },
                   ].map((item, i) => (

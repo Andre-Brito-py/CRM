@@ -186,7 +186,7 @@ const Billing = ({ invoices, products }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="billing-tour" steps={billingSteps} />
-      <Meta title="Closify - Billing" />
+      <Meta title="Vysify - Billing" />
       <Content.Title
         title="Billing & Subscription"
         subtitle="Manage your professional plan and invoicing"
@@ -202,7 +202,7 @@ const Billing = ({ invoices, products }) => {
             >
               <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
                 <p className="text-sm">
-                  Professional and Enterprise accounts unlock the full power of Closify.
+                  Professional and Enterprise accounts unlock the full power of Vysify.
                   Manage unlimited contacts, advanced pipelines, and team collaboration
                   with our executive suite.
                 </p>
@@ -449,7 +449,7 @@ const Billing = ({ invoices, products }) => {
           </Content.Container>
         ) : (
           <Content.Empty>
-            Once you&apos;ve paid for something on Closify, invoices will show
+            Once you&apos;ve paid for something on Vysify, invoices will show
             up here
           </Content.Empty>
         )}

@@ -342,7 +342,7 @@ const WhatsAppSettings = () => {
                 </div>
                 <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-4">Connection Guide</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-                  Connect your business numbers via Meta&apos;s Cloud API to start receiving messages directly in Closify.
+                  Connect your business numbers via Meta&apos;s Cloud API to start receiving messages directly in Vysify.
                 </p>
                 <ul className="space-y-4">
                   {[

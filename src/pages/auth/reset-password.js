@@ -66,14 +66,14 @@ const ResetPassword = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-6">
-            <Meta title="Closify | Redefinir senha" description="Redefina a senha da sua conta." />
+            <Meta title="Vysify | Redefinir senha" description="Redefina a senha da sua conta." />
             <Toaster position="bottom-center" toastOptions={{ duration: 10000 }} />
 
             <div className="w-full max-w-md bg-white border border-gray-100 shadow-sm rounded-2xl p-8">
                 <div className="mb-8">
                     <Link href="/" className="inline-flex items-center gap-2">
                         <span className="text-xl font-black tracking-tight text-gray-900">
-                            Clos<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">ify</span>
+                            Vys<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-500">ify</span>
                         </span>
                     </Link>
                     <h1 className="mt-6 text-2xl font-extrabold text-gray-900 tracking-tight">Redefinir senha</h1>

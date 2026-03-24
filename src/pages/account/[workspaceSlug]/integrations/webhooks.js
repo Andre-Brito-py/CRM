@@ -112,7 +112,7 @@ const Webhooks = () => {
             <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
               <div className="font-semibold">Zapier</div>
               <div className="mt-1 text-indigo-800">
-                Use um <span className="font-mono">Catch Hook</span> do Zapier para receber eventos do Closify e conectar com apps externos.
+                Use um <span className="font-mono">Catch Hook</span> do Zapier para receber eventos do Vysify e conectar com apps externos.
               </div>
               <div className="mt-3">
                 <Button

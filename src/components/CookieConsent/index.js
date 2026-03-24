@@ -12,7 +12,7 @@ const CookieConsent = ({ onAccept }) => {
   });
 
   useEffect(() => {
-    const consent = localStorage.getItem('closify_cookie_prefs_v2');
+    const consent = localStorage.getItem('vysify_cookie_prefs_v2');
     if (!consent) {
       setIsVisible(true);
     } else {
@@ -25,7 +25,7 @@ const CookieConsent = ({ onAccept }) => {
   }, []);
 
   const savePreferences = (newPrefs) => {
-    localStorage.setItem('closify_cookie_prefs_v2', JSON.stringify(newPrefs));
+    localStorage.setItem('vysify_cookie_prefs_v2', JSON.stringify(newPrefs));
     if (newPrefs.analytics && onAccept) {
       onAccept();
     }
@@ -64,7 +64,7 @@ const CookieConsent = ({ onAccept }) => {
                 <span className="font-executive font-black text-white text-[10px] uppercase tracking-[0.2em]">Sua Privacidade, Suas Regras</span>
               </div>
               <p className="font-executive">
-                O Closify utiliza cookies para otimizar sua experiência. Você pode aceitar todos os cookies, recusar os não essenciais ou configurar suas preferências agora. 
+                O Vysify utiliza cookies para otimizar sua experiência. Você pode aceitar todos os cookies, recusar os não essenciais ou configurar suas preferências agora. 
                 Saiba mais em nossa{' '}
                 <Link href="/privacy" className="text-brand-400 font-bold hover:text-brand-300 underline underline-offset-4 decoration-brand-500/30">
                   Política de Privacidade

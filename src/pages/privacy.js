@@ -3,7 +3,7 @@ import { LandingLayout } from '@/layouts/index';
 import { Footer } from '@/sections/index';
 
 const PrivacyPolicy = () => {
-  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Closify CRM';
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Vysify CRM';
   const privacyEmail =
     process.env.NEXT_PUBLIC_PRIVACY_EMAIL ||
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
@@ -14,8 +14,8 @@ const PrivacyPolicy = () => {
   return (
     <LandingLayout>
       <Meta
-        title="Política de Privacidade - Closify CRM"
-        description="Política de Privacidade da plataforma Closify CRM."
+        title="Política de Privacidade - Vysify CRM"
+        description="Política de Privacidade da plataforma Vysify CRM."
       />
       <main className="max-w-4xl mx-auto px-6 py-20 text-gray-800">
         <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>
@@ -143,7 +143,7 @@ const PrivacyPolicy = () => {
                 <tr>
                   <td className="p-3 border border-gray-200 font-medium">Admin/Suporte (quando aplicável)</td>
                   <td className="p-3 border border-gray-200">
-                    <code>closify_impersonation</code>, <code>closify_impersonating</code>
+                    <code>vysify_impersonation</code>, <code>vysify_impersonating</code>
                   </td>
                   <td className="p-3 border border-gray-200">
                     Suportar rotinas de suporte/masquerade do Super Admin com trilha de auditoria.

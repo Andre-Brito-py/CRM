@@ -127,7 +127,7 @@ const Topbar = ({ menu, staticMenu }) => {
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const cookie = document.cookie || '';
-    setIsImpersonating(cookie.includes('closify_impersonating=1'));
+    setIsImpersonating(cookie.includes('vysify_impersonating=1'));
   }, []);
 
   // Sync workspace from URL slug if not set
@@ -142,10 +142,8 @@ const Topbar = ({ menu, staticMenu }) => {
     }
   }, [router.query.workspaceSlug, workspacesData, workspace, setWorkspace]);
 
-  const logOut = () => {
-    if (confirm('Are you sure you want to logout?')) {
-      signOut({ callbackUrl: '/' });
-    }
+  const logOut = async () => {
+    await signOut({ callbackUrl: '/' });
   };
 
   const toggleTheme = (e) => {

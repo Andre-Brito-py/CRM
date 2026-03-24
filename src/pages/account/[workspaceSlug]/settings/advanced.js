@@ -70,7 +70,7 @@ const Advanced = ({ isCreator, workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${currentWorkspace?.name} | Advanced Settings`} />
+      <Meta title={`Vysify - ${currentWorkspace?.name} | Advanced Settings`} />
       <Content.Title
         title={t("settings.workspace.advanced")}
         subtitle={t("settings.workspace.manage.label")}

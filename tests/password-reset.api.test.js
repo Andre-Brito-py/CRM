@@ -61,7 +61,7 @@ describe('Password reset endpoints', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     rateLimit.mockResolvedValue({ ok: true });
-    getSystemConfig.mockResolvedValue('https://app.closify.com');
+    getSystemConfig.mockResolvedValue('https://app.vysify.com');
   });
 
   test('forgot-password returns generic ok and sends email for credential user', async () => {

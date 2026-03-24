@@ -86,8 +86,8 @@ const DemoPage = ({ plan, hasFreePlan }) => {
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex flex-col font-executive antialiased">
       <Head>
-        <title>Closify | Interactive Demo</title>
-        <meta name="description" content="Experience the future of CRM with Closify's premium interface." />
+        <title>Vysify | Interactive Demo</title>
+        <meta name="description" content="Experience the future of CRM with Vysify's premium interface." />
       </Head>
 
       {/* Modern Premium Header */}
@@ -297,7 +297,7 @@ const DemoPage = ({ plan, hasFreePlan }) => {
               <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,rgba(20,184,166,0.1),transparent)] animate-spin-slow" />
               <div className="relative z-10 text-center md:text-left flex-1">
                 <p className="text-2xl font-black tracking-tight leading-tight mb-2">{t('demo.readyForUpgrade', 'Pronto para o upgrade?')}</p>
-                <p className="text-zinc-400 text-sm font-medium">{t('demo.deployInstance', 'Implemente sua própria instância do Closify em menos de 2 minutos e escale com precisão.')}</p>
+                <p className="text-zinc-400 text-sm font-medium">{t('demo.deployInstance', 'Implemente sua própria instância do Vysify em menos de 2 minutos e escale com precisão.')}</p>
               </div>
               <Link
                 href="/auth/register"

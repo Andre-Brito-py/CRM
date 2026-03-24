@@ -121,7 +121,7 @@ const General = ({ isTeamOwner, workspace }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="settings-tour" steps={settingsSteps} />
-      <Meta title={`Closify - ${workspace.name} | Settings`} />
+      <Meta title={`Vysify - ${workspace.name} | Settings`} />
       <div id="settings-general-content">
         <Content.Title
           title={t("settings.workspace.information")}
@@ -207,7 +207,7 @@ const General = ({ isTeamOwner, workspace }) => {
           <Card>
             <Card.Body
               title="AI Business Context"
-              subtitle="Describe your company, products, and sales style to help Closify AI suggest better replies and insights."
+              subtitle="Describe your company, products, and sales style to help Vysify AI suggest better replies and insights."
             >
               <textarea
                 className="px-3 py-2 border rounded w-full h-32 resize-none text-sm"

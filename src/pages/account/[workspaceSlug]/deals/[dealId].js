@@ -343,7 +343,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="deal-details-tour" steps={dealSteps} />
-      <Meta title={`${deal.name} | Closify`} />
+      <Meta title={`${deal.name} | Vysify`} />
       <Content>
         <Content.Title
           title={deal.name}

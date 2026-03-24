@@ -1,6 +1,6 @@
-# Guia de Configuração de Chaves de API (Closify)
+# Guia de Configuração de Chaves de API (Vysify)
 
-Para o Closify funcionar 100%, você precisará configurar as seguintes chaves. A maioria pode ser configurada diretamente pelo **Painel Super Admin**, mas algumas são fundamentais para o "bootcamp" do sistema e devem ir no arquivo [.env](file:///c:/Users/Usu%C3%A1rio/Documents/novo/nextacular/.env).
+Para o Vysify funcionar 100%, você precisará configurar as seguintes chaves. A maioria pode ser configurada diretamente pelo **Painel Super Admin**, mas algumas são fundamentais para o "bootcamp" do sistema e devem ir no arquivo [.env](file:///c:/Users/Usu%C3%A1rio/Documents/novo/nextacular/.env).
 
 ## 1. Configuração Obrigatória (Direto no Código / .env)
 Estas chaves são essenciais para o servidor iniciar e para o banco de dados funcionar. **Não podem ser configuradas pelo painel.**
@@ -18,7 +18,7 @@ Estas chaves são essenciais para o servidor iniciar e para o banco de dados fun
 Estas chaves podem ser salvas e alteradas em tempo real através da interface administrativa.
 
 ### 🛡️ Pagamentos e Assinaturas (Stripe)
-Necessário para cobrar as assinaturas dos seus clientes do Closify.
+Necessário para cobrar as assinaturas dos seus clientes do Vysify.
 *   **Stripe Secret Key (`PAYMENTS_SECRET_KEY`)**: [Stripe Dashboard > API Keys](https://dashboard.stripe.com/apikeys)
 *   **Stripe Webhook Secret (`STRIPE_WEBHOOK_SECRET`)**: No Stripe, crie um webhook apontando para `https://seu-dominio.com/api/webhooks/stripe`. O secret será gerado lá.
 

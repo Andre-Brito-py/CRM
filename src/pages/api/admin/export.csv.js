@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
   const delimiter = parseDelimiter(req);
   const today = new Date().toISOString().split('T')[0];
-  const filename = `closify-admin-export-${today}.csv`;
+  const filename = `vysify-admin-export-${today}.csv`;
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
@@ -49,7 +49,7 @@ export default async function handler(req, res) {
   res.write('\ufeff');
 
   const exportedAt = new Date().toISOString();
-  csvWriteRow(res, ['Closify Admin Export', exportedAt, session.user.email || ''], delimiter);
+  csvWriteRow(res, ['Vysify Admin Export', exportedAt, session.user.email || ''], delimiter);
   csvWriteRow(res, [], delimiter);
 
   const workspaces = await prisma.workspace.findMany({

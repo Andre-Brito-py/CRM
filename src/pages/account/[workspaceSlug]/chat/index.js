@@ -249,8 +249,8 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
 
   return (
     <AccountLayout>
-      <Meta title={`Closify - ${workspace.name} | Chat`} />
-      <Content.Title title="Chat Interno" subtitle="Converse com a equipe sem sair do Closify" />
+      <Meta title={`Vysify - ${workspace.name} | Chat`} />
+      <Content.Title title="Chat Interno" subtitle="Converse com a equipe sem sair do Vysify" />
       <Content.Divider />
       <Content.Container>
         <Card>

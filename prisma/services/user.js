@@ -44,7 +44,7 @@ export const updateEmail = async (id, email, previousEmail) => {
   });
   await sendMail({
     html: html({ email }),
-    subject: `[Closify] Email address updated`,
+    subject: `[Vysify] Email address updated`,
     text: text({ email }),
     to: [email, previousEmail],
   });

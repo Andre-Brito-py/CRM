@@ -401,7 +401,7 @@ const TUTORIAL_CONTENT = {
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Webhooks enviam dados do CRM para sistemas externos (Zapier, Make, seu próprio sistema) sempre que algo acontece. São a ponte entre o Closify e qualquer outra ferramenta.
+          Webhooks enviam dados do CRM para sistemas externos (Zapier, Make, seu próprio sistema) sempre que algo acontece. São a ponte entre o Vysify e qualquer outra ferramenta.
         </p>
 
         <TutorialImage
@@ -415,7 +415,7 @@ const TUTORIAL_CONTENT = {
           <Step number={2} title='Clique em "+ New Webhook"' desc='Um formulário de criação aparece.' />
           <Step number={3} title='Cole a URL do destino' desc='Ex.: URL do Zapier, Make, seu servidor, ou n8n. A URL deve aceitar requisições POST com JSON.' />
           <Step number={4} title='Selecione os eventos a enviar' desc='• contact.created — Novo contato criado | • deal.stage_changed — Negócio mudou de estágio | • message.received — Mensagem recebida | • task.completed — Tarefa concluída | • * — Envia TODOS os eventos' />
-          <Step number={5} title='Copie o HMAC Secret' desc='Esse segredo serve para validar que os webhooks são legítimos e vieram do Closify. Use-o no seu servidor para verificar a assinatura.' />
+          <Step number={5} title='Copie o HMAC Secret' desc='Esse segredo serve para validar que os webhooks são legítimos e vieram do Vysify. Use-o no seu servidor para verificar a assinatura.' />
           <Step number={6} title='Salve e teste' desc='Clique em "Save". O primeiro evento real que acontecer disparará o webhook.' />
         </div>
 
@@ -442,7 +442,7 @@ const TUTORIAL_CONTENT = {
         </div>
 
         <TipBox>
-          Para integrar com o Zapier sem programação: crie um Zap com trigger &quot;Webhooks by Zapier → Catch Hook&quot;, copie a URL gerada e cole no Closify. Pronto!
+          Para integrar com o Zapier sem programação: crie um Zap com trigger &quot;Webhooks by Zapier → Catch Hook&quot;, copie a URL gerada e cole no Vysify. Pronto!
         </TipBox>
       </div>
     ),
@@ -645,7 +645,7 @@ const TUTORIAL_CONTENT = {
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          O Closify registra todas as ações sensíveis para garantir total transparência e conformidade com a LGPD.
+          O Vysify registra todas as ações sensíveis para garantir total transparência e conformidade com a LGPD.
         </p>
         <div className="space-y-4">
           <Step number={1} title="Trilha de Auditoria" desc="Veja quem acessou o sistema, de qual IP e quais registros foram exportados ou deletados." />
@@ -685,12 +685,12 @@ const TUTORIAL_CONTENT = {
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Conecte o Closify a mais de 5.000 aplicativos através do Zapier ou integrações via API.
+          Conecte o Vysify a mais de 5.000 aplicativos através do Zapier ou integrações via API.
         </p>
         <div className="space-y-4">
           <Step number={1} title="Chaves de API" desc="Gere chaves de acesso únicas por workspace para integrar seu sistema proprietário." />
-          <Step number={2} title="Webhooks Assinados" desc="Utilizamos assinaturas HMAC para garantir que os dados vieram do Closify." />
-          <Step number={3} title="Zapier Catch Hooks" desc="Receba leads de qualquer lugar do mundo e crie contatos automaticamente no Closify." />
+          <Step number={2} title="Webhooks Assinados" desc="Utilizamos assinaturas HMAC para garantir que os dados vieram do Vysify." />
+          <Step number={3} title="Zapier Catch Hooks" desc="Receba leads de qualquer lugar do mundo e crie contatos automaticamente no Vysify." />
         </div>
         <TipBox>
           Para maior segurança, nunca compartilhe suas chaves de API por canais não criptografados.
@@ -705,13 +705,13 @@ const TUTORIAL_CONTENT = {
     render: () => (
       <div className="space-y-6">
         <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-          Conecte seu Instagram Business para receber e responder Direct Messages diretamente pelo Closify.
+          Conecte seu Instagram Business para receber e responder Direct Messages diretamente pelo Vysify.
         </p>
         <div className="space-y-4">
           <Step number={1} title='Acesse Configurações → Integrações → Instagram' desc='No menu superior, clique em "Configurações" e selecione "Instagram Direct" na lista de integrações.' />
           <Step number={2} title='Prepare sua conta Meta' desc='Certifique-se de que sua conta do Instagram é do tipo "Business" e está vinculada a uma Página do Facebook.' />
           <Step number={3} title='Clique em "+ Adicionar Conta Instagram"' desc='Preencha os campos: Nome Amigável, ID da Página, ID do Instagram e o Token de Acesso (gerado no Meta Developers).' />
-          <Step number={4} title='Configure o Webhook' desc='Copie a URL de Webhook exibida no Closify e cole no seu App da Meta, configurando o token de verificação que você definiu.' />
+          <Step number={4} title='Configure o Webhook' desc='Copie a URL de Webhook exibida no Vysify e cole no seu App da Meta, configurando o token de verificação que você definiu.' />
           <Step number={5} title='Tudo pronto!' desc='As mensagens enviadas para seu Instagram agora aparecerão em sua Inbox Omnichannel.' />
         </div>
         <TipBox>

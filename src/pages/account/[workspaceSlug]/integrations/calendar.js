@@ -118,7 +118,7 @@ const CalendarIntegration = () => {
 
   return (
     <AccountLayout>
-      <Meta title="Closify - Google Calendar Integration" />
+      <Meta title="Vysify - Google Calendar Integration" />
       <Content.Title
         title="Google Calendar Integration"
         subtitle="Sync your meetings and events"

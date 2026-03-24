@@ -160,7 +160,7 @@ const Settings = ({ user }) => {
 
   return (
     <AccountLayout>
-      <Meta title="Closify - Account Settings" />
+      <Meta title="Vysify - Account Settings" />
       <Content.Title
         title={t("settings.header.title")}
         subtitle={t("settings.header.description")}

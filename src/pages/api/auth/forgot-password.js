@@ -44,13 +44,13 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
     const logoUrl = `${appUrl}/images/logo-full.png`;
 
     return {
-        subject: '[Closify] Recuperação de senha',
+        subject: '[Vysify] Recuperação de senha',
         text:
             `Olá!\n\n` +
-            `Recebemos um pedido para redefinir a senha da sua conta no Closify (${String(email || '').trim().toLowerCase()}).\n\n` +
+            `Recebemos um pedido para redefinir a senha da sua conta no Vysify (${String(email || '').trim().toLowerCase()}).\n\n` +
             `Para criar uma nova senha, use este link (válido por 1 hora):\n${safeUrl}\n\n` +
             `Se você não solicitou essa redefinição, ignore este e-mail. Sua senha atual continuará válida.\n\n` +
-            `— Equipe Closify`,
+            `— Equipe Vysify`,
         html:
             `<!doctype html>` +
             `<html lang="pt-BR">` +
@@ -66,7 +66,7 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
             `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;background-color:#ffffff;border-radius:16px;box-shadow:0 4px 6px -1px rgba(0,0,1,0.05),0 2px 4px -2px rgba(0,0,1,0.05);border:1px solid #e2e8f0;">` +
             `<tr>` +
             `<td style="padding:40px 40px 32px 40px;text-align:center;">` +
-            `<img src="${logoUrl}" alt="Closify" width="160" style="display:block;margin:0 auto;height:auto;border:0;" />` +
+            `<img src="${logoUrl}" alt="Vysify" width="160" style="display:block;margin:0 auto;height:auto;border:0;" />` +
             `</td>` +
             `</tr>` +
             `<tr>` +
@@ -74,7 +74,7 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
             `<div style="font-size:24px;font-weight:700;color:#0f172a;margin-bottom:16px;">Recuperação de senha</div>` +
             `<div style="font-size:16px;line-height:24px;color:#475569;">` +
             `<p style="margin:0 0 16px 0;">Olá,</p>` +
-            `<p style="margin:0 0 16px 0;">Recebemos uma solicitação para redefinir a senha associada à conta <strong>${safeEmail}</strong> no Closify.</p>` +
+            `<p style="margin:0 0 16px 0;">Recebemos uma solicitação para redefinir a senha associada à conta <strong>${safeEmail}</strong> no Vysify.</p>` +
             `<p style="margin:0 0 24px 0;">Para escolher uma nova senha, clique no botão abaixo. Este link expira em <strong>1 hora</strong> por motivos de segurança.</p>` +
             `</div>` +
             `</td>` +
@@ -96,7 +96,7 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
             `<td style="padding:32px 40px;background-color:#f8fafc;border-bottom-left-radius:16px;border-bottom-right-radius:16px;border-top:1px solid #f1f5f9;">` +
             `<div style="font-size:14px;line-height:20px;color:#94a3b8;">` +
             `<p style="margin:0 0 8px 0;"><strong>Não solicitou esta alteração?</strong> Você pode ignorar este e-mail com segurança. Sua senha não será alterada até que você clique no link acima.</p>` +
-            `<p style="margin:0;">— Equipe Closify</p>` +
+            `<p style="margin:0;">— Equipe Vysify</p>` +
             `</div>` +
             `</td>` +
             `</tr>` +
@@ -104,7 +104,7 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
             `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:540px;">` +
             `<tr>` +
             `<td style="padding:24px 0;text-align:center;font-size:12px;color:#94a3b8;">` +
-            `Closify &bull; CRM &bull; Inbox &bull; Automação` +
+            `Vysify &bull; CRM &bull; Inbox &bull; Automação` +
             `</td>` +
             `</tr>` +
             `</table>` +

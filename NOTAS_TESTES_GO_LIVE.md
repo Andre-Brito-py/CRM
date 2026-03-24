@@ -1,6 +1,6 @@
-# Notas de Testes — Closify (Go‑Live Comercial)
+# Notas de Testes — Vysify (Go‑Live Comercial)
 
-Este arquivo é o roteiro único para validar que o Closify está pronto para lançamento. A execução deve ser **sequencial** (de cima para baixo), registrando **status** e **evidências** em cada item.
+Este arquivo é o roteiro único para validar que o Vysify está pronto para lançamento. A execução deve ser **sequencial** (de cima para baixo), registrando **status** e **evidências** em cada item.
 
 ## Como usar
 
