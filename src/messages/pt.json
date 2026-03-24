@@ -769,5 +769,8 @@
   "landing.app.feature2.desc": "Fique por dentro de suas vendas com alertas em tempo real entregues diretamente na sua tela inicial.",
   "landing.app.feature3.title": "Zero Fricção",
   "landing.app.feature3.desc": "Instale instantaneamente com um clique e comece a vender sem passar pela App Store.",
-  "landing.app.cta": "Experimente no Celular"
+  "landing.app.cta": "Experimente no Celular",
+  "landing.app.modal.title": "Aponte a Camera para Testar",
+  "landing.app.modal.desc": "Pronto para levar suas vendas ao próximo nível? Abra o app de câmera e aponte para este QR code para acessar o Vysify no seu celular instantaneamente.",
+  "landing.app.modal.instruction": "Siga o aviso no seu navegador móvel para instalar o app na sua tela inicial."
 }

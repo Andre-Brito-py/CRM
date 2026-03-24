@@ -1,14 +1,20 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
   DevicePhoneMobileIcon, 
   BoltIcon, 
   BellAlertIcon, 
-  CursorArrowRaysIcon 
+  CursorArrowRaysIcon,
+  QrCodeIcon
 } from '@heroicons/react/24/outline';
+import Modal from '@/components/Modal';
 
 const AppShowcase = () => {
   const { t } = useTranslation();
+  const [showModal, setShowModal] = useState(false);
+
+  const toggleModal = () => setShowModal(!showModal);
 
   const features = [
     {
@@ -86,7 +92,10 @@ const AppShowcase = () => {
             </div>
 
             <div className="mt-12">
-                <button className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-transform shadow-xl shadow-black/10 dark:shadow-white/5 active:scale-95">
+                <button 
+                  onClick={toggleModal}
+                  className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-8 py-4 rounded-2xl font-bold text-lg hover:scale-105 transition-transform shadow-xl shadow-black/10 dark:shadow-white/5 active:scale-95"
+                >
                     {t('landing.app.cta')}
                 </button>
             </div>
@@ -183,6 +192,45 @@ const AppShowcase = () => {
 
         </div>
       </div>
+
+      {/* QR Code Modal for Desktop Verification */}
+      <Modal
+        show={showModal}
+        title={t('landing.app.modal.title')}
+        toggle={toggleModal}
+      >
+        <div className="flex flex-col items-center text-center py-6">
+            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mb-8 border-2 border-dashed border-gray-300 dark:border-gray-600 relative overflow-hidden group">
+                <QrCodeIcon className="w-32 h-32 text-gray-400 group-hover:scale-110 transition-transform duration-500" />
+                {/* Simulated QR blocks with CSS for realistic look */}
+                <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 opacity-10 pointer-events-none">
+                    {[...Array(16)].map((_, i) => (
+                        <div key={i} className={`border border-black dark:border-white ${Math.random() > 0.5 ? 'bg-black dark:bg-white' : ''}`} />
+                    ))}
+                </div>
+            </div>
+            
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">
+                {t('landing.app.modal.desc')}
+            </p>
+            
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-2xl border border-blue-100 dark:border-blue-900/50 flex items-start gap-3 text-left">
+                <div className="bg-blue-500 p-1.5 rounded-lg text-white mt-0.5">
+                    <DevicePhoneMobileIcon className="w-4 h-4" />
+                </div>
+                <p className="text-sm text-blue-700 dark:text-blue-300 leading-relaxed font-medium">
+                    {t('landing.app.modal.instruction')}
+                </p>
+            </div>
+            
+            <button 
+                onClick={toggleModal}
+                className="mt-10 w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-colors shadow-lg shadow-blue-500/20"
+            >
+                {t('pwa.prompt.close')}
+            </button>
+        </div>
+      </Modal>
     </section>
   );
 };

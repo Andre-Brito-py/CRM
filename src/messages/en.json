@@ -763,5 +763,8 @@
   "landing.app.feature2.desc": "Stay on top of your deals with real-time alerts delivered directly to your home screen.",
   "landing.app.feature3.title": "Zero Friction",
   "landing.app.feature3.desc": "Install instantly with one click and get to work without going through the App Store.",
-  "landing.app.cta": "Try it on Mobile"
+  "landing.app.cta": "Try it on Mobile",
+  "landing.app.modal.title": "Scan to Try Vysify",
+  "landing.app.modal.desc": "Ready to take your sales to the next level? Open your camera app and scan this QR code to access Vysify on your mobile device instantly.",
+  "landing.app.modal.instruction": "Follow the prompt on your mobile browser to install the app on your home screen."
 }
