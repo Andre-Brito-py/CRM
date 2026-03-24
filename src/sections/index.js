@@ -7,6 +7,7 @@ import Hero from './Hero';
 import Pricing from './Pricing';
 import Testimonial from './Testimonial';
 import Stats from './Stats';
+import AppShowcase from './AppShowcase';
 
 export {
   CallToAction,
@@ -18,4 +19,5 @@ export {
   Pricing,
   Stats,
   Testimonial,
+  AppShowcase,
 };

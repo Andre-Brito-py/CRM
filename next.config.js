@@ -2,7 +2,7 @@ const { withSentryConfig } = require('@sentry/nextjs');
 
 const withPWA = require('next-pwa')({
   dest: 'public',
-  disable: process.env.PWA_DISABLE === 'true' || process.env.NODE_ENV === 'development' || process.platform === 'win32',
+  disable: process.env.PWA_DISABLE === 'true' || process.env.NODE_ENV === 'development',
   importScripts: ['/worker/push.js'],
 });
 

@@ -10,6 +10,7 @@ import {
   Pricing,
   Stats,
   Testimonial,
+  AppShowcase,
 } from '@/sections/index';
 import { getAllPlans } from '@/prisma/services/plan';
 import prisma from '@/prisma/index';
@@ -59,6 +60,7 @@ const Home = ({ products, promo, hasFreePlan }) => {
       <Hero hasFreePlan={hasFreePlan} />
       <Stats />
       <Features />
+      <AppShowcase />
       <Pricing products={products} promo={promo} />
       <Testimonial />
       <FAQ />

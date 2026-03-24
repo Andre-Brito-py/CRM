@@ -1,11 +1,13 @@
 {
   "name": "Vysify CRM",
   "short_name": "Vysify",
-  "description": "A powerful SaaS CRM for your business",
+  "description": "The elite SaaS CRM for high-growth teams. Manage leads, automate sales, and close deals with AI.",
   "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#2563EB",
+  "categories": ["business", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -16,6 +18,18 @@
       "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Inbox",
+      "url": "/account/inbox",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pipeline",
+      "url": "/account/pipeline",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

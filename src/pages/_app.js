@@ -14,6 +14,7 @@ import swrConfig from '@/config/swr/index';
 import WorkspaceProvider from '@/providers/workspace';
 import fetcher from '@/lib/client/fetcher';
 import CookieConsent from '@/components/CookieConsent';
+import PWAPrompt from '@/components/PWA/PWAPrompt';
 
 import '@/styles/globals.css';
 let enData = require('../messages/en.json');
@@ -273,6 +274,7 @@ const App = ({ Component, pageProps }) => {
             )}
             <Component {...pageProps} />
             <CookieConsent onAccept={() => setHasConsent(true)} />
+            <PWAPrompt />
           </WorkspaceProvider>
         </ThemeProvider>
       </SWRConfig>

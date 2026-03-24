@@ -747,5 +747,21 @@
   "auth.register.selectPlan": "Select a plan",
   "auth.register.featureTrial": "Full access for {{days}} days (free trial)",
   "common.interval.monthly": "Monthly",
-  "common.interval.yearly": "Yearly"
+  "common.interval.yearly": "Yearly",
+  "pwa.install.title": "Install Vysify",
+  "pwa.install.description": "Install our app for a faster, native experience and better performance.",
+  "pwa.install.button": "Install App",
+  "pwa.notifications.title": "Stay Updated",
+  "pwa.notifications.description": "Enable notifications to receive real-time alerts about your sales and customers.",
+  "pwa.notifications.button": "Enable Notifications",
+  "pwa.prompt.close": "Maybe later",
+  "landing.app.title": "Your CRM, Everywhere",
+  "landing.app.subtitle": "Experience the power of Vysify on your mobile device. Fast, reliable, and always connected. No app store required.",
+  "landing.app.feature1.title": "Native Performance",
+  "landing.app.feature1.desc": "Optimized as a PWA for lightning-fast speeds and smooth interactions on iOS and Android.",
+  "landing.app.feature2.title": "Push Notifications",
+  "landing.app.feature2.desc": "Stay on top of your deals with real-time alerts delivered directly to your home screen.",
+  "landing.app.feature3.title": "Zero Friction",
+  "landing.app.feature3.desc": "Install instantly with one click and get to work without going through the App Store.",
+  "landing.app.cta": "Try it on Mobile"
 }
