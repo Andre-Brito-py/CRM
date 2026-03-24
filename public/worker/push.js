@@ -4,14 +4,28 @@ self.addEventListener('push', function (event) {
   }
 
   const data = event.data?.json() ?? {};
+  
+  // Custom Vysify Branding & Logic
   const title = data.title || 'Vysify Notification';
   const options = {
-    body: data.body || 'You have a new notification.',
+    body: data.body || 'You have a new update in your CRM.',
     icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png', // Monochrome for Android status bar
+    vibrate: [100, 50, 100], // Professional vibration pattern
+    image: data.image || null, // Banner image if provided
+    tag: data.tag || 'vysify-default', // Group notifications
+    renotify: true,
     data: {
       url: data.url || '/',
+      actionUrl: data.actionUrl || data.url || '/',
     },
+    actions: data.actions || [
+      {
+        action: 'open',
+        title: 'Abrir Vysify',
+        icon: '/icons/icon-192x192.png'
+      }
+    ]
   };
 
   event.waitUntil(
@@ -20,10 +34,20 @@ self.addEventListener('push', function (event) {
 });
 
 self.addEventListener('notificationclick', function (event) {
-  event.notification.close();
+  const notification = event.notification;
+  const action = event.action;
+
+  notification.close();
+
+  let targetUrl = notification.data.url;
+  
+  // Handle specific action clicks
+  if (action === 'open') {
+    targetUrl = notification.data.actionUrl || notification.data.url;
+  }
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
-      const url = event.notification.data.url;
       if (clientList.length > 0) {
         let client = clientList[0];
         for (let i = 0; i < clientList.length; i++) {
@@ -31,9 +55,11 @@ self.addEventListener('notificationclick', function (event) {
             client = clientList[i];
           }
         }
-        return client.focus();
+        return client.focus().then(c => {
+            if ('navigate' in c) return c.navigate(targetUrl);
+        });
       }
-      return clients.openWindow(url);
+      return clients.openWindow(targetUrl);
     })
   );
 });
