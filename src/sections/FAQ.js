@@ -21,6 +21,10 @@ const FAQ = () => {
       answer: "Você pode criar fluxos de resposta baseados em gatilhos específicos, como recebimento de novo lead ou mudança de estágio no funil. Tudo sem precisar programar."
     },
     {
+      question: "Como funciona o Vysify Autopilot (Inteligência Artificial)?",
+      answer: "O Autopilot é o nosso agente inteligente nativo. Você fornece o site da sua empresa ou arquivos contendo suas regras, e a I.A. aprende tudo sobre o seu negócio. Depois disso, ela é capaz de responder contatos no WhatsApp 24 horas por dia de maneira extremamente humana e persuasiva, qualificando os clientes sozinha antes de passar para um vendedor humano."
+    },
+    {
        question: "O que é automação 'No-Code' na prática?",
        answer: "Imagine conectar seu WhatsApp, e-mail e CRM como se estivesse brincando com blocos de montar, sem precisar escrever uma única linha de código. O 'No-Code' permite que qualquer gerente ou vendedor crie regras automáticas poderosas (ex: 'se o lead não responder em 2 dias, mande um WhatsApp') apenas clicando e arrastando na tela."
     },
