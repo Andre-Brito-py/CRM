@@ -126,7 +126,9 @@ Para não perder a linha de evolução, aqui estão os saltos da plataforma cons
 
 ## Licença
 
-Este projeto comercial é mantido e licenciado sob a **MIT License** — veja o arquivo [LICENSE](LICENSE) para detalhes de cópia e direitos.
+Este projeto comercial é **Proprietário e Confidencial**. Todos os direitos reservados à **Vysify**. 
+
+A cópia, distribuição ou uso não autorizado deste software é estritamente proibida. Veja o arquivo [LICENSE](LICENSE) para mais detalhes sobre os termos de direitos autorais.
 
 ---
 
