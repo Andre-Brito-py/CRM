@@ -173,17 +173,17 @@ const Login = ({ hasFreePlan }) => {
             </Link>
           </div>
           <h2 className="text-5xl font-extrabold text-white leading-tight mb-6">
-            Acelere suas vendas com <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Inteligência Real.</span>
+            {t('auth.login.headline.part1', 'Acelere suas vendas com')} <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">{t('auth.login.headline.highlight', 'Inteligência Real.')}</span>
           </h2>
           <p className="text-xl text-gray-400 mb-10 leading-relaxed">
-            Gerencie leads, automatize processos e feche negócios mais rápido com o CRM mais intuitivo e poderoso do mercado.
+            {t('auth.login.description', 'Gerencie leads, automatize processos e feche negócios mais rápido com o CRM mais intuitivo e poderoso do mercado.')}
           </p>
 
           <div className="p-4 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <img
               src="/images/mockups/dashboard.png"
-              alt="Dashboard Preview"
+              alt={t('auth.login.mockupAlt', 'Dashboard Preview')}
               className="rounded-lg shadow-2xl border border-white/5 transform group-hover:translate-y-[-5px] transition-transform duration-500 w-full max-h-[220px] object-contain object-top"
             />
           </div>
@@ -216,8 +216,8 @@ const Login = ({ hasFreePlan }) => {
           </div>
 
           <div className="text-left space-y-2">
-            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Bem-vindo de volta!</h1>
-            <p className="text-gray-500 text-lg">Acesse sua conta para gerenciar seus negócios.</p>
+            <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">{t('auth.login.title', 'Bem-vindo de volta!')}</h1>
+            <p className="text-gray-500 text-lg">{t('auth.login.subtitle', 'Acesse sua conta para gerenciar seus negócios.')}</p>
           </div>
 
           {step === 'LOGIN' && (
@@ -225,7 +225,7 @@ const Login = ({ hasFreePlan }) => {
               <form className="space-y-5" onSubmit={signInWithCredentials}>
                 <div className="space-y-4">
                   <div className="flex flex-col space-y-1.5">
-                    <label className="text-sm font-semibold text-gray-700">Email</label>
+                    <label className="text-sm font-semibold text-gray-700">{t('auth.login.emailLabel', 'Email')}</label>
                     <input
                       className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400"
                       onChange={(e) => setEmail(e.target.value)}
@@ -238,9 +238,9 @@ const Login = ({ hasFreePlan }) => {
 
                   <div className="flex flex-col space-y-1.5">
                     <div className="flex justify-between items-center">
-                      <label className="text-sm font-semibold text-gray-700">Senha</label>
+                      <label className="text-sm font-semibold text-gray-700">{t('auth.login.passwordLabel', 'Senha')}</label>
                       <button type="button" onClick={() => setStep('FORGOT_PASSWORD')} className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">
-                        Esqueceu a senha?
+                        {t('auth.login.forgotPassword', 'Esqueceu a senha?')}
                       </button>
                     </div>
                     <input
@@ -265,7 +265,7 @@ const Login = ({ hasFreePlan }) => {
                       />
                       <svg className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 left-0.5 pointer-events-none transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </div>
-                    <span className="ml-2 text-sm text-gray-600 group-hover:text-gray-900 transition-colors font-medium">Lembrar-me por 30 dias</span>
+                    <span className="ml-2 text-sm text-gray-600 group-hover:text-gray-900 transition-colors font-medium">{t('auth.login.rememberMe', 'Lembrar-me por 30 dias')}</span>
                   </label>
                 </div>
 
@@ -274,7 +274,7 @@ const Login = ({ hasFreePlan }) => {
                   disabled={status === 'loading' || !isEmailValid || !password || isSubmitting}
                   type="submit"
                 >
-                  {isSubmitting ? 'Iniciando sessão...' : 'Entrar no Vysify'}
+                  {isSubmitting ? t('auth.login.submitting', 'Iniciando sessão...') : t('auth.login.submit', 'Entrar no Vysify')}
                 </Button>
               </form>
 
@@ -283,7 +283,7 @@ const Login = ({ hasFreePlan }) => {
                 onClick={() => setStep('MAGIC_LINK')}
                 className="w-full text-center text-sm font-bold text-gray-500 hover:text-indigo-600 transition-colors"
               >
-                Entrar com link mágico
+                {t('auth.login.magicLink', 'Entrar com link mágico')}
               </button>
 
               {socialProviders.length > 0 && (
@@ -293,7 +293,7 @@ const Login = ({ hasFreePlan }) => {
                       <div className="w-full border-t border-gray-200"></div>
                     </div>
                     <div className="relative flex justify-center text-sm uppercase">
-                      <span className="px-3 bg-white text-gray-400 font-medium">ou continue com</span>
+                      <span className="px-3 bg-white text-gray-400 font-medium">{t('auth.login.socialContinue', 'ou continue com')}</span>
                     </div>
                   </div>
 
@@ -314,7 +314,7 @@ const Login = ({ hasFreePlan }) => {
                           </svg>
                         )}
                         <span className="text-sm font-bold text-gray-700 group-hover:text-gray-900 transition-colors">
-                          Continuar com {provider.name}
+                          {t('auth.login.socialWith', 'Continuar com {{name}}', { name: provider.name })}
                         </span>
                       </button>
                     ))}
@@ -459,7 +459,7 @@ const Login = ({ hasFreePlan }) => {
 
           <div className="pt-8 text-center border-t border-gray-100 w-full mt-10">
             <p className="text-base text-gray-600">
-              Ainda não tem uma conta?{' '}
+              {t('auth.login.noAccount', 'Ainda não tem uma conta?')} {' '}
               <Link href="/auth/register" className="font-bold text-indigo-600 hover:text-indigo-500 transition-colors decoration-2 hover:underline underline-offset-8">
                 {hasFreePlan ? t('auth.login.createFreeAccount', 'Crie sua conta gratuita agora') : t('auth.login.createAccount', 'Crie sua conta agora')}
               </Link>

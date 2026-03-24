@@ -6,10 +6,12 @@ import toast, { Toaster } from 'react-hot-toast';
 
 import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
+import { useTranslation } from 'react-i18next';
 import { redirectToCheckout } from '@/lib/client/stripe';
 
 const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => {
     const router = useRouter();
+    const { t } = useTranslation();
     const [isSubmitting, setSubmittingState] = useState(false);
     const [isRedirecting, setRedirectingState] = useState(false);
     const [socialProviders, setSocialProviders] = useState([]);
@@ -146,12 +148,12 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
             if (response.ok) {
                 if (data?.data?.sessionId) {
                     setRedirectingState(true);
-                    toast.success('Cadastro realizado! Redirecionando para o pagamento seguro...');
+                    toast.success(t('auth.register.successRedirect', 'Cadastro realizado! Redirecionando para o pagamento seguro...'));
                     await redirectToCheckout(data.data.sessionId);
                     return;
                 }
 
-                toast.success(data.message || 'Cadastro realizado. Verifique seu e-mail para ativar a conta.');
+                toast.success(data.message || t('auth.register.successNoRedirect', 'Cadastro realizado. Verifique seu e-mail para ativar a conta.'));
                 setFormData({
                     name: '',
                     email: '',
@@ -217,17 +219,15 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                     </Link>
 
                     <div className="space-y-8">
-                        <h2 className="text-5xl font-extrabold text-white leading-tight">
-                            Comece sua jornada <br /> com o <span className="text-emerald-400">Vysify CRM</span>
-                        </h2>
+                        <h2 className="text-5xl font-extrabold text-white leading-tight" dangerouslySetInnerHTML={{ __html: t('auth.register.headline.part1', 'Comece sua jornada <br /> com o') + ' <span className="text-emerald-400">' + t('auth.register.headline.vysify', 'Vysify CRM') + '</span>' }} />
                         <ul className="space-y-5">
                             {[
                                 isPaidPlan && trialDays > 0
-                                    ? `Acesso total por ${trialDays} dias (teste grátis)`
-                                    : "Acesso total à plataforma",
-                                "Inbox Omnichannel ilimitado",
-                                "IA para transcrição e resumos",
-                                "Form Builder e réguas No-code"
+                                    ? t('auth.register.featureTrial', { days: trialDays, defaultValue: `Acesso total por ${trialDays} dias (teste grátis)` })
+                                    : t('auth.register.feature1', 'Acesso total à plataforma'),
+                                t('auth.register.feature2', 'Inbox Omnichannel ilimitado'),
+                                t('auth.register.feature3', 'IA para transcrição e resumos'),
+                                t('auth.register.feature4', 'Form Builder e réguas No-code')
                             ].map((item, i) => (
                                 <li key={i} className="flex items-center text-gray-400 text-lg">
                                     <svg className="h-6 w-6 text-emerald-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -269,8 +269,8 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                     </div>
 
                     <div className="text-left">
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-3">Criar sua conta</h1>
-                        <p className="text-gray-500 text-lg">Junte-se a mais de 2.000 empresas que vendem melhor.</p>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-3">{t('auth.register.title', 'Criar sua conta')}</h1>
+                        <p className="text-gray-500 text-lg">{t('auth.register.subtitle', 'Junte-se a mais de 2.000 empresas que vendem melhor.')}</p>
                     </div>
 
                     {socialProviders.length > 0 && (
@@ -304,7 +304,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                     <form className="space-y-6" onSubmit={handleRegister}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="name">Nome completo</label>
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="name">{t('auth.register.nameLabel', 'Nome completo')}</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
                                     name="name"
@@ -317,7 +317,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="companyName">Nome da Empresa</label>
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="companyName">{t('auth.register.companyLabel', 'Nome da Empresa')}</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
                                     name="companyName"
@@ -332,7 +332,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                         </div>
 
                         <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="email">Email profissional</label>
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="email">{t('auth.register.emailLabel', 'Email profissional')}</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
                                     name="email"
@@ -347,7 +347,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="password">Senha segura</label>
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="password">{t('auth.register.passwordLabel', 'Senha segura')}</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
                                     name="password"
@@ -361,7 +361,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                 />
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="confirmPassword">Confirmar senha</label>
+                                <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="confirmPassword">{t('auth.register.confirmPasswordLabel', 'Confirmar senha')}</label>
                                 <input
                                     className="w-full px-4 py-3.5 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner placeholder:text-gray-400"
                                     name="confirmPassword"
@@ -376,7 +376,7 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                         </div>
 
                         <div className="space-y-4">
-                            <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="planSlug">Plano selecionado</label>
+                            <label className="text-sm font-bold text-gray-700 ml-1" htmlFor="planSlug">{t('auth.register.planLabel', 'Plano selecionado')}</label>
                             <div className="relative">
                                 <select
                                     className="w-full px-4 py-4 bg-gray-50 border-2 border-transparent focus:border-emerald-500 focus:bg-white rounded-2xl outline-none transition shadow-inner appearance-none font-semibold text-gray-700"
@@ -420,24 +420,24 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                         onClick={() => setFormData({ ...formData, interval: 'month' })}
                                         className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${formData.interval !== 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
-                                        Mensal
+                                        {t('common.interval.monthly', 'Mensal')}
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, interval: 'year' })}
                                         className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all flex justify-center items-center gap-2 ${formData.interval === 'year' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                                     >
-                                        Anual {selectedPlan?.annualDiscount > 0 && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-{selectedPlan.annualDiscount}%</span>}
+                                        {t('common.interval.yearly', 'Anual')} {selectedPlan?.annualDiscount > 0 && <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full uppercase tracking-wider font-extrabold">-{selectedPlan.annualDiscount}%</span>}
                                     </button>
                                 </div>
                             )}
 
                             <p className="text-xs text-gray-400 ml-1">
-                                Para garantir a segurança da plataforma e validar sua identidade, é necessário cadastrar um cartão (Stripe){showFreePlan ? ', mesmo no plano gratuito' : ''}.
+                                {t('auth.register.securityNote', 'Para garantir a segurança da plataforma e validar sua identidade, é necessário cadastrar um cartão (Stripe)')}{showFreePlan ? t('auth.register.securityNoteFree', ', mesmo no plano gratuito') : ''}.
                             </p>
                             {isPaidPlan && trialDays > 0 && (
                                 <p className="text-xs text-gray-500 ml-1">
-                                    Você terá {trialDays} {trialDays === 1 ? 'dia' : 'dias'} de teste. Após esse período, a cobrança inicia automaticamente.
+                                    {t('auth.register.trialNote', 'Você terá {{days}} dias de teste. Após esse período, a cobrança inicia automaticamente.', { days: trialDays })}
                                 </p>
                             )}
                         </div>
@@ -456,9 +456,9 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                                     <svg className="absolute h-3.5 w-3.5 text-white opacity-0 peer-checked:opacity-100 left-0.5 pointer-events-none transition-opacity" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                 </div>
                                 <span className="ml-3 text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
-                                    Eu li e aceito os{' '}
+                                    {t('auth.register.termsPrefix', 'Eu li e aceito os')}{' '}
                                     <Link href="/terms" className="font-bold text-emerald-600 hover:text-emerald-500" target="_blank">
-                                        Termos de Uso
+                                        {t('auth.register.termsLink', 'Termos de Uso')}
                                     </Link>
                                 </span>
                             </label>
@@ -470,16 +470,16 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
                             type="submit"
                         >
                             {isSubmitting
-                                ? 'Processando cadastro...'
-                                : (!canSubmit ? 'Selecione um plano' : (isPaidPlan ? 'Assinar e Criar minha conta' : (showFreePlan ? 'Criar minha conta gratuita' : 'Criar minha conta')))}
+                                ? t('auth.register.submitting', 'Processando cadastro...')
+                                : (!canSubmit ? t('auth.register.selectPlan', 'Selecione um plano') : t('auth.register.submit', 'Assinar e Criar minha conta'))}
                         </Button>
                     </form>
 
                     <div className="pt-8 text-center border-t border-gray-100 w-full mt-10">
                         <p className="text-gray-600 font-medium">
-                            Já possui uma conta?{' '}
+                            {t('auth.register.alreadyHaveAccount', 'Já possui uma conta?')}{' '}
                             <Link href="/auth/login" className="font-black text-emerald-600 hover:text-emerald-500 transition-colors uppercase tracking-widest text-sm ml-2">
-                                Fazer Login
+                                {t('auth.register.loginAction', 'Fazer Login')}
                             </Link>
                         </p>
                     </div>
