@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import Image from 'next/image';
 import Logo from '@/components/Logo';
 import MouseParticles from '@/components/Animations/MouseParticles';
-
+ 
 const Hero = ({ hasFreePlan }) => {
   const { data: session } = useSession();
   const { t } = useTranslation();
