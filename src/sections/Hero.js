@@ -53,7 +53,7 @@ const Hero = ({ hasFreePlan }) => {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center px-4 py-2 mb-8 text-[9px] font-black text-indigo-600 bg-indigo-50 rounded-full border border-indigo-100 tracking-[0.2em] uppercase"
           >
-            Engineering the Future of Sales
+            CRM & WhatsApp Omnichannel
           </motion.div>
 
           <motion.h1
@@ -62,8 +62,8 @@ const Hero = ({ hasFreePlan }) => {
             transition={{ duration: 0.8 }}
             className="text-6xl md:text-8xl font-black text-zinc-900 tracking-tighter uppercase leading-[0.85] mb-8"
           >
-            A nova era do <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Comércio Digital.</span>
+            A NOVA ERA DO <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">COMÉRCIO DIGITAL</span>
           </motion.h1>
 
           <motion.p
@@ -72,7 +72,7 @@ const Hero = ({ hasFreePlan }) => {
             transition={{ delay: 0.4 }}
             className="text-lg md:text-xl text-zinc-500 font-medium tracking-tight max-w-2xl leading-relaxed mb-12"
           >
-            Sincronize sua equipe, automatize seu WhatsApp e domine seu pipeline com a arquitetura CRM mais avançada do mercado.
+            Centralize seus leads, automatize seu WhatsApp e domine seu pipeline com o CRM mais completo para equipes de alta performance.
           </motion.p>
 
           <motion.div

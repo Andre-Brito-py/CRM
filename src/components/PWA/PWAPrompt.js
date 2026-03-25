@@ -2,43 +2,72 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, BellIcon, DevicePhoneMobileIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 
 const PWAPrompt = () => {
+  const router = useRouter();
+  const { status } = useSession();
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
+  const [hasDismissed, setHasDismissed] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
+  // Check if current route is landing page (handles both root and tenant rewrites)
+  const isLandingPage = router.asPath === '/' || router.pathname === '/' || router.pathname.endsWith('/index');
+
   useEffect(() => {
     // Detect mobile
     const mobileRegex = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
-    const mobile = mobileRegex.test(navigator.userAgent);
-    setIsMobile(mobile);
+    const isActuallyMobile = mobileRegex.test(navigator.userAgent);
+    setIsMobile(isActuallyMobile);
 
-    // Only proceed if mobile or simulated mobile
-    if (!mobile) return;
+    // Check if previously dismissed in this session
+    const dismissedThisSession = sessionStorage.getItem('pwa_prompt_dismissed') === 'true';
+    if (dismissedThisSession) {
+      setHasDismissed(true);
+      return;
+    }
 
-    // Listen for install prompt
-    window.addEventListener('beforeinstallprompt', (e) => {
+    // Check for global captured prompt from _document.js
+    if (window.__deferredPrompt) {
+      setDeferredPrompt(window.__deferredPrompt);
+      if (isActuallyMobile && !isLandingPage && status === 'authenticated' && !hasDismissed) {
+        const timer = setTimeout(() => setIsVisible(true), 3000);
+        return () => clearTimeout(timer);
+      }
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Show prompt after a short delay
-      setTimeout(() => setIsVisible(true), 3000);
-    });
+      // Show prompt after a short delay if on appropriate route and authenticated
+      if (isActuallyMobile && !isLandingPage && status === 'authenticated' && !hasDismissed) {
+        const timer = setTimeout(() => setIsVisible(true), 3000);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Only proceed with side effects (like notification checks) if is actually mobile, not landing page, and authenticated
+    if (!isActuallyMobile || isLandingPage || status !== 'authenticated') return;
 
     // Check for notifications
     if ('Notification' in window && Notification.permission === 'default') {
       setShowNotificationPrompt(true);
-      if (!isVisible) {
-          setTimeout(() => setIsVisible(true), 5000);
+      if (!isVisible && !hasDismissed) {
+          const timer = setTimeout(() => setIsVisible(true), 5000);
+          return () => clearTimeout(timer);
       }
     }
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', () => {});
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, [isVisible]);
+  }, [router.asPath, router.pathname, status, isLandingPage, hasDismissed]);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -62,7 +91,13 @@ const PWAPrompt = () => {
     }
   };
 
-  if (!isMobile || !isVisible) return null;
+  const handleDismiss = () => {
+    setIsVisible(false);
+    setHasDismissed(true);
+    sessionStorage.setItem('pwa_prompt_dismissed', 'true');
+  };
+
+  if (!isMobile || !isVisible || hasDismissed || status !== 'authenticated' || isLandingPage) return null;
 
   return (
     <AnimatePresence>
@@ -74,7 +109,7 @@ const PWAPrompt = () => {
       >
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-5 overflow-hidden relative">
           <button
-            onClick={() => setIsVisible(false)}
+            onClick={handleDismiss}
             className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -125,7 +160,7 @@ const PWAPrompt = () => {
             )}
 
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={handleDismiss}
               className="w-full text-gray-500 dark:text-gray-400 text-xs font-medium hover:underline mt-1"
             >
               {t('pwa.prompt.close')}
