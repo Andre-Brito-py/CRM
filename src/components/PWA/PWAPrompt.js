@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, BellIcon, DevicePhoneMobileIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline';
+import { useSession } from 'next-auth/react';
 
 const PWAPrompt = () => {
+  const { status } = useSession();
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
+  const [hasDismissed, setHasDismissed] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
@@ -38,7 +41,7 @@ const PWAPrompt = () => {
     return () => {
       window.removeEventListener('beforeinstallprompt', () => {});
     };
-  }, [isVisible]);
+  }, []);
 
   const handleInstall = async () => {
     if (!deferredPrompt) return;
@@ -62,7 +65,7 @@ const PWAPrompt = () => {
     }
   };
 
-  if (!isMobile || !isVisible) return null;
+  if (!isMobile || !isVisible || hasDismissed || status !== 'authenticated') return null;
 
   return (
     <AnimatePresence>
@@ -74,7 +77,10 @@ const PWAPrompt = () => {
       >
         <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 p-5 overflow-hidden relative">
           <button
-            onClick={() => setIsVisible(false)}
+            onClick={() => {
+              setIsVisible(false);
+              setHasDismissed(true);
+            }}
             className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
           >
             <XMarkIcon className="w-5 h-5" />
@@ -125,7 +131,10 @@ const PWAPrompt = () => {
             )}
 
             <button
-              onClick={() => setIsVisible(false)}
+              onClick={() => {
+                setIsVisible(false);
+                setHasDismissed(true);
+              }}
               className="w-full text-gray-500 dark:text-gray-400 text-xs font-medium hover:underline mt-1"
             >
               {t('pwa.prompt.close')}
