@@ -13,6 +13,7 @@ const PWAPrompt = () => {
   const [hasDismissed, setHasDismissed] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isQrScan, setIsQrScan] = useState(false);
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
 
   // Check if current route is landing page (handles both root and tenant rewrites)
@@ -24,6 +25,11 @@ const PWAPrompt = () => {
     const isActuallyMobile = mobileRegex.test(navigator.userAgent);
     setIsMobile(isActuallyMobile);
 
+    // Detect if user came from QR Code
+    const params = new URLSearchParams(window.location.search);
+    const fromQr = params.get('source') === 'qrcode';
+    setIsQrScan(fromQr);
+
     // Check if previously dismissed in this session
     const dismissedThisSession = sessionStorage.getItem('pwa_prompt_dismissed') === 'true';
     if (dismissedThisSession) {
@@ -34,8 +40,12 @@ const PWAPrompt = () => {
     // Check for global captured prompt from _document.js
     if (window.__deferredPrompt) {
       setDeferredPrompt(window.__deferredPrompt);
-      if (isActuallyMobile && !isLandingPage && status === 'authenticated' && !hasDismissed) {
-        const timer = setTimeout(() => setIsVisible(true), 3000);
+      const shouldShow = isActuallyMobile && !hasDismissed && (
+        fromQr || (!isLandingPage && status === 'authenticated')
+      );
+      
+      if (shouldShow) {
+        const timer = setTimeout(() => setIsVisible(true), fromQr ? 1000 : 3000);
         return () => clearTimeout(timer);
       }
     }
@@ -43,9 +53,13 @@ const PWAPrompt = () => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      // Show prompt after a short delay if on appropriate route and authenticated
-      if (isActuallyMobile && !isLandingPage && status === 'authenticated' && !hasDismissed) {
-        const timer = setTimeout(() => setIsVisible(true), 3000);
+      // Show prompt after a short delay if on appropriate route/auth OR if QR scan
+      const shouldShow = isActuallyMobile && !hasDismissed && (
+        fromQr || (!isLandingPage && status === 'authenticated')
+      );
+
+      if (shouldShow) {
+        const timer = setTimeout(() => setIsVisible(true), fromQr ? 1000 : 3000);
         return () => clearTimeout(timer);
       }
     };
@@ -97,7 +111,8 @@ const PWAPrompt = () => {
     sessionStorage.setItem('pwa_prompt_dismissed', 'true');
   };
 
-  if (!isMobile || !isVisible || hasDismissed || status !== 'authenticated' || isLandingPage) return null;
+  const canShow = isMobile && isVisible && !hasDismissed && (isQrScan || (status === 'authenticated' && !isLandingPage));
+  if (!canShow) return null;
 
   return (
     <AnimatePresence>
