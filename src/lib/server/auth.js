@@ -300,10 +300,10 @@ const buildBaseAuthOptions = () => {
           Boolean(user) ||
           !token.role ||
           !token.email ||
-          !token.termsAcceptedAt ||
-          token.termsVersion !== requiredTermsVersion;
+          token.termsVersion !== requiredTermsVersion ||
+          !token.twoFactorEnabled;
 
-        if (!shouldRefresh) return token;
+        if (!shouldRefresh && token.twoFactorEnabled !== undefined) return token;
 
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
