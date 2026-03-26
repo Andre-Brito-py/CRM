@@ -269,42 +269,33 @@ Nome do cliente: ${contactName}`;
     }
   }
 
-  // 7. Call OpenAI
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  // 7. Call Unified AI Service
+  const { generateChatCompletion } = await import('@/lib/server/ai/index');
+  let aiResponseData;
 
-  let aiResponse;
   try {
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openAiApiKey}`,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [{ role: 'system', content: systemPrompt }, ...history],
+    aiResponseData = await generateChatCompletion({
+      messages: history,
+      systemPrompt,
+      options: {
+        model: platform === 'EMAIL' ? 'gpt-4o' : 'gpt-4o-mini', // Fallback defaults if using OpenAI
+        maxTokens: isEmail ? 800 : 400,
         temperature: 0.6,
-        max_tokens: isEmail ? 800 : 400,
-      }),
+      }
     });
-    clearTimeout(timeout);
-
-    if (!resp.ok) {
-      log({ level: 'error', msg: 'autopilot_openai_error', ...logCtx, status: resp.status });
-      return;
-    }
-
-    aiResponse = await resp.json();
   } catch (err) {
-    clearTimeout(timeout);
-    log({ level: 'error', msg: 'autopilot_openai_request_failed', ...logCtx, error: err });
+    log({ level: 'error', msg: 'autopilot_ai_call_failed', ...logCtx, error: err.message });
     reportError(err, { route: 'autopilot', ...logCtx });
     return;
   }
 
-  const replyText = aiResponse?.choices?.[0]?.message?.content?.trim();
+  const replyText = aiResponseData.content;
+  // Map back to the legacy variable names for usage logging
+  const aiResponse = {
+    choices: [{ message: { content: replyText } }],
+    usage: aiResponseData.usage
+  };
+
   if (!replyText) {
     log({ level: 'warn', msg: 'autopilot_empty_response', ...logCtx });
     return;

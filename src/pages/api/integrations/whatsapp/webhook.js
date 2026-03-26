@@ -109,68 +109,22 @@ const downloadWhatsAppMedia = async ({ accessToken, url, maxBytes }) => {
 };
 
 const transcribeAudio = async ({ openAiApiKey, audioBytes, mimeType }) => {
-  const blob = new Blob([audioBytes], { type: mimeType || 'audio/mpeg' });
-  const form = new FormData();
-  form.append('model', 'whisper-1');
-  form.append('file', blob, 'audio');
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  const { transcribeAudio: aiTranscribe } = await import('@/lib/server/ai/index');
   try {
-    const resp = await fetch('https://api.openai.com/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${openAiApiKey}` },
-      body: form,
-      signal: controller.signal,
-    });
-    if (!resp.ok) throw new Error(`openai_transcription_failed:${resp.status}`);
-    const data = await resp.json();
-    return String(data?.text || '').trim() || null;
-  } finally {
-    clearTimeout(timeout);
+    return await aiTranscribe({ audioBytes, mimeType });
+  } catch (error) {
+    log({ level: 'error', msg: 'whatsapp_ai_transcription_failed', error: error.message });
+    throw error;
   }
 };
 
 const extractImageText = async ({ openAiApiKey, imageBytes, mimeType }) => {
-  const safeMime = String(mimeType || 'image/jpeg').toLowerCase();
-  const base64 = Buffer.from(imageBytes).toString('base64');
-  const url = `data:${safeMime};base64,${base64}`;
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 25_000);
+  const { extractTextFromImage } = await import('@/lib/server/ai/index');
   try {
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openAiApiKey}`,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        temperature: 0.1,
-        max_tokens: 350,
-        messages: [
-          {
-            role: 'system',
-            content: 'Extraia o texto visível da imagem e retorne apenas o texto (sem Markdown). Se não houver texto legível, retorne vazio.',
-          },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Extraia o texto desta imagem.' },
-              { type: 'image_url', image_url: { url } },
-            ],
-          },
-        ],
-      }),
-    });
-    if (!resp.ok) throw new Error(`openai_vision_failed:${resp.status}`);
-    const data = await resp.json();
-    const text = String(data?.choices?.[0]?.message?.content || '').trim();
-    return text || null;
-  } finally {
-    clearTimeout(timeout);
+    return await extractTextFromImage({ imageBytes, mimeType });
+  } catch (error) {
+    log({ level: 'error', msg: 'whatsapp_ai_vision_failed', error: error.message });
+    throw error;
   }
 };
 
@@ -382,6 +336,7 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
 
   const shouldAttemptProcessing = Boolean(mediaId && accessToken);
   if (shouldAttemptProcessing) {
+    const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
     const typeLower = String(msgType || '').toLowerCase();
     const isAudio = typeLower === 'audio';
@@ -397,11 +352,11 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
     const maxImageBytes = 8 * 1024 * 1024;
     const maxDocumentBytes = 6 * 1024 * 1024;
 
-    if ((isAudio || isImage) && !openAiApiKey) {
+    if ((isAudio || isImage) && !openAiApiKey && !googleAiApiKey) {
       await createActivity(workspace.id, null, {
         type: 'MEDIA_PROCESSING_SKIPPED',
         title: 'Media processing skipped',
-        content: JSON.stringify({ reason: 'missing_openai_key', conversationId: conversation.id, msgType }),
+        content: JSON.stringify({ reason: 'missing_ai_keys', conversationId: conversation.id, msgType }),
         contactId: contact.id,
       });
     } else if (isDocument && !consentOk) {

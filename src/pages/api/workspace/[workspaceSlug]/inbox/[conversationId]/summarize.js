@@ -216,9 +216,12 @@ const handler = async (req, res) => {
 
     const transcript = buildTranscript(conversation.messages, conversation.contact?.name);
 
+    // 219. Get Unified AI Service
+    const { generateChatCompletion } = await import('@/lib/server/ai/index');
+    const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
-    if (!openAiApiKey) {
+    if (!googleAiApiKey && !openAiApiKey) {
       await new Promise(resolve => setTimeout(resolve, 1200));
       const contact = conversation.contact?.name || 'o cliente';
       const msgCount = conversation.messages.length;
@@ -231,7 +234,7 @@ const handler = async (req, res) => {
             `• ${msgCount} mensagens no total (${inbound} recebidas, ${outbound} enviadas).\n` +
             `• Última mensagem: "${conversation.messages[conversation.messages.length - 1]?.content?.slice(0, 80)}..."\n` +
             `• Status atual: ${conversation.status || 'Aberta'}.\n\n` +
-            `_Adicione sua chave OpenAI nas configurações do sistema para obter resumos com IA._`
+            `_Adicione uma chave Gemini ou OpenAI nas configurações para obter resumos completos._`
         }
       });
     }
@@ -330,36 +333,29 @@ const handler = async (req, res) => {
       }
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20_000);
+    // Call AI Service
+    let aiResponseData;
+    try {
+      aiResponseData = await generateChatCompletion({
+        messages: [{ role: 'user', content: prompt }],
+        systemPrompt: systemMessage,
+        options: {
+          model: 'gpt-3.5-turbo', // Fallback for OpenAI
+          temperature: 0.5,
+          maxTokens: 300
+        }
+      });
+    } catch (err) {
+      throw new Error(`AI Service Error: ${err.message}`);
+    }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.5,
-        max_tokens: 300
-      })
-    });
-    clearTimeout(timeout);
+    const summary = aiResponseData.content;
+    const aiProvider = aiResponseData.provider;
+    const aiModel = aiResponseData.model;
 
-    if (!response.ok) throw new Error('OpenAI API Error');
-
-    const data = await response.json();
-    const summary = data.choices[0]?.message?.content?.trim();
-
-    const tokensTotal = Number(data?.usage?.total_tokens || 0);
-    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
-    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+    const tokensTotal = Number(aiResponseData.usage?.total_tokens || 0);
+    const tokensPrompt = Number(aiResponseData.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(aiResponseData.usage?.completion_tokens || 0);
 
     let billingResult = null;
     if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {

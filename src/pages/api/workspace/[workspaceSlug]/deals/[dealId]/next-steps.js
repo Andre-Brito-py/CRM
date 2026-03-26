@@ -192,9 +192,12 @@ const handler = async (req, res) => {
       return res.status(404).json({ error: { msg: 'Deal not found' } });
     }
 
+    // 195. Get Unified AI Service
+    const { generateChatCompletion } = await import('@/lib/server/ai/index');
+    const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
-    if (!openAiApiKey) {
+    if (!googleAiApiKey && !openAiApiKey) {
       await new Promise(resolve => setTimeout(resolve, 1200));
       return res.status(200).json({
         data: {
@@ -293,33 +296,30 @@ const handler = async (req, res) => {
       }
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.5,
-        max_tokens: 150
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('OpenAI API Error');
+    // Call AI Service
+    let aiResponseData;
+    try {
+      aiResponseData = await generateChatCompletion({
+        messages: [{ role: 'user', content: prompt }],
+        systemPrompt: systemMessage,
+        options: {
+          model: 'gpt-3.5-turbo', // Fallback for OpenAI
+          temperature: 0.5,
+          maxTokens: 150
+        }
+      });
+    } catch (err) {
+      log({ level: 'error', msg: 'ai_service_error', requestId, workspaceId: workspace.id, error: err.message });
+      throw new Error(`AI Service Error: ${err.message}`);
     }
 
-    const data = await response.json();
-    const recommendation = data.choices[0]?.message?.content?.trim();
+    const recommendation = aiResponseData.content;
+    const aiProvider = aiResponseData.provider;
+    const aiModel = aiResponseData.model;
 
-    const tokensTotal = Number(data?.usage?.total_tokens || 0);
-    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
-    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+    const tokensTotal = Number(aiResponseData.usage?.total_tokens || 0);
+    const tokensPrompt = Number(aiResponseData.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(aiResponseData.usage?.completion_tokens || 0);
 
     let billingResult = null;
     if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {
