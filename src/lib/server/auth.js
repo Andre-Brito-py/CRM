@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { authenticator } from 'otplib';
+import { verify } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -111,7 +111,10 @@ const createCredentialsProvider = () =>
           throw new Error('2FA secret is missing. Please contact support.');
         }
 
-        const isValidToken = authenticator.check(credentials.token2fa, user.twoFactorSecret);
+        const isValidToken = await verify({
+          token: credentials.token2fa,
+          secret: user.twoFactorSecret
+        });
 
         if (!isValidToken) {
           await sleep(200);
