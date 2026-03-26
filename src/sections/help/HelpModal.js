@@ -128,8 +128,8 @@ const Step = ({ number, title, desc }) => (
 
 const TipBox = ({ children }) => (
   <div className="mt-4 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl">
-    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0.5">💡 Dica</p>
-    <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed">{children}</p>
+    <p className="text-xs font-bold text-amber-700 dark:text-amber-300 mb-0.5">💡 Dica</p>
+    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">{children}</p>
   </div>
 );
 
@@ -848,7 +848,7 @@ const HelpModal = ({ isOpen, toggle }) => {
               </div>
 
               <div
-                className="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-zinc-400"
+                className="max-w-none text-sm text-gray-600 dark:text-zinc-400 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:text-gray-900 dark:[&>h3]:text-white [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ul>li]:mb-1 [&>ul>li>b]:text-gray-800 dark:[&>ul>li>b]:text-zinc-200 [&>p>b]:text-gray-800 dark:[&>p>b]:text-zinc-200"
                 dangerouslySetInnerHTML={{ __html: sanitizeHelpHtml(t(`help.category.${activeCategory}.content`)) }}
               />
 

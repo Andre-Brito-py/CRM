@@ -1,4 +1,4 @@
-import { authenticator } from 'otplib';
+import { TOTP } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
@@ -42,10 +42,12 @@ const handler = async (req, res) => {
             return res.status(400).json({ error: { msg: '2FA is already enabled' } });
         }
 
+        const totp = new TOTP();
+
         // Generate secret only if not exists or if explicitly resetting
         let secret = user.twoFactorSecret;
         if (!secret || req.body.reset) {
-            secret = authenticator.generateSecret();
+            secret = totp.generateSecret();
             await prisma.user.update({
                 where: { id: user.id },
                 data: { twoFactorSecret: secret }
@@ -54,7 +56,7 @@ const handler = async (req, res) => {
 
         // Generate URI for Google Authenticator
         const userEmail = user.email || 'user@vysify.com';
-        const otpauth = authenticator.keyuri(userEmail, 'Vysify', secret);
+        const otpauth = totp.toURI({ issuer: 'Vysify', label: userEmail, secret });
 
         // Generate QR Code as SVG to avoid Canvas native binding crashes on Vercel
         const svgString = await QRCode.toString(otpauth, { type: 'svg' });

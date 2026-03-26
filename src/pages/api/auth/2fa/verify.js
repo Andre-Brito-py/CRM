@@ -1,4 +1,4 @@
-import { authenticator } from 'otplib';
+import { TOTP } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
@@ -43,7 +43,8 @@ const handler = async (req, res) => {
             return res.status(400).json({ error: { msg: '2FA is not setup for this user' } });
         }
 
-        const isValid = authenticator.check(token, user.twoFactorSecret);
+        const totp = new TOTP();
+        const isValid = await totp.verify(token, { secret: user.twoFactorSecret });
 
         if (!isValid) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
