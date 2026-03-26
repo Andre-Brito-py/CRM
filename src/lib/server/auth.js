@@ -103,16 +103,13 @@ const createCredentialsProvider = () =>
       }
 
       if (user.twoFactorEnabled) {
-        if (!credentials.token2fa) {
+        const token = String(credentials.token2fa || '').replace(/\s/g, '');
+        if (token.length !== 6) {
           throw new Error('2FA_REQUIRED');
         }
 
-        if (!user.twoFactorSecret) {
-          throw new Error('2FA secret is missing. Please contact support.');
-        }
-
         const isValidToken = await verify({
-          token: credentials.token2fa,
+          token,
           secret: user.twoFactorSecret
         });
 
