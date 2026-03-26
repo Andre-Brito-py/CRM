@@ -4,56 +4,33 @@ export default function middleware(req) {
   const { pathname } = req.nextUrl;
   const hostname = req.headers.get('host') || '';
   const hostnameWithoutPort = hostname.includes(':') ? hostname.split(':')[0] : hostname;
-  const requestIdHeader = req.headers.get('x-request-id') || '';
-  const requestId =
-    requestIdHeader.trim().length > 0
-      ? requestIdHeader.trim()
-      : globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  const requestHeaders = new Headers(req.headers);
-  requestHeaders.set('x-request-id', requestId);
-
-  if (
-    process.env.NODE_ENV !== 'production' &&
-    (hostnameWithoutPort === 'localhost' || hostnameWithoutPort === '127.0.0.1')
-  ) {
-    const res = NextResponse.next({ request: { headers: requestHeaders } });
-    res.headers.set('x-request-id', requestId);
-    return res;
-  }
+  
+  // LOG FOR DEBUGGING (USER CAN SEE IN VERCEL)
+  console.log(`[DEBUG_MIDDLEWARE] Host: ${hostnameWithoutPort}, Path: ${pathname}`);
 
   let appUrl = process.env.APP_URL;
-  if (!appUrl) {
-    appUrl = 'http://localhost:3000';
-  }
-
+  if (!appUrl) appUrl = 'http://localhost:3000';
   const appHostname = new URL(appUrl).hostname;
 
+  // 1. Direct pass for main domain
+  if (hostnameWithoutPort === appHostname || hostnameWithoutPort === 'localhost' || hostnameWithoutPort === '127.0.0.1') {
+    return NextResponse.next();
+  }
+
+  // 2. Multi-tenant logic only if not main domain
   const currentHost = hostnameWithoutPort.replace(`.${appHostname}`, '');
   const site = currentHost.trim().toLowerCase();
 
-  if (pathname.startsWith(`/_sites`)) {
-    return new Response(null, { status: 404 });
+  if (pathname.startsWith(`/_sites`) || pathname.startsWith('/api')) {
+    return NextResponse.next();
   }
 
-  if (!pathname.includes('.') && !pathname.startsWith('/api')) {
-    if (hostnameWithoutPort === appHostname) {
-      const res = NextResponse.next({ request: { headers: requestHeaders } });
-      res.headers.set('x-request-id', requestId);
-      return res;
-    }
-
-    if (!/^[a-z0-9-]{1,63}$/.test(site)) {
-      return new Response(null, { status: 404 });
-    }
-
+  if (!pathname.includes('.')) {
     const url = req.nextUrl.clone();
     url.pathname = `/_sites/${site}${pathname}`;
-    const res = NextResponse.rewrite(url, { request: { headers: requestHeaders } });
-    res.headers.set('x-request-id', requestId);
-    return res;
+    return NextResponse.rewrite(url);
   }
 
-  const res = NextResponse.next({ request: { headers: requestHeaders } });
-  res.headers.set('x-request-id', requestId);
-  return res;
+  return NextResponse.next();
 }
+
