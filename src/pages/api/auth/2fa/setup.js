@@ -56,8 +56,9 @@ const handler = async (req, res) => {
         const userEmail = user.email || 'user@vysify.com';
         const otpauth = authenticator.keyuri(userEmail, 'Vysify', secret);
 
-        // Generate QR Code image data URL
-        const qrCodeUrl = await QRCode.toDataURL(otpauth);
+        // Generate QR Code as SVG to avoid Canvas native binding crashes on Vercel
+        const svgString = await QRCode.toString(otpauth, { type: 'svg' });
+        const qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(svgString).toString('base64')}`;
 
         res.status(200).json({ data: { qrCodeUrl } });
     } catch (error) {
