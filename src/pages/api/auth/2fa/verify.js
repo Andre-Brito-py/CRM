@@ -1,8 +1,8 @@
-import { TOTP } from 'otplib';
-import { validateSession } from '@/config/api-validation';
-import prisma from '@/prisma/index';
-import { log, reportError } from '@/lib/server/logger';
-import { rateLimit } from '@/lib/server/rateLimit';
+const { TOTP } = require('otplib');
+const { validateSession } = require('@/config/api-validation');
+const prisma = require('@/prisma/index').default;
+const { log, reportError } = require('@/lib/server/logger');
+const { rateLimit } = require('@/lib/server/rateLimit');
 
 export const config = {
     api: {
@@ -28,7 +28,11 @@ const handler = async (req, res) => {
     }
 
     try {
-        const userId = session.user.userId || session.user.id;
+        const userId = session.user?.userId || session.user?.id;
+        if (!userId) {
+            throw new Error('User ID not found in session');
+        }
+
         const rl = await rateLimit({ req, limit: 20, windowMs: 5 * 60_000, key: `u:${userId}:2fa:verify` });
         if (!rl.ok) {
             log({ level: 'warn', msg: 'auth_2fa_verify_rate_limited', requestId, userId });
@@ -61,8 +65,8 @@ const handler = async (req, res) => {
         res.status(200).json({ data: { success: true, enabled: enable } });
     } catch (error) {
         console.error('[2FA VERIFY ERROR]:', error);
-        log({ level: 'error', msg: 'auth_2fa_verify_failed', requestId, userId: session.user.userId, error: error.message });
-        reportError(error, { route: '/api/auth/2fa/verify', requestId, userId: session.user.userId });
+        log({ level: 'error', msg: 'auth_2fa_verify_failed', requestId, userId: session?.user?.userId, error: error.message });
+        reportError(error, { route: '/api/auth/2fa/verify', requestId, userId: session?.user?.userId });
         res.status(500).json({ error: { msg: 'Failed to verify token', detail: error.message } });
     }
 };

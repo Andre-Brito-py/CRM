@@ -33,10 +33,16 @@ const SecuritySettings = () => {
                 method: 'POST',
             });
 
-            setQrCodeUrl(response.data.qrCodeUrl);
-            setShowSetupModal(true);
+            if (response.data?.qrCodeUrl) {
+                setQrCodeUrl(response.data.qrCodeUrl);
+                setShowSetupModal(true);
+            } else {
+                throw new Error(response.error?.msg || 'Failed to get QR code');
+            }
         } catch (error) {
-            toast.error(t('security.2fa.setupFailed'));
+            console.error('2FA Setup Error:', error);
+            const detail = error.response?.data?.error?.detail || error.message;
+            toast.error(`${t('security.2fa.setupFailed')} (${detail})`);
         }
     };
 
@@ -59,7 +65,9 @@ const SecuritySettings = () => {
                 await update(); // Update NextAuth session
             }
         } catch (error) {
-            toast.error(error.message || t('security.2fa.invalidCode'));
+            console.error('2FA Verify Error:', error);
+            const detail = error.response?.data?.error?.detail || error.message;
+            toast.error(`${t('security.2fa.invalidCode')} (${detail})`);
         } finally {
             setIsSubmitting(false);
         }
@@ -86,7 +94,9 @@ const SecuritySettings = () => {
                     await update();
                 }
             } catch (error) {
-                toast.error(t('security.2fa.disableFailed'));
+                console.error('2FA Disable Error:', error);
+                const detail = error.response?.data?.error?.detail || error.message;
+                toast.error(`${t('security.2fa.disableFailed')} (${detail})`);
             }
         }
     };

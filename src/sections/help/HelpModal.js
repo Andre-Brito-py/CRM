@@ -881,8 +881,21 @@ const HelpModal = ({ isOpen, toggle }) => {
                 </h2>
               </div>
               {TUTORIAL_CONTENT[activeTutorial]?.render()}
-              <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 text-center">
-                <p className="text-xs text-gray-400 dark:text-zinc-500">{t('help.footer.text')}</p>
+              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <p className="text-xs text-gray-400 dark:text-zinc-500">
+                  {t('help.footer.text')}
+                </p>
+                <div className="flex flex-col items-end gap-1">
+                  <a
+                    href="https://vysify.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                  >
+                    vysify.com
+                  </a>
+                  <span className="text-[10px] text-zinc-500 opacity-50">v1.4.1-Fix (26/03 16:15)</span>
+                </div>
               </div>
             </div>
           )}
