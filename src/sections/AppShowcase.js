@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import QRCode from 'qrcode';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { 
@@ -13,8 +14,32 @@ import Modal from '@/components/Modal';
 const AppShowcase = () => {
   const { t } = useTranslation();
   const [showModal, setShowModal] = useState(false);
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
 
   const toggleModal = () => setShowModal(!showModal);
+
+  useEffect(() => {
+    const generateQRCode = async () => {
+      try {
+        const url = `${window.location.origin}/?source=qrcode`;
+        const dataUrl = await QRCode.toDataURL(url, {
+          width: 400,
+          margin: 2,
+          color: {
+            dark: '#111827', // gray-900
+            light: '#ffffff'
+          }
+        });
+        setQrCodeUrl(dataUrl);
+      } catch (err) {
+        console.error('Failed to generate QR Code:', err);
+      }
+    };
+
+    if (showModal && !qrCodeUrl) {
+      generateQRCode();
+    }
+  }, [showModal, qrCodeUrl]);
 
   const features = [
     {
@@ -200,14 +225,21 @@ const AppShowcase = () => {
         toggle={toggleModal}
       >
         <div className="flex flex-col items-center text-center py-6">
-            <div className="w-48 h-48 bg-gray-100 dark:bg-gray-800 rounded-3xl flex items-center justify-center mb-8 border-2 border-dashed border-gray-300 dark:border-gray-600 relative overflow-hidden group">
-                <QrCodeIcon className="w-32 h-32 text-gray-400 group-hover:scale-110 transition-transform duration-500" />
-                {/* Simulated QR blocks with CSS for realistic look */}
-                <div className="absolute inset-0 grid grid-cols-4 grid-rows-4 opacity-10 pointer-events-none">
-                    {[...Array(16)].map((_, i) => (
-                        <div key={i} className={`border border-black dark:border-white ${Math.random() > 0.5 ? 'bg-black dark:bg-white' : ''}`} />
-                    ))}
-                </div>
+            <div className="w-56 h-56 bg-white dark:bg-white rounded-3xl flex items-center justify-center mb-8 border-2 border-gray-100 dark:border-gray-800 shadow-2xl relative overflow-hidden group p-4">
+                {qrCodeUrl ? (
+                  <motion.img 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    src={qrCodeUrl} 
+                    alt="Vysify App QR Code" 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <QrCodeIcon className="w-16 h-16 text-gray-300 animate-pulse" />
+                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Generating...</span>
+                  </div>
+                )}
             </div>
             
             <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-sm">

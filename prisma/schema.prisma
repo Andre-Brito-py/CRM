@@ -215,6 +215,7 @@ model User {
   notifications         Notification[]
   createdWorkspace      Workspace[]
   aiUsageEvents         AiUsageEvent[]
+  whatsAppUsageEvents   WhatsAppUsageEvent[]
   internalChatChannelsAsA InternalChatChannel[] @relation("InternalChatUserA")
   internalChatChannelsAsB InternalChatChannel[] @relation("InternalChatUserB")
   internalChatMessages  InternalChatMessage[]
@@ -434,6 +435,7 @@ model Workspace {
   webhooks               Webhook[]
   webForms               WebForm[]
   aiUsageEvents          AiUsageEvent[]
+  whatsAppUsageEvents    WhatsAppUsageEvent[]
   internalChatChannels   InternalChatChannel[]
   internalChatMessages   InternalChatMessage[]
   internalChatBridgeWorkspaces InternalChatBridgeWorkspace[]
@@ -1155,4 +1157,29 @@ model SystemError {
 
   @@index([level, createdAt])
   @@map("system_errors")
+}
+
+model WhatsAppUsageEvent {
+  id                   String   @id @default(cuid())
+  workspaceId          String
+  userId               String?
+  messageId            String?  // External WhatsApp message ID (wamid)
+  direction            String   @default("OUTBOUND") // OUTBOUND or INBOUND
+  provider             String   @default("whatsapp")
+  overageMode          Boolean  @default(false)
+  billedAmount         Int?     // In cents (reserved for future billing)
+  billedCurrency       String?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  stripeInvoiceItemId  String?
+  createdAt            DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, direction, createdAt])
+  @@index([overageMode, createdAt])
+  @@index([stripeSubscriptionId])
+  @@map("whatsapp_usage_events")
 }

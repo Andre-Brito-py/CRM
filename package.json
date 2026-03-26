@@ -1,6 +1,6 @@
 {
   "name": "vysify",
-  "version": "1.4.1-Beta",
+  "version": "1.5.0-Fix",
   "private": true,
   "scripts": {
     "dev": "next dev",

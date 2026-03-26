@@ -5,6 +5,22 @@ class MyDocument extends Document {
     return (
       <Html lang="en" suppressHydrationWarning>
         <Head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.addEventListener('beforeinstallprompt', (e) => {
+                  // Capture the prompt to prevent native browser behavior
+                  e.preventDefault();
+                  // Store it globally so our React component can use it later
+                  window.__deferredPrompt = e;
+                  
+                  // If we are on the landing page, we definitely want to silene it
+                  const isLanding = window.location.pathname === '/' || window.location.pathname.endsWith('/index');
+                  console.log('PWA Event captured. Landing page:', isLanding);
+                });
+              `,
+            }}
+          />
           <link rel="manifest" href="/manifest.json" />
           <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
           <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon.png" />

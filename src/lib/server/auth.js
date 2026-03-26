@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { authenticator } from 'otplib';
+import { verify } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -103,15 +103,15 @@ const createCredentialsProvider = () =>
       }
 
       if (user.twoFactorEnabled) {
-        if (!credentials.token2fa) {
+        const token = String(credentials.token2fa || '').replace(/\s/g, '');
+        if (token.length !== 6) {
           throw new Error('2FA_REQUIRED');
         }
 
-        if (!user.twoFactorSecret) {
-          throw new Error('2FA secret is missing. Please contact support.');
-        }
-
-        const isValidToken = authenticator.check(credentials.token2fa, user.twoFactorSecret);
+        const isValidToken = await verify({
+          token,
+          secret: user.twoFactorSecret
+        });
 
         if (!isValidToken) {
           await sleep(200);
@@ -300,10 +300,10 @@ const buildBaseAuthOptions = () => {
           Boolean(user) ||
           !token.role ||
           !token.email ||
-          !token.termsAcceptedAt ||
-          token.termsVersion !== requiredTermsVersion;
+          token.termsVersion !== requiredTermsVersion ||
+          !token.twoFactorEnabled;
 
-        if (!shouldRefresh) return token;
+        if (!shouldRefresh && token.twoFactorEnabled !== undefined) return token;
 
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },

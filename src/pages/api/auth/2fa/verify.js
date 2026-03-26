@@ -1,8 +1,7 @@
-import { authenticator } from 'otplib';
+import { verify } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
-import { rateLimit } from '@/lib/server/rateLimit';
 
 export const config = {
     api: {
@@ -13,26 +12,20 @@ export const config = {
 };
 
 const handler = async (req, res) => {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: { msg: `${req.method} method unsupported` } });
-    }
-
-    const session = await validateSession(req, res);
-    if (!session) return;
-    const requestId = String(req.headers['x-request-id'] || '').trim() || null;
-
-    const { token, enable } = req.body;
-
-    if (!token) {
-        return res.status(400).json({ error: { msg: 'Token is required' } });
-    }
-
     try {
-        const userId = session.user.userId || session.user.id;
-        const rl = await rateLimit({ req, limit: 20, windowMs: 5 * 60_000, key: `u:${userId}:2fa:verify` });
-        if (!rl.ok) {
-            log({ level: 'warn', msg: 'auth_2fa_verify_rate_limited', requestId, userId });
-            return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+        if (req.method !== 'POST') {
+            return res.status(405).json({ error: { msg: 'Method Unsupported' } });
+        }
+
+        const session = await validateSession(req, res);
+        if (!session) return;
+        const requestId = String(req.headers['x-request-id'] || '').trim() || null;
+        const userId = session.user?.userId || session.user?.id;
+
+        const { token, enable } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ error: { msg: 'Token is required' } });
         }
 
         const user = await prisma.user.findUnique({
@@ -40,28 +33,32 @@ const handler = async (req, res) => {
         });
 
         if (!user || !user.twoFactorSecret) {
-            return res.status(400).json({ error: { msg: '2FA is not setup for this user' } });
+            return res.status(400).json({ error: { msg: '2FA setup not found for user' } });
         }
 
-        const isValid = authenticator.check(token, user.twoFactorSecret);
+        // Verify token
+        const isValid = await verify({
+            token,
+            secret: user.twoFactorSecret
+        });
 
         if (!isValid) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
         }
 
-        // Toggle 2FA state based on the request (enable/disable)
+        // Update 2FA status
         if (enable !== undefined) {
             await prisma.user.update({
-                where: { id: user.id },
+                where: { id: userId },
                 data: { twoFactorEnabled: enable }
             });
         }
 
-        res.status(200).json({ data: { success: true, enabled: enable } });
+        return res.status(200).json({ data: { success: true, enabled: enable } });
     } catch (error) {
-        log({ level: 'error', msg: 'auth_2fa_verify_failed', requestId, userId: session.user.userId, error });
-        reportError(error, { route: '/api/auth/2fa/verify', requestId, userId: session.user.userId });
-        res.status(500).json({ error: { msg: 'Failed to verify token' } });
+        console.error('[2FA VERIFY ERROR]:', error);
+        log({ level: 'error', msg: 'auth_2fa_verify_failed', userId: session?.user?.id, error: error.message });
+        return res.status(500).json({ error: { msg: 'Failed to verify 2FA token', detail: error.message } });
     }
 };
 

@@ -128,8 +128,8 @@ const Step = ({ number, title, desc }) => (
 
 const TipBox = ({ children }) => (
   <div className="mt-4 px-4 py-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/40 rounded-xl">
-    <p className="text-xs font-bold text-amber-700 dark:text-amber-400 mb-0.5">💡 Dica</p>
-    <p className="text-xs text-amber-700 dark:text-amber-500 leading-relaxed">{children}</p>
+    <p className="text-xs font-bold text-amber-700 dark:text-amber-300 mb-0.5">💡 Dica</p>
+    <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">{children}</p>
   </div>
 );
 
@@ -748,7 +748,7 @@ const HelpModal = ({ isOpen, toggle }) => {
     <Modal show={isOpen} title={mode === 'tutorials' ? '📚 Tutoriais No-Code' : t('help.modal.title')} toggle={toggle} size="large">
       <div className="flex h-[560px] -m-6 border-t border-gray-100 dark:border-zinc-800">
         {/* ── Sidebar ─────────────────────────────────────────────── */}
-        <div className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 flex flex-col">
+        <div className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex flex-col">
           {/* Mode switcher */}
           <div className="flex gap-1 p-3 pb-0">
             <button
@@ -793,10 +793,10 @@ const HelpModal = ({ isOpen, toggle }) => {
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${isActive
                     ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/25'
-                    : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
+                    : 'text-gray-600 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400 dark:text-zinc-300'}`} />
                   {t(`help.category.${cat.key}.title`)}
                 </button>
               );
@@ -815,11 +815,11 @@ const HelpModal = ({ isOpen, toggle }) => {
                     : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${isActive ? 'text-blue-200' : 'text-gray-400 dark:text-zinc-500'}`} />
+                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${isActive ? 'text-blue-200' : 'text-gray-400 dark:text-zinc-300'}`} />
                   <div className="flex flex-col">
                     <span>{tut.title}</span>
                     {tut.subtitle && (
-                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-brand-100' : 'text-zinc-500'}`}>
+                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-brand-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
                         {tut.subtitle}
                       </span>
                     )}
@@ -848,7 +848,7 @@ const HelpModal = ({ isOpen, toggle }) => {
               </div>
 
               <div
-                className="prose prose-blue dark:prose-invert max-w-none text-gray-600 dark:text-zinc-400"
+                className="max-w-none text-sm text-gray-600 dark:text-zinc-400 [&>h3]:text-lg [&>h3]:font-bold [&>h3]:text-gray-900 dark:[&>h3]:text-white [&>h3]:mb-2 [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ul>li]:mb-1 [&>ul>li>b]:text-gray-800 dark:[&>ul>li>b]:text-zinc-200 [&>p>b]:text-gray-800 dark:[&>p>b]:text-zinc-200"
                 dangerouslySetInnerHTML={{ __html: sanitizeHelpHtml(t(`help.category.${activeCategory}.content`)) }}
               />
 
@@ -881,8 +881,21 @@ const HelpModal = ({ isOpen, toggle }) => {
                 </h2>
               </div>
               {TUTORIAL_CONTENT[activeTutorial]?.render()}
-              <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 text-center">
-                <p className="text-xs text-gray-400 dark:text-zinc-500">{t('help.footer.text')}</p>
+              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between">
+                <p className="text-xs text-gray-400 dark:text-zinc-500">
+                  {t('help.footer.text')}
+                </p>
+                <div className="flex flex-col items-end gap-1">
+                  <a
+                    href="https://vysify.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] font-medium text-brand-600 dark:text-brand-400 hover:underline"
+                  >
+                    vysify.com
+                  </a>
+                  <span className="text-[10px] text-zinc-500 opacity-50">v1.4.1-Fix (26/03 16:15)</span>
+                </div>
               </div>
             </div>
           )}
