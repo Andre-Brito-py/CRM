@@ -1,9 +1,9 @@
-const { TOTP } = require('otplib');
-const QRCode = require('qrcode');
-const { validateSession } = require('@/config/api-validation');
-const prisma = require('@/prisma/index').default;
-const { log, reportError } = require('@/lib/server/logger');
-const { rateLimit } = require('@/lib/server/rateLimit');
+import { TOTP } from 'otplib';
+import QRCode from 'qrcode';
+import { validateSession } from '@/config/api-validation';
+import prisma from '@/prisma/index';
+import { log, reportError } from '@/lib/server/logger';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 export const config = {
     api: {
@@ -73,8 +73,8 @@ const handler = async (req, res) => {
         res.status(200).json({ data: { qrCodeUrl } });
     } catch (error) {
         console.error('[2FA SETUP ERROR]:', error);
-        log({ level: 'error', msg: 'auth_2fa_setup_failed', requestId, userId: session?.user?.userId, error: error.message });
-        reportError(error, { route: '/api/auth/2fa/setup', requestId, userId: session?.user?.userId });
+        log({ level: 'error', msg: 'auth_2fa_setup_failed', requestId, userId: session?.user?.userId || session?.user?.id, error: error.message });
+        reportError(error, { route: '/api/auth/2fa/setup', requestId, userId: session?.user?.userId || session?.user?.id });
         res.status(500).json({ error: { msg: 'Failed to setup 2FA', detail: error.message } });
     }
 };
