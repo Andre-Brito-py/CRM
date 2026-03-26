@@ -15,6 +15,10 @@ const menu = () => [
         path: '/admin/whatsapp/usage',
       },
       {
+        name: 'WhatsApp / Simulator',
+        path: '/admin/whatsapp/simulate',
+      },
+      {
         name: 'API Settings',
         path: '/admin/settings',
       },
