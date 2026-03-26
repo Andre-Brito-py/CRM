@@ -748,7 +748,7 @@ const HelpModal = ({ isOpen, toggle }) => {
     <Modal show={isOpen} title={mode === 'tutorials' ? '📚 Tutoriais No-Code' : t('help.modal.title')} toggle={toggle} size="large">
       <div className="flex h-[560px] -m-6 border-t border-gray-100 dark:border-zinc-800">
         {/* ── Sidebar ─────────────────────────────────────────────── */}
-        <div className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 flex flex-col">
+        <div className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex flex-col">
           {/* Mode switcher */}
           <div className="flex gap-1 p-3 pb-0">
             <button
@@ -793,10 +793,10 @@ const HelpModal = ({ isOpen, toggle }) => {
                   onClick={() => setActiveCategory(cat.key)}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${isActive
                     ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/25'
-                    : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
+                    : 'text-gray-600 dark:text-zinc-200 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                  <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400 dark:text-zinc-300'}`} />
                   {t(`help.category.${cat.key}.title`)}
                 </button>
               );
@@ -815,11 +815,11 @@ const HelpModal = ({ isOpen, toggle }) => {
                     : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white'
                     }`}
                 >
-                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${isActive ? 'text-blue-200' : 'text-gray-400 dark:text-zinc-500'}`} />
+                  <Icon className={`h-5 w-5 shrink-0 mt-0.5 ${isActive ? 'text-blue-200' : 'text-gray-400 dark:text-zinc-300'}`} />
                   <div className="flex flex-col">
                     <span>{tut.title}</span>
                     {tut.subtitle && (
-                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-brand-100' : 'text-zinc-500'}`}>
+                      <span className={`text-xs leading-tight mt-0.5 ${isActive ? 'text-brand-100' : 'text-zinc-500 dark:text-zinc-400'}`}>
                         {tut.subtitle}
                       </span>
                     )}

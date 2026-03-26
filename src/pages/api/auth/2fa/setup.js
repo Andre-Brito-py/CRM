@@ -58,15 +58,20 @@ const handler = async (req, res) => {
         const userEmail = user.email || 'user@vysify.com';
         const otpauth = totp.toURI({ issuer: 'Vysify', label: userEmail, secret });
 
+        if (!otpauth) {
+            throw new Error('Failed to generate OTPAuth URI');
+        }
+
         // Generate QR Code as SVG to avoid Canvas native binding crashes on Vercel
         const svgString = await QRCode.toString(otpauth, { type: 'svg' });
         const qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(svgString).toString('base64')}`;
 
         res.status(200).json({ data: { qrCodeUrl } });
     } catch (error) {
-        log({ level: 'error', msg: 'auth_2fa_setup_failed', requestId, userId: session.user.userId, error });
+        console.error('[2FA SETUP ERROR]:', error);
+        log({ level: 'error', msg: 'auth_2fa_setup_failed', requestId, userId: session.user.userId, error: error.message });
         reportError(error, { route: '/api/auth/2fa/setup', requestId, userId: session.user.userId });
-        res.status(500).json({ error: { msg: 'Failed to setup 2FA' } });
+        res.status(500).json({ error: { msg: 'Failed to setup 2FA', detail: error.message } });
     }
 };
 

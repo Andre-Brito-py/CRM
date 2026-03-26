@@ -60,9 +60,10 @@ const handler = async (req, res) => {
 
         res.status(200).json({ data: { success: true, enabled: enable } });
     } catch (error) {
-        log({ level: 'error', msg: 'auth_2fa_verify_failed', requestId, userId: session.user.userId, error });
+        console.error('[2FA VERIFY ERROR]:', error);
+        log({ level: 'error', msg: 'auth_2fa_verify_failed', requestId, userId: session.user.userId, error: error.message });
         reportError(error, { route: '/api/auth/2fa/verify', requestId, userId: session.user.userId });
-        res.status(500).json({ error: { msg: 'Failed to verify token' } });
+        res.status(500).json({ error: { msg: 'Failed to verify token', detail: error.message } });
     }
 };
 
