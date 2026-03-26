@@ -221,9 +221,12 @@ const handler = async (req, res) => {
       return res.status(200).json({ data: { insights: "No deals found in this pipeline to analyze." } });
     }
 
+    // 224. Get Unified AI Service
+    const { generateChatCompletion } = await import('@/lib/server/ai/index');
+    const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
-    if (!openAiApiKey) {
+    if (!googleAiApiKey && !openAiApiKey) {
       await new Promise(resolve => setTimeout(resolve, 1500));
       return res.status(200).json({
         data: {
@@ -351,43 +354,41 @@ const handler = async (req, res) => {
       }
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: systemMessage },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 400
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error('OpenAI API Error');
+    // Call AI Service
+    let aiResponseData;
+    try {
+      aiResponseData = await generateChatCompletion({
+        messages: [{ role: 'user', content: prompt }],
+        systemPrompt: systemMessage,
+        options: {
+          model: 'gpt-3.5-turbo', // Fallback for OpenAI
+          temperature: 0.7,
+          maxTokens: 400
+        }
+      });
+    } catch (err) {
+      log({ level: 'error', msg: 'ai_service_error', requestId, workspaceId: workspace.id, error: err.message });
+      throw new Error(`AI Service Error: ${err.message}`);
     }
 
-    const data = await response.json();
     let result = { insights: "Unable to parse AI response", deals: [] };
 
     try {
-      const content = data.choices[0]?.message?.content?.trim();
+      const content = aiResponseData.content;
       // Remove markdown code blocks if present
       const jsonStr = content.replace(/^```json\n?/, '').replace(/```$/, '').trim();
       result = JSON.parse(jsonStr);
     } catch (e) {
       log({ level: 'error', msg: 'ai_insights_parse_error', requestId, workspaceId: workspace.id, error: e.message });
-      result.insights = data.choices[0]?.message?.content?.trim();
+      result.insights = aiResponseData.content;
     }
 
-    const tokensTotal = Number(data?.usage?.total_tokens || 0);
-    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
-    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+    const aiProvider = aiResponseData.provider;
+    const aiModel = aiResponseData.model;
+
+    const tokensTotal = Number(aiResponseData.usage?.total_tokens || 0);
+    const tokensPrompt = Number(aiResponseData.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(aiResponseData.usage?.completion_tokens || 0);
 
     let billingResult = null;
     if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {

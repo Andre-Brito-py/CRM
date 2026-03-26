@@ -52,6 +52,7 @@ const CATALOG = [
     title: 'IA',
     items: [
       { key: 'OPENAI_API_KEY', category: 'AI', label: 'OpenAI API Key', secret: true },
+      { key: 'GOOGLE_AI_API_KEY', category: 'AI', label: 'Google AI API Key (Gemini)', secret: true },
       { key: 'AI_QUOTA_WARN_PERCENT', category: 'AI', label: 'Aviso de cota (percentual, ex: 80)', secret: false, public: false },
       { key: 'AI_OVERAGE_ENABLED', category: 'AI', label: 'Permitir overage (true/false)', secret: false, public: false },
       { key: 'AI_OVERAGE_REQUIRE_OPTIN', category: 'AI', label: 'Exigir opt-in do cliente (true/false)', secret: false, public: false },

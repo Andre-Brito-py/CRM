@@ -191,9 +191,12 @@ const handler = async (req, res) => {
       return res.status(403).json({ error: { msg: 'Access denied' } });
     }
 
+    // 194. Get Unified AI Service
+    const { generateChatCompletion } = await import('@/lib/server/ai/index');
+    const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
     const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
-    if (!openAiApiKey) {
+    if (!googleAiApiKey && !openAiApiKey) {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const contact = conversation.contact?.name || 'cliente';
       const lastInbound = [...(conversation.messages || [])].reverse().find(m => m.direction === 'INBOUND');
@@ -209,7 +212,7 @@ const handler = async (req, res) => {
       });
     }
 
-    // Format messages for OpenAI
+    // Format messages for AI Service
     // INBOUND (from contact) -> user
     // OUTBOUND (from us) -> assistant
     const messages = conversation.messages.map(m => ({
@@ -343,39 +346,30 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
       }
     }
 
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20_000);
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages.slice(-20) // Context window of last 20 messages
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      })
-    });
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      log({ level: 'error', msg: 'ai_suggest_reply_provider_error', requestId, workspaceId: workspace.id, status: response.status });
+    // Call AI Service
+    let aiResponseData;
+    try {
+      aiResponseData = await generateChatCompletion({
+        messages: messages.slice(-20), // Context window of last 20 messages
+        systemPrompt,
+        options: {
+          model: 'gpt-3.5-turbo', // Fallback for OpenAI
+          temperature: 0.7,
+          maxTokens: 500
+        }
+      });
+    } catch (err) {
+      log({ level: 'error', msg: 'ai_suggest_reply_provider_error', requestId, workspaceId: workspace.id, error: err.message });
       return res.status(500).json({ error: { msg: 'Failed to generate response from AI provider' } });
     }
 
-    const data = await response.json();
-    const suggestion = data.choices[0]?.message?.content?.trim();
+    const suggestion = aiResponseData.content;
+    const aiProvider = aiResponseData.provider;
+    const aiModel = aiResponseData.model;
 
-    const tokensTotal = Number(data?.usage?.total_tokens || 0);
-    const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
-    const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+    const tokensTotal = Number(aiResponseData.usage?.total_tokens || 0);
+    const tokensPrompt = Number(aiResponseData.usage?.prompt_tokens || 0);
+    const tokensCompletion = Number(aiResponseData.usage?.completion_tokens || 0);
 
     let billingResult = null;
     if (overageMode && Number.isFinite(tokensTotal) && tokensTotal > 0) {
