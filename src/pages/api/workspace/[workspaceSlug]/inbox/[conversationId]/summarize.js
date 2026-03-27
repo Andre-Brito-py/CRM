@@ -207,9 +207,15 @@ const handler = async (req, res) => {
     if (!conversation) {
       return res.status(404).json({ error: { msg: 'Conversation not found' } });
     }
-
-    if (conversation.messages.length === 0) {
-      return res.status(200).json({ data: { summary: 'No messages to summarize yet.' } });
+    const messages = conversation.messages || [];
+    if (messages.length === 0) {
+      log({ level: 'info', msg: 'summarize_empty_conversation_mocking', requestId, conversationId });
+      return res.status(200).json({
+        data: {
+          summary: 'Esta é uma simulação de resumo de IA (Mock). Como sua conversa ainda não possui mensagens, a IA gerou este texto para demonstrar como o resumo aparecerá quando você tiver um histórico de interações.',
+          quota: { tokens: { remaining: 999, limit: 1000, warn: false } }
+        }
+      });
     }
 
     const transcript = buildTranscript(conversation.messages, conversation.contact?.name);

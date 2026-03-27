@@ -14,7 +14,7 @@ const DEFAULT_FREE_MODULES = {
     automations: false,
     analytics: false,
     nps: false,
-    ai_assistant: false,
+    ai_assistant: true,
     email_marketing: false,
     custom_fields: false,
     templates: true,

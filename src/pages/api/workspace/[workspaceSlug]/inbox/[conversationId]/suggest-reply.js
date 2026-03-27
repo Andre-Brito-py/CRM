@@ -189,6 +189,17 @@ const handler = async (req, res) => {
       return res.status(404).json({ error: { msg: 'Conversation not found' } });
     }
 
+    const rawMessages = conversation.messages || [];
+    if (rawMessages.length === 0) {
+      log({ level: 'info', msg: 'suggest_reply_empty_conversation_mocking', requestId, conversationId });
+      return res.status(200).json({
+        data: {
+          suggestion: 'Este é um exemplo de resposta gerada pela IA (Mock). Como esta conversa ainda não possui mensagens, estamos utilizando este texto apenas para demonstrar a funcionalidade.',
+          quota: { tokens: { remaining: 999, limit: 1000, warn: false } }
+        }
+      });
+    }
+
     if (conversation.workspaceId !== workspace.id) {
       return res.status(403).json({ error: { msg: 'Access denied' } });
     }
