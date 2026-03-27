@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import formatDistance from 'date-fns/formatDistance';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import { getServerSession } from 'next-auth/next';
 import toast from 'react-hot-toast';
 import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
@@ -19,7 +18,6 @@ import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const Billing = ({ invoices, products }) => {
   const { t } = useTranslation();
@@ -459,6 +457,8 @@ const Billing = ({ invoices, products }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
 

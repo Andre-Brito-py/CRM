@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { ArrowTopRightOnSquareIcon } from '@heroicons/react/24/outline';
-import { getServerSession } from 'next-auth/next';
-import { authOptions, getAuthOptions } from '@/lib/server/auth';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { mutate } from 'swr';
@@ -195,6 +193,8 @@ const Domain = ({ isTeamOwner, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;

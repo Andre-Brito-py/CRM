@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { DocumentDuplicateIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { signOut } from 'next-auth/react';
-import { getServerSession } from 'next-auth/next';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
 import isEmail from 'validator/lib/isEmail';
@@ -15,7 +14,6 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { getUser } from '@/prisma/services/user';
 import { useTranslation } from "react-i18next";
-import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const Settings = ({ user }) => {
   const [email, setEmail] = useState(user.email || '');
@@ -500,6 +498,8 @@ const Settings = ({ user }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
 

@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getServerSession } from 'next-auth/next';
 import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
-import { getAuthOptions } from '@/lib/server/auth';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
 import isAlphanumeric from 'validator/lib/isAlphanumeric';
@@ -295,6 +293,8 @@ const General = ({ isTeamOwner, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;

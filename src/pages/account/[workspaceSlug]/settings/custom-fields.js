@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { getServerSession } from 'next-auth/next';
 import toast from 'react-hot-toast';
 import { 
   PlusIcon, 
@@ -23,7 +22,6 @@ import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const FieldTypeIcon = ({ type, className = "w-5 h-5" }) => {
   switch (type) {
@@ -311,6 +309,8 @@ const CustomFields = ({ workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;

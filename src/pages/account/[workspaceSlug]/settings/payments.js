@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getServerSession } from 'next-auth/next';
-import { authOptions, getAuthOptions } from '@/lib/server/auth';
 import useSWR from 'swr';
 import toast from 'react-hot-toast';
 
@@ -120,6 +118,8 @@ const PaymentsSettings = ({ isTeamOwner, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
+  const { getServerSession } = await import('next-auth/next');
+  const { getAuthOptions } = await import('@/lib/server/auth');
   const options = await getAuthOptions();
   const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;
