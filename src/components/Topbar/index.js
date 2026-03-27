@@ -130,17 +130,7 @@ const Topbar = ({ menu, staticMenu }) => {
     setIsImpersonating(cookie.includes('vysify_impersonating=1'));
   }, []);
 
-  // Sync workspace from URL slug if not set
-  useEffect(() => {
-    if (router.query.workspaceSlug && workspacesData?.workspaces && !workspace) {
-      const currentWorkspace = workspacesData.workspaces.find(
-        (ws) => ws.slug === router.query.workspaceSlug
-      );
-      if (currentWorkspace) {
-        setWorkspace(currentWorkspace);
-      }
-    }
-  }, [router.query.workspaceSlug, workspacesData, workspace, setWorkspace]);
+
 
   const logOut = async () => {
     await signOut({ callbackUrl: '/' });

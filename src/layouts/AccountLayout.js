@@ -12,6 +12,7 @@ import sidebarMenu from '@/config/menu/sidebar-static';
 import { useWorkspace } from '@/providers/workspace';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import usePlanFeatures from '@/hooks/data/usePlanFeatures';
+import { useWorkspaces } from '@/hooks/data';
 
 const staticMenu = sidebarMenu();
 
@@ -19,7 +20,7 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
   const { status, data: session } = useSession();
   const { t } = useTranslation();
   const router = useRouter();
-  const { workspace } = useWorkspace();
+  const { workspace, setWorkspace } = useWorkspace();
 
   const requiredTermsVersion = process.env.NEXT_PUBLIC_TERMS_VERSION || '2026-03-13';
   const currentSlug = workspace?.slug || router.query.workspaceSlug;
@@ -33,6 +34,19 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
   }, [session?.user?.email, workspace?.members]);
   const workspaceMenu = currentSlug ? menu(currentSlug, { isOwner }) : [];
   const { allowedModules, trial } = usePlanFeatures();
+  const { data: workspacesData } = useWorkspaces();
+
+  // Sync workspace from URL slug if not set
+  useEffect(() => {
+    if (router.query.workspaceSlug && workspacesData?.workspaces && !workspace) {
+      const currentWorkspace = workspacesData.workspaces.find(
+        (ws) => ws.slug === router.query.workspaceSlug
+      );
+      if (currentWorkspace) {
+        setWorkspace(currentWorkspace);
+      }
+    }
+  }, [router.query.workspaceSlug, workspacesData, workspace, setWorkspace]);
 
   // Filtra seções inteiras do menu cujo módulo está desabilitado
   const filteredMenu = workspaceMenu.map(section => {

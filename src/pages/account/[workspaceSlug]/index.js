@@ -296,10 +296,19 @@ const Workspace = () => {
     },
   ].filter(Boolean);
 
-  return (
-    workspace && (
+  if (!workspace) {
+    return (
       <AccountLayout>
-        <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} />
+        <div className="flex h-[80vh] items-center justify-center">
+          <div className="w-10 h-10 border-4 border-zinc-200 dark:border-zinc-800 border-t-indigo-600 rounded-full animate-spin"></div>
+        </div>
+      </AccountLayout>
+    );
+  }
+
+  return (
+    <AccountLayout>
+      <OnboardingTour tourId="dashboard-tour" steps={dashboardSteps} />
         <Meta title={`Vysify - ${workspace.name} | Dashboard`} />
         <Content.Title
           title={workspace.name}
@@ -551,7 +560,6 @@ const Workspace = () => {
           </div>
         </Content.Container>
       </AccountLayout>
-    )
   );
 };
 
