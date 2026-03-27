@@ -107,7 +107,7 @@ const OnboardingTour = ({ tourId, steps, active = true }) => {
                 prevBtnText: t('onboarding.tour.btn.prev'),
                 doneBtnText: t('onboarding.tour.btn.done'),
                 allowClose: true,
-                onDismissed: () => {
+                onDestroyed: () => {
                     handleComplete(true);
                 },
                 steps: resolvedSteps,

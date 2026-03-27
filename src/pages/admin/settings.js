@@ -51,6 +51,7 @@ const CATALOG = [
   {
     title: 'IA',
     items: [
+      { key: 'PRIMARY_AI_PROVIDER', category: 'AI', label: 'Provedor Principal (GEMINI ou OPENAI)', secret: false, public: false },
       { key: 'OPENAI_API_KEY', category: 'AI', label: 'OpenAI API Key', secret: true },
       { key: 'GOOGLE_AI_API_KEY', category: 'AI', label: 'Google AI API Key (Gemini)', secret: true },
       { key: 'AI_QUOTA_WARN_PERCENT', category: 'AI', label: 'Aviso de cota (percentual, ex: 80)', secret: false, public: false },
