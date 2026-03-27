@@ -30,7 +30,7 @@ const MessageBubble = ({ message, isMe }) => {
           className={`px-4 py-2 text-[15px] leading-relaxed transition-all shadow-sm ${
             isMe
               ? 'bg-brand-600 text-white rounded-[18px] rounded-tr-none'
-              : 'bg-white text-zinc-800 border border-zinc-200 rounded-[18px] rounded-tl-none'
+              : 'bg-white dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 rounded-[18px] rounded-tl-none'
           }`}
         >
           <p className="whitespace-pre-wrap">{message.content}</p>

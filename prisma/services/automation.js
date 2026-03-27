@@ -7,6 +7,7 @@ import { createMessage, createConversation } from '@/prisma/services/conversatio
 import { createActivity } from '@/prisma/services/activity';
 import { renderTemplateString } from '@/prisma/services/template';
 import { getSystemConfig } from '@/lib/server/config';
+import { generateChatCompletion } from '@/lib/server/ai/index';
 import crypto from 'crypto';
 
 const MAX_AUTOMATION_JOB_ATTEMPTS = 5;
@@ -1223,8 +1224,10 @@ const executeAutoReplyAiAction = async (workspaceId, actionConfig, eventData) =>
   });
   if (!workspace) return;
 
+  const googleAiApiKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
   const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
-  if (!openAiApiKey) {
+
+  if (!googleAiApiKey && !openAiApiKey) {
     prisma.conversation.update({
       where: { id: conversationId },
       data: { autopilotEnabled: false },
@@ -1232,7 +1235,7 @@ const executeAutoReplyAiAction = async (workspaceId, actionConfig, eventData) =>
     await createActivity(workspaceId, null, {
       type: 'AUTOPILOT_HANDOFF',
       title: 'Autopilot handoff',
-      content: safeJsonStringify({ reason: 'missing_openai_key', conversationId }),
+      content: safeJsonStringify({ reason: 'missing_ai_key', conversationId }),
       contactId,
     });
     return;
@@ -1276,30 +1279,18 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
     content: clampText(m.content, 2000),
   }));
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20_000);
-
-  let response;
+  let aiData;
   try {
-    response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${openAiApiKey}`,
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
+    aiData = await generateChatCompletion({
+      messages: messages.slice(-20),
+      systemPrompt,
+      options: {
         model: 'gpt-3.5-turbo',
-        messages: [{ role: 'system', content: systemPrompt }, ...messages.slice(-20)],
         temperature: 0.7,
-        max_tokens: isEmail ? 500 : 250,
-      }),
+        maxTokens: isEmail ? 500 : 250
+      }
     });
-  } finally {
-    clearTimeout(timeout);
-  }
-
-  if (!response?.ok) {
+  } catch (err) {
     prisma.conversation.update({
       where: { id: conversationId },
       data: { autopilotEnabled: false },
@@ -1307,14 +1298,13 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
     await createActivity(workspaceId, null, {
       type: 'AUTOPILOT_HANDOFF',
       title: 'Autopilot handoff',
-      content: safeJsonStringify({ reason: 'provider_error', status: response?.status || null, conversationId }),
+      content: safeJsonStringify({ reason: 'provider_error', error: err.message, conversationId }),
       contactId,
     });
     return;
   }
 
-  const data = await response.json();
-  const suggestion = String(data?.choices?.[0]?.message?.content || '').trim();
+  const suggestion = String(aiData?.content || '').trim();
   if (!suggestion) {
     prisma.conversation.update({
       where: { id: conversationId },
@@ -1329,9 +1319,9 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
     return;
   }
 
-  const tokensTotal = Number(data?.usage?.total_tokens || 0);
-  const tokensPrompt = Number(data?.usage?.prompt_tokens || 0);
-  const tokensCompletion = Number(data?.usage?.completion_tokens || 0);
+  const tokensTotal = Number(aiData?.usage?.total_tokens || 0);
+  const tokensPrompt = Number(aiData?.usage?.prompt_tokens || 0);
+  const tokensCompletion = Number(aiData?.usage?.completion_tokens || 0);
 
   if (Number.isFinite(tokensTotal) && tokensTotal > 0) {
     prisma.aiUsageEvent?.create?.({
@@ -1340,8 +1330,8 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
         userId: null,
         requestId: null,
         route: '/automation/auto-reply',
-        provider: 'openai',
-        model: 'gpt-3.5-turbo',
+        provider: aiData?.provider || 'unknown',
+        model: aiData?.model || 'unknown',
         tokensTotal: Math.max(0, Math.floor(tokensTotal)),
         tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
         tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,

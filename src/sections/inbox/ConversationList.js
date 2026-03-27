@@ -42,7 +42,7 @@ const ConversationList = ({
   }, [localSearch, searchText, setSearchText]);
 
   return (
-    <div className="flex flex-col h-full bg-white/40 backdrop-blur-xl border-r border-zinc-200/50 w-full md:w-[320px] lg:w-[380px]">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 w-full md:w-[320px] lg:w-[380px]">
       <div className="p-4 border-b border-zinc-100/80 flex flex-col gap-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-zinc-900 tracking-tight">
@@ -54,19 +54,19 @@ const ConversationList = ({
             onClick={() => setShowFilters(!showFilters)}
             className={`p-2 rounded-xl transition-all duration-300 border ${
               showFilters || (filterAssignee && filterAssignee !== user?.id && filterAssignee !== 'unassigned') || filterStatus 
-                ? 'bg-brand-50 border-brand-100 text-brand-600 shadow-sm' 
-                : 'bg-white border-zinc-100 text-zinc-400 hover:bg-zinc-50'
+                ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-100 dark:border-brand-500/30 text-brand-600 dark:text-brand-400 shadow-sm' 
+                : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
             }`}
           >
             <FunnelIcon className="w-5 h-5 transition-transform duration-500" style={{ transform: showFilters ? 'rotate(180)deg' : 'none' }} />
           </motion.button>
         </div>
 
-        <div className="flex bg-zinc-100/50 p-1.5 rounded-[20px] border border-zinc-200/20">
+        <div className="flex bg-zinc-100/50 dark:bg-zinc-900/50 p-1.5 rounded-[20px] border border-zinc-200/20 dark:border-zinc-800">
           <button
             onClick={() => setFilterAssignee('')}
             className={`flex-1 text-[10px] font-black uppercase tracking-[0.15em] py-3 rounded-[14px] transition-all duration-300 ${
-              !filterAssignee ? 'bg-white text-zinc-900 shadow-premium border border-zinc-100' : 'text-zinc-500 hover:text-zinc-700'
+              !filterAssignee ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-premium border border-zinc-100 dark:border-zinc-600' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`}
           >
             {t('inbox.filter.all')}
@@ -75,7 +75,7 @@ const ConversationList = ({
             onClick={() => setFilterAssignee(user?.id)}
             disabled={!user?.id}
             className={`flex-1 text-[10px] font-black uppercase tracking-[0.15em] py-3 rounded-[14px] transition-all duration-300 ${
-              filterAssignee === user?.id ? 'bg-white text-zinc-900 shadow-premium border border-zinc-100' : 'text-zinc-500 hover:text-zinc-700'
+              filterAssignee === user?.id ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-premium border border-zinc-100 dark:border-zinc-600' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`}
           >
             {t('inbox.filter.mine')}
@@ -83,7 +83,7 @@ const ConversationList = ({
           <button
             onClick={() => setFilterAssignee('unassigned')}
             className={`flex-1 text-[10px] font-black uppercase tracking-[0.15em] py-3 rounded-[14px] transition-all duration-300 ${
-              filterAssignee === 'unassigned' ? 'bg-white text-zinc-900 shadow-premium border border-zinc-100' : 'text-zinc-500 hover:text-zinc-700'
+              filterAssignee === 'unassigned' ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white shadow-premium border border-zinc-100 dark:border-zinc-600' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
             }`}
           >
             {t('inbox.filter.unassigned')}
@@ -115,7 +115,7 @@ const ConversationList = ({
                   <select
                     value={filterAssignee}
                     onChange={(e) => setFilterAssignee(e.target.value)}
-                    className="w-full text-xs font-bold uppercase tracking-tight bg-white border border-zinc-100 rounded-xl px-4 py-3 focus:ring-brand-500/10 focus:border-brand-500/30 shadow-premium-sm"
+                    className="w-full text-xs font-bold uppercase tracking-tight bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-4 py-3 focus:ring-brand-500/10 focus:border-brand-500/30 shadow-premium-sm text-zinc-900 dark:text-white"
                   >
                     <option value="">{t('inbox.filters.allAssignees')}</option>
                     <option value="unassigned">{t('inbox.filter.unassigned')}</option>
@@ -132,7 +132,7 @@ const ConversationList = ({
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
-                    className="w-full text-xs font-bold uppercase tracking-tight bg-white border border-zinc-100 rounded-xl px-4 py-3 focus:ring-brand-500/10 focus:border-brand-500/30 shadow-premium-sm"
+                    className="w-full text-xs font-bold uppercase tracking-tight bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 rounded-xl px-4 py-3 focus:ring-brand-500/10 focus:border-brand-500/30 shadow-premium-sm text-zinc-900 dark:text-white"
                   >
                     <option value="">{t('inbox.filters.allStatuses')}</option>
                     <option value="OPEN">{t('inbox.status.open')}</option>
@@ -169,8 +169,8 @@ const ConversationList = ({
                     onClick={() => onSelect(conversation)}
                     className={`group flex flex-col p-3 cursor-pointer transition-colors relative rounded-lg ${
                       isActive 
-                        ? 'bg-brand-50/50 border-brand-100/50' 
-                        : 'hover:bg-zinc-50 border-transparent'
+                        ? 'bg-brand-50/50 dark:bg-brand-500/10 border-brand-100/50 dark:border-brand-500/20' 
+                        : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/50 border-transparent'
                     }`}
                   >
                     {isActive && (
@@ -210,7 +210,7 @@ const ConversationList = ({
                         </div>
                         <div className="ml-3 min-w-0">
                           <h3 className={`text-[15px] font-semibold transition-colors truncate ${
-                            isActive ? 'text-zinc-900' : 'text-zinc-800'
+                            isActive ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-800 dark:text-zinc-300 group-hover:text-zinc-900 dark:group-hover:text-white'
                           }`}>
                             {conversation.contact?.name || conversation.externalId || t('common.unknown')}
                           </h3>

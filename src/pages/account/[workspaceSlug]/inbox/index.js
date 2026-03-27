@@ -446,20 +446,20 @@ const Inbox = () => {
   ];
 
   return (
-    <AccountLayout>
+    <AccountLayout full={true}>
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
-      <Content>
-        <div className="flex flex-col h-[calc(100vh-140px)]">
+      <Content full={true}>
+        <div className="flex flex-col h-full overflow-hidden">
 
 
           {(conversationsData === undefined && !!workspaceSlug) ? (
-            <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg border border-gray-200">
-              <div className="w-12 h-12 border-4 border-zinc-200 border-t-brand-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-zinc-500 font-medium tracking-wide italic">Synchronizing communications...</p>
+            <div className="flex-1 flex flex-col items-center justify-center bg-white dark:bg-zinc-950 rounded-none md:rounded-xl shadow-lg border border-gray-200 dark:border-zinc-800">
+              <div className="w-12 h-12 border-4 border-zinc-200 dark:border-zinc-800 border-t-brand-600 rounded-full animate-spin mb-4"></div>
+              <p className="text-zinc-500 dark:text-zinc-400 font-medium tracking-wide italic">Synchronizing communications...</p>
             </div>
           ) : (
-            <div className="flex flex-1 overflow-hidden bg-white rounded-[32px] shadow-premium border border-zinc-100">
+            <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 rounded-none border-t border-zinc-100 dark:border-zinc-800">
               <div
                 id="conversation-list"
                 className={`${selectedId ? 'hidden md:block' : 'block'} h-full flex-shrink-0 w-full md:w-[420px] lg:w-[480px]`}

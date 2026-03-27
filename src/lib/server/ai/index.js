@@ -124,11 +124,20 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
   const model = options.model || 'gemini-1.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  // Convert OpenAI messages to Gemini contents
-  const contents = messages.map(m => ({
-    role: m.role === 'assistant' ? 'model' : 'user',
-    parts: [{ text: String(m.content || '') }]
-  }));
+  // Convert OpenAI messages to Gemini contents (must alternate roles)
+  const contents = [];
+  for (const m of messages) {
+    const role = m.role === 'assistant' ? 'model' : 'user';
+    const last = contents[contents.length - 1];
+    if (last && last.role === role) {
+      last.parts[0].text += `\n\n${String(m.content || '')}`;
+    } else {
+      contents.push({
+        role,
+        parts: [{ text: String(m.content || '') }]
+      });
+    }
+  }
 
   const body = {
     contents,

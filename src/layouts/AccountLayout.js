@@ -15,7 +15,7 @@ import usePlanFeatures from '@/hooks/data/usePlanFeatures';
 
 const staticMenu = sidebarMenu();
 
-const AccountLayout = ({ children }) => {
+const AccountLayout = ({ children, full = false }) => {
   const { status, data: session } = useSession();
   const { t } = useTranslation();
   const router = useRouter();
@@ -168,8 +168,8 @@ const AccountLayout = ({ children }) => {
         />
 
         {/* Main content area */}
-        <div className="relative flex flex-col flex-1 h-full overflow-y-auto bg-[var(--bg-primary)]">
-          <div className="px-6 py-8 lg:px-10 lg:py-10">
+        <div className={`relative flex flex-col flex-1 h-full bg-[var(--bg-primary)] ${full ? '' : 'overflow-y-auto'}`}>
+          <div className={full ? 'flex-1 h-full' : 'px-6 py-8 lg:px-10 lg:py-10'}>
             {children}
           </div>
         </div>
