@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline';
+import { 
+  DocumentDuplicateIcon, 
+  HomeIcon, 
+  BuildingOffice2Icon, 
+  BriefcaseIcon, 
+  SparklesIcon, 
+  RocketLaunchIcon, 
+  AcademicCapIcon, 
+  SunIcon, 
+  CakeIcon 
+} from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
@@ -16,6 +26,17 @@ import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
+
+const presetIcons = {
+  real_estate: HomeIcon,
+  clinic: BuildingOffice2Icon,
+  agency: BriefcaseIcon,
+  aesthetics: SparklesIcon,
+  dealership: RocketLaunchIcon,
+  infoproducts: AcademicCapIcon,
+  solar_energy: SunIcon,
+  restaurant: CakeIcon,
+};
 
 const General = ({ isTeamOwner, workspace }) => {
   const router = useRouter();
@@ -239,49 +260,53 @@ const General = ({ isTeamOwner, workspace }) => {
               >
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { id: 'real_estate', name: 'Real Estate', icon: '🏠' },
-                    { id: 'clinic', name: 'Clinic', icon: '⚕️' },
-                    { id: 'agency', name: 'Agency / B2B', icon: '💼' },
-                    { id: 'aesthetics', name: 'Aesthetics', icon: '✨' },
-                    { id: 'dealership', name: 'Dealership', icon: '🚗' },
-                    { id: 'infoproducts', name: 'Infoproducts', icon: '🎓' },
-                    { id: 'solar_energy', name: 'Solar Energy', icon: '☀️' },
-                    { id: 'restaurant', name: 'Restaurant', icon: '🍽️' },
-                  ].map(preset => (
-                    <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-brand-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
-                      <span className="text-3xl mb-2">{preset.icon}</span>
-                      <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{preset.name}</h4>
-                      <p className="text-xs text-zinc-500 mt-2">{t("settings.workspace.presets.custom")}</p>
-                      <Button
-                        className="mt-4 w-full bg-brand-600 text-white hover:bg-brand-700 text-xs py-1.5"
-                        onClick={async () => {
-                          if (confirm(t("settings.workspace.presets.confirm", { name: preset.name }))) {
-                            try {
-                              setSubmittingState(true);
-                              toast.loading(t("settings.workspace.presets.applying"), { id: 'preset' });
-                              const res = await api(`/api/workspace/${workspace.slug}/presets`, {
-                                method: 'POST',
-                                body: { presetId: preset.id }
-                              });
-                              if (res.data) {
-                                toast.success(t("settings.workspace.presets.success"), { id: 'preset' });
-                                setTimeout(() => router.reload(), 1500);
-                              } else {
-                                throw new Error(res.error?.msg || 'Error');
+                    { id: 'real_estate', name: 'Real Estate' },
+                    { id: 'clinic', name: 'Clinic' },
+                    { id: 'agency', name: 'Agency / B2B' },
+                    { id: 'aesthetics', name: 'Aesthetics' },
+                    { id: 'dealership', name: 'Dealership' },
+                    { id: 'infoproducts', name: 'Infoproducts' },
+                    { id: 'solar_energy', name: 'Solar Energy' },
+                    { id: 'restaurant', name: 'Restaurant' },
+                  ].map(preset => {
+                    const Icon = presetIcons[preset.id] || HomeIcon;
+                    return (
+                      <div key={preset.id} className="group border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/10 cursor-pointer transition-all duration-300 bg-white dark:bg-zinc-900 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <Icon className="w-10 h-10 mb-3 text-zinc-400 group-hover:text-brand-600 transition-colors" />
+                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{preset.name}</h4>
+                        <p className="text-xs text-zinc-500 mt-2">{t("settings.workspace.presets.custom")}</p>
+                        <Button
+                          className="mt-4 w-full bg-brand-600 text-white hover:bg-brand-700 text-xs py-1.5"
+                          onClick={async () => {
+                            if (confirm(t("settings.workspace.presets.confirm", { name: preset.name }))) {
+                              try {
+                                setSubmittingState(true);
+                                toast.loading(t("settings.workspace.presets.applying"), { id: 'preset' });
+                                const res = await api(`/api/workspace/${workspace.slug}/presets`, {
+                                  method: 'POST',
+                                  body: { presetId: preset.id }
+                                });
+                                if (res.data) {
+                                  toast.success(t("settings.workspace.presets.success"), { id: 'preset' });
+                                  setTimeout(() => router.reload(), 1500);
+                                } else {
+                                  throw new Error(res.error?.msg || 'Error');
+                                }
+                              } catch (err) {
+                                toast.error(t("settings.workspace.presets.err"), { id: 'preset' });
+                              } finally {
+                                setSubmittingState(false);
                               }
-                            } catch (err) {
-                              toast.error(t("settings.workspace.presets.err"), { id: 'preset' });
-                            } finally {
-                              setSubmittingState(false);
                             }
-                          }
-                        }}
-                        disabled={isSubmitting}
-                      >
-                        {t("settings.workspace.presets.apply")}
-                      </Button>
-                    </div>
-                  ))}
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          {t("settings.workspace.presets.apply")}
+                        </Button>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card.Body>
             </Card>
