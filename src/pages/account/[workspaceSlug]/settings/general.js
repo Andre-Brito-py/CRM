@@ -260,26 +260,27 @@ const General = ({ isTeamOwner, workspace }) => {
               >
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { id: 'real_estate', name: 'Real Estate' },
-                    { id: 'clinic', name: 'Clinic' },
-                    { id: 'agency', name: 'Agency / B2B' },
-                    { id: 'aesthetics', name: 'Aesthetics' },
-                    { id: 'dealership', name: 'Dealership' },
-                    { id: 'infoproducts', name: 'Infoproducts' },
-                    { id: 'solar_energy', name: 'Solar Energy' },
-                    { id: 'restaurant', name: 'Restaurant' },
+                    { id: 'real_estate' },
+                    { id: 'clinic' },
+                    { id: 'agency' },
+                    { id: 'aesthetics' },
+                    { id: 'dealership' },
+                    { id: 'infoproducts' },
+                    { id: 'solar_energy' },
+                    { id: 'restaurant' },
                   ].map(preset => {
                     const Icon = presetIcons[preset.id] || HomeIcon;
+                    const presetName = t(`settings.workspace.presets.industry.${preset.id}`);
                     return (
                       <div key={preset.id} className="group border border-zinc-100 dark:border-zinc-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:border-brand-500 hover:shadow-xl hover:shadow-brand-500/10 cursor-pointer transition-all duration-300 bg-white dark:bg-zinc-900 overflow-hidden relative">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                         <Icon className="w-10 h-10 mb-3 text-zinc-400 group-hover:text-brand-600 transition-colors" />
-                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{preset.name}</h4>
+                        <h4 className="font-bold text-zinc-900 dark:text-zinc-100 text-sm">{presetName}</h4>
                         <p className="text-xs text-zinc-500 mt-2">{t("settings.workspace.presets.custom")}</p>
                         <Button
                           className="mt-4 w-full bg-brand-600 text-white hover:bg-brand-700 text-xs py-1.5"
                           onClick={async () => {
-                            if (confirm(t("settings.workspace.presets.confirm", { name: preset.name }))) {
+                            if (confirm(t("settings.workspace.presets.confirm", { name: presetName }))) {
                               try {
                                 setSubmittingState(true);
                                 toast.loading(t("settings.workspace.presets.applying"), { id: 'preset' });
