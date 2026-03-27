@@ -68,7 +68,8 @@ const Inbox = () => {
     workspaceSlug && selectedId
       ? `/api/workspace/${workspaceSlug}/inbox/${selectedId}`
       : null,
-    api
+    api,
+    { refreshInterval: selectedId ? 3000 : 0 }
   );
 
   // Fetch templates
@@ -329,10 +330,11 @@ const Inbox = () => {
     if (!selectedConversation) return;
 
     const previousConversations = [...conversations];
+    const previousDetail = detailData ? { ...detailData } : null;
 
     // Optimistic update
     const newMessage = {
-      id: Date.now().toString(),
+      id: `temp-${Date.now()}`,
       content,
       direction: 'OUTBOUND',
       createdAt: new Date().toISOString(),
@@ -346,14 +348,24 @@ const Inbox = () => {
       updatedAt: new Date().toISOString(),
     };
 
-    // Update local state immediately
+    // Update List Cache
     mutateConversations({
       data: {
-        conversations: conversations.map((c) =>
+        conversations: (conversations || []).map((c) =>
           c.id === selectedId ? updatedConversation : c
         )
       }
     }, false);
+
+    // Update Detail Cache
+    mutateConversation({
+      data: {
+        conversation: updatedConversation
+      }
+    }, false);
+
+    // Update local state directly for immediate UI reaction
+    setSelectedConversation(updatedConversation);
 
     try {
       await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
@@ -365,14 +377,15 @@ const Inbox = () => {
           type: selectedConversation.platform === 'EMAIL' ? 'EMAIL' : 'TEXT',
         }),
       });
-      // Revalidate both list and detail
+      // Revalidate both
       mutateConversations();
       mutateConversation();
     } catch (error) {
       console.error(error);
       toast.error(t('inbox.message.sendFailed'));
-      // Rollback
+      // Rollback both
       mutateConversations({ data: { conversations: previousConversations } }, false);
+      if (previousDetail) mutateConversation(previousDetail, false);
     }
   };
 
