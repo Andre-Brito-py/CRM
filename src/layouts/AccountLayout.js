@@ -15,7 +15,7 @@ import usePlanFeatures from '@/hooks/data/usePlanFeatures';
 
 const staticMenu = sidebarMenu();
 
-const AccountLayout = ({ children, full = false }) => {
+const AccountLayout = ({ children, full = false, immersive = false }) => {
   const { status, data: session } = useSession();
   const { t } = useTranslation();
   const router = useRouter();
@@ -120,7 +120,7 @@ const AccountLayout = ({ children, full = false }) => {
   return (
     <main className="relative flex flex-col w-screen h-screen overflow-hidden selection:bg-brand-100 selection:text-brand-900 transition-colors duration-300">
       {/* Top navigation bar */}
-      <Topbar menu={filteredMenu} staticMenu={staticMenu} />
+      {!immersive && <Topbar menu={filteredMenu} staticMenu={staticMenu} />}
 
       {/* Trial banner */}
       {trial.hasTrial && (
@@ -160,12 +160,14 @@ const AccountLayout = ({ children, full = false }) => {
 
       {/* Body row: optional ContextSidebar + main content */}
       <div className="relative flex flex-row flex-1 min-h-0 overflow-hidden">
-        <ContextSidebar
-          items={activeSection?.items || []}
-          sectionLabel={activeSection?.label || ''}
-          visible={!!activeSection && activeSection.items?.length > 0}
-          allowedModules={allowedModules}
-        />
+        {!immersive && (
+          <ContextSidebar
+            items={activeSection?.items || []}
+            sectionLabel={activeSection?.label || ''}
+            visible={!!activeSection && activeSection.items?.length > 0}
+            allowedModules={allowedModules}
+          />
+        )}
 
         {/* Main content area */}
         <div className={`relative flex flex-col flex-1 h-full bg-[var(--bg-primary)] ${full ? '' : 'overflow-y-auto'}`}>
