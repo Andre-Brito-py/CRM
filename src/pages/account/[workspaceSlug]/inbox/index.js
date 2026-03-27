@@ -13,6 +13,7 @@ import ConversationList from '@/sections/inbox/ConversationList';
 import ChatWindow from '@/sections/inbox/ChatWindow';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import api from '@/lib/common/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -29,6 +30,16 @@ import {
   YAxis,
 } from 'recharts';
 
+import {
+  CreditCardIcon,
+  CalendarDaysIcon,
+  EnvelopeIcon,
+  ChatBubbleLeftRightIcon,
+  CameraIcon,
+  FunnelIcon,
+  XMarkIcon
+} from '@heroicons/react/24/outline';
+
 const Inbox = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -44,9 +55,12 @@ const Inbox = () => {
   const [isSummarizingAI, setIsSummarizingAI] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
-  const [aiObjective, setAiObjective] = useState('');
+  const [aiObjective, setAiObjective] = useState('qualify');
   const [aiSuggestOnlyEnabled, setAiSuggestOnlyEnabled] = useState(true);
   const [isTogglingAutopilot, setIsTogglingAutopilot] = useState(false);
+  const [showAiDebug, setShowAiDebug] = useState(false);
+  const [aiDiagnostics, setAiDiagnostics] = useState(null);
+  const [isLoadingDiagnostics, setIsLoadingDiagnostics] = useState(false);
 
   const locale = useMemo(() => {
     const base = (i18n?.language || 'en').split('-')[0];
@@ -331,8 +345,31 @@ const Inbox = () => {
     }
   };
 
+  const handleFetchDiagnostics = async () => {
+    if (!workspaceSlug) return;
+    setIsLoadingDiagnostics(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/debug/ai`);
+      if (response.data?.diagnostics) {
+        setAiDiagnostics(response.data.diagnostics);
+      } else {
+        toast.error('Falha ao carregar diagnósticos');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro na conexão de diagnóstico');
+    } finally {
+      setIsLoadingDiagnostics(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showAiDebug) {
+      handleFetchDiagnostics();
+    }
+  }, [showAiDebug]);
+
   const handleSendMessage = async (content) => {
-    if (!content?.trim()) return;
     if (!workspaceSlug || !selectedId || !selectedConversation) return;
 
     const previousConversations = [...conversations];
@@ -549,7 +586,19 @@ const Inbox = () => {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   </Link>
                 </div>
-                <div className="mt-auto">
+                <div className="mt-auto flex flex-col items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setShowAiDebug(!showAiDebug)}
+                    className={`p-2.5 rounded-2xl border transition-all ${
+                      showAiDebug 
+                        ? 'bg-amber-500 text-white border-amber-600 shadow-glow-amber/40' 
+                        : 'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400'
+                    }`}
+                    title="AI Diagnostics"
+                  >
+                    <FunnelIcon className="w-5 h-5" />
+                  </button>
                   <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 font-bold flex items-center justify-center text-zinc-500">
                     {session?.user?.name?.charAt(0) || 'U'}
                   </div>
@@ -607,6 +656,100 @@ const Inbox = () => {
                   isTogglingAutopilot={isTogglingAutopilot}
                   onBack={() => setSelectedId(null)}
                 />
+
+                {/* AI Debug Panel */}
+                <AnimatePresence>
+                  {showAiDebug && (
+                    <motion.div
+                      initial={{ x: '100%' }}
+                      animate={{ x: 0 }}
+                      exit={{ x: '100%' }}
+                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                      className="absolute inset-y-0 right-0 w-80 bg-white dark:bg-zinc-900 border-l border-amber-200 dark:border-amber-900 shadow-2xl z-50 flex flex-col"
+                    >
+                      <div className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/50 flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <FunnelIcon className="w-4 h-4 text-amber-600" />
+                          <span className="text-sm font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Diagnóstico de IA</span>
+                        </div>
+                        <button onClick={() => setShowAiDebug(false)} className="text-amber-600 hover:text-amber-700 p-1">
+                          <XMarkIcon className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                        {isLoadingDiagnostics ? (
+                          <div className="flex flex-col items-center justify-center h-40">
+                            <div className="w-8 h-8 border-3 border-amber-100 border-t-amber-600 rounded-full animate-spin mb-2" />
+                            <span className="text-xs text-amber-600 font-bold uppercase tracking-widest">Analisando...</span>
+                          </div>
+                        ) : aiDiagnostics ? (
+                          <>
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Configuração de Chaves</p>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className={`p-3 rounded-xl border ${aiDiagnostics.ai.googleKeyPresent ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
+                                  <p className="text-[9px] font-bold text-zinc-500 uppercase">Google AI</p>
+                                  <p className={`text-xs font-black ${aiDiagnostics.ai.googleKeyPresent ? 'text-emerald-700' : 'text-red-700'}`}>
+                                    {aiDiagnostics.ai.googleKeyPresent ? 'CONNECTED' : 'MISSING'}
+                                  </p>
+                                </div>
+                                <div className={`p-3 rounded-xl border ${aiDiagnostics.ai.openAiKeyPresent ? 'bg-emerald-50/50 border-emerald-100' : 'bg-zinc-50/50 border-zinc-100'}`}>
+                                  <p className="text-[9px] font-bold text-zinc-500 uppercase">OpenAI</p>
+                                  <p className={`text-xs font-black ${aiDiagnostics.ai.openAiKeyPresent ? 'text-emerald-700' : 'text-zinc-400'}`}>
+                                    {aiDiagnostics.ai.openAiKeyPresent ? 'CONNECTED' : 'NOT CONFIGURED'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 space-y-3">
+                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                <span className="text-zinc-400">Status do Plano</span>
+                                <span className="text-brand-600">{aiDiagnostics.ai.plan}</span>
+                              </div>
+                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                                <span className="text-zinc-400">Módulo Ativo</span>
+                                <span className={aiDiagnostics.ai.moduleAllowed ? 'text-emerald-600' : 'text-red-600'}>
+                                  {aiDiagnostics.ai.moduleAllowed ? 'AUTORIZADO' : 'BLOQUEADO'}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Integrações de Chat</p>
+                              <div className="space-y-1.5">
+                                {aiDiagnostics.integrations.items.map(int => (
+                                  <div key={int.id} className="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-1.5 h-1.5 rounded-full ${int.enabled ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
+                                      <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{int.provider}</span>
+                                    </div>
+                                    <span className="text-[9px] font-black text-zinc-400">{int.enabled ? 'ACTIVE' : 'DISABLED'}</span>
+                                  </div>
+                                ))}
+                                {aiDiagnostics.integrations.count === 0 && (
+                                  <p className="text-[11px] font-bold text-red-500 italic px-1">Nenhuma integração WhatsApp encontrada.</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              onClick={handleFetchDiagnostics}
+                              className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-glow-amber/20"
+                            >
+                              Atualizar Diagnóstico
+                            </button>
+                          </>
+                        ) : (
+                          <div className="text-center py-10">
+                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Erro inesperado</p>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
           )}
