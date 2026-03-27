@@ -13,6 +13,9 @@ import ConversationList from '@/sections/inbox/ConversationList';
 import ChatWindow from '@/sections/inbox/ChatWindow';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import api from '@/lib/common/api';
+
+const cn = (...classes) => classes.filter(Boolean).join(' ');
+
 import {
   Bar,
   BarChart,

@@ -358,7 +358,7 @@ const ChatWindow = ({
             <span className="hidden lg:inline">Autopilot:</span> {conversation.autopilotEnabled ? 'ON' : 'OFF'}
           </motion.button>
 
-          <div className="h-10 w-[1px] bg-zinc-100 mx-1" />
+          <div className="h-10 w-[1px] bg-zinc-100 dark:bg-zinc-800 mx-1" />
 
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button className="flex items-center group bg-zinc-50 dark:bg-zinc-800 p-1.5 pr-3 rounded-full border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors">
@@ -387,7 +387,7 @@ const ChatWindow = ({
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 w-64 mt-3 origin-top-right bg-white rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
+              <Menu.Items className="absolute right-0 w-64 mt-3 origin-top-right bg-white dark:bg-zinc-900 rounded-2xl shadow-premium ring-1 ring-black ring-opacity-5 focus:outline-none z-20 overflow-hidden divide-y divide-zinc-50">
                 <div className="px-4 py-3 bg-zinc-50/50">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Select Agent</p>
                 </div>
@@ -431,8 +431,12 @@ const ChatWindow = ({
               </Menu.Items>
             </Transition>
           </Menu>
-          <div className="hidden sm:block ml-4 pr-4">
-            <Logo variant="full" />
+
+          <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-zinc-100 dark:border-zinc-800 ml-2">
+             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
+                <SparklesIcon className="w-4 h-4 text-white" />
+             </div>
+             <span className="text-xs font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Vysify</span>
           </div>
         </div>
       </div>
