@@ -24,7 +24,8 @@ const Advanced = ({ isCreator, workspace }) => {
   const [showModal, setModalState] = useState(false);
   const [verifyWorkspace, setVerifyWorkspace] = useState('');
   const currentWorkspace = workspaceFromContext || workspace;
-  const verifiedWorkspace = verifyWorkspace === currentWorkspace?.slug;
+  const verifiedWord = t("settings.workspace.delete.confirm.word");
+  const verifiedWorkspace = verifyWorkspace === verifiedWord;
 
   useEffect(() => {
     if (workspace) setWorkspace(workspace);
@@ -136,13 +137,13 @@ const Advanced = ({ isCreator, workspace }) => {
             </p>
             <div className="flex flex-col">
               <label className="text-sm text-gray-400">
-                Enter <strong>{currentWorkspace?.slug}</strong> to continue:
+                {t("settings.workspace.delete.confirm.label", { word: verifiedWord })}
               </label>
               <input
                 className="px-3 py-2 border rounded"
                 disabled={isSubmitting}
                 onChange={handleVerifyWorkspaceChange}
-                type="email"
+                type="text"
                 value={verifyWorkspace}
               />
             </div>

@@ -21,6 +21,8 @@
   "settings.workspace.delete.contact.message": "Please contact your team creator for the deletion of your workspace.",
   "settings.workspace.delete.data.warning": "Your workspace will be deleted, along with all of its contents.",
   "settings.workspace.delete.final.message": "This action is not reversible. Please be certain.",
+  "settings.workspace.delete.confirm.label": "Enter {{word}} to continue:",
+  "settings.workspace.delete.confirm.word": "Delete",
   "settings.workspace.information": "Workspace Information",
   "settings.general.workspace.description": "Manage your workspace details and information",
   "settings.domain.configuration": "Domain Configuration",

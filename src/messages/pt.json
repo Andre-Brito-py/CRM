@@ -21,6 +21,8 @@
   "settings.workspace.delete.contact.message": "Entre em contato com o criador da equipe para a exclusão da sua área de trabalho.",
   "settings.workspace.delete.data.warning": "Sua área de trabalho será excluída, juntamente com todo o seu conteúdo.",
   "settings.workspace.delete.final.message": "Esta ação não é reversível. Por favor, tenha certeza.",
+  "settings.workspace.delete.confirm.label": "Digite {{word}} para continuar:",
+  "settings.workspace.delete.confirm.word": "Delete",
   "settings.workspace.information": "Informações da Área de Trabalho",
   "settings.general.workspace.description": "Gerencie os detalhes e informações da sua área de trabalho",
   "settings.domain.configuration": "Configuração de Domínio",
