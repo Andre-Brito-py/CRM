@@ -25,7 +25,7 @@ export async function generateChatCompletion({ messages, systemPrompt, options =
   const enableGemini = () => {
     const model = (options.model && options.model.startsWith('gemini-')) 
       ? options.model 
-      : 'gemini-1.5-flash-latest';
+      : 'gemini-2.0-flash';
     return callGemini(googleKey, messages, systemPrompt, { ...options, model });
   };
 
@@ -47,7 +47,7 @@ export async function transcribeAudio({ audioBytes, mimeType, options = {} }) {
   const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
   if (googleKey) {
-    const model = options.model || 'gemini-1.5-flash-latest';
+    const model = options.model || 'gemini-2.0-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${googleKey}`;
     const base64 = Buffer.from(audioBytes).toString('base64');
 
@@ -92,7 +92,7 @@ export async function extractTextFromImage({ imageBytes, mimeType, options = {} 
   const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
   if (googleKey) {
-    const model = options.model || 'gemini-1.5-flash-latest';
+    const model = options.model || 'gemini-2.0-flash';
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${googleKey}`;
     const base64 = Buffer.from(imageBytes).toString('base64');
 
@@ -135,7 +135,7 @@ export async function extractTextFromImage({ imageBytes, mimeType, options = {} 
   throw new Error('MISSING_AI_API_KEY');
 }
 async function callGemini(apiKey, messages, systemPrompt, options) {
-  const model = options.model || 'gemini-1.5-flash-latest';
+  const model = options.model || 'gemini-2.0-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   // Convert OpenAI messages to Gemini contents (must start with user and alternate roles)

@@ -521,15 +521,28 @@ const AdminSettings = () => {
                         <div className="mt-3">
                           <label className="block text-xs font-medium text-gray-700">Valor</label>
                           <div className="mt-1 flex items-center gap-2">
-                            <input
-                              type={inputType}
-                              className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
-                              value={currentValue}
-                              onChange={(e) => setKeyValue(item.key, e.target.value)}
-                              placeholder={item.secret ? '••••••••••' : ''}
-                              autoComplete={item.secret ? 'new-password' : 'off'}
-                              disabled={isLoading}
-                            />
+                            {item.key === 'PRIMARY_AI_PROVIDER' ? (
+                              <select
+                                className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm border p-2 bg-white"
+                                value={currentValue}
+                                onChange={(e) => setKeyValue(item.key, e.target.value)}
+                                disabled={isLoading}
+                              >
+                                <option value="">Automático (Gemini Padrão)</option>
+                                <option value="GEMINI">Google Gemini</option>
+                                <option value="OPENAI">OpenAI</option>
+                              </select>
+                            ) : (
+                              <input
+                                type={inputType}
+                                className="flex-1 rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
+                                value={currentValue}
+                                onChange={(e) => setKeyValue(item.key, e.target.value)}
+                                placeholder={item.secret ? '••••••••••' : ''}
+                                autoComplete={item.secret ? 'new-password' : 'off'}
+                                disabled={isLoading}
+                              />
+                            )}
                             {item.secret ? (
                               <button
                                 type="button"
