@@ -15,7 +15,7 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { getUser } from '@/prisma/services/user';
 import { useTranslation } from "react-i18next";
-import { authOptions } from '@/lib/server/auth';
+import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const Settings = ({ user }) => {
   const [email, setEmail] = useState(user.email || '');
@@ -500,7 +500,8 @@ const Settings = ({ user }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const options = await getAuthOptions();
+  const session = await getServerSession(context.req, context.res, options);
 
   // Be resilient: check both userId and email for session validity
   const userId = session?.user?.userId || session?.user?.id;

@@ -14,7 +14,7 @@ import { getServerSession } from 'next-auth/next';
 import { getWorkspace, isWorkspaceCreator, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from "react-i18next";
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
-import { authOptions } from '@/lib/server/auth';
+import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const Advanced = ({ isCreator, workspace }) => {
   const { setWorkspace, workspace: workspaceFromContext } = useWorkspace();
@@ -164,7 +164,8 @@ const Advanced = ({ isCreator, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const options = await getAuthOptions();
+  const session = await getServerSession(context.req, context.res, options);
   let isOwner = false;
   let isCreator = false;
   let workspace = null;

@@ -4,7 +4,8 @@ import useSWR from 'swr';
 import toast from 'react-hot-toast';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { DocumentDuplicateIcon, PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
+import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 import Button from '@/components/Button/index';
 import Card from '@/components/Card/index';
@@ -345,7 +346,8 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getSession(context);
+  const options = await getAuthOptions();
+  const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;
   let workspace = null;
 

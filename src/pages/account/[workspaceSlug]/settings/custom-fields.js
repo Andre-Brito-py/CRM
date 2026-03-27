@@ -23,7 +23,7 @@ import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import { authOptions } from '@/lib/server/auth';
+import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const FieldTypeIcon = ({ type, className = "w-5 h-5" }) => {
   switch (type) {
@@ -311,7 +311,8 @@ const CustomFields = ({ workspace }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const options = await getAuthOptions();
+  const session = await getServerSession(context.req, context.res, options);
   let isTeamOwner = false;
   let workspace = null;
 

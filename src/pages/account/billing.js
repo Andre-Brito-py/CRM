@@ -19,7 +19,7 @@ import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import { authOptions } from '@/lib/server/auth';
+import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const Billing = ({ invoices, products }) => {
   const { t } = useTranslation();
@@ -459,7 +459,8 @@ const Billing = ({ invoices, products }) => {
 };
 
 export const getServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  const options = await getAuthOptions();
+  const session = await getServerSession(context.req, context.res, options);
 
   if (!session || !session.user?.email) {
     return {
