@@ -406,8 +406,8 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
           userId: userId || null,
           requestId,
           route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/suggest-reply',
-          provider: 'openai',
-          model: 'gpt-3.5-turbo',
+          provider: aiProvider || 'unknown',
+          model: aiModel || 'unknown',
           tokensTotal: Math.max(0, Math.floor(tokensTotal)),
           tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
           tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,
@@ -435,7 +435,8 @@ Escreva a melhor próxima mensagem para responder à última mensagem do cliente
     res.status(200).json({
       data: {
         suggestion,
-        provider: 'openai',
+        provider: aiProvider,
+        model: aiModel,
         quota,
         overage: overage || {
           enabled: overageSettings.enabled,

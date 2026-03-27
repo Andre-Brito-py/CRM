@@ -50,11 +50,23 @@ export default async function handler(req, res) {
       },
     });
 
-    log({ level: 'info', msg: 'simulated_inbound_message', requestId, workspaceId: workspace.id, conversationId: conversation.id });
+    // TRIGGER AUTOPILOT
+    if (conversation.autopilotEnabled) {
+      const { processAutopilotReply } = await import('@/lib/server/autopilot');
+      const contact = await prisma.contact.findUnique({
+        where: { id: conversation.contactId },
+      });
+      processAutopilotReply({ workspace, conversation, contact, message }).catch((err) => {
+        log({ level: 'error', msg: 'simulated_autopilot_failed', workspaceId: workspace.id, error: err });
+      });
+    }
+
+    log({ level: 'info', msg: 'simulated_inbound_message', requestId, workspaceId: workspace.id, conversationId: conversation.id, autopilot: conversation.autopilotEnabled });
 
     res.status(200).json({
       data: {
         message,
+        autopilotTriggered: conversation.autopilotEnabled
       }
     });
 

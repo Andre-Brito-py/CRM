@@ -383,8 +383,8 @@ const handler = async (req, res) => {
           userId: userId || null,
           requestId,
           route: '/api/workspace/[workspaceSlug]/inbox/[conversationId]/summarize',
-          provider: 'openai',
-          model: 'gpt-3.5-turbo',
+          provider: aiProvider || 'unknown',
+          model: aiModel || 'unknown',
           tokensTotal: Math.max(0, Math.floor(tokensTotal)),
           tokensPrompt: Number.isFinite(tokensPrompt) && tokensPrompt > 0 ? Math.floor(tokensPrompt) : null,
           tokensCompletion: Number.isFinite(tokensCompletion) && tokensCompletion > 0 ? Math.floor(tokensCompletion) : null,
@@ -412,7 +412,8 @@ const handler = async (req, res) => {
     res.status(200).json({
       data: {
         summary,
-        provider: 'openai',
+        provider: aiProvider,
+        model: aiModel,
         quota,
         overage: overage || {
           enabled: overageSettings.enabled,

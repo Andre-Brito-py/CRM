@@ -17,6 +17,7 @@ const ConversationList = ({
   setSearchText,
   members = [],
   user,
+  isSuperAdmin = false,
   showAiDebug,
   onToggleAiDebug
 }) => {
@@ -51,19 +52,21 @@ const ConversationList = ({
             {t('Inbox')}
           </h2>
           <div className="flex items-center gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onToggleAiDebug?.(!showAiDebug)}
-              className={`p-2 rounded-xl transition-all duration-300 border ${
-                showAiDebug 
-                  ? 'bg-amber-500 text-white border-amber-600 shadow-glow-amber/40' 
-                  : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 font-bold'
-              }`}
-              title="IA Diagnostics"
-            >
-              <SparklesIcon className="w-5 h-5" />
-            </motion.button>
+            {isSuperAdmin && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onToggleAiDebug?.(!showAiDebug)}
+                className={`p-2 rounded-xl transition-all duration-300 border ${
+                  showAiDebug 
+                    ? 'bg-amber-500 text-white border-amber-600 shadow-glow-amber/40' 
+                    : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 font-bold'
+                }`}
+                title="IA Diagnostics (Super Admin)"
+              >
+                <SparklesIcon className="w-5 h-5" />
+              </motion.button>
+            )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

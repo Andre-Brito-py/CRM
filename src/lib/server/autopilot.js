@@ -130,12 +130,14 @@ export async function processAutopilotReply({ workspace, conversation, contact, 
     return;
   }
 
-  // 2. Get OpenAI key
-  const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
-  if (!openAiApiKey) {
-    log({ level: 'warn', msg: 'autopilot_skipped_no_api_key', ...logCtx });
-    return;
-  }
+  // 2. Get AI keys
+    const googleKey = await getSystemConfig('GOOGLE_AI_API_KEY', process.env.GOOGLE_AI_API_KEY);
+    const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
+    
+    if (!googleKey && !openAiApiKey) {
+      log({ level: 'warn', msg: 'autopilot_skipped_no_api_keys', ...logCtx });
+      return;
+    }
 
   // 3. Rate limit check (daily quota)
   const limits = await getWorkspaceLimits(workspace.id);

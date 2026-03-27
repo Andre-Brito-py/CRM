@@ -637,6 +637,7 @@ const Inbox = () => {
                   setSearchText={setSearchText}
                   members={members}
                   user={session?.user}
+                  isSuperAdmin={session?.user?.role === 'SUPERADMIN'}
                   showAiDebug={showAiDebug}
                   onToggleAiDebug={setShowAiDebug}
                 />
@@ -674,107 +675,174 @@ const Inbox = () => {
                   onBack={() => setSelectedId(null)}
                 />
 
-                {/* AI Debug Panel */}
+                {/* AI Debug Panel — Super Admin Only */}
                 <AnimatePresence>
-                  {showAiDebug && (
+                  {showAiDebug && session?.user?.role === 'SUPERADMIN' && (
                     <motion.div
                       initial={{ x: '100%' }}
                       animate={{ x: 0 }}
                       exit={{ x: '100%' }}
-                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                      className="absolute inset-y-0 right-0 w-80 bg-white dark:bg-zinc-900 border-l border-amber-200 dark:border-amber-900 shadow-2xl z-50 flex flex-col"
+                      transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+                      className="absolute inset-y-0 right-0 w-[340px] bg-zinc-950 text-white border-l border-amber-500/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col"
                     >
-                      <div className="p-4 bg-amber-50/50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900/50 flex justify-between items-center">
+                      {/* Header */}
+                      <div className="p-4 border-b border-amber-500/20 flex justify-between items-center shrink-0 bg-gradient-to-r from-amber-900/30 to-transparent">
                         <div className="flex items-center gap-2">
-                          <FunnelIcon className="w-4 h-4 text-amber-600" />
-                          <span className="text-sm font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Diagnóstico de IA</span>
+                          <div className="w-7 h-7 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                            <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-400">IA Diagnóstico</p>
+                            <p className="text-[9px] text-zinc-500 uppercase tracking-widest">Super Admin</p>
+                          </div>
                         </div>
-                        <button onClick={() => setShowAiDebug(false)} className="text-amber-600 hover:text-amber-700 p-1">
-                          <XMarkIcon className="w-5 h-5" />
+                        <button onClick={() => setShowAiDebug(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-zinc-500 hover:text-white hover:bg-zinc-800 transition-all">
+                          <XMarkIcon className="w-4 h-4" />
                         </button>
                       </div>
 
-                      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                      <div className="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar">
                         {isLoadingDiagnostics ? (
-                          <div className="flex flex-col items-center justify-center h-40">
-                            <div className="w-8 h-8 border-3 border-amber-100 border-t-amber-600 rounded-full animate-spin mb-2" />
-                            <span className="text-xs text-amber-600 font-bold uppercase tracking-widest">Analisando...</span>
+                          <div className="flex flex-col items-center justify-center h-48">
+                            <div className="w-10 h-10 border-2 border-zinc-800 border-t-amber-500 rounded-full animate-spin mb-3" />
+                            <span className="text-[10px] text-amber-500 font-black uppercase tracking-[0.2em]">Analisando...</span>
                           </div>
                         ) : aiDiagnostics ? (
                           <>
+                            {/* AI Provider Status */}
                             <div className="space-y-2">
-                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Configuração de Chaves</p>
+                              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] px-0.5">Provedores de IA</p>
                               <div className="grid grid-cols-2 gap-2">
-                                <div className={`p-3 rounded-xl border ${aiDiagnostics.ai.googleKeyPresent ? 'bg-emerald-50/50 border-emerald-100' : 'bg-red-50/50 border-red-100'}`}>
-                                  <p className="text-[9px] font-bold text-zinc-500 uppercase">Google AI</p>
-                                  <p className={`text-xs font-black ${aiDiagnostics.ai.googleKeyPresent ? 'text-emerald-700' : 'text-red-700'}`}>
-                                    {aiDiagnostics.ai.googleKeyPresent ? 'CONNECTED' : 'MISSING'}
+                                <div className={`p-3 rounded-xl border ${
+                                  aiDiagnostics.ai.googleKeyPresent
+                                    ? 'bg-emerald-950/40 border-emerald-700/40'
+                                    : 'bg-red-950/30 border-red-800/30'
+                                }`}>
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${aiDiagnostics.ai.googleKeyPresent ? 'bg-emerald-400' : 'bg-red-500'} animate-pulse`} />
+                                    <p className="text-[8px] font-bold text-zinc-400 uppercase">Google Gemini</p>
+                                  </div>
+                                  <p className={`text-xs font-black ${aiDiagnostics.ai.googleKeyPresent ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {aiDiagnostics.ai.googleKeyPresent ? '✓ Conectado' : '✗ Ausente'}
                                   </p>
                                 </div>
-                                <div className={`p-3 rounded-xl border ${aiDiagnostics.ai.openAiKeyPresent ? 'bg-emerald-50/50 border-emerald-100' : 'bg-zinc-50/50 border-zinc-100'}`}>
-                                  <p className="text-[9px] font-bold text-zinc-500 uppercase">OpenAI</p>
-                                  <p className={`text-xs font-black ${aiDiagnostics.ai.openAiKeyPresent ? 'text-emerald-700' : 'text-zinc-400'}`}>
-                                    {aiDiagnostics.ai.openAiKeyPresent ? 'CONNECTED' : 'NOT CONFIGURED'}
+                                <div className={`p-3 rounded-xl border ${
+                                  aiDiagnostics.ai.openAiKeyPresent
+                                    ? 'bg-emerald-950/40 border-emerald-700/40'
+                                    : 'bg-zinc-900 border-zinc-800'
+                                }`}>
+                                  <div className="flex items-center gap-1.5 mb-1">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${aiDiagnostics.ai.openAiKeyPresent ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-700'}`} />
+                                    <p className="text-[8px] font-bold text-zinc-400 uppercase">OpenAI GPT</p>
+                                  </div>
+                                  <p className={`text-xs font-black ${aiDiagnostics.ai.openAiKeyPresent ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                    {aiDiagnostics.ai.openAiKeyPresent ? '✓ Conectado' : '— N/A'}
                                   </p>
                                 </div>
                               </div>
+                              {!aiDiagnostics.ai.googleKeyPresent && !aiDiagnostics.ai.openAiKeyPresent && (
+                                <div className="flex items-start gap-2 p-3 bg-red-950/40 border border-red-800/40 rounded-xl">
+                                  <svg className="w-4 h-4 text-red-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                                  <p className="text-[10px] text-red-400">Nenhuma chave de IA configurada. Defina <code className="text-red-300">GOOGLE_AI_API_KEY</code> no Vercel.</p>
+                                </div>
+                              )}
                             </div>
 
-                            <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 space-y-3">
-                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                <span className="text-zinc-400">Status do Plano</span>
-                                <span className="text-brand-600">{aiDiagnostics.ai.plan}</span>
+                            {/* Plan & Module */}
+                            <div className="rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+                              <div className="px-4 py-3 flex justify-between items-center border-b border-zinc-800">
+                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Plano</span>
+                                <span className="text-[10px] font-black text-brand-400 uppercase">{aiDiagnostics.ai.plan}</span>
                               </div>
-                              <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                <span className="text-zinc-400">Módulo Ativo</span>
-                                <span className={aiDiagnostics.ai.moduleAllowed ? 'text-emerald-600' : 'text-red-600'}>
-                                  {aiDiagnostics.ai.moduleAllowed ? 'AUTORIZADO' : 'BLOQUEADO'}
+                              <div className="px-4 py-3 flex justify-between items-center">
+                                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Módulo IA</span>
+                                <span className={`text-[10px] font-black uppercase ${aiDiagnostics.ai.moduleAllowed ? 'text-emerald-400' : 'text-red-400'}`}>
+                                  {aiDiagnostics.ai.moduleAllowed ? '✓ Autorizado' : '✗ Bloqueado'}
                                 </span>
                               </div>
                             </div>
 
-                            <div className="space-y-2">
-                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Integrações de Chat</p>
-                              <div className="space-y-1.5">
-                                {aiDiagnostics.integrations.items.map(int => (
-                                  <div key={int.id} className="flex justify-between items-center p-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700">
-                                    <div className="flex items-center gap-2">
-                                      <div className={`w-1.5 h-1.5 rounded-full ${int.enabled ? 'bg-emerald-500' : 'bg-zinc-300'}`} />
-                                      <span className="text-xs font-bold text-zinc-700 dark:text-zinc-200">{int.provider}</span>
-                                    </div>
-                                    <span className="text-[9px] font-black text-zinc-400">{int.enabled ? 'ACTIVE' : 'DISABLED'}</span>
-                                  </div>
-                                ))}
-                                {aiDiagnostics.integrations.count === 0 && (
-                                  <p className="text-[11px] font-bold text-red-500 italic px-1">Nenhuma integração WhatsApp encontrada.</p>
-                                )}
+                            {/* Conversation Context */}
+                            {selectedConversation && (
+                              <div className="rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden">
+                                <div className="px-4 py-3 flex justify-between items-center border-b border-zinc-800">
+                                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Conversa Ativa</span>
+                                  <span className="text-[10px] font-black text-zinc-300 truncate max-w-[120px]">{selectedConversation.contact?.name || 'N/A'}</span>
+                                </div>
+                                <div className="px-4 py-3 flex justify-between items-center">
+                                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Autopilot</span>
+                                  <span className={`text-[10px] font-black uppercase ${selectedConversation.autopilotEnabled ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                                    {selectedConversation.autopilotEnabled ? '✓ Ligado' : '— Desligado'}
+                                  </span>
+                                </div>
                               </div>
+                            )}
+
+                            {/* Integrations */}
+                            <div className="space-y-2">
+                              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] px-0.5">Integrações</p>
+                              {aiDiagnostics.integrations.count === 0 ? (
+                                <div className="flex items-center gap-2 p-3 bg-zinc-900 border border-zinc-800 rounded-xl">
+                                  <div className="w-2 h-2 rounded-full bg-zinc-700" />
+                                  <span className="text-[10px] text-zinc-500">Nenhuma integração ativa</span>
+                                </div>
+                              ) : (
+                                <div className="space-y-1.5">
+                                  {aiDiagnostics.integrations.items.map(int => (
+                                    <div key={int.id} className="flex justify-between items-center p-3 rounded-xl bg-zinc-900 border border-zinc-800">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`w-1.5 h-1.5 rounded-full ${int.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-700'}`} />
+                                        <span className="text-[10px] font-bold text-zinc-300">{int.provider}</span>
+                                      </div>
+                                      <span className={`text-[9px] font-black ${int.enabled ? 'text-emerald-500' : 'text-zinc-600'}`}>
+                                        {int.enabled ? 'ATIVO' : 'INATIVO'}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
                             </div>
 
+                            {/* Test Tools */}
                             <div className="space-y-2">
-                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Ferramentas de Teste</p>
+                              <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] px-0.5">Ferramentas de Teste</p>
                               <button
                                 onClick={handleSimulateInbound}
-                                disabled={!selectedId}
-                                className="w-full py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
+                                disabled={!selectedId || isLoadingDiagnostics}
+                                className="w-full py-3 px-4 bg-white text-zinc-900 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                               >
-                                Simular Mensagem de Cliente
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                {selectedConversation?.autopilotEnabled ? 'Simular + Acionar Autopilot' : 'Simular Mensagem'}
                               </button>
-                              {!selectedId && <p className="text-[9px] text-zinc-400 italic text-center">Selecione uma conversa para simular</p>}
+                              {!selectedId && (
+                                <p className="text-[9px] text-zinc-600 italic text-center">Selecione uma conversa para simular</p>
+                              )}
+                              {selectedId && !selectedConversation?.autopilotEnabled && (
+                                <p className="text-[9px] text-zinc-600 italic text-center">Ligue o Autopilot para ver a IA responder</p>
+                              )}
                             </div>
-
-                            <button
-                              onClick={handleFetchDiagnostics}
-                              className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-glow-amber/20"
-                            >
-                              Atualizar Diagnóstico
-                            </button>
                           </>
                         ) : (
-                          <div className="text-center py-10">
-                            <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Erro inesperado</p>
+                          <div className="flex flex-col items-center justify-center h-48 text-center">
+                            <svg className="w-8 h-8 text-zinc-700 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                            <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">Erro ao carregar</p>
                           </div>
                         )}
+                      </div>
+
+                      {/* Footer actions */}
+                      <div className="p-4 border-t border-zinc-800 shrink-0 space-y-2">
+                        <button
+                          onClick={handleFetchDiagnostics}
+                          disabled={isLoadingDiagnostics}
+                          className="w-full py-3 bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2"
+                        >
+                          {isLoadingDiagnostics ? (
+                            <><div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" /> Atualizando...</>
+                          ) : (
+                            <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg> Atualizar Diagnóstico</>
+                          )}
+                        </button>
                       </div>
                     </motion.div>
                   )}
