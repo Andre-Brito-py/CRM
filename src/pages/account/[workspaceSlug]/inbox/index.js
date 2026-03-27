@@ -363,6 +363,33 @@ const Inbox = () => {
     }
   };
 
+  const handleSimulateInbound = async () => {
+    if (!workspaceSlug || !selectedId) {
+      toast.error('Selecione uma conversa para simular');
+      return;
+    }
+    
+    setIsLoadingDiagnostics(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/debug/simulate-inbound`, {
+        method: 'POST',
+        body: { conversationId: selectedId }
+      });
+      
+      if (response.data?.message) {
+        toast.success('Mensagem de cliente simulada!');
+        mutateConversation(); // Reload the current conversation to show the message
+      } else {
+        toast.error('Falha ao simular mensagem');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro na simulação');
+    } finally {
+      setIsLoadingDiagnostics(false);
+    }
+  };
+
   useEffect(() => {
     if (showAiDebug) {
       handleFetchDiagnostics();
@@ -586,19 +613,7 @@ const Inbox = () => {
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                   </Link>
                 </div>
-                <div className="mt-auto flex flex-col items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowAiDebug(!showAiDebug)}
-                    className={`p-2.5 rounded-2xl border transition-all ${
-                      showAiDebug 
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-glow-amber/40' 
-                        : 'bg-white dark:bg-zinc-900 border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400'
-                    }`}
-                    title="AI Diagnostics"
-                  >
-                    <FunnelIcon className="w-5 h-5" />
-                  </button>
+                <div className="mt-auto">
                   <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 font-bold flex items-center justify-center text-zinc-500">
                     {session?.user?.name?.charAt(0) || 'U'}
                   </div>
@@ -622,6 +637,8 @@ const Inbox = () => {
                   setSearchText={setSearchText}
                   members={members}
                   user={session?.user}
+                  showAiDebug={showAiDebug}
+                  onToggleAiDebug={setShowAiDebug}
                 />
               </div>
 
@@ -732,6 +749,18 @@ const Inbox = () => {
                                   <p className="text-[11px] font-bold text-red-500 italic px-1">Nenhuma integração WhatsApp encontrada.</p>
                                 )}
                               </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest px-1">Ferramentas de Teste</p>
+                              <button
+                                onClick={handleSimulateInbound}
+                                disabled={!selectedId}
+                                className="w-full py-3 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30"
+                              >
+                                Simular Mensagem de Cliente
+                              </button>
+                              {!selectedId && <p className="text-[9px] text-zinc-400 italic text-center">Selecione uma conversa para simular</p>}
                             </div>
 
                             <button

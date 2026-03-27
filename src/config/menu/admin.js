@@ -11,6 +11,10 @@ const menu = () => [
         path: '/admin/ai/usage',
       },
       {
+        name: 'AI / Diagnostics',
+        path: '/admin/ai/diagnostics',
+      },
+      {
         name: 'WhatsApp / Usage',
         path: '/admin/whatsapp/usage',
       },

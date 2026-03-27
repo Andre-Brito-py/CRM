@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
-import { UserCircleIcon, FunnelIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, FunnelIcon, MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS, ptBR, es, fr, de, it } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +17,8 @@ const ConversationList = ({
   setSearchText,
   members = [],
   user,
+  showAiDebug,
+  onToggleAiDebug
 }) => {
   const { t, i18n } = useTranslation();
   const [localSearch, setLocalSearch] = useState(searchText || '');
@@ -48,18 +50,33 @@ const ConversationList = ({
           <h2 className="text-xl font-bold text-zinc-900 tracking-tight">
             {t('Inbox')}
           </h2>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowFilters(!showFilters)}
-            className={`p-2 rounded-xl transition-all duration-300 border ${
-              showFilters || (filterAssignee && filterAssignee !== user?.id && filterAssignee !== 'unassigned') || filterStatus 
-                ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-100 dark:border-brand-500/30 text-brand-600 dark:text-brand-400 shadow-sm' 
-                : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
-            }`}
-          >
-            <FunnelIcon className="w-5 h-5 transition-transform duration-500" style={{ transform: showFilters ? 'rotate(180)deg' : 'none' }} />
-          </motion.button>
+          <div className="flex items-center gap-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onToggleAiDebug?.(!showAiDebug)}
+              className={`p-2 rounded-xl transition-all duration-300 border ${
+                showAiDebug 
+                  ? 'bg-amber-500 text-white border-amber-600 shadow-glow-amber/40' 
+                  : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:text-amber-600 dark:hover:text-amber-400 font-bold'
+              }`}
+              title="IA Diagnostics"
+            >
+              <SparklesIcon className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowFilters(!showFilters)}
+              className={`p-2 rounded-xl transition-all duration-300 border ${
+                showFilters || (filterAssignee && filterAssignee !== user?.id && filterAssignee !== 'unassigned') || filterStatus 
+                  ? 'bg-brand-50 dark:bg-brand-900/20 border-brand-100 dark:border-brand-500/30 text-brand-600 dark:text-brand-400 shadow-sm' 
+                  : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-700'
+              }`}
+            >
+              <FunnelIcon className="w-5 h-5 transition-transform duration-500" style={{ transform: showFilters ? 'rotate(180)deg' : 'none' }} />
+            </motion.button>
+          </div>
         </div>
 
         <div className="flex bg-zinc-100/50 dark:bg-zinc-900/50 p-1.5 rounded-[20px] border border-zinc-200/20 dark:border-zinc-800">
