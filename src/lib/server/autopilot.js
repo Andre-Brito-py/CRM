@@ -288,6 +288,16 @@ Nome do cliente: ${contactName}`;
   } catch (err) {
     log({ level: 'error', msg: 'autopilot_ai_call_failed', ...logCtx, error: err.message });
     reportError(err, { route: 'autopilot', ...logCtx });
+    // Save a system error message so the user can see autopilot attempted to run
+    try {
+      await createMessage(conversation.id, {
+        direction: 'OUTBOUND',
+        type: 'TEXT',
+        content: `⚠️ [Autopilot] Falha ao gerar resposta: ${err.message}`,
+        status: 'FAILED',
+        externalId: null,
+      });
+    } catch (_) {}
     return;
   }
 

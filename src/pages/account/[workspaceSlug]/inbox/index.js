@@ -61,6 +61,8 @@ const Inbox = () => {
   const [showAiDebug, setShowAiDebug] = useState(false);
   const [aiDiagnostics, setAiDiagnostics] = useState(null);
   const [isLoadingDiagnostics, setIsLoadingDiagnostics] = useState(false);
+  const [aiTestResult, setAiTestResult] = useState(null);
+  const [isTestingAi, setIsTestingAi] = useState(false);
 
   const locale = useMemo(() => {
     const base = (i18n?.language || 'en').split('-')[0];
@@ -393,8 +395,31 @@ const Inbox = () => {
   useEffect(() => {
     if (showAiDebug) {
       handleFetchDiagnostics();
+    } else {
+      setAiTestResult(null);
     }
   }, [showAiDebug]);
+
+  const handleLiveAiTest = async () => {
+    if (!workspaceSlug) return;
+    setIsTestingAi(true);
+    setAiTestResult(null);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/debug/test-ai`, {
+        method: 'POST',
+      });
+      if (response.data) {
+        setAiTestResult(response.data);
+      } else {
+        setAiTestResult({ overallOk: false, error: response.error?.msg || 'Falha desconhecida' });
+      }
+    } catch (err) {
+      setAiTestResult({ overallOk: false, error: err.message });
+    } finally {
+      setIsTestingAi(false);
+    }
+  };
+
 
   const handleSendMessage = async (content) => {
     if (!workspaceSlug || !selectedId || !selectedConversation) return;
@@ -806,6 +831,53 @@ const Inbox = () => {
                             {/* Test Tools */}
                             <div className="space-y-2">
                               <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.2em] px-0.5">Ferramentas de Teste</p>
+
+                              {/* Live AI Test */}
+                              <button
+                                onClick={handleLiveAiTest}
+                                disabled={isTestingAi}
+                                className="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.15em] transition-all flex items-center justify-center gap-2"
+                              >
+                                {isTestingAi ? (
+                                  <><div className="w-3 h-3 border border-white/30 border-t-white rounded-full animate-spin" /> Testando IA...</>
+                                ) : (
+                                  <><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Executar Teste de IA</>
+                                )}
+                              </button>
+
+                              {/* Live Test Result */}
+                              {aiTestResult && (
+                                <div className={`p-3 rounded-xl border text-[10px] space-y-2 ${aiTestResult.overallOk ? 'bg-emerald-950/40 border-emerald-700/40' : 'bg-red-950/40 border-red-700/40'}`}>
+                                  <p className={`font-black uppercase tracking-widest ${aiTestResult.overallOk ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {aiTestResult.overallOk ? '✓ IA Funcionando' : '✗ Falha no Teste'}
+                                  </p>
+                                  {aiTestResult.google && (
+                                    <div className="space-y-0.5">
+                                      <p className="text-[8px] text-zinc-500 uppercase font-bold">Google Gemini</p>
+                                      {aiTestResult.google.ok ? (
+                                        <p className="text-emerald-400">Resposta: &quot;{aiTestResult.google.response}&quot; ({aiTestResult.google.tokensUsed} tokens)</p>
+                                      ) : (
+                                        <p className="text-red-400 break-words">{aiTestResult.google.error}</p>
+                                      )}
+                                    </div>
+                                  )}
+                                  {aiTestResult.openai && (
+                                    <div className="space-y-0.5">
+                                      <p className="text-[8px] text-zinc-500 uppercase font-bold">OpenAI</p>
+                                      {aiTestResult.openai.ok ? (
+                                        <p className="text-emerald-400">Resposta: &quot;{aiTestResult.openai.response}&quot;</p>
+                                      ) : (
+                                        <p className="text-red-400 break-words">{aiTestResult.openai.error}</p>
+                                      )}
+                                    </div>
+                                  )}
+                                  {aiTestResult.error && (
+                                    <p className="text-red-400 break-words">{aiTestResult.error}</p>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Simulate Inbound */}
                               <button
                                 onClick={handleSimulateInbound}
                                 disabled={!selectedId || isLoadingDiagnostics}
