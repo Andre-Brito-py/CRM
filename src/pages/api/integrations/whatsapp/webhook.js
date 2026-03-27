@@ -154,7 +154,7 @@ export default async function handler(req, res) {
     if (mode && token) {
       if (mode === 'subscribe' && workspaceSlug) {
         // Find the integration for this workspace to check the verify token
-        const workspace = await prisma.workspace.findUnique({
+        const workspace = await prisma.workspace.findFirst({
           where: { slug: workspaceSlug },
           include: {
             integrations: {
@@ -249,7 +249,7 @@ export default async function handler(req, res) {
 
 async function processIncomingMessage({ workspaceSlug, from, name, body, msgType, wamid, timestamp, phoneNumberId, mediaId }) {
   // 1. Find Workspace
-  const workspace = await prisma.workspace.findUnique({
+  const workspace = await prisma.workspace.findFirst({
     where: { slug: workspaceSlug },
   });
 

@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
     if (mode && token) {
       if (mode === 'subscribe' && workspaceSlug) {
-        const workspace = await prisma.workspace.findUnique({
+        const workspace = await prisma.workspace.findFirst({
           where: { slug: workspaceSlug },
           include: {
             integrations: {
@@ -221,7 +221,7 @@ async function fetchInstagramUserProfile(accessToken, senderId) {
 
 async function processIncomingInstagramMessage(requestId, workspaceSlug, senderId, body, mid, timestamp) {
   // 1. Find Workspace
-  const workspace = await prisma.workspace.findUnique({
+  const workspace = await prisma.workspace.findFirst({
     where: { slug: workspaceSlug },
   });
 

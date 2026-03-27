@@ -39,7 +39,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const workspace = await prisma.workspace.findUnique({
+    const workspace = await prisma.workspace.findFirst({
       where: { slug: String(workspaceSlug) },
       select: { id: true, slug: true, name: true },
     });
