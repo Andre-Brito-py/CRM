@@ -1,5 +1,5 @@
+import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
-import { getSession } from 'next-auth/react';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 
 const WON_STAGE_NAMES_LOWER = ['fechado', 'closed', 'won'];
@@ -9,10 +9,8 @@ const handler = async (req, res) => {
     return res.status(405).json({ error: 'Method not supported' });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = await validateSession(req, res);
+  if (!session) return;
 
   const { workspaceSlug } = req.query;
   const scope = req.query.scope;

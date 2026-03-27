@@ -1,5 +1,5 @@
 import prisma from '@/prisma/index';
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import { getNpsAnalytics } from '@/prisma/services/nps';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { getWorkspaceLimits } from '@/lib/server/subscription';
@@ -16,10 +16,8 @@ const handler = async (req, res) => {
     return res.status(405).json({ error: `Method ${req.method} Not Allowed` });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = await validateSession(req, res);
+  if (!session) return;
 
   const { workspaceSlug } = req.query;
 
@@ -146,7 +144,7 @@ const handler = async (req, res) => {
       prisma.task.findMany({
         where: {
           workspaceId,
-          assigneeId: session.user.userId,
+          assigneeId: session.user.userId || session.user.id,
           isCompleted: false,
           dueDate: { gte: new Date() },
         },

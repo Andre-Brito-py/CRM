@@ -1,17 +1,15 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { getMembersByWorkspaceId } from '@/prisma/services/membership';
 
 const handler = async (req, res) => {
   const { method } = req;
-  const session = await getSession({ req });
+  const session = await validateSession(req, res);
 
-  if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
+  if (!session) return;
 
   if (method === 'GET') {
-    const workspace = await getWorkspace(session.user.userId, session.user.email, req.query.workspaceSlug);
+    const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, req.query.workspaceSlug);
     if (!workspace) {
       return res.status(404).json({ error: { msg: 'Workspace not found' } });
     }

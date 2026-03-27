@@ -15,9 +15,8 @@ const api = async (url, options = {}) => {
   const response = await fetch(url, fetchOptions);
 
   if (response.status === 401 && typeof window !== 'undefined') {
-    // Session expired, redirect to login
-    window.location.href = `/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
-    return { status: 401, error: { msg: 'Session expired' } };
+    console.warn('API returned 401 (Unauthorized). Passive session check failed.');
+    return { status: 401, ok: false, error: { msg: 'Session expired' } };
   }
 
   let result;

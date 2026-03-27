@@ -1,4 +1,4 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { getWorkspaceLimits, getTrialStatus } from '@/lib/server/subscription';
 
@@ -7,10 +7,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: { msg: 'Method not allowed' } });
   }
 
-  const session = await getSession({ req });
-  if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
-  }
+  const session = await validateSession(req, res);
+  if (!session) return;
 
   const { workspaceSlug } = req.query;
 

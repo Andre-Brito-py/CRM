@@ -1,13 +1,10 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 
 export default async function handler(req, res) {
-    const session = await getSession({ req });
+    const session = await validateSession(req, res);
 
-    if (!session) {
-        res.status(401).json({ error: { msg: 'Unauthorized' } });
-        return;
-    }
+    if (!session) return;
 
     const userId = session.user.userId || session.user.id;
 

@@ -1,17 +1,14 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getNotifications, markAllAsRead } from '@/prisma/services/notification';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await validateSession(req, res);
 
-  if (!session) {
-    res.status(401).end();
-    return;
-  }
+  if (!session) return;
 
   const { workspaceSlug } = req.query;
-  const workspace = await getWorkspace(session.user.id, workspaceSlug);
+  const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, workspaceSlug);
 
   if (!workspace) {
     res.status(403).end();
@@ -19,10 +16,10 @@ export default async function handler(req, res) {
   }
 
   if (req.method === 'GET') {
-    const data = await getNotifications(workspace.id, session.user.id);
+    const data = await getNotifications(workspace.id, session.user.userId || session.user.id);
     res.status(200).json(data);
   } else if (req.method === 'PUT') {
-    await markAllAsRead(workspace.id, session.user.id);
+    await markAllAsRead(workspace.id, session.user.userId || session.user.id);
     res.status(200).json({ status: 'success' });
   } else {
     res.status(405).end();
