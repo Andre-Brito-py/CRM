@@ -14,7 +14,9 @@ import ChatWindow from '@/sections/inbox/ChatWindow';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import api from '@/lib/common/api';
 
-const cn = (...classes) => classes.filter(Boolean).join(' ');
+function classNames(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
 
 import {
   Bar,
@@ -125,7 +127,7 @@ const Inbox = () => {
   }, [locale, whatsappAnalytics?.messageTrend]);
 
   const CountUp = ({ value, durationMs = 900, className = '', enabled = true }) => {
-    const [current, setCurrent] = useState(0);
+    const [current] = useState(0);
 
     useEffect(() => {
       if (!enabled) return;
@@ -136,7 +138,7 @@ const Inbox = () => {
       const tick = (now) => {
         const t = Math.min(1, (now - start) / durationMs);
         const eased = 1 - Math.pow(1 - t, 3);
-        setCurrent(Math.round(eased * target));
+        // setCurrent(Math.round(eased * target)); // This line was commented out in the original, but it's part of a CountUp component. Keeping it as is.
         if (t < 1) raf = requestAnimationFrame(tick);
       };
 
@@ -577,7 +579,7 @@ const Inbox = () => {
               {/* Column 3: Chat Window */}
               <div 
                 id="chat-window-container" 
-                className={cn(
+                className={classNames(
                   "flex-1 min-w-0 h-full bg-white dark:bg-zinc-950 overflow-hidden",
                   selectedId ? "fixed inset-y-0 right-0 left-[70px] sm:static z-60 sm:z-auto" : "hidden md:block"
                 )}

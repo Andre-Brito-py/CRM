@@ -144,14 +144,16 @@ const handler = async (req, res) => {
   const session = await validateSession(req, res);
   if (!session) return;
 
-  const workspace = await getWorkspace(null, session.user.email, workspaceSlug);
+  const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, workspaceSlug);
 
   if (!workspace) {
+    log({ level: 'warn', msg: 'suggest_reply_workspace_not_found', requestId, workspaceSlug, userEmail: session.user.email });
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
   }
 
   const aiEnabled = await isModuleAllowed(workspace.id, 'ai_assistant');
   if (!aiEnabled) {
+    log({ level: 'info', msg: 'ai_assistant_not_allowed', requestId, workspaceId: workspace.id });
     return res.status(403).json({ error: { msg: 'AI Assistant module is not available in your current plan.' } });
   }
 

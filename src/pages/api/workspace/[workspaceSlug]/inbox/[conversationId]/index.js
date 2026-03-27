@@ -29,7 +29,7 @@ const handler = async (req, res) => {
 
   if (!session) return;
 
-  const workspace = await getWorkspace(null, session.user.email, workspaceSlug);
+  const workspace = await getWorkspace(session.user.userId || session.user.id, session.user.email, workspaceSlug);
 
   if (!workspace) {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
@@ -142,11 +142,34 @@ const handler = async (req, res) => {
 
             let { integrationId } = req.body;
             if (!integrationId) {
+              // Detailed logging to help troubleshoot integration issues
+              log({ level: 'info', msg: 'searching_whatsapp_integration', requestId, workspaceId: workspace.id, workspaceSlug });
+
+              // Look for any enabled WHATSAPP integration
               const defaultIntegration = await prisma.integration.findFirst({
-                where: { workspaceId: workspace.id, provider: 'WHATSAPP', enabled: true }
+                where: { 
+                  workspaceId: workspace.id, 
+                  provider: { in: ['WHATSAPP', 'whatsapp'] }, 
+                  enabled: true 
+                }
               });
+
               if (!defaultIntegration) {
-                return res.status(400).json({ error: { msg: 'No active WhatsApp integration found.' } });
+                // Check if any exists but is disabled
+                const anyIntegration = await prisma.integration.findFirst({
+                  where: { 
+                    workspaceId: workspace.id, 
+                    provider: { in: ['WHATSAPP', 'whatsapp'] }
+                  }
+                });
+
+                if (anyIntegration) {
+                  log({ level: 'warn', msg: 'whatsapp_integration_disabled', requestId, workspaceId: workspace.id });
+                  return res.status(400).json({ error: { msg: 'Sua integração com o WhatsApp está desativada. Ative-a nas configurações.' } });
+                }
+
+                log({ level: 'error', msg: 'no_whatsapp_integration_found', requestId, workspaceId: workspace.id });
+                return res.status(400).json({ error: { msg: 'Nenhuma integração com o WhatsApp foi encontrada para este workspace.' } });
               }
               integrationId = defaultIntegration.id;
             }
