@@ -143,12 +143,12 @@ const ChatWindow = ({
             } disabled:opacity-40 disabled:grayscale`}
           >
             <SparklesIcon className={`h-5 w-5 ${isSummarizingAI ? 'animate-spin' : 'animate-pulse'}`} />
-            {isSummarizingAI ? 'Analysing...' : 'AI Summary'}
+            {isSummarizingAI ? t('inbox.ai.summarizing') : t('inbox.ai.summarize')}
           </motion.button>
 
           <div className="h-10 w-px bg-zinc-100 mx-1" />
 
-          <div className="flex items-center bg-zinc-50 border border-zinc-100 rounded-2xl px-5 py-3 hover:bg-white hover:border-zinc-300 transition-all shadow-premium-sm group">
+          <div className="hidden lg:flex items-center bg-zinc-50 border border-zinc-100 rounded-2xl px-5 py-3 hover:bg-white hover:border-zinc-300 transition-all shadow-premium-sm group">
             <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mr-4 group-hover:text-indigo-400 transition-colors">
               Owner
             </span>
@@ -164,6 +164,10 @@ const ChatWindow = ({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div className="hidden sm:block ml-2">
+            <img src="/images/logo-symbol.png" alt="Vysify" className="w-8 h-8 opacity-40 hover:opacity-100 transition-opacity" />
           </div>
         </div>
       </div>

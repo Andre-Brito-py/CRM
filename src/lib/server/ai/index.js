@@ -135,15 +135,18 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
   // Convert OpenAI messages to Gemini contents (must start with user and alternate roles)
   const contents = [];
   for (const m of messages) {
+    const contentText = String(m.content || '').trim();
+    if (!contentText) continue; // Gemini fails on empty parts
+
     const role = (m.role === 'assistant' || m.role === 'model') ? 'model' : 'user';
     const last = contents[contents.length - 1];
     
     if (last && last.role === role) {
-      last.parts[0].text += `\n\n${String(m.content || '')}`;
+      last.parts[0].text += `\n\n${contentText}`;
     } else {
       contents.push({
         role,
-        parts: [{ text: String(m.content || '') }]
+        parts: [{ text: contentText }]
       });
     }
   }
@@ -154,6 +157,11 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
       role: 'user',
       parts: [{ text: '[Contexto anterior]' }]
     });
+  }
+
+  // If after filtering we have no content, we can't call Gemini
+  if (contents.length === 0) {
+    throw new Error('AI_NO_CONTENT');
   }
 
   const body = {
@@ -186,7 +194,8 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     log({ level: 'error', msg: 'gemini_api_error', status: response.status, error: err });
-    throw new Error(`Gemini API Error: ${response.status}`);
+    const msg = err?.error?.message || `Status ${response.status}`;
+    throw new Error(`Gemini API Error: ${msg}`);
   }
 
   const data = await response.json();

@@ -519,9 +519,9 @@ const Inbox = () => {
               <p className="text-zinc-500 dark:text-zinc-400 font-medium tracking-wide italic text-sm">Sincronizando comunicações...</p>
             </div>
           ) : (
-            <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800">
+            <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative">
               {/* Column 1: Global Small Sidebar (WhatsApp Web style) */}
-              <div className="hidden sm:flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0">
+              <div className="flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0 z-[70] relative">
                 <div className="flex flex-col items-center gap-6 w-full">
                   <Link
                     href={`/account/${workspaceSlug}`}
@@ -570,7 +570,15 @@ const Inbox = () => {
                   user={session?.user}
                 />
               </div>
-              <div id="chat-window" className={`${selectedId ? 'block' : 'hidden md:block'} flex-1 min-w-0 h-full`}>
+
+              {/* Column 3: Chat Window */}
+              <div 
+                id="chat-window-container" 
+                className={cn(
+                  "flex-1 min-w-0 h-full bg-white dark:bg-zinc-950 overflow-hidden",
+                  selectedId ? "fixed inset-y-0 right-0 left-[70px] sm:static z-60 sm:z-auto" : "hidden md:block"
+                )}
+              >
                 <ChatWindow
                   conversation={selectedConversation}
                   messages={selectedConversation?.messages || []}
