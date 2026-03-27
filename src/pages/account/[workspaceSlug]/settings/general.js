@@ -190,7 +190,7 @@ const General = ({ isTeamOwner, workspace }) => {
           </Card>
           <Card>
             <Card.Body
-              title={t("settings.workspace.slug.validation.message")}
+              title={t("settings.workspace.id")}
               subtitle={t("settings.workspace.id.description")}
             >
               <div className="flex items-center justify-between px-3 py-2 space-x-5 font-mono text-sm border rounded md:w-1/2">
@@ -235,8 +235,8 @@ const General = ({ isTeamOwner, workspace }) => {
           {isTeamOwner && (
             <Card>
               <Card.Body
-                title="Industry Presets"
-                subtitle="Apply a 1-click setup to your workspace to automatically configure pipelines, custom fields, and tags for your niche."
+                title={t("settings.workspace.presets.title")}
+                subtitle={t("settings.workspace.presets.description")}
               >
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
@@ -252,26 +252,26 @@ const General = ({ isTeamOwner, workspace }) => {
                     <div key={preset.id} className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col items-center justify-center text-center hover:border-brand-500 cursor-pointer transition-colors bg-zinc-50 dark:bg-zinc-800/50">
                       <span className="text-3xl mb-2">{preset.icon}</span>
                       <h4 className="font-semibold text-zinc-900 dark:text-zinc-100">{preset.name}</h4>
-                      <p className="text-xs text-zinc-500 mt-2">Pipelines, Fields & Tags</p>
+                      <p className="text-xs text-zinc-500 mt-2">{t("settings.workspace.presets.custom")}</p>
                       <Button
                         className="mt-4 w-full bg-brand-600 text-white hover:bg-brand-700 text-xs py-1.5"
                         onClick={async () => {
-                          if (confirm(`Are you sure you want to apply the ${preset.name} preset? This will add new pipelines and fields to your workspace.`)) {
+                          if (confirm(t("settings.workspace.presets.confirm", { name: preset.name }))) {
                             try {
                               setSubmittingState(true);
-                              toast.loading('Applying preset...', { id: 'preset' });
+                              toast.loading(t("settings.workspace.presets.applying"), { id: 'preset' });
                               const res = await api(`/api/workspace/${workspace.slug}/presets`, {
                                 method: 'POST',
                                 body: { presetId: preset.id }
                               });
                               if (res.data) {
-                                toast.success('Preset applied successfully!', { id: 'preset' });
+                                toast.success(t("settings.workspace.presets.success"), { id: 'preset' });
                                 setTimeout(() => router.reload(), 1500);
                               } else {
                                 throw new Error(res.error?.msg || 'Error');
                               }
                             } catch (err) {
-                              toast.error('Failed to apply preset', { id: 'preset' });
+                              toast.error(t("settings.workspace.presets.err"), { id: 'preset' });
                             } finally {
                               setSubmittingState(false);
                             }
@@ -279,7 +279,7 @@ const General = ({ isTeamOwner, workspace }) => {
                         }}
                         disabled={isSubmitting}
                       >
-                        Apply Preset
+                        {t("settings.workspace.presets.apply")}
                       </Button>
                     </div>
                   ))}
