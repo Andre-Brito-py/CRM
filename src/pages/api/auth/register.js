@@ -151,7 +151,8 @@ const handler = async (req, res) => {
         const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
         const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
 
-        await sendMail({
+        try {
+          await sendMail({
             html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
           <h2>Welcome to Vysify, ${name}!</h2>
@@ -164,7 +165,10 @@ const handler = async (req, res) => {
             subject: '[Vysify] Confirm your email address',
             text: `Welcome to Vysify, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
             to: normalizedEmail,
-        });
+          });
+        } catch (mailErr) {
+          log({ level: 'warn', msg: 'auth_register_verification_email_failed', requestId, error: mailErr });
+        }
 
         const requireCardOnSignup = isTruthy(
             await getSystemConfig(
