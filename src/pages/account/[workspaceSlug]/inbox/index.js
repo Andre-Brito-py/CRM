@@ -450,53 +450,8 @@ const Inbox = () => {
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
       <Content>
-        <div className="flex flex-col h-[calc(100vh-200px)]">
-          <Card className="mb-6">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-lg">{t('analytics.whatsapp.title')}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{t('analytics.whatsapp.last30Days')}</p>
-                </div>
-                <div className="flex space-x-6">
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.inbound')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.inbound} enabled={mounted} />
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.outbound')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.outbound} enabled={mounted} />
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs text-gray-500">{t('analytics.whatsapp.total')}</div>
-                    <div className="text-xl font-semibold text-gray-900">
-                      <CountUp value={messageTotals.total} enabled={mounted} />
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <div className="flex flex-col h-[calc(100vh-140px)]">
 
-              {mounted ? (
-                <div className="h-44 mt-5">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#16a34a" isAnimationActive animationDuration={900} />
-                      <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#2563eb" isAnimationActive animationDuration={900} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : null}
-            </div>
-          </Card>
 
           {(conversationsData === undefined && !!workspaceSlug) ? (
             <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-lg shadow-lg border border-gray-200">

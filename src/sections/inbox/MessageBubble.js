@@ -17,7 +17,7 @@ const MessageBubble = ({ message, isMe }) => {
       initial={{ opacity: 0, y: 10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-      className={`flex w-full mb-8 ${
+      className={`flex w-full mb-3 ${
         isMe ? 'justify-end' : 'justify-start'
       }`}
     >
@@ -27,24 +27,21 @@ const MessageBubble = ({ message, isMe }) => {
         }`}
       >
         <div
-          className={`px-6 py-4 font-executive text-[16px] leading-[1.6] transition-all duration-500 shadow-premium-sm hover:shadow-premium ${
+          className={`px-4 py-2 text-[15px] leading-relaxed transition-all shadow-sm ${
             isMe
-              ? 'bg-brand-600 premium-gradient text-white rounded-[26px] rounded-tr-none'
-              : 'bg-white text-zinc-800 border border-zinc-100 rounded-[26px] rounded-tl-none'
+              ? 'bg-brand-600 text-white rounded-[18px] rounded-tr-none'
+              : 'bg-white text-zinc-800 border border-zinc-200 rounded-[18px] rounded-tl-none'
           }`}
         >
-          <p className="whitespace-pre-wrap font-medium">{message.content}</p>
+          <p className="whitespace-pre-wrap">{message.content}</p>
         </div>
-        <div className={`mt-2.5 flex items-center gap-2.5 px-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-          <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest tabular-nums">
+        <div className={`mt-1 flex items-center gap-2 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+          <span className="text-[11px] text-zinc-400">
             {message.createdAt ? formatDistanceToNow(new Date(message.createdAt), { addSuffix: false, locale: dateFnsLocale }) : ''}
           </span>
           {isMe && (
             <div className="flex items-center gap-1">
-              <span className="text-[10px] font-black text-brand-500 uppercase tracking-widest">
-                Delivered
-              </span>
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-500 shadow-glow-emerald" />
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-500" />
             </div>
           )}
         </div>

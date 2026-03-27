@@ -8,6 +8,7 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const workspaces = await prisma.workspace.findMany({
+        where: { deletedAt: null },
         select: {
           id: true,
           name: true,

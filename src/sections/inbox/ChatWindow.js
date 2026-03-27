@@ -291,45 +291,45 @@ const ChatWindow = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white relative">
       {/* Header */}
-      <div className="px-10 py-8 border-b border-zinc-100/80 flex justify-between items-center bg-white/60 backdrop-blur-xl sticky top-0 z-30 shrink-0">
-        <div className="flex items-center gap-7">
+      <div className="px-6 py-4 border-b border-zinc-100 flex justify-between items-center bg-white/90 backdrop-blur-md sticky top-0 z-30 shrink-0">
+        <div className="flex items-center gap-4">
           {onBack && (
             <motion.button 
               whileHover={{ x: -2 }}
               onClick={onBack} 
-              className="md:hidden p-3 -ml-4 text-zinc-400 hover:text-zinc-900 transition-colors"
+              className="md:hidden p-2 -ml-2 text-zinc-400 hover:text-zinc-900 transition-colors"
             >
-              <ArrowLeftIcon className="w-6 h-6" />
+              <ArrowLeftIcon className="w-5 h-5" />
             </motion.button>
           )}
-          <div className="w-16 h-16 bg-zinc-100 rounded-[22px] flex items-center justify-center border-2 border-white shadow-xl overflow-hidden avatar-premium relative">
+          <div className="w-12 h-12 bg-zinc-100 rounded-full flex items-center justify-center border overflow-hidden relative">
             {conversation.contact?.image ? (
               <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
             ) : (
-              <span className="text-3xl font-executive font-extrabold text-zinc-400">
+              <span className="text-xl font-bold text-zinc-400">
                 {conversation.contact?.name?.charAt(0) || '?'}
               </span>
             )}
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center border-2 border-white shadow-md z-10">
-              <PlatformIcon platform={conversation.platform} className="w-3 h-3" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-white rounded-full flex items-center justify-center border border-white z-10">
+              <PlatformIcon platform={conversation.platform} className="w-2.5 h-2.5" />
             </div>
           </div>
           <div>
-            <h3 className="text-2xl font-executive font-extrabold text-zinc-950 tracking-tighter leading-none mb-3">
+            <h3 className="text-[16px] font-semibold text-zinc-900 tracking-tight leading-none mb-1.5">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h3>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 bg-emerald-50 rounded-full px-3 py-1 border border-emerald-100/50">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse-subtle" />
-                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-[11px] font-medium text-emerald-600">
                   Active
                 </span>
               </div>
-              <span className="text-xs font-black text-zinc-200">/</span>
-              <div className="flex items-center gap-2">
-                <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5" />
-                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.15em] leading-none">
-                  {conversation.platform}
+              <span className="text-[10px] text-zinc-300">•</span>
+              <div className="flex items-center gap-1.5">
+                <PlatformIcon platform={conversation.platform} className="w-3 h-3 text-zinc-400" />
+                <span className="text-[11px] font-medium text-zinc-500 capitalize">
+                  {String(conversation.platform).toLowerCase()}
                 </span>
               </div>
             </div>
@@ -357,21 +357,21 @@ const ChatWindow = ({
           <div className="h-10 w-[1px] bg-zinc-100 mx-1" />
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="flex items-center group bg-white/50 p-1.5 pr-4 rounded-[20px] border border-zinc-100 hover:bg-white hover:shadow-premium-sm transition-all duration-300">
-              <div className="w-11 h-11 bg-zinc-50 rounded-[14px] border border-zinc-200/50 flex items-center justify-center group-hover:border-zinc-300 transition-all overflow-hidden avatar-premium mr-4">
+            <Menu.Button className="flex items-center group bg-zinc-50 p-1.5 pr-3 rounded-full border border-zinc-200 hover:bg-zinc-100 transition-colors">
+              <div className="w-8 h-8 bg-white rounded-full border border-zinc-200 flex items-center justify-center overflow-hidden mr-2">
                 {conversation.assignee?.image ? (
                   <img src={conversation.assignee.image} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <UserCircleIcon className="w-7 h-7 text-zinc-300" />
+                  <UserCircleIcon className="w-5 h-5 text-zinc-400" />
                 )}
               </div>
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-0.5">Owner</span>
-                <span className="text-xs font-black text-zinc-900 group-hover:text-brand-600 transition-colors uppercase tracking-[0.05em]">
+              <div className="flex flex-col items-start mr-1">
+                <span className="text-[10px] font-medium text-zinc-400 leading-none mb-0.5">Owner</span>
+                <span className="text-[12px] font-semibold text-zinc-700 leading-none">
                   {conversation.assignee?.name || t('inbox.filter.unassigned')}
                 </span>
               </div>
-              <ChevronDownIcon className="w-4 h-4 ml-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+              <ChevronDownIcon className="w-4 h-4 ml-1 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
             </Menu.Button>
 
             <Transition
@@ -430,7 +430,7 @@ const ChatWindow = ({
         </div>
       </div>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-10 space-y-2 bg-[#fdfdfe] custom-scrollbar relative">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#f0f2f5] custom-scrollbar relative">
         <div className="absolute inset-0 bg-grid-zinc-100/50 [mask-image:linear-gradient(to_bottom,white,transparent)] pointer-events-none" />
         <AnimatePresence mode="popLayout">
           {conversation.messages?.length === 0 ? (
@@ -455,9 +455,9 @@ const ChatWindow = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-10 bg-white border-t border-zinc-100/80 shadow-[0_-8px_40px_rgba(0,0,0,0.03)] shrink-0 z-20">
+      <div className="p-4 bg-[#f0f2f5] border-t border-zinc-200 shrink-0 z-20">
         {/* Unified Toolbar */}
-        <div className="flex items-center gap-3 mb-8 overflow-x-auto pb-3 scrollbar-hide">
+        <div className="flex items-center gap-2 mb-3 overflow-x-auto pb-1 scrollbar-hide">
           <Paywall
             minPlan="PREMIUM"
             fallback={
@@ -649,13 +649,17 @@ const ChatWindow = ({
           </Menu>
         </div>
 
-        <form onSubmit={handleSend} className="relative group">
+        <form onSubmit={handleSend} className="relative flex items-end gap-3">
           <textarea
-            rows={3}
-            className="w-full px-8 py-7 bg-zinc-50/50 border border-zinc-100/80 rounded-[32px] text-[16px] font-medium placeholder:text-zinc-300 focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white focus:border-brand-500/30 transition-all resize-none shadow-inner font-executive leading-relaxed"
+            rows={1}
+            className="w-full px-4 py-3 bg-white border border-transparent rounded-lg text-[15px] placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/30 transition-all resize-none shadow-sm leading-relaxed max-h-32"
             placeholder={t('inbox.replyPlaceholder')}
             value={messageText || ''}
-            onChange={(e) => onMessageChange(e.target.value)}
+            onChange={(e) => {
+              onMessageChange(e.target.value);
+              e.target.style.height = 'auto';
+              e.target.style.height = (e.target.scrollHeight) + 'px';
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
@@ -663,20 +667,15 @@ const ChatWindow = ({
               }
             }}
           />
-          <div className="absolute bottom-6 right-6 flex items-center gap-5">
-            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.3em] hidden sm:block">
-              {t('inbox.action.pressEnter')}
-            </span>
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: -5 }}
-              whileTap={{ scale: 0.9 }}
-              type="submit"
-              disabled={!messageText?.trim()}
-              className="p-4 bg-brand-600 premium-gradient text-white rounded-[22px] shadow-glow-emerald disabled:opacity-30 disabled:shadow-none transition-all"
-            >
-              <PaperAirplaneIcon className="w-6 h-6 -rotate-45" />
-            </motion.button>
-          </div>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="submit"
+            disabled={!messageText?.trim()}
+            className="p-3 bg-brand-600 text-white rounded-lg shadow-sm disabled:opacity-50 disabled:bg-zinc-300 transition-colors shrink-0"
+          >
+            <PaperAirplaneIcon className="w-5 h-5 -rotate-45" />
+          </motion.button>
         </form>
       </div>
 
