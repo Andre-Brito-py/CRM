@@ -475,7 +475,7 @@ const Inbox = () => {
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800">
               {/* Column 1: Global Small Sidebar (WhatsApp Web style) */}
-              <div className="hidden lg:flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0">
+              <div className="hidden md:flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0">
                 <div className="flex flex-col items-center gap-6 w-full">
                   <button 
                     onClick={() => router.push(`/account/${workspaceSlug}`)}
@@ -508,7 +508,7 @@ const Inbox = () => {
               {/* Column 2: Chat List */}
               <div
                 id="conversation-list"
-                className={`${selectedId ? 'hidden md:block' : 'block'} h-full flex-shrink-0 w-full md:w-[360px] lg:w-[400px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10`}
+                className={`${selectedId ? 'hidden md:flex' : 'flex'} h-full flex-shrink-0 w-full md:w-[360px] lg:w-[400px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10 flex-col`}
               >
                 <ConversationList
                   conversations={conversations}

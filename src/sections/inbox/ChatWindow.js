@@ -22,6 +22,7 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import toast from 'react-hot-toast';
 import api from '@/lib/common/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import Logo from '@/components/Logo';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -427,6 +428,9 @@ const ChatWindow = ({
               </Menu.Items>
             </Transition>
           </Menu>
+          <div className="hidden sm:block">
+            <Logo variant="full" className="scale-75 origin-right" />
+          </div>
         </div>
       </div>
       {/* Messages */}
