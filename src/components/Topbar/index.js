@@ -77,6 +77,7 @@ const ITEM_ICONS = {
   'common.label.billing': CreditCardIcon,
   'common.label.settings': CogIcon,
   'common.label.security': UserCircleIcon,
+  'common.label.presets': BoltIcon,
 };
 
 const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];

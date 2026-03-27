@@ -98,6 +98,11 @@ const menu = (workspaceId, options = {}) => {
           ownerOnly: true,
         },
         {
+          name: 'common.label.presets',
+          path: `/account/${workspaceId}/settings/general`,
+          ownerOnly: true,
+        },
+        {
           name: 'settings.domain.configuration',
           path: `/account/${workspaceId}/settings/domain`,
           ownerOnly: true,

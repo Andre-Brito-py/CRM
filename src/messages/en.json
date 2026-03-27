@@ -70,6 +70,7 @@
   "common.label.logout": "Logout",
   "common.label.account": "Account",
   "common.label.billing": "Billing",
+  "common.label.presets": "Industry Presets",
   "common.label.landingpage": "Landing Page",
   "login.label": "Sign in with your email",
   "workspace.action.button.label": "Create Workspace",
