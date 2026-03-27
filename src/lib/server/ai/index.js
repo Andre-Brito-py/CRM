@@ -15,11 +15,19 @@ export async function generateChatCompletion({ messages, systemPrompt, options =
   const openAiApiKey = await getSystemConfig('OPENAI_API_KEY', process.env.OPENAI_API_KEY);
 
   if (googleKey) {
-    return callGemini(googleKey, messages, systemPrompt, options);
+    // Ensure we use a Gemini model if we are using the Google key
+    const model = (options.model && options.model.startsWith('gemini-')) 
+      ? options.model 
+      : 'gemini-1.5-flash';
+    return callGemini(googleKey, messages, systemPrompt, { ...options, model });
   }
 
   if (openAiApiKey) {
-    return callOpenAI(openAiApiKey, messages, systemPrompt, options);
+    // Ensure we use an OpenAI model if we are using the OpenAI key
+    const model = (options.model && (options.model.startsWith('gpt-') || options.model.startsWith('o1-')))
+      ? options.model
+      : 'gpt-4o-mini';
+    return callOpenAI(openAiApiKey, messages, systemPrompt, { ...options, model });
   }
 
   throw new Error('MISSING_AI_API_KEY');

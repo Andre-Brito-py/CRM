@@ -368,7 +368,7 @@ const Inbox = () => {
     setSelectedConversation(updatedConversation);
 
     try {
-      await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
+      const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -377,9 +377,41 @@ const Inbox = () => {
           type: selectedConversation.platform === 'EMAIL' ? 'EMAIL' : 'TEXT',
         }),
       });
-      // Revalidate both
-      mutateConversations();
-      mutateConversation();
+
+      const serverMessage = response?.data?.message;
+      if (serverMessage) {
+        // Create final conversation state with the real server message instead of temp one
+        const finalConversation = {
+          ...selectedConversation,
+          messages: [
+            ...(selectedConversation.messages || []).filter(m => !m.id.startsWith('temp-')),
+            serverMessage
+          ],
+          lastMessage: content,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Update caches with REAL data and no revalidation (to prevent flickering)
+        mutateConversations({
+          data: {
+            conversations: (conversations || []).map((c) =>
+              c.id === selectedId ? finalConversation : c
+            )
+          }
+        }, false);
+
+        mutateConversation({
+          data: {
+            conversation: finalConversation
+          }
+        }, false);
+
+        setSelectedConversation(finalConversation);
+      } else {
+        // Fallback revalidate if response was unexpected
+        mutateConversations();
+        mutateConversation();
+      }
     } catch (error) {
       console.error(error);
       toast.error(t('inbox.message.sendFailed'));
