@@ -12,7 +12,6 @@ import api from '@/lib/common/api';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import { getServerSession } from 'next-auth/next';
 import { authOptions, getAuthOptions } from '@/lib/server/auth';
 
 const SUPPORTED_LANGUAGES = ['und', 'pt', 'en', 'es', 'fr', 'de', 'it'];
