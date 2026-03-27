@@ -431,7 +431,7 @@ const ChatWindow = ({
               </Menu.Items>
             </Transition>
           </Menu>
-          <div className="hidden sm:block">
+          <div className="hidden sm:block ml-4 pr-2">
             <Logo variant="full" className="scale-75 origin-right" />
           </div>
         </div>

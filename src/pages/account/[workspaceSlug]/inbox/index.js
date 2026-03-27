@@ -465,7 +465,7 @@ const Inbox = () => {
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
       <Content full={true}>
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full w-full max-w-full overflow-hidden">
 
 
           {(conversationsData === undefined && !!workspaceSlug) ? (
@@ -509,7 +509,7 @@ const Inbox = () => {
               {/* Column 2: Chat List */}
               <div
                 id="conversation-list"
-                className={`${selectedId ? 'hidden sm:flex' : 'flex'} h-full flex-shrink-0 w-full sm:w-[320px] md:w-[360px] lg:w-[400px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10 flex-col`}
+                className={`${selectedId ? 'hidden sm:flex' : 'flex'} h-full flex-shrink-0 w-full sm:w-[320px] md:w-[350px] lg:w-[380px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10 flex-col`}
               >
                 <ConversationList
                   conversations={conversations}
