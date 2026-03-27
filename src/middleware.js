@@ -26,6 +26,7 @@ export default function middleware(req) {
 
   // 3. Bypass for main domain and standard environments
   if (
+    hostnameWithoutPort.includes('vysify.com') ||
     hostnameWithoutPort === appHostname ||
     hostnameWithoutPort === 'www.' + appHostname ||
     hostnameWithoutPort === 'localhost' ||
