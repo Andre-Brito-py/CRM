@@ -465,7 +465,7 @@ const Inbox = () => {
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
       <Content full={true}>
-        <div className="flex flex-col h-full w-full max-w-full overflow-hidden">
+        <div className="fixed inset-0 z-[50] flex flex-col h-screen w-screen bg-white dark:bg-zinc-950 overflow-hidden">
 
 
           {(conversationsData === undefined && !!workspaceSlug) ? (
