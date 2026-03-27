@@ -475,28 +475,28 @@ const Inbox = () => {
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800">
               {/* Column 1: Global Small Sidebar (WhatsApp Web style) */}
-              <div className="hidden md:flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0">
+              <div className="hidden sm:flex flex-col items-center py-6 w-[70px] bg-zinc-50 dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-800 shrink-0">
                 <div className="flex flex-col items-center gap-6 w-full">
-                  <button 
-                    onClick={() => router.push(`/account/${workspaceSlug}`)}
+                  <Link
+                    href={`/account/${workspaceSlug}`}
                     className="p-3 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-brand-600 dark:hover:text-brand-400 hover:scale-105 transition-all shadow-sm"
                     title="Dashboard"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                  </button>
+                  </Link>
                   <button 
                     className="p-3 bg-brand-600/10 rounded-2xl border border-brand-500/20 text-brand-600 dark:text-brand-400 shadow-[0_0_15px_rgba(139,92,246,0.15)]"
                     title="Inbox"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0l-8 4-8-4"/></svg>
                   </button>
-                  <button 
-                    onClick={() => router.push(`/account/${workspaceSlug}/settings`)}
+                  <Link
+                    href={`/account/${workspaceSlug}/settings`}
                     className="p-3 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 text-zinc-400 hover:text-brand-600 dark:hover:text-brand-400 hover:scale-105 transition-all shadow-sm"
                     title="Settings"
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                  </button>
+                  </Link>
                 </div>
                 <div className="mt-auto">
                   <div className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 font-bold flex items-center justify-center text-zinc-500">
@@ -508,7 +508,7 @@ const Inbox = () => {
               {/* Column 2: Chat List */}
               <div
                 id="conversation-list"
-                className={`${selectedId ? 'hidden md:flex' : 'flex'} h-full flex-shrink-0 w-full md:w-[360px] lg:w-[400px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10 flex-col`}
+                className={`${selectedId ? 'hidden sm:flex' : 'flex'} h-full flex-shrink-0 w-full sm:w-[320px] md:w-[360px] lg:w-[400px] border-r border-zinc-100 dark:border-zinc-800 shadow-sm z-10 flex-col`}
               >
                 <ConversationList
                   conversations={conversations}

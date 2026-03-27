@@ -285,6 +285,9 @@ const ChatWindow = ({
         <p className="text-zinc-400 dark:text-zinc-500 text-lg font-executive font-medium max-w-sm mx-auto leading-relaxed">
           {t('inbox.chat.empty.subtitle')}
         </p>
+        <div className="mt-12 opacity-40 hover:opacity-100 transition-opacity">
+          <Logo variant="full" className="scale-75" />
+        </div>
       </div>
     );
   }
