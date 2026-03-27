@@ -330,48 +330,44 @@ const Inbox = () => {
   };
 
   const handleSendMessage = async (content) => {
-    if (!selectedConversation) return;
+    if (!content?.trim()) return;
+    if (!workspaceSlug || !selectedId || !selectedConversation) return;
 
     const previousConversations = [...conversations];
-    const previousDetail = detailData ? { ...detailData } : null;
+    const previousDetail = { ...selectedConversation };
 
-    // Optimistic update
-    const newMessage = {
-      id: `temp-${Date.now()}`,
-      content,
+    // 1. Prepare optimistic state
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage = {
+      id: tempId,
       direction: 'OUTBOUND',
+      type: 'TEXT',
+      content: content.trim(),
       createdAt: new Date().toISOString(),
       status: 'SENDING',
     };
 
-    const updatedConversation = {
+    const optimisticConversation = {
       ...selectedConversation,
-      messages: [...(selectedConversation.messages || []), newMessage],
-      lastMessage: content,
-      updatedAt: new Date().toISOString(),
+      messages: [...(selectedConversation.messages || []), optimisticMessage],
+      lastMessage: optimisticMessage.content,
+      updatedAt: optimisticMessage.createdAt,
     };
 
-    // Update List Cache
+    // 2. Optimistic Update
     mutateConversations({
       data: {
         conversations: (conversations || []).map((c) =>
-          c.id === selectedId ? updatedConversation : c
+          c.id === selectedId ? optimisticConversation : c
         )
       }
     }, false);
-
-    // Update Detail Cache
-    mutateConversation({
-      data: {
-        conversation: updatedConversation
-      }
-    }, false);
-
-    // Update local state directly for immediate UI reaction
-    setSelectedConversation(updatedConversation);
+    mutateConversation({ data: { conversation: optimisticConversation } }, false);
+    setSelectedConversation(optimisticConversation);
+    setMessageText(''); // Clear input optimistically
 
     try {
-      const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedConversation.id}`, {
+      const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -381,46 +377,50 @@ const Inbox = () => {
         }),
       });
 
-      const serverMessage = response?.data?.message;
-      if (serverMessage) {
-        // Create final conversation state with the real server message instead of temp one
-        const finalConversation = {
-          ...selectedConversation,
-          messages: [
-            ...(selectedConversation.messages || []).filter(m => !m.id.startsWith('temp-')),
-            serverMessage
-          ],
-          lastMessage: content,
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Update caches with REAL data and no revalidation (to prevent flickering)
-        mutateConversations({
-          data: {
-            conversations: (conversations || []).map((c) =>
-              c.id === selectedId ? finalConversation : c
-            )
-          }
-        }, false);
-
-        mutateConversation({
-          data: {
-            conversation: finalConversation
-          }
-        }, false);
-
-        setSelectedConversation(finalConversation);
-      } else {
-        // Fallback revalidate if response was unexpected
-        mutateConversations();
-        mutateConversation();
+      if (!response.ok) {
+        if (response.status === 401) {
+          toast.error('Sessão expirada. Recarregando...');
+          setTimeout(() => window.location.reload(), 1500);
+          throw new Error('Sessão expirada');
+        }
+        throw new Error(response.error?.msg || 'Failed to send message');
       }
+
+      const serverMessage = response.data?.message;
+      if (!serverMessage) throw new Error('No message returned');
+
+      const finalConversation = {
+        ...selectedConversation,
+        messages: [
+          ...(selectedConversation.messages || []).filter(m => m.id !== tempId),
+          serverMessage
+        ],
+        lastMessage: serverMessage.content,
+        updatedAt: serverMessage.createdAt,
+      };
+
+      // Final cache sync
+      mutateConversations({
+        data: {
+          conversations: (conversations || []).map((c) =>
+            c.id === selectedId ? finalConversation : c
+          )
+        }
+      }, false);
+      mutateConversation({ data: { conversation: finalConversation } }, false);
+      setSelectedConversation(finalConversation);
+      
     } catch (error) {
-      console.error(error);
-      toast.error(t('inbox.message.sendFailed'));
-      // Rollback both
+      console.error('Send failed:', error);
+      toast.error(t('inbox.message.sendFailed') + ': ' + error.message);
+      
+      // Rollback
       mutateConversations({ data: { conversations: previousConversations } }, false);
-      if (previousDetail) mutateConversation(previousDetail, false);
+      mutateConversation({ data: { conversation: previousDetail } }, false);
+      setSelectedConversation(previousDetail);
+      
+      // Restore text to input area
+      setMessageText(content);
     }
   };
 

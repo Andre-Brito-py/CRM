@@ -433,10 +433,7 @@ const ChatWindow = ({
           </Menu>
 
           <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-zinc-100 dark:border-zinc-800 ml-2">
-             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center shadow-sm">
-                <SparklesIcon className="w-4 h-4 text-white" />
-             </div>
-             <span className="text-xs font-black tracking-tighter text-zinc-900 dark:text-zinc-100">Vysify</span>
+             <Logo variant="full" className="scale-90 origin-left" />
           </div>
         </div>
       </div>
