@@ -132,11 +132,12 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
   const model = options.model || 'gemini-1.5-flash';
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  // Convert OpenAI messages to Gemini contents (must alternate roles)
+  // Convert OpenAI messages to Gemini contents (must start with user and alternate roles)
   const contents = [];
   for (const m of messages) {
-    const role = m.role === 'assistant' ? 'model' : 'user';
+    const role = (m.role === 'assistant' || m.role === 'model') ? 'model' : 'user';
     const last = contents[contents.length - 1];
+    
     if (last && last.role === role) {
       last.parts[0].text += `\n\n${String(m.content || '')}`;
     } else {
@@ -147,12 +148,27 @@ async function callGemini(apiKey, messages, systemPrompt, options) {
     }
   }
 
+  // Gemini Rule: First message MUST be 'user'
+  if (contents.length > 0 && contents[0].role === 'model') {
+    contents.unshift({
+      role: 'user',
+      parts: [{ text: '[Contexto anterior]' }]
+    });
+  }
+
   const body = {
     contents,
     generationConfig: {
       temperature: options.temperature ?? 0.7,
       maxOutputTokens: options.maxTokens ?? 1000,
-    }
+    },
+    // Disable aggressive safety filters for business processing
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+    ]
   };
 
   if (systemPrompt) {
