@@ -156,6 +156,12 @@ const CATALOG = [
     title: 'Geral',
     items: [{ key: 'APP_URL', category: 'GENERAL', label: 'App URL', secret: false }],
   },
+  {
+    title: 'Status de Recursos (Universal)',
+    items: [
+      { key: 'APP_FEATURES_STATUS', category: 'GENERAL', label: 'Status dos Recursos (JSON)', secret: false, public: true },
+    ],
+  },
 ];
 
 const getConfigStatus = (config, def) => {
@@ -493,6 +499,20 @@ const AdminSettings = () => {
                     const inputType = item.secret ? (showValue[item.key] ? 'text' : 'password') : 'text';
                     const canClear = Boolean(config);
                     const saving = Boolean(isSavingKey[item.key]);
+
+                    // Renderização customizada para o Status de Recursos
+                    if (item.key === 'APP_FEATURES_STATUS') {
+                      return (
+                        <div key={item.key} className="col-span-1 md:col-span-2 space-y-4">
+                          <FeatureStatusManager 
+                            value={currentValue} 
+                            onChange={(val) => setKeyValue(item.key, val)}
+                            onSave={(val) => saveKey({ key: item.key, category: item.category, value: val, secret: false })}
+                            isSaving={saving}
+                          />
+                        </div>
+                      );
+                    }
 
                     return (
                       <div key={item.key} className="border rounded-lg p-4">
@@ -1072,6 +1092,91 @@ const AdminSettings = () => {
         </div>
       </Content.Container>
     </AdminLayout>
+  );
+};
+
+const FeatureStatusManager = ({ value, onChange, onSave, isSaving }) => {
+  const currentStatus = useMemo(() => {
+    try {
+      return JSON.parse(value || '{}');
+    } catch {
+      return {};
+    }
+  }, [value]);
+
+  const updateFeature = (key, data) => {
+    const next = { ...currentStatus, [key]: { ...currentStatus[key], ...data } };
+    onChange(JSON.stringify(next));
+  };
+
+  const removeFeature = (key) => {
+    const next = { ...currentStatus };
+    delete next[key];
+    onChange(JSON.stringify(next));
+  };
+
+  const PREDEFINED_FEATURES = [
+    { key: 'fiscal', label: 'Nota Fiscal' },
+    { key: 'ia', label: 'Inteligência Artificial' },
+    { key: 'inbox', label: 'Inbox / WhatsApp' },
+    { key: 'analytics', label: 'Analytics' },
+    { key: 'automations', label: 'Automações' },
+  ];
+
+  return (
+    <div className="space-y-4 pt-4 border-t border-zinc-100 dark:border-zinc-800">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {PREDEFINED_FEATURES.map((f) => {
+          const config = currentStatus[f.key] || { offline: false, message: '', title: '' };
+          return (
+            <div key={f.key} className={`p-4 rounded-2xl border transition-all ${config.offline ? 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30' : 'bg-zinc-50 border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800'}`}>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100">{f.label}</span>
+                <button
+                  type="button"
+                  onClick={() => updateFeature(f.key, { offline: !config.offline })}
+                  className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full transition-colors duration-200 ease-in-out focus:outline-none ${config.offline ? 'bg-red-500' : 'bg-zinc-200 dark:bg-zinc-700'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out mt-0.5 ${config.offline ? 'translate-x-5 ml-0.5' : 'translate-x-0 ml-0.5'}`} />
+                </button>
+              </div>
+              {config.offline && (
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                  <input
+                    type="text"
+                    placeholder="Título (ex: Em breve)"
+                    className="w-full text-xs p-2 rounded-lg border border-red-200 dark:border-red-900/40 bg-white dark:bg-zinc-900 placeholder:text-zinc-400"
+                    value={config.title || ''}
+                    onChange={(e) => updateFeature(f.key, { title: e.target.value })}
+                  />
+                  <textarea
+                    rows={2}
+                    placeholder="Mensagem para o usuário..."
+                    className="w-full text-xs p-2 rounded-lg border border-red-200 dark:border-red-900/40 bg-white dark:bg-zinc-900 placeholder:text-zinc-400"
+                    value={config.message || ''}
+                    onChange={(e) => updateFeature(f.key, { message: e.target.value })}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      <div className="flex justify-between items-center bg-zinc-50 dark:bg-zinc-900/50 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+         <div className="text-xs text-zinc-500 max-w-sm">
+           Ao marcar como offline, os usuários verão uma tela premium com o aviso. A aplicação é instantânea.
+         </div>
+         <button
+           type="button"
+           disabled={isSaving}
+           onClick={() => onSave(value)}
+           className="px-6 py-2 bg-zinc-900 dark:bg-brand-600 text-white text-sm font-bold rounded-xl shadow-lg hover:opacity-90 disabled:opacity-50 transition-all"
+         >
+           {isSaving ? 'Aplicando...' : 'Aplicar Alterações de Status'}
+         </button>
+      </div>
+    </div>
   );
 };
 

@@ -11,6 +11,7 @@ import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
+import FeatureGuard from '@/components/Maintenance/FeatureGuard';
 
 const PaymentsSettings = ({ isTeamOwner, workspace }) => {
   const router = useRouter();
@@ -80,38 +81,40 @@ const PaymentsSettings = ({ isTeamOwner, workspace }) => {
       />
       <Content.Divider />
       <Content.Container>
-        <Card>
-          <Card.Body title="Conta recebedora" subtitle={`Gateway: ${providerLabel}`}>
-            {!paymentSetting ? (
-              <div className="text-sm text-gray-700">
-                Este workspace ainda não tem gateway habilitado. Contate o suporte para ativar pagamentos.
-              </div>
-            ) : (
-              <form onSubmit={save} className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Provider Account ID</label>
-                  <input
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
-                    value={providerAccountId}
-                    onChange={(e) => setProviderAccountId(e.target.value)}
-                    disabled={isSaving || !isTeamOwner}
-                    placeholder="ex: walletId / acct_... / collector_id"
-                  />
-                  <div className="mt-2 text-xs text-gray-500">{helperText}</div>
+        <FeatureGuard featureKey="fiscal">
+          <Card>
+            <Card.Body title="Conta recebedora" subtitle={`Gateway: ${providerLabel}`}>
+              {!paymentSetting ? (
+                <div className="text-sm text-gray-700">
+                  Este workspace ainda não tem gateway habilitado. Contate o suporte para ativar pagamentos.
                 </div>
-                <div className="flex justify-end">
-                  <Button
-                    className="text-white bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-lg text-sm font-bold"
-                    disabled={isSaving || !isTeamOwner}
-                    type="submit"
-                  >
-                    {isSaving ? 'Salvando...' : 'Salvar'}
-                  </Button>
-                </div>
-              </form>
-            )}
-          </Card.Body>
-        </Card>
+              ) : (
+                <form onSubmit={save} className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Provider Account ID</label>
+                    <input
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
+                      value={providerAccountId}
+                      onChange={(e) => setProviderAccountId(e.target.value)}
+                      disabled={isSaving || !isTeamOwner}
+                      placeholder="ex: walletId / acct_... / collector_id"
+                    />
+                    <div className="mt-2 text-xs text-gray-500">{helperText}</div>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      className="text-white bg-brand-600 hover:bg-brand-700 px-4 py-2 rounded-lg text-sm font-bold"
+                      disabled={isSaving || !isTeamOwner}
+                      type="submit"
+                    >
+                      {isSaving ? 'Salvando...' : 'Salvar'}
+                    </Button>
+                  </div>
+                </form>
+              )}
+            </Card.Body>
+          </Card>
+        </FeatureGuard>
       </Content.Container>
     </AccountLayout>
   );
