@@ -111,11 +111,11 @@ const ConversationList = ({
         </div>
 
         <div className="relative group">
-          <MagnifyingGlassIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4.5 h-4.5 transition-colors duration-300 ${localSearch ? 'text-indigo-500' : 'text-zinc-400'}`} />
+          <MagnifyingGlassIcon className={`absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-300 ${localSearch ? 'text-indigo-500' : 'text-zinc-400'}`} />
           <input
             type="text"
             placeholder="Procurar conversas..."
-            className="w-full pl-12 pr-4 py-4 bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-700/50 rounded-2xl text-[13px] font-bold focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 border-indigo-500/0 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400 italic placeholder:uppercase placeholder:tracking-widest"
+            className="w-full pl-14 pr-6 py-4.5 bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-700/50 rounded-[1.25rem] text-[13px] font-bold focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 border-indigo-500/0 focus:border-indigo-500/30 transition-all placeholder:text-zinc-400 italic placeholder:uppercase placeholder:tracking-widest"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
           />
