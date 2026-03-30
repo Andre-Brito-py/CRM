@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import useSWR from 'swr';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   CurrencyDollarIcon,
@@ -9,6 +9,7 @@ import {
   ChartBarIcon,
   CreditCardIcon,
   ClockIcon,
+  FaceSmileIcon,
 } from '@heroicons/react/24/outline';
 import {
   AreaChart,
