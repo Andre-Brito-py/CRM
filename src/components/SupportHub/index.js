@@ -243,7 +243,7 @@ const SupportHub = () => {
   if (!session) return null;
 
   return (
-    <div className="fixed bottom-8 right-8 z-50">
+    <div className="fixed bottom-4 right-4 sm:bottom-8 sm:right-8 z-50">
       <AnimatePresence>
         {!isOpen ? (
           <motion.button
@@ -253,16 +253,16 @@ const SupportHub = () => {
             whileHover={{ scale: 1.1, rotate: 5 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => setIsOpen(true)}
-            className="flex items-center justify-center w-16 h-16 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 rounded-[1.75rem] shadow-3xl shadow-indigo-600/20 border border-white/10 dark:border-zinc-200/20"
+            className="flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 rounded-[1.5rem] sm:rounded-[1.75rem] shadow-3xl shadow-indigo-600/20 border border-white/10 dark:border-zinc-200/20"
           >
-            <QuestionMarkCircleIcon className="w-8 h-8 stroke-[1.5]" />
+            <ChatBubbleLeftRightIcon className="w-7 h-7 sm:w-8 sm:h-8 stroke-[1.5]" />
           </motion.button>
         ) : (
           <motion.div 
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-96 h-[600px] max-h-[85vh] vysify-glass rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-white/40 dark:border-zinc-800/40"
+            className="w-[calc(100vw-2rem)] sm:w-96 h-[600px] max-h-[calc(100vh-6rem)] sm:max-h-[85vh] vysify-glass rounded-[2rem] sm:rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-white/40 dark:border-zinc-800/40"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl shrink-0">
