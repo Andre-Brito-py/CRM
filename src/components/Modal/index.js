@@ -47,7 +47,7 @@ const Modal = ({ children, show, title, toggle }) => {
               </div>
 
               <button
-                className="absolute top-8 right-8 p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-white/10 rounded-full transition-all duration-300"
+                className="absolute top-8 right-8 p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-white/10 rounded-full transition-all duration-300 z-50"
                 onClick={toggle}
               >
                 <XMarkIcon className="w-6 h-6" />
