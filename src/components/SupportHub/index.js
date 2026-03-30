@@ -11,15 +11,15 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como altero meu plano?',
-        a: 'Você pode fazer o upgrade ou downgrade do seu plano acessando o menu "Conta" no canto superior direito e clicando em "Faturamento" (Billing). Lá estarão listados os planos disponíveis.'
+        a: 'Para alterar seu plano, clique no seu nome no canto superior direito e selecione "Configurações da Conta" > "Faturamento".\n\nLá você poderá visualizar seu plano atual e as opções de Upgrade ou Downgrade. Ao mudar de plano, o Stripe (nosso processador de pagamentos) calcula automaticamente o valor proporcional (prorata) para o restante do seu ciclo de faturamento atual, garantindo que você pague apenas a diferença.'
       },
       {
         q: 'Como atualizo meu cartão de crédito?',
-        a: 'No menu superior "Conta" > "Faturamento", você verá uma opção para gerenciar seus métodos de pagamento ou acessar o portal do cliente.'
+        a: 'Acesse "Configurações da Conta" > "Faturamento" e clique em "Gerenciar Pagamentos". Isso abrirá o Portal de Cobrança seguro da Stripe.\n\nNo portal, você pode:\n1. Adicionar um novo método de pagamento.\n2. Definir um cartão como principal.\n3. Remover cartões antigos.\n4. Visualizar seu histórico completo de faturas e baixar recibos para contabilidade.'
       },
       {
         q: 'Por que fui cobrado a mais?',
-        a: 'Isso pode ocorrer devido a taxas de Uso de IA (Overage) se você ultrapassar o limite do seu plano, ou comissões retidas em pagamentos (Marketplace Fees) caso você use o checkout integrado.'
+        a: 'Existem três motivos principais para cobranças extras além da mensalidade fixa:\n\n1. Overage de IA: Se o seu plano possui um limite de tokens de Inteligência Artificial e você o ultrapassou, o sistema cobra pelo uso excedente por mil tokens.\n2. Marketplace Fees: Caso você use o checkout integrado do CRM para vender seus próprios produtos, uma pequena comissão pode ser retida.\n3. Provisão de Números: Adição de números de WhatsApp extras além do pacote base do seu plano.\n\nVocê pode auditar todos os custos detalhados na aba de Faturamento.'
       }
     ]
   },
@@ -30,15 +30,15 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como conectar meu WhatsApp?',
-        a: 'No menu lateral do seu Workspace, vá em "Configurações" > "Integrações" e escolha WhatsApp. Você precisará escanear o QR Code gerado pelo sistema.'
+        a: 'O Vysify utiliza a API oficial do WhatsApp Cloud (Meta). Para conectar:\n\n1. Vá em "Configurações do Workspace" > "WhatsApp".\n2. Clique em "Conectar Número".\n3. Você precisará do Phone Number ID e do Business Account ID do seu painel de desenvolvedor da Meta.\n4. Configure o Webhook fornecido na tela para começar a receber mensagens em tempo real.\n\nEste método oficial garante que sua conta não seja banida e permite múltiplos atendentes simultâneos.'
       },
       {
         q: 'Minha conexão caiu, o que fazer?',
-        a: 'Vá novamente na tela de Integrações, desconecte a instância atual e gere um novo QR Code. Certifique-se de que seu celular está conectado à internet.'
+        a: 'Como usamos a API oficial, a conexão raramente "cai" como no WhatsApp Web comum. Se as mensagens pararem de chegar:\n\n1. Verifique se o seu Token de Acesso da Meta ainda é válido (recomendamos usar tokens permanentes).\n2. Verifique se o seu Webhook no painel da Meta está com o status "Verificado".\n3. No Vysify, vá em "Configurações > WhatsApp" e use o botão "Testar Conexão" para diagnosticar erros de permissão.'
       },
       {
         q: 'Como a IA do Autopilot funciona?',
-        a: 'O Autopilot pode ser ativado na tela de "Inbox" dentro de uma conversa específica ou nas automações. Ele utiliza o Contexto do Workspace definido em "Configurações > IA" para responder.'
+        a: 'O Autopilot é o cérebro da nossa plataforma. Ele funciona de duas formas:\n\n1. Sugestões de Resposta: No Inbox, ele sugere o que você deve responder economizando seu tempo.\n2. Resposta Automática: Ele pode responder diretamente ao cliente 24/7.\n\nPara que ele seja eficiente, você DEVE preencher o "Contexto de Negócio" em "Configurações > IA". Quanto mais detalhes sobre sua empresa, preços e serviços você fornecer, mais precisa será a Inteligência Artificial.'
       }
     ]
   },
@@ -49,15 +49,15 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como criar múltiplos funis (Pipelines)?',
-        a: 'No menu "Funil de Vendas", você controla seus processos via blocos visuais arrastáveis (Kanban). É 100% No-Code: clique no seletor de funis no topo e em "Criar Novo". Você pode customizar estágios e cores depois.'
+        a: 'Você pode gerenciar diferentes processos de negócio (ex: Vendas, Pós-Venda, Parcerias) criando múltiplos funis.\n\n1. No menu "Funil de Vendas", localize o seletor de funis no topo da tela.\n2. Clique em "Criar Novo Funil".\n3. Dê um nome e defina as colunas (Estágios) do seu processo.\n4. Você pode arrastar e soltar negócios entre funis diferentes conforme o lead evolui na jornada.'
       },
       {
         q: 'Como as automações visuais funcionam?',
-        a: 'Nosso sistema de Automação é "No-Code" (sem necessidade de código). Você monta regras em uma interface simples: escolhe um "Gatilho" pronto (ex: negócio ganhou) e conecta com "Ações" automáticas (ex: enviar WhatsApp, chamar webhook, etc).'
+        a: 'Nossa engine No-Code permite automatizar tarefas repetitivas sem programar. Uma automação sempre segue a lógica: QUANDO [Gatilho] acontece, FAÇA [Ação].\n\nExemplos poderosos:\n- Gatilho: Negócio movido para "Proposta Enviada" -> Ação: Enviar mensagem de WhatsApp em 48h.\n- Gatilho: Pagamento Confirmado -> Ação: Mover para Funil de "Entrega/Onboarding".\n- Gatilho: Novo Lead Captado -> Ação: Aplicar Tag "Lead Frio".\n\nConfigure em "Automações" no menu lateral.'
       },
       {
         q: 'Posso convidar mais pessoas da minha equipe?',
-        a: 'Sim! Vá em "Membros" dentro das "Configurações" do Workspace e clique em "Convidar Membro" para enviar o convite, distribuindo a gestão dos negócios sem mexer em código.'
+        a: 'Sim! A colaboração é ilimitada no Vysify (respeitando os limites de assentos do seu plano).\n\n1. Vá em "Configurações do Workspace" > "Equipe".\n2. Clique em "Convidar Membro".\n3. Insira o e-mail e defina a Role: "Admin" (acesso total) ou "Membro" (apenas operação).\n4. O convidado receberá um link de acesso instantâneo por e-mail.'
       }
     ]
   },
@@ -68,11 +68,11 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Preciso saber programar para captar leads?',
-        a: 'Não! Nosso Construtor Visual de Formulários é 100% "Drag-and-Drop" (arrastar e soltar). Vá em "Formulários" para criar uma página de captura incrível, adicionar campos personalizados e editar o visual em segundos.'
+        a: 'Absolutamente não. Em "Formulários", você encontrará nosso editor visual "Drag-and-Drop".\n\nVocê pode adicionar campos de Texto, Telefone, Seleção e mais. Após salvar, o sistema gera uma URL única (link) que você pode colocar na bio do seu Instagram, no seu site ou enviar por mensagem. Cada resposta gera um novo Lead automaticamente no seu CRM.'
       },
       {
         q: 'Como integrar os formulários ao meu funil?',
-        a: 'Na configuração visual do WebForm, e usando nossa engenharia No-Code, você escolhe exatamente em qual Estágio do Funil (Pipeline) aquele lead recém-captado irá acampar. É instantâneo.'
+        a: 'Esta é a grande vantagem do WebForm integrado:\n\nDentro do editor do formulário, na aba "Configurações", você pode definir o "Mapeamento do Funil". Escolha exatamente em qual Funil e em qual Estágio o Lead deve ser criado após apertar o botão de enviar. Você também pode configurar para que uma Tag automática (ex: "Vindo do Instagram") seja aplicada ao novo contato.'
       }
     ]
   }
