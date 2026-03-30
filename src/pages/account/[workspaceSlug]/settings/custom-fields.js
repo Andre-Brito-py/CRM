@@ -4,7 +4,17 @@ import {
   QueueListIcon,
   TagIcon,
   AdjustmentsVerticalIcon,
-  SparklesIcon
+  SparklesIcon,
+  Bars2Icon,
+  CalendarIcon,
+  HashtagIcon,
+  ChevronDownIcon,
+  CheckIcon,
+  CurrencyDollarIcon,
+  LinkIcon,
+  PhoneIcon,
+  PlusIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';

@@ -16,7 +16,6 @@ import {
   UserGroupIcon, 
   ChatBubbleLeftRightIcon,
   FunnelIcon,
-  TrendingUpIcon,
   ClockIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline';
@@ -387,14 +386,13 @@ const Analytics = () => {
                   </p>
                 </div>
               </motion.div>
-            </div>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 id="analytics-whatsapp"
-                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+                className="col-span-1 md:col-span-2 vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
               >
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-10 h-10 bg-zinc-950 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
@@ -602,7 +600,9 @@ const Analytics = () => {
                     </ResponsiveContainer>
                   </div>
                 ) : null}
-                   <motion.div
+              </motion.div>
+
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}

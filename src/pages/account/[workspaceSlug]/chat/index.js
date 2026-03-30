@@ -265,10 +265,10 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
       </div>
 
       <div className="relative group p-[2px] rounded-3xl bg-gradient-to-br from-indigo-500/20 via-purple-500/20 to-pink-500/20 dark:from-indigo-500/10 dark:via-purple-500/10 dark:to-pink-500/10 shadow-2xl overflow-hidden backdrop-blur-3xl animate-in fade-in slide-in-from-bottom-4 duration-1000">
-        <div className="flex flex-col md:flex-row h-[75vh] min-h-[600px] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl rounded-[calc(1.5rem-1px)] border border-white/40 dark:border-zinc-800/40 relative z-10">
+        <div className="flex flex-col md:flex-row h-[calc(100vh-12rem)] sm:h-[75vh] min-h-[400px] sm:min-h-[600px] bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl rounded-[calc(1.5rem-1px)] border border-white/40 dark:border-zinc-800/40 relative z-10">
           
           {/* Sidebar */}
-          <div className="w-full md:w-[320px] lg:w-[380px] flex flex-col border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800/50">
+          <div className={`${selectedChannelId ? 'hidden md:flex' : 'flex'} w-full md:w-[320px] lg:w-[380px] flex-col border-b md:border-b-0 md:border-r border-gray-100 dark:border-zinc-800/50 ${!selectedChannelId ? 'flex-1 md:flex-none' : ''}`}>
             <div className="p-5 flex items-center justify-between gap-4">
               <h3 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">Conversas</h3>
               <div className="flex items-center gap-2">
@@ -359,9 +359,15 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
           </div>
 
           {/* Chat Area */}
-          <div className="flex-1 flex flex-col bg-white/20 dark:bg-zinc-900/10 h-full relative">
-            <div className="px-6 py-4 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800/50 backdrop-blur-xl">
-              <div className="flex items-center gap-4">
+          <div className={`${selectedChannelId ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-white/20 dark:bg-zinc-900/10 h-full relative`}>
+            <div className="px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between border-b border-gray-100 dark:border-zinc-800/50 backdrop-blur-xl">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => setSelectedChannelId('')}
+                  className="md:hidden p-1.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-400 hover:bg-gray-200 transition-colors shrink-0"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </button>
                 <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center border border-indigo-200 dark:border-indigo-800/50">
                   {selectedChannel?.kind === 'TEAM' ? <UsersIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" /> : <UserCircleIcon className="w-6 h-6 text-gray-500" />}
                 </div>
@@ -375,7 +381,7 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar scroll-smooth">
+            <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 custom-scrollbar scroll-smooth">
               <AnimatePresence mode="popLayout" initial={false}>
                 {messages.length === 0 ? (
                   <motion.div 
@@ -439,7 +445,7 @@ const InternalChat = ({ isTeamOwner, workspace }) => {
               </AnimatePresence>
             </div>
 
-            <div className="p-6 bg-gradient-to-t from-white via-white/80 dark:from-zinc-900 dark:via-zinc-900/80 backdrop-blur-md">
+            <div className="p-3 sm:p-4 lg:p-6 bg-gradient-to-t from-white via-white/80 dark:from-zinc-900 dark:via-zinc-900/80 backdrop-blur-md">
               <div className="flex items-center gap-3 p-1.5 rounded-2xl bg-gray-100/50 dark:bg-zinc-800/50 border border-gray-200 dark:border-zinc-700 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-500/50 transition-all">
                 <input
                   value={composer}

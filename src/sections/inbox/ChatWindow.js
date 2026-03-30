@@ -304,25 +304,25 @@ const ChatWindow = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-black relative overflow-hidden group/chat">
       {/* Header */}
-      <div className="px-10 py-6 border-b border-zinc-100 dark:border-zinc-800/50 flex justify-between items-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl sticky top-0 z-30 shrink-0 shadow-premium-sm">
-        <div className="flex items-center gap-6">
+      <div className="px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 border-b border-zinc-100 dark:border-zinc-800/50 flex justify-between items-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl sticky top-0 z-30 shrink-0 shadow-premium-sm">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0">
           {onBack && (
             <motion.button 
               whileHover={{ x: -3, scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={onBack} 
-              className="md:hidden p-3 -ml-3 text-zinc-400 hover:text-indigo-600 transition-all"
+              className="md:hidden p-2.5 sm:p-3 -ml-1 text-zinc-400 hover:text-indigo-600 transition-all shrink-0"
             >
               <ArrowLeftIcon className="w-6 h-6 stroke-[2]" />
             </motion.button>
           )}
-          <div className="relative group/profile">
-            <div className="w-16 h-16 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-[2.25rem] border border-zinc-200 dark:border-zinc-800 transition-all duration-700 overflow-hidden relative shadow-premium group-hover/profile:scale-110 group-hover/profile:rotate-3">
-              <div className="w-full h-full rounded-[1.75rem] overflow-hidden bg-white dark:bg-zinc-950 flex items-center justify-center">
+          <div className="relative group/profile shrink-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 p-0.5 sm:p-1 bg-zinc-100 dark:bg-zinc-900 rounded-[1.25rem] sm:rounded-[1.75rem] lg:rounded-[2.25rem] border border-zinc-200 dark:border-zinc-800 transition-all duration-700 overflow-hidden relative shadow-premium group-hover/profile:scale-110 group-hover/profile:rotate-3">
+              <div className="w-full h-full rounded-[1rem] sm:rounded-[1.5rem] lg:rounded-[1.75rem] overflow-hidden bg-white dark:bg-zinc-950 flex items-center justify-center">
                 {conversation.contact?.image ? (
                   <img src={conversation.contact.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover/profile:scale-110" />
                 ) : (
-                  <span className="text-2xl font-executive font-black italic text-zinc-300 dark:text-zinc-700">
+                  <span className="text-base sm:text-lg lg:text-2xl font-executive font-black italic text-zinc-300 dark:text-zinc-700">
                     {conversation.contact?.name?.charAt(0) || '?'}
                   </span>
                 )}
@@ -332,11 +332,11 @@ const ChatWindow = ({
               <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div>
-            <h3 className="text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none mb-2.5 uppercase italic">
+          <div className="min-w-0">
+            <h3 className="text-[14px] sm:text-[16px] lg:text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none mb-1.5 sm:mb-2.5 uppercase italic truncate">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h3>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse" />
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 italic">
@@ -354,7 +354,7 @@ const ChatWindow = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-10">
+        <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 shrink-0">
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
@@ -362,19 +362,21 @@ const ChatWindow = ({
             onClick={() => onToggleAutopilot?.(!conversation.autopilotEnabled)}
             disabled={!onToggleAutopilot || isTogglingAutopilot}
             className={classNames(
-              'group flex items-center gap-4 px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] rounded-[1.75rem] border-2 transition-all duration-700 italic shadow-2xl',
+              'group flex items-center gap-2 sm:gap-4 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-10 lg:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-[1.25rem] sm:rounded-[1.75rem] border-2 transition-all duration-700 italic shadow-2xl',
               conversation.autopilotEnabled 
                 ? 'bg-zinc-950 border-indigo-500/50 text-white shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
                 : 'bg-white dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:border-indigo-500/30 hover:text-indigo-600'
             )}
           >
-            <SparklesIcon className={`w-4 h-4 ${conversation.autopilotEnabled ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 group-hover:text-indigo-500'}`} />
-            <span className="hidden lg:inline mr-1 text-indigo-400/70">AGENT MODE:</span> {conversation.autopilotEnabled ? 'AUTOPILOT' : 'MANUAL'}
+            <SparklesIcon className={`w-4 h-4 shrink-0 ${conversation.autopilotEnabled ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 group-hover:text-indigo-500'}`} />
+            <span className="hidden lg:inline mr-1 text-indigo-400/70">AGENT MODE:</span>
+            <span className="hidden sm:inline">{conversation.autopilotEnabled ? 'AUTOPILOT' : 'MANUAL'}</span>
+            <span className="sm:hidden">{conversation.autopilotEnabled ? 'AUTO' : 'MAN'}</span>
           </motion.button>
 
-          <div className="h-12 w-[1px] bg-zinc-100 dark:bg-zinc-800/80" />
+          <div className="hidden lg:block h-12 w-[1px] bg-zinc-100 dark:bg-zinc-800/80" />
 
-          <Menu as="div" className="relative inline-block text-left">
+          <Menu as="div" className="hidden sm:block relative inline-block text-left">
             <Menu.Button className="flex items-center group bg-zinc-50/50 dark:bg-zinc-900/40 p-2 pr-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 transition-all duration-500 hover:bg-white dark:hover:bg-zinc-900 shadow-sm hover:shadow-premium">
               <div className="w-12 h-12 bg-white dark:bg-zinc-950 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden mr-4 shadow-inner transition-transform group-hover:scale-110">
                 {conversation.assignee?.image ? (
@@ -456,7 +458,7 @@ const ChatWindow = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-6 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar relative">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar relative">
         <div className="absolute inset-0 bg-grid-zinc-200/40 dark:bg-grid-white/[0.01] [mask-image:radial-gradient(ellipse_at_center,black,transparent)] pointer-events-none" />
         <AnimatePresence mode="popLayout">
           {conversation.messages?.length === 0 ? (
@@ -483,9 +485,9 @@ const ChatWindow = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl border-t border-zinc-100 dark:border-zinc-800/50 shrink-0 z-20 shadow-premium-lg">
+      <div className="p-3 sm:p-5 lg:p-8 xl:p-10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl border-t border-zinc-100 dark:border-zinc-800/50 shrink-0 z-20 shadow-premium-lg">
         {/* Unified Toolbar */}
-        <div className="flex items-center gap-4 mb-8 overflow-x-auto pb-4 scrollbar-hide no-scrollbar -mx-2 px-2">
+        <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-4 sm:mb-6 lg:mb-8 overflow-x-auto pb-2 sm:pb-4 scrollbar-hide no-scrollbar -mx-1 sm:-mx-2 px-1 sm:px-2">
           <Paywall
             minPlan="PREMIUM"
             fallback={
@@ -507,14 +509,15 @@ const ChatWindow = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onGenerateResponse?.({ objective: aiObjective })}
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
-                className={`flex items-center gap-4 px-10 py-4 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border transition-all duration-700 shadow-3xl italic ${
+                className={`flex items-center gap-2 sm:gap-3 lg:gap-4 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-10 lg:py-4 rounded-[1.25rem] sm:rounded-[1.75rem] text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] border transition-all duration-700 shadow-3xl italic shrink-0 ${
                   aiSuggestOnlyEnabled 
                     ? 'bg-zinc-950 border-indigo-500/50 text-indigo-400 shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
                     : 'bg-zinc-50 border-zinc-100 text-zinc-400'
                 }`}
               >
-                <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'animate-spin' : ''}`} />
-                {isGeneratingAI ? 'SYNTHESIZING...' : 'GENERATE AI RESPONSE'}
+                <SparklesIcon className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${isGeneratingAI ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">{isGeneratingAI ? 'SYNTHESIZING...' : 'GENERATE AI RESPONSE'}</span>
+                <span className="sm:hidden">{isGeneratingAI ? 'AI...' : 'AI GEN'}</span>
               </motion.button>
 
               <motion.button
@@ -522,13 +525,14 @@ const ChatWindow = ({
                 whileTap={{ scale: 0.95 }}
                 onClick={handleSummarize}
                 disabled={isSummarizingAI}
-                className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shadow-premium italic"
+                className="flex items-center gap-2 sm:gap-3 lg:gap-4 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-10 lg:py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.25rem] sm:rounded-[1.75rem] text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shadow-premium italic shrink-0"
               >
-                <DocumentTextIcon className="w-5 h-5" />
-                {isSummarizingAI ? 'ANALYZING...' : 'SUMMARIZE STREAM'}
+                <DocumentTextIcon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                <span className="hidden sm:inline">{isSummarizingAI ? 'ANALYZING...' : 'SUMMARIZE STREAM'}</span>
+                <span className="sm:hidden">{isSummarizingAI ? '...' : 'SUMA.'}</span>
               </motion.button>
               
-              <div className="flex items-center gap-6 ml-2 p-2 bg-zinc-100/50 dark:bg-black/40 rounded-[2.25rem] border border-zinc-100 dark:border-zinc-800 shadow-inner-premium">
+              <div className="hidden lg:flex items-center gap-6 ml-2 p-2 bg-zinc-100/50 dark:bg-black/40 rounded-[2.25rem] border border-zinc-100 dark:border-zinc-800 shadow-inner-premium">
                 <label className="flex items-center gap-4 px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 select-none cursor-pointer hover:text-indigo-600 transition-all duration-500 italic rounded-2xl">
                   <input
                     type="checkbox"
@@ -553,7 +557,7 @@ const ChatWindow = ({
             </div>
           </Paywall>
 
-          <div className="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-6 shrink-0" />
+          <div className="hidden lg:block h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-2 sm:mx-4 lg:mx-6 shrink-0" />
 
           <motion.button
             whileHover={{ scale: 1.05, y: -2 }}
@@ -561,7 +565,7 @@ const ChatWindow = ({
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
             disabled={aiObjective !== 'schedule'}
-            className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shrink-0 disabled:opacity-30 shadow-premium italic"
+            className="hidden lg:flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shrink-0 disabled:opacity-30 shadow-premium italic"
           >
             <CalendarDaysIcon className="w-5 h-5" />
             {t('inbox.schedule.title')}
@@ -670,12 +674,12 @@ const ChatWindow = ({
           </Menu>
         </div>
 
-        <form onSubmit={handleSend} className="relative flex items-center gap-8 max-w-6xl mx-auto">
-          <div className="relative flex-1 group/input">
+        <form onSubmit={handleSend} className="relative flex items-center gap-3 sm:gap-5 lg:gap-8 max-w-6xl mx-auto">
+          <div className="relative flex-1 group/input min-w-0">
             <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-[3rem] blur-xl opacity-0 group-focus-within/input:opacity-100 transition duration-1000" />
             <textarea
               rows={1}
-              className="relative w-full px-10 py-6 bg-white dark:bg-zinc-900/90 border border-zinc-100 dark:border-zinc-800 rounded-[3rem] text-[16px] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all resize-none shadow-2xl leading-relaxed max-h-80 font-medium custom-scrollbar italic"
+              className="relative w-full px-5 py-4 sm:px-8 sm:py-5 lg:px-10 lg:py-6 bg-white dark:bg-zinc-900/90 border border-zinc-100 dark:border-zinc-800 rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[3rem] text-[14px] sm:text-[15px] lg:text-[16px] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all resize-none shadow-2xl leading-relaxed max-h-48 sm:max-h-80 font-medium custom-scrollbar italic"
               placeholder={t('inbox.replyPlaceholder')}
               value={messageText || ''}
               onChange={(e) => {
@@ -696,9 +700,9 @@ const ChatWindow = ({
             whileTap={{ scale: 0.9 }}
             type="submit"
             disabled={!messageText?.trim()}
-            className="w-20 h-20 flex items-center justify-center premium-gradient text-white rounded-[2.5rem] shadow-3xl shadow-indigo-600/40 disabled:opacity-30 disabled:grayscale transition-all shrink-0 group/send"
+            className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 flex items-center justify-center premium-gradient text-white rounded-[1.5rem] sm:rounded-[2rem] lg:rounded-[2.5rem] shadow-3xl shadow-indigo-600/40 disabled:opacity-30 disabled:grayscale transition-all shrink-0 group/send"
           >
-            <PaperAirplaneIcon className="w-9 h-9 -rotate-25 ml-1 transition-transform group-hover/send:scale-110" />
+            <PaperAirplaneIcon className="w-6 h-6 sm:w-7 sm:h-7 lg:w-9 lg:h-9 -rotate-25 ml-0.5 transition-transform group-hover/send:scale-110" />
           </motion.button>
         </form>
       </div>

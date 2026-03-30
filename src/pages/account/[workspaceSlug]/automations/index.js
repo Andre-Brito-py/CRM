@@ -557,8 +557,9 @@ const Automations = () => {
 
   return (
     <AccountLayout>
-      <OnboardingTour tourId="automations-tour" steps={automationSteps} />
       <Meta title={`Vysify - ${workspace?.name} | ${t('Automations')}`} />
+      <Content>
+        <OnboardingTour tourId="automations-tour" steps={automationSteps} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
         <motion.div 
@@ -619,6 +620,7 @@ const Automations = () => {
               {t('automations.newRule')}
             </button>
           </motion.div>
+        ) : (
           <div id="automations-list" className="grid grid-cols-1 gap-6">
             <AnimatePresence>
               {automations.map((rule, idx) => (

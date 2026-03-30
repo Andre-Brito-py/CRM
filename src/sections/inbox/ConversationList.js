@@ -48,10 +48,10 @@ const ConversationList = ({
     <div className="flex flex-col h-full vysify-glass border-r border-zinc-100 dark:border-zinc-800/50 w-full relative overflow-hidden group/list">
       <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
       
-      <div className="p-10 border-b border-zinc-100 dark:border-zinc-800/30 flex flex-col gap-10 relative z-10">
+      <div className="p-5 sm:p-8 lg:p-10 border-b border-zinc-100 dark:border-zinc-800/30 flex flex-col gap-5 sm:gap-8 lg:gap-10 relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
-            <h2 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white italic tracking-tighter uppercase leading-none mb-1">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-executive font-extrabold text-zinc-950 dark:text-white italic tracking-tighter uppercase leading-none mb-1">
               {t('Inbox')}
             </h2>
             <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] italic ml-1 opacity-70">Secured Channel</p>
@@ -112,7 +112,7 @@ const ConversationList = ({
           <input
             type="text"
             placeholder="PROCURAR COMUNICAÇÕES..."
-            className="w-full pl-16 pr-8 py-5 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800/50 rounded-[1.5rem] text-[13px] font-executive font-black focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300 italic uppercase tracking-[0.15em]"
+            className="w-full pl-14 sm:pl-16 pr-6 sm:pr-8 py-4 sm:py-5 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800/50 rounded-[1.25rem] sm:rounded-[1.5rem] text-[12px] sm:text-[13px] font-executive font-black focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300 italic uppercase tracking-[0.15em]"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
           />
@@ -165,7 +165,7 @@ const ConversationList = ({
         </AnimatePresence>
       </div>
 
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6">
         {conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center h-full">
             <div className="relative w-28 h-28 mb-10 group/empty">
@@ -193,7 +193,7 @@ const ConversationList = ({
                     transition={{ delay: idx * 0.05, duration: 0.5 }}
                     key={conversation.id}
                     onClick={() => onSelect(conversation)}
-                    className={`group flex flex-col p-8 cursor-pointer transition-all duration-500 relative rounded-[2.5rem] border overflow-hidden ${
+                    className={`group flex flex-col p-5 sm:p-6 lg:p-8 cursor-pointer transition-all duration-500 relative rounded-[1.75rem] sm:rounded-[2.5rem] border overflow-hidden ${
                       isActive 
                         ? 'bg-zinc-950 border-zinc-800 shadow-3xl ring-1 ring-zinc-800' 
                         : 'bg-white/40 dark:bg-zinc-900/40 border-transparent hover:bg-white dark:hover:bg-zinc-900 hover:border-zinc-100 dark:hover:border-zinc-800/50 hover:shadow-premium'
@@ -207,10 +207,10 @@ const ConversationList = ({
                       />
                     )}
                     
-                    <div className="flex items-start justify-between mb-6 relative z-10">
+                    <div className="flex items-start justify-between mb-3 sm:mb-6 relative z-10">
                       <div className="flex items-center min-w-0">
                         <div className="relative flex-shrink-0">
-                          <div className={`w-16 h-16 rounded-[2rem] flex items-center justify-center border transition-all duration-700 overflow-hidden shadow-premium ${
+                          <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-[1.25rem] sm:rounded-[1.75rem] lg:rounded-[2rem] flex items-center justify-center border transition-all duration-700 overflow-hidden shadow-premium ${
                             isActive ? 'bg-zinc-900 border-zinc-800' : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 group-hover:scale-105'
                           }`}>
                             {conversation.contact?.image ? (
@@ -237,8 +237,8 @@ const ConversationList = ({
                             )}
                           </div>
                         </div>
-                        <div className="ml-5 min-w-0">
-                          <h3 className={`text-[17px] font-executive font-extrabold transition-all truncate italic uppercase tracking-tight mb-1.5 ${
+                        <div className="ml-3 sm:ml-4 lg:ml-5 min-w-0">
+                          <h3 className={`text-[14px] sm:text-[15px] lg:text-[17px] font-executive font-extrabold transition-all truncate italic uppercase tracking-tight mb-1 sm:mb-1.5 ${
                             isActive ? 'text-white' : 'text-zinc-950 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
                           }`}>
                             {conversation.contact?.name || conversation.externalId || t('common.unknown')}

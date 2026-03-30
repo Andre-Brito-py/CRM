@@ -7,6 +7,7 @@ import {
   ChevronUpDownIcon
 } from '@heroicons/react/24/outline';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { motion } from 'framer-motion';
 import Modal from '@/components/Modal/index';
 import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';

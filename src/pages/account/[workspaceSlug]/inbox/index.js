@@ -604,7 +604,7 @@ const Inbox = () => {
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
       <Content full={true}>
-        <div className="fixed inset-0 z-[50] flex flex-col h-screen w-screen bg-white dark:bg-zinc-950 overflow-hidden">
+        <div className="fixed inset-0 z-[50] flex flex-col h-[100dvh] w-screen bg-white dark:bg-zinc-950 overflow-hidden">
 
 
           {(conversationsData === undefined && !!workspaceSlug) ? (
@@ -614,8 +614,8 @@ const Inbox = () => {
             </div>
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative">
-              {/* Column 1: Global Small Sidebar (WhatsApp Web style) */}
-              <div className="flex flex-col items-center py-8 w-[85px] bg-zinc-950 dark:bg-black border-r border-zinc-800 shrink-0 z-[70] relative">
+              {/* Column 1: Global Small Sidebar (WhatsApp Web style) — hidden on mobile */}
+              <div className="hidden sm:flex flex-col items-center py-8 w-[85px] bg-zinc-950 dark:bg-black border-r border-zinc-800 shrink-0 z-[70] relative">
                 <div className="flex flex-col items-center gap-8 w-full">
                   <Link
                     href={`/account/${workspaceSlug}`}
@@ -657,7 +657,7 @@ const Inbox = () => {
               {/* Column 2: Chat List */}
               <div
                 id="conversation-list"
-                className={`${selectedId ? 'hidden sm:flex' : 'flex'} h-full flex-shrink-0 w-full sm:w-[340px] md:w-[380px] lg:w-[420px] bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-900 shadow-premium-sm z-10 flex-col relative`}
+                className={`${selectedId ? 'hidden md:flex' : 'flex'} h-full flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px] bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-900 shadow-premium-sm z-10 flex-col relative`}
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-zinc-50/30 to-transparent pointer-events-none" />
                 <div className="relative flex-1 flex flex-col">
@@ -685,7 +685,7 @@ const Inbox = () => {
                 id="chat-window-container" 
                 className={classNames(
                   "flex-1 min-w-0 h-full bg-white dark:bg-zinc-950 overflow-hidden",
-                  selectedId ? "fixed inset-y-0 right-0 left-[70px] sm:static z-60 sm:z-auto" : "hidden md:block"
+                  selectedId ? "fixed inset-0 md:static md:inset-auto z-[60] md:z-auto" : "hidden md:block"
                 )}
               >
                 <ChatWindow
