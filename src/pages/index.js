@@ -1,194 +1,27 @@
-// Triggering redeploy after PWA fix and CRM branding update
-import Meta from '@/components/Meta/index';
-import { LandingLayout } from '@/layouts/index';
-import {
-  CallToAction,
-  FAQ,
-  Features,
-  Footer,
-  Guides,
-  Hero,
-  Pricing,
-  Stats,
-  Testimonial,
-  AppShowcase,
-} from '@/sections/index';
-import { getAllPlans } from '@/prisma/services/plan';
-import prisma from '@/prisma/index';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/server/auth';
 
-const DEFAULT_PRODUCTS = [
-  {
-    name: 'Starter',
-    slug: 'FREE',
-    description: 'Perfect for solo entrepreneurs and small side projects.',
-    price: 0,
-    currency: 'BRL',
-    interval: 'month',
-    features: ['1 WhatsApp Number', '100 Contacts', 'Basic Support'],
-  },
-  {
-    name: 'Standard',
-    slug: 'STANDARD',
-    description: 'Perfect for growing teams and serious businesses.',
-    price: 149,
-    currency: 'BRL',
-    interval: 'month',
-    features: ['5 WhatsApp Numbers', 'Unlimited Contacts', 'Basic Analytics', 'Priority Support'],
-  },
-  {
-    name: 'Premium',
-    slug: 'PREMIUM',
-    description: 'Unlimited possibilities for large organizations and enterprises.',
-    price: 399,
-    currency: 'BRL',
-    interval: 'month',
-    features: ['Unlimited WhatsApp Numbers', 'Advanced Analytics', 'AI Reply Suggestions', '24/7 Phone Support'],
-  },
-];
+export default function Home() {
+  return null;
+}
 
-const isTruthyValue = (value) => {
-  const v = String(value ?? '').trim().toLowerCase();
-  return v === 'true' || v === '1' || v === 'yes' || v === 'on';
-};
+export const getServerSideProps = async (context) => {
+  const session = await getServerSession(context.req, context.res, authOptions);
 
-const Home = ({ products, promo, hasFreePlan }) => {
-  return (
-    <LandingLayout>
-      <Meta
-        title="Vysify CRM - Omnichannel Sales & Customer Management"
-        description="The ultimate CRM platform to manage your leads, sales pipelines, and WhatsApp conversations in one place."
-      />
-      <Hero hasFreePlan={hasFreePlan} />
-      <Stats />
-      <Features />
-      <AppShowcase />
-      <Pricing products={products} promo={promo} />
-      <Testimonial />
-      <FAQ />
-      <CallToAction hasFreePlan={hasFreePlan} />
-      <Footer />
-    </LandingLayout>
-  );
-};
-
-const formatPlanFeatures = (features) => {
-  if (Array.isArray(features)) return features;
-  if (!features || typeof features !== 'object') return [];
-
-  const list = [];
-
-  if (features.maxUsers) {
-    list.push(`${features.maxUsers} Assentos`);
-  } else {
-    list.push(`Assentos Ilimitados`);
-  }
-
-  if (features.maxContacts) {
-    list.push(`${features.maxContacts} Contatos`);
-  } else {
-    list.push(`Contatos Ilimitados`);
-  }
-
-  const mods = features.allowedModules || {};
-  if (mods.inbox !== false) list.push('WhatsApp Omnichannel');
-  if (mods.pipeline !== false) list.push('Pipeline de Vendas');
-  if (mods.ai_assistant !== false) list.push('Assistente de IA Integrado');
-
-  if (mods.automations !== false && features.maxAutomations) {
-    list.push(`${features.maxAutomations} Automações Ativas`);
-  } else if (mods.automations !== false) {
-    list.push(`Automações Ilimitadas`);
-  }
-
-  if (mods.payments !== false) list.push('Cobranças & Pagamentos');
-  if (mods.integrations !== false) list.push('API & Webhooks');
-
-  return list;
-};
-
-const toPublicPrices = (prices) => {
-  if (!Array.isArray(prices)) return [];
-  return prices.map((p) => ({
-    currency: p?.currency ? String(p.currency) : null,
-    amount: p?.amount == null ? null : Number(p.amount),
-    amountAnnual: p?.amountAnnual == null ? null : Number(p.amountAnnual),
-    stripePriceId: p?.stripePriceId ? String(p.stripePriceId) : null,
-    stripePriceIdAnnual: p?.stripePriceIdAnnual ? String(p.stripePriceIdAnnual) : null,
-  }));
-};
-
-export const getStaticProps = async () => {
-  let products = [];
-  let promo = { enabled: false, code: '', text: '' };
-  let hasFreePlan = false;
-  try {
-    const [plans, configs] = await Promise.all([
-      getAllPlans(),
-      prisma.systemConfig.findMany({
-        where: {
-          key: {
-            in: [
-              'LANDING_PROMO_ENABLED',
-              'LANDING_PROMO_CODE',
-              'LANDING_PROMO_TEXT',
-            ],
-          },
-        },
-      }),
-    ]);
-
-    const map = new Map((configs || []).map((c) => [String(c.key || '').toUpperCase(), c.value ?? '']));
-    const promoEnabledRaw = map.get('LANDING_PROMO_ENABLED');
-    const promoCodeRaw = map.get('LANDING_PROMO_CODE');
-    const promoTextRaw = map.get('LANDING_PROMO_TEXT');
-
-    promo = {
-      enabled: promoEnabledRaw == null ? false : isTruthyValue(promoEnabledRaw),
-      code: String(promoCodeRaw || ''),
-      text: String(promoTextRaw || ''),
+  if (session) {
+    return {
+      redirect: {
+        destination: '/account',
+        permanent: false,
+      },
     };
-
-    products = plans
-      .filter((plan) => plan.isActive)
-      .map((plan) => ({
-        name: plan.name,
-        slug: plan.slug,
-        description: plan.description,
-        price: Number(plan.price),
-        priceAnnual: plan.priceAnnual ? Number(plan.priceAnnual) : null,
-        currency: plan.currency,
-        interval: plan.interval,
-        prices: toPublicPrices(plan.prices),
-        features: formatPlanFeatures(plan.features),
-        isFreePlan:
-          Boolean(plan?.features?.isFreePlan) ||
-          String(plan?.slug || '').trim().toUpperCase() === 'FREE' ||
-          Number(plan?.price || 0) === 0,
-      }))
-      .sort((a, b) => a.price - b.price);
-
-    hasFreePlan = products.some((p) => Boolean(p?.isFreePlan));
-  } catch (e) {
-    products = [];
-  }
-
-  if (!products?.length) {
-    products = DEFAULT_PRODUCTS;
-    hasFreePlan = products.some(
-      (p) =>
-        String(p?.slug || '').trim().toUpperCase() === 'FREE' ||
-        Number(p?.price || 0) === 0
-    );
   }
 
   return {
-    props: {
-      products,
-      promo,
-      hasFreePlan,
+    redirect: {
+      destination: '/auth/login',
+      permanent: false,
     },
-    revalidate: 60, // Revalidate every 60 seconds
   };
 };
 
-export default Home;
