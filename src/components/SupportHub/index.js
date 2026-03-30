@@ -1,13 +1,90 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { useWorkspace } from '@/providers/workspace';
-import { XMarkIcon, ChatBubbleLeftRightIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, ChatBubbleLeftRightIcon, PaperAirplaneIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+
+const FAQ_DATA = [
+  {
+    id: 'payment',
+    icon: '💳',
+    title: 'Planos e Faturamento',
+    items: [
+      {
+        q: 'Como altero meu plano?',
+        a: 'Você pode fazer o upgrade ou downgrade do seu plano acessando o menu "Conta" no canto superior direito e clicando em "Faturamento" (Billing). Lá estarão listados os planos disponíveis.'
+      },
+      {
+        q: 'Como atualizo meu cartão de crédito?',
+        a: 'No menu superior "Conta" > "Faturamento", você verá uma opção para gerenciar seus métodos de pagamento ou acessar o portal do cliente.'
+      },
+      {
+        q: 'Por que fui cobrado a mais?',
+        a: 'Isso pode ocorrer devido a taxas de Uso de IA (Overage) se você ultrapassar o limite do seu plano, ou comissões retidas em pagamentos (Marketplace Fees) caso você use o checkout integrado.'
+      }
+    ]
+  },
+  {
+    id: 'whatsapp',
+    icon: '📱',
+    title: 'WhatsApp e Caixa de Entrada',
+    items: [
+      {
+        q: 'Como conectar meu WhatsApp?',
+        a: 'No menu lateral do seu Workspace, vá em "Configurações" > "Integrações" e escolha WhatsApp. Você precisará escanear o QR Code gerado pelo sistema.'
+      },
+      {
+        q: 'Minha conexão caiu, o que fazer?',
+        a: 'Vá novamente na tela de Integrações, desconecte a instância atual e gere um novo QR Code. Certifique-se de que seu celular está conectado à internet.'
+      },
+      {
+        q: 'Como a IA do Autopilot funciona?',
+        a: 'O Autopilot pode ser ativado na tela de "Inbox" dentro de uma conversa específica ou nas automações. Ele utiliza o Contexto do Workspace definido em "Configurações > IA" para responder.'
+      }
+    ]
+  },
+  {
+    id: 'crm',
+    icon: '🤝',
+    title: 'CRM e Automações',
+    items: [
+      {
+        q: 'Como criar múltiplos funis (Pipelines)?',
+        a: 'No menu "Funil de Vendas", haverá um seletor de funis no topo. Clique lá e selecione "Criar Novo Funil". Você pode customizar os estágios depois.'
+      },
+      {
+        q: 'Como as regras de automação funcionam?',
+        a: 'No menu "Automações", você cria "Regras", que são baseadas em um "Gatilho" (ex: um negócio mudou de estágio) e uma "Ação" (ex: enviar mensagem no WhatsApp).'
+      },
+      {
+        q: 'Posso convidar mais pessoas da minha equipe?',
+        a: 'Sim! Vá em "Membros" dentro das "Configurações" do Workspace e clique em "Convidar Membro" para enviar um convite para o e-mail da pessoa.'
+      }
+    ]
+  },
+  {
+    id: 'forms',
+    icon: '📝',
+    title: 'Formulários (WebForms)',
+    items: [
+      {
+        q: 'Como capto leads usando o sistema?',
+        a: 'Use o menu "Formulários" para criar um WebForm, ou usar Webhooks para se conectar a plataformas como Typeform/Facebook Ads.'
+      },
+      {
+        q: 'Onde encontro leads que vieram do formulário?',
+        a: 'Eles aparecem instantaneamente na sua tela de "Contatos" e também são adicionados ao funil que você conectou ao formulário.'
+      }
+    ]
+  }
+];
 
 const SupportHub = () => {
   const { data: session } = useSession();
   const { workspace } = useWorkspace();
   const [isOpen, setIsOpen] = useState(false);
-  const [view, setView] = useState('menu'); // menu, chat
+  const [view, setView] = useState('menu'); // 'menu', 'faq', 'answer', 'chat'
+  const [activeCategory, setActiveCategory] = useState(null);
+  const [activeQuestion, setActiveQuestion] = useState(null);
   const [tickets, setTickets] = useState([]);
   const [currentTicketId, setCurrentTicketId] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -53,7 +130,7 @@ const SupportHub = () => {
        fetchMessages(currentTicketId);
        const interval = setInterval(() => {
          fetchMessages(currentTicketId);
-       }, 15000); // Poll every 15s
+       }, 15000);
        return () => clearInterval(interval);
     }
   }, [view, currentTicketId]);
@@ -69,12 +146,11 @@ const SupportHub = () => {
     setLoading(true);
     try {
       if (!currentTicketId) {
-        // Create new ticket
         const res = await fetch('/api/user/support/tickets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-             subject: 'Nova Dúvida via Chat',
+             subject: 'Dúvida do Visiot',
              initialMessage: newMessage,
              workspaceId: workspace?.id
           })
@@ -85,7 +161,6 @@ const SupportHub = () => {
           setView('chat');
         }
       } else {
-        // Add message to existing ticket
         await fetch(`/api/user/support/tickets/${currentTicketId}/messages`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -113,41 +188,107 @@ const SupportHub = () => {
           <ChatBubbleLeftRightIcon className="w-7 h-7" />
         </button>
       ) : (
-        <div className="w-80 h-[450px] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl shadow-xl flex flex-col drop-shadow-2xl overflow-hidden">
+        <div className="w-80 sm:w-80 w-[calc(100vw-2rem)] h-[450px] max-h-[85vh] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl shadow-xl flex flex-col drop-shadow-2xl overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 bg-brand-600 text-white">
-            <h3 className="font-semibold text-lg">Central de Ajuda</h3>
+             {view !== 'menu' && view !== 'chat' && (
+               <button onClick={() => {
+                  if (view === 'answer') setView('faq');
+                  else setView('menu');
+               }} className="hover:bg-brand-700 p-1 rounded-full transition-colors mr-2 -ml-2">
+                 <ChevronLeftIcon className="w-5 h-5" />
+               </button>
+             )}
+            <h3 className="font-semibold text-lg flex-1 truncate">
+               {view === 'menu' && 'Central de Ajuda'}
+               {view === 'faq' && activeCategory?.title}
+               {view === 'answer' && 'Resposta'}
+               {view === 'chat' && 'Atendimento'}
+            </h3>
             <button onClick={() => setIsOpen(false)} className="hover:bg-brand-700 p-1 rounded-full transition-colors">
               <XMarkIcon className="w-5 h-5" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-gray-50 dark:bg-zinc-800/50">
-            {view === 'menu' ? (
-              <div className="flex flex-col gap-2">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Como podemos te ajudar hoje?</p>
-                <button
-                  className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium"
-                  onClick={() => alert('Dica: Verifique a aba "Billing" no menu superior para dúvidas de pagamento.')}
-                >
-                  💳 Dúvidas sobre Pagamento
-                </button>
-                <button
-                   className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium"
-                   onClick={() => alert('Para conectar o WhatsApp, vá em Configurações > Integrações no seu Workspace.')}
-                >
-                  📱 Conexão WhatsApp
-                </button>
-                <button
-                   className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-brand-200 dark:border-brand-900/30 hover:bg-brand-50 dark:hover:bg-brand-900/10 transition-colors shadow-sm text-sm font-bold text-brand-600 dark:text-brand-400 mt-2"
-                   onClick={() => setView('chat')}
-                >
-                  💬 Falar com um Humano
-                </button>
+            {view === 'menu' && (
+              <div className="flex flex-col gap-2 relative h-full">
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Escoha uma categoria de dúvida:</p>
+                {FAQ_DATA.map((cat) => (
+                  <button
+                    key={cat.id}
+                    className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium flex items-center justify-between"
+                    onClick={() => {
+                      setActiveCategory(cat);
+                      setView('faq');
+                    }}
+                  >
+                    <span>{cat.icon} {cat.title}</span>
+                    <span className="text-gray-400 text-xs">&gt;</span>
+                  </button>
+                ))}
+                
+                <div className="mt-auto pt-4 border-t border-gray-200 dark:border-zinc-700">
+                  <p className="text-xs text-center text-gray-500 mb-2">Ainda não resolveu?</p>
+                  <button
+                    className="p-3 text-center w-full rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-900/40 hover:bg-brand-100 transition-colors shadow-sm text-sm font-bold text-brand-600 dark:text-brand-400"
+                    onClick={() => setView('chat')}
+                  >
+                    💬 Falar com Suporte Humano
+                  </button>
+                </div>
               </div>
-            ) : (
+            )}
+
+            {view === 'faq' && activeCategory && (
+              <div className="flex flex-col gap-2">
+                {activeCategory.items.map((item, idx) => (
+                  <button
+                    key={idx}
+                    className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium leading-tight"
+                    onClick={() => {
+                      setActiveQuestion(item);
+                      setView('answer');
+                    }}
+                  >
+                    {item.q}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {view === 'answer' && activeQuestion && (
+              <div className="flex flex-col gap-4">
+                 <h4 className="font-bold text-gray-900 dark:text-white leading-tight mt-2">{activeQuestion.q}</h4>
+                 <div className="p-4 bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line shadow-sm">
+                   {activeQuestion.a}
+                 </div>
+                 
+                 <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 dark:border-zinc-700 pt-4">
+                   <p className="text-xs text-center text-gray-500 mb-1">Ajudou a resolver?</p>
+                   <button
+                     className="p-2 w-full rounded-lg bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 transition-colors text-sm font-medium"
+                     onClick={() => setView('menu')}
+                   >
+                     Sim, Obrigado!
+                   </button>
+                   <button
+                     className="p-2 w-full rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors text-sm font-medium"
+                     onClick={() => setView('chat')}
+                   >
+                     Não, Falar com Atendente
+                   </button>
+                 </div>
+              </div>
+            )}
+
+            {view === 'chat' && (
               <div className="flex flex-col gap-4 h-full">
                 {messages.length === 0 ? (
-                  <p className="text-sm text-gray-500 text-center my-auto">Envie uma mensagem para iniciarmos o atendimento.</p>
+                  <div className="text-center my-auto px-4">
+                    <ChatBubbleLeftRightIcon className="w-10 h-10 mx-auto text-brand-300 mb-3" />
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inicie um ticket</p>
+                    <p className="text-xs text-gray-500">Nossa equipe costuma responder o mais rápido possível nos horários comerciais.</p>
+                  </div>
                 ) : (
                   messages.map((m) => {
                     const isMe = m.authorId === session.user.userId || m.author.role === 'USER'; // Approx check
@@ -188,9 +329,9 @@ const SupportHub = () => {
           {view === 'chat' && (
             <button
                onClick={() => setView('menu')}
-               className="text-xs text-center p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50"
+               className="text-xs text-center p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 flex-shrink-0"
             >
-              Voltar para opções
+              Voltar para Menu Principal
             </button>
           )}
         </div>
