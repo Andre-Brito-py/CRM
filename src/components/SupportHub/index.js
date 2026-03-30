@@ -7,12 +7,7 @@ import {
   PaperAirplaneIcon, 
   ChevronLeftIcon,
   ChevronRightIcon,
-  MagnifyingGlassIcon,
-  SparklesIcon,
-  QuestionMarkCircleIcon,
-  LifebuoyIcon,
   BookOpenIcon,
-  PhoneIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -126,6 +121,14 @@ const SupportHub = () => {
       console.error(e);
     }
   };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [history, humanMessages, loading]);
 
   useEffect(() => {
     if (isOpen) {
@@ -290,22 +293,22 @@ const SupportHub = () => {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="w-[calc(100vw-2rem)] sm:w-96 h-[600px] max-h-[calc(100vh-6rem)] sm:max-h-[85vh] vysify-glass rounded-[2rem] sm:rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-white/40 dark:border-zinc-800/40"
+            className="fixed left-4 right-4 bottom-4 sm:left-auto sm:right-8 sm:bottom-8 sm:w-96 h-[600px] max-h-[calc(100vh-6rem)] sm:max-h-[85vh] vysify-glass rounded-[2rem] sm:rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-white/40 dark:border-zinc-800/40"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl shrink-0">
                <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-                      <SparklesIcon className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-2xl bg-zinc-950 dark:bg-white flex items-center justify-center shadow-lg shadow-black/10">
+                      <div className="w-5 h-5 rounded-full border-2 border-white dark:border-zinc-900 bg-indigo-500" />
                     </div>
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-zinc-900 rounded-full" />
                   </div>
                   <div>
                     <h3 className="text-[14px] font-executive font-black text-zinc-950 dark:text-white uppercase tracking-tight italic leading-none">
-                      Assistente Vysify
+                      Suporte Vysify
                     </h3>
-                    <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Conectado e Pronto</p>
+                    <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1">Sempre Disponível</p>
                   </div>
                </div>
                <div className="flex items-center gap-2">
