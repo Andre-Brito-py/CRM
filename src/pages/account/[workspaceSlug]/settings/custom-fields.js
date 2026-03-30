@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { 
-  PlusIcon, 
-  TrashIcon, 
-  Bars2Icon, 
-  CalendarIcon, 
-  HashtagIcon, 
-  ChevronDownIcon, 
-  CheckIcon, 
-  CurrencyDollarIcon, 
-  LinkIcon, 
-  PhoneIcon,
-  QueueListIcon
+  QueueListIcon,
+  TagIcon,
+  AdjustmentsVerticalIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -124,34 +118,50 @@ const CustomFields = ({ workspace }) => {
       <OnboardingTour tourId="custom-fields-tour" steps={customFieldsSteps} />
       <Meta title={`Vysify - ${workspace.name} | Custom Fields`} />
       
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-10 py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16"
+        >
           <div>
-            <h1 className="text-4xl font-executive font-bold text-zinc-900 tracking-tight mb-2">
-              Custom Fields
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
+                <TagIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Schema Configuration</span>
+            </div>
+            <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
+              Custom <span className="text-indigo-600">Properties</span>
             </h1>
-            <p className="text-zinc-500 font-medium font-executive">
-              Define custom properties to track unique data for your contacts and deals.
+            <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed italic">
+              Architect unique data structures to capture essential business insights.
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button
+
+          <div className="flex items-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               id="add-field-btn"
               onClick={addField}
-              className="inline-flex items-center px-6 py-3 bg-white border border-zinc-200 text-zinc-900 font-executive font-bold rounded-2xl shadow-sm hover:bg-zinc-50 hover:border-zinc-300 transition-all active:scale-95"
+              className="flex items-center px-8 py-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-black text-[11px] uppercase tracking-widest italic rounded-2xl shadow-premium-sm hover:border-indigo-500/30 transition-all"
             >
-              <PlusIcon className="w-5 h-5 mr-2 text-brand-600" />
-              Add New Property
-            </button>
-            <button
+              <PlusIcon className="w-5 h-5 mr-3 text-indigo-600 stroke-[3]" />
+              New Property
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={saveFields}
               disabled={isSubmitting}
-              className="inline-flex items-center px-8 py-3 bg-brand-600 text-white font-executive font-bold rounded-2xl shadow-lg shadow-brand-500/20 hover:bg-brand-700 transition-all active:scale-95 disabled:opacity-50"
+              className="flex items-center px-8 py-4 premium-gradient text-white font-black text-[11px] uppercase tracking-widest italic rounded-2xl shadow-xl shadow-indigo-500/25 disabled:opacity-50"
             >
-              {isSubmitting ? t('common.action.saving') : 'Save Configuration'}
-            </button>
+               <AdjustmentsVerticalIcon className="w-5 h-5 mr-3 stroke-[3]" />
+              {isSubmitting ? t('common.action.saving') : 'Sync Changes'}
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="custom-fields">
@@ -162,141 +172,161 @@ const CustomFields = ({ workspace }) => {
                 id="fields-container"
                 className="space-y-4"
               >
-                {fields.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-20 bg-zinc-50/50 border-2 border-dashed border-zinc-200 rounded-[40px] text-center">
-                    <div className="w-20 h-20 bg-white rounded-3xl shadow-premium flex items-center justify-center mb-6">
-                      <Bars2Icon className="w-10 h-10 text-zinc-300" />
-                    </div>
-                    <h3 className="text-xl font-executive font-bold text-zinc-900 mb-2">No custom fields yet</h3>
-                    <p className="text-zinc-400 max-w-sm font-executive">Create your first custom property to start tailoring Vysify to your business needs.</p>
-                  </div>
+                 {fields.length === 0 ? (
+                   <motion.div 
+                     initial={{ opacity: 0, scale: 0.95 }}
+                     animate={{ opacity: 1, scale: 1 }}
+                     className="vysify-glass p-24 text-center rounded-[3rem] border-dashed border-2 border-zinc-200 dark:border-zinc-800/50"
+                   >
+                     <div className="relative inline-block mb-10">
+                        <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
+                        <div className="relative w-24 h-24 bg-white dark:bg-zinc-900 rounded-[32px] shadow-premium flex items-center justify-center mx-auto border border-zinc-100 dark:border-zinc-800">
+                          <AdjustmentsVerticalIcon className="w-12 h-12 text-indigo-600 animate-pulse" />
+                        </div>
+                      </div>
+                     <h3 className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic tracking-tight mb-3">
+                       No Custom <span className="text-zinc-400 font-medium">Fields</span>
+                     </h3>
+                     <p className="text-zinc-500 font-medium font-executive max-w-sm mx-auto italic leading-relaxed">
+                       Start defining unique data parameters that matter to your business scaling.
+                     </p>
+                   </motion.div>
                 ) : (
-                  fields.map((field, index) => (
+                <AnimatePresence>
+                  {fields.map((field, index) => (
                     <Draggable key={field.id || index} draggableId={String(field.id || index)} index={index}>
                       {(provided, snapshot) => (
-                        <div
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`group bg-white p-2 rounded-[32px] border transition-all duration-300 ${
+                          className={`vysify-glass p-1 rounded-[2.5rem] transition-all duration-500 border ${
                             snapshot.isDragging 
-                              ? 'shadow-2xl border-brand-500/30 ring-4 ring-brand-500/5 rotate-1 z-50' 
-                              : 'shadow-premium border-zinc-100 hover:border-zinc-200'
+                              ? 'shadow-2xl border-indigo-500/30 scale-[1.02] z-50' 
+                              : 'border-zinc-100 dark:border-zinc-800/50 hover:shadow-2xl'
                           }`}
                         >
-                          <div className="flex items-start gap-4 p-4 lg:p-6">
+                          <div className="flex items-start gap-3 p-6 lg:p-8">
                             <div 
                               {...provided.dragHandleProps}
-                              className="mt-2 p-2 text-zinc-300 hover:text-zinc-500 hover:bg-zinc-50 rounded-xl transition-colors cursor-grab active:cursor-grabbing"
+                              className="mt-1 p-3 text-zinc-300 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-2xl transition-all cursor-grab active:cursor-grabbing"
                             >
-                              <Bars2Icon className="w-6 h-6" />
+                              <Bars2Icon className="w-6 h-6 stroke-[2]" />
                             </div>
 
-                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                               <div className="lg:col-span-1">
-                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Label</label>
+                                <label className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1 italic font-executive">Label Name</label>
                                 <input
                                   type="text"
                                   value={field.label || ''}
                                   onChange={(e) => updateField(index, 'label', e.target.value)}
-                                  className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[15px] font-executive font-bold focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
-                                  placeholder="e.g. Birthday"
+                                  className="w-full h-14 px-6 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-sm font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300"
+                                  placeholder="e.g. BIRTHDAY"
                                 />
                               </div>
                               <div className="lg:col-span-1">
-                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Internal Key</label>
+                                <label className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1 italic font-executive">System Identifier</label>
                                 <input
                                   type="text"
                                   value={field.key || ''}
                                   onChange={(e) => updateField(index, 'key', e.target.value)}
-                                  className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-medium text-zinc-500 focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
-                                  placeholder="e.g. birthday"
+                                  className="w-full h-14 px-6 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-[13px] font-mono text-zinc-500 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300"
+                                  placeholder="e.g. birthday_key"
                                 />
                               </div>
                               <div className="lg:col-span-1">
-                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Field Type</label>
-                                <div className="relative">
-                                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-600">
+                                <label className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1 italic font-executive">Input Archetype</label>
+                                <div className="relative group/select">
+                                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-indigo-600 transition-transform group-hover/select:scale-110">
                                     <FieldTypeIcon type={field.type} />
                                   </div>
                                   <select
                                     value={field.type || 'text'}
                                     onChange={(e) => updateField(index, 'type', e.target.value)}
-                                    className="w-full h-12 pl-12 pr-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-executive font-bold appearance-none focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all cursor-pointer"
+                                    className="w-full h-14 pl-14 pr-6 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-xs font-black uppercase tracking-widest italic cursor-pointer focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all appearance-none"
                                   >
-                                    <option value="text">Text</option>
-                                    <option value="date">Date</option>
-                                    <option value="number">Number</option>
-                                    <option value="select">Select (Dropdown)</option>
-                                    <option value="multi-select">Multi-Select</option>
-                                    <option value="checkbox">Checkbox</option>
-                                    <option value="currency">Currency</option>
-                                    <option value="url">URL</option>
-                                    <option value="phone">Phone</option>
+                                    <option value="text">Standard Text</option>
+                                    <option value="date">Temporal Date</option>
+                                    <option value="number">Numeric Val</option>
+                                    <option value="select">Single Choice</option>
+                                    <option value="multi-select">Multi Selection</option>
+                                    <option value="checkbox">Toggle Boolean</option>
+                                    <option value="currency">Fiscal Currency</option>
+                                    <option value="url">Web Resource</option>
+                                    <option value="phone">Contact Phone</option>
                                   </select>
                                 </div>
                               </div>
                               <div className="lg:col-span-1 flex items-center justify-end">
                                 <button
                                   onClick={() => removeField(index)}
-                                  className="p-3 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+                                  className="p-4 text-zinc-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl transition-all"
                                   title="Delete field"
                                 >
-                                  <TrashIcon className="w-6 h-6" />
+                                  <TrashIcon className="w-6 h-6 stroke-[2]" />
                                 </button>
                               </div>
 
                               {(field.type === 'select' || field.type === 'multi-select') && (
-                                <div className="lg:col-span-4">
-                                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Options (Comma separated)</label>
+                                <motion.div 
+                                  initial={{ opacity: 0, y: -10 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  className="lg:col-span-4"
+                                >
+                                  <label className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1 italic font-executive">Available Options (Comma Separated)</label>
                                   <input
                                     type="text"
                                     value={field.options || ''}
                                     onChange={(e) => updateField(index, 'options', e.target.value)}
-                                    className="w-full h-12 px-4 bg-zinc-50/50 border border-zinc-100 rounded-2xl text-[14px] font-medium focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all placeholder:text-zinc-300"
-                                    placeholder="Option 1, Option 2, Option 3"
+                                    className="w-full h-14 px-6 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300"
+                                    placeholder="PREMIUM, STANDARD, ENTERPRISE"
                                   />
-                                </div>
+                                </motion.div>
                               )}
 
                               <div className="lg:col-span-2">
-                                <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 ml-1">Visibility Range</label>
-                                <div className="flex bg-zinc-50/50 p-1 rounded-[18px] border border-zinc-100">
+                                <label className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-2 ml-1 italic font-executive">Scope Distribution</label>
+                                <div className="flex bg-zinc-100 dark:bg-zinc-900/50 p-1.5 rounded-[22px] border border-zinc-100 dark:border-zinc-800">
                                   {['both', 'sales', 'support'].map((a) => (
                                     <button
                                       key={a}
                                       onClick={() => updateField(index, 'area', a)}
-                                      className={`flex-1 py-2 text-[10px] font-black uppercase tracking-wider rounded-[14px] transition-all ${
+                                      className={`flex-1 py-3 text-[10px] font-black uppercase tracking-widest italic rounded-[16px] transition-all ${
                                         (field.area || 'both') === a 
-                                          ? 'bg-white text-zinc-900 shadow-premium' 
-                                          : 'text-zinc-400 hover:text-zinc-600 font-executive'
+                                          ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-premium' 
+                                          : 'text-zinc-400 dark:text-zinc-600 hover:text-zinc-950 dark:hover:text-zinc-400'
                                       }`}
                                     >
-                                      {a === 'both' ? 'All Areas' : a}
+                                      {a === 'both' ? 'Unified' : a}
                                     </button>
                                   ))}
                                 </div>
                               </div>
 
-                              <div className="lg:col-span-2 flex items-center gap-4">
-                                <div className="flex-1 flex items-center">
-                                  <label className="relative flex items-center cursor-pointer">
+                              <div className="lg:col-span-2 flex items-center justify-end">
+                                <label className="flex items-center cursor-pointer group/toggle">
+                                  <span className="mr-4 text-[10px] font-black uppercase tracking-widest italic text-zinc-500 group-hover/toggle:text-zinc-900 dark:group-hover/toggle:text-white transition-colors">Enforce Validation</span>
+                                  <div className="relative">
                                     <input
                                       type="checkbox"
                                       checked={field.required || false}
                                       onChange={(e) => updateField(index, 'required', e.target.checked)}
                                       className="sr-only peer"
                                     />
-                                    <div className="w-11 h-6 bg-zinc-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
-                                    <span className="ml-4 text-[13px] font-executive font-bold text-zinc-700">Mandatory Field</span>
-                                  </label>
-                                </div>
+                                    <div className="w-14 h-8 bg-zinc-100 dark:bg-zinc-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-indigo-600 shadow-inner"></div>
+                                  </div>
+                                </label>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                     </Draggable>
-                  ))
+                  ))}
+                </AnimatePresence>
                 )}
                 {provided.placeholder}
               </div>

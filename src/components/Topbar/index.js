@@ -240,14 +240,14 @@ const Topbar = ({ menu, staticMenu }) => {
             {({ open }) => (
               <>
                 <Popover.Button
-                  className={`flex items-center justify-center w-11 h-11 rounded-[1.2rem] transition-all duration-300 ${open ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50 shadow-sm'}`}
+                  className={`flex items-center justify-center w-10 h-10 rounded-[1.1rem] transition-all duration-300 ${open ? 'text-indigo-600 bg-indigo-50 border-indigo-200 shadow-glow-indigo/10' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50 shadow-sm'}`}
                   title="Notificações"
                 >
-                  <BellIcon className="w-5.5 h-5.5" />
+                  <BellIcon className="w-5 h-5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 flex h-3 w-3">
+                    <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] border-2 border-white dark:border-zinc-900"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] border-2 border-white dark:border-zinc-900"></span>
                     </span>
                   )}
                 </Popover.Button>
@@ -331,6 +331,15 @@ const Topbar = ({ menu, staticMenu }) => {
               </>
             )}
           </Popover>
+          
+          {/* Support Hub */}
+          <button
+            onClick={() => setHelpOpen(true)}
+            className="flex items-center justify-center w-10 h-10 rounded-[1.1rem] text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50 shadow-sm transition-all duration-300"
+            title="Ajuda e Suporte"
+          >
+            <QuestionMarkCircleIcon className="w-5 h-5" />
+          </button>
 
           {/* User menu */}
           <Menu as="div" className="relative">
@@ -366,7 +375,7 @@ const Topbar = ({ menu, staticMenu }) => {
               leaveFrom="opacity-100 scale-100 translate-y-0"
               leaveTo="opacity-0 scale-95 translate-y-3"
             >
-              <Menu.Items className="absolute right-0 mt-4 w-64 origin-top-right vysify-glass rounded-[2rem] shadow-[0_32px_80px_rgba(0,0,0,0.2)] z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+              <Menu.Items className="absolute right-0 mt-4 w-64 origin-top-right bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl rounded-[2rem] shadow-[0_32px_80px_rgba(0,0,0,0.2)] z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50 border border-white/40 dark:border-zinc-800/40">
                 {session?.user?.role === 'SUPERADMIN' && (
                   <div className="p-3">
                     <Menu.Item>

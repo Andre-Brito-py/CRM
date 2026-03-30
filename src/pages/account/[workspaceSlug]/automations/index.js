@@ -6,8 +6,12 @@ import {
   PlusIcon,
   TrashIcon,
   BoltIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  ArrowRightIcon,
+  SparklesIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import AccountLayout from '@/layouts/AccountLayout';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
@@ -555,123 +559,207 @@ const Automations = () => {
     <AccountLayout>
       <OnboardingTour tourId="automations-tour" steps={automationSteps} />
       <Meta title={`Vysify - ${workspace?.name} | ${t('Automations')}`} />
-      <Content title={t('Automations')} subtitle={t('automations.subtitle')}>
-        <div className="flex justify-end mb-5">
-          <button
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12"
+        >
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
+                <BoltIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Workflows</span>
+            </div>
+            <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
+              {t('Automations')} <span className="text-indigo-600">Studio</span>
+            </h1>
+            <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed italic">
+              Design intelligent rules to scale your business operations automatically.
+            </p>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             id="create-rule-btn"
-            className="premium-button flex items-center px-4 py-2 text-white bg-brand-600 rounded-md hover:bg-brand-700"
+            className="flex items-center px-8 py-4 text-white premium-gradient rounded-2xl shadow-xl shadow-indigo-500/25 font-black text-[11px] uppercase tracking-widest italic"
             onClick={toggleModal}
           >
-            <PlusIcon className="w-5 h-5 mr-2" />
+            <PlusIcon className="w-5 h-5 mr-3 stroke-[3]" />
             {t('automations.createRule')}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {automations.length === 0 ? (
-          <div className="text-center py-10 bg-white rounded-lg shadow">
-            <BoltIcon className="w-12 h-12 mx-auto text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">{t('automations.empty.title')}</h3>
-            <p className="mt-1 text-sm text-gray-500">{t('automations.empty.subtitle')}</p>
-            <div className="mt-6">
-              <button
-                onClick={toggleModal}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-600 border border-transparent rounded-md shadow-sm hover:bg-brand-700"
-              >
-                <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                {t('automations.newRule')}
-              </button>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="vysify-glass p-20 text-center rounded-[3rem] border-dashed border-2 border-zinc-200 dark:border-zinc-800/50"
+          >
+             <div className="relative inline-block mb-8">
+              <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
+              <div className="relative w-24 h-24 bg-white dark:bg-zinc-900 rounded-[32px] shadow-premium flex items-center justify-center mx-auto border border-zinc-100 dark:border-zinc-800">
+                <BoltIcon className="w-12 h-12 text-indigo-600 animate-pulse" />
+              </div>
             </div>
-          </div>
-        ) : (
-          <div id="automations-list" className="grid grid-cols-1 gap-4">
-            {automations.map((rule) => (
-              <Card key={rule.id}>
-                <Card.Body>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">{rule.name}</h3>
-                      <div className="mt-2 space-y-2">
-                        <div className="flex items-center text-sm text-gray-600">
-                          <span className="font-semibold mr-2 w-16">{t('automations.trigger.label')}</span>
-                          {renderTriggerDescription(rule)}
+            <h3 className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic tracking-tight mb-3">
+              No Automations <span className="text-zinc-400 font-medium">Defined</span>
+            </h3>
+            <p className="text-zinc-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed italic">
+              Take the manually repetitive out of your day. Create your first workflow rule to see the magic happen.
+            </p>
+            <button
+              onClick={toggleModal}
+              className="inline-flex items-center px-8 py-4 text-sm font-black text-white bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              <PlusIcon className="mr-3 h-5 w-5 stroke-[3]" aria-hidden="true" />
+              {t('automations.newRule')}
+            </button>
+          </motion.div>
+          <div id="automations-list" className="grid grid-cols-1 gap-6">
+            <AnimatePresence>
+              {automations.map((rule, idx) => (
+                <motion.div
+                  key={rule.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="vysify-glass p-8 rounded-[2.5rem] hover:shadow-2xl transition-all duration-500 border border-zinc-100/50 dark:border-zinc-800/50 group"
+                >
+                  <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-widest rounded-lg border italic ${
+                          rule.isActive 
+                            ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800' 
+                            : 'bg-zinc-50 dark:bg-zinc-900/30 text-zinc-400 border-zinc-100 dark:border-zinc-800'
+                        }`}>
+                          {rule.isActive ? 'Operation Active' : 'Operation Paused'}
+                        </span>
+                        <h3 className="text-xl font-executive font-extrabold text-zinc-950 dark:text-white uppercase italic tracking-tight leading-none group-hover:text-indigo-600 transition-colors">
+                          {rule.name}
+                        </h3>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6 pt-6 border-t border-zinc-50 dark:border-zinc-800/50">
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 border border-indigo-100 dark:border-indigo-800">
+                            <BoltIcon className="w-5 h-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Trigger Event</span>
+                            <div className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400 italic">
+                              {renderTriggerDescription(rule)}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <span className="font-semibold mr-2 w-16">{t('automations.action.label')}</span>
-                          {renderActionDescription(rule)}
+
+                        <div className="flex items-start gap-4">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0 border border-indigo-100 dark:border-indigo-800">
+                            <SparklesIcon className="w-5 h-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">Automated Action</span>
+                            <div className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400 italic">
+                              {renderActionDescription(rule)}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-4">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${rule.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {rule.isActive ? t('common.status.active') : t('common.status.inactive')}
-                      </span>
+
+                    <div className="flex items-center gap-4 pl-0 lg:pl-8 border-l-0 lg:border-l border-zinc-100 dark:border-zinc-800 lg:h-20">
                       <button
                         onClick={() => handleDeleteRule(rule.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                        className="p-3 text-zinc-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
                         title={t('automations.deleteRule')}
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
+                      <ArrowRightIcon className="w-5 h-5 text-zinc-200 group-hover:translate-x-2 transition-transform" />
                     </div>
                   </div>
-                </Card.Body>
-              </Card>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
 
-        <div className="mt-6">
-          <Card>
-            <Card.Body>
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900">{t('automations.logs.title')}</h3>
-                <span className="text-xs text-gray-500">{t('automations.logs.subtitle')}</span>
-              </div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-20"
+        >
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-10 h-10 bg-zinc-950 dark:bg-zinc-800 rounded-[14px] flex items-center justify-center shadow-glow-zinc/20">
+              <ClockIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">
+                {t('automations.logs.title')} <span className="text-indigo-600">History</span>
+              </h3>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-1 italic">{t('automations.logs.subtitle')}</p>
+            </div>
+          </div>
 
-              {logs.length === 0 ? (
-                <div className="mt-4 text-sm text-gray-500">{t('automations.logs.empty')}</div>
-              ) : (
-                <div className="mt-4 overflow-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('automations.logs.table.time')}</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('automations.logs.table.event')}</th>
-                        <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('automations.logs.table.related')}</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {logs.slice(0, 20).map((log) => (
-                        <tr key={log.id}>
-                          <td className="px-4 py-2 text-sm text-gray-600 whitespace-nowrap">
-                            {new Date(log.createdAt).toLocaleString()}
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-900">
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${log.type === 'AUTOMATION_FAILED' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}`}>
+          <div className="vysify-glass rounded-[2.5rem] overflow-hidden border border-zinc-100/50 dark:border-zinc-800/50 shadow-2xl">
+            {logs.length === 0 ? (
+              <div className="py-20 text-center text-zinc-400 italic text-sm">{t('automations.logs.empty')}</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-zinc-50 dark:divide-zinc-800/30">
+                  <thead className="bg-zinc-50/30 dark:bg-zinc-900/30 backdrop-blur-md">
+                    <tr>
+                      <th className="px-10 py-6 text-left text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] italic">{t('automations.logs.table.time')}</th>
+                      <th className="px-10 py-6 text-left text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] italic">{t('automations.logs.table.event')}</th>
+                      <th className="px-10 py-6 text-left text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] italic">{t('automations.logs.table.related')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-50 dark:divide-zinc-800/30">
+                    {logs.slice(0, 20).map((log) => (
+                      <tr key={log.id} className="hover:bg-zinc-50/30 dark:hover:bg-zinc-900/10 transition-colors">
+                        <td className="px-10 py-6 text-xs text-zinc-500 font-mono italic whitespace-nowrap">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-10 py-6">
+                          <div className="flex items-center gap-3">
+                            <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest italic ${
+                              log.type === 'AUTOMATION_FAILED' 
+                                ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30' 
+                                : 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30'
+                            }`}>
                               {log.type === 'AUTOMATION_FAILED' ? t('automations.logs.status.failed') : t('automations.logs.status.executed')}
                             </span>
-                            <span className="ml-2">{log.title}</span>
-                          </td>
-                          <td className="px-4 py-2 text-sm text-gray-600">
+                            <span className="text-sm font-bold text-zinc-900 dark:text-zinc-200">{log.title}</span>
+                          </div>
+                        </td>
+                        <td className="px-10 py-6 text-xs text-zinc-500">
+                          <div className="flex flex-wrap gap-3 italic">
                             {log.contact?.name ? (
-                              <span className="mr-2">{t('automations.logs.related.contact')}: {log.contact.name}</span>
+                              <span className="px-2 py-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-lg">
+                                {t('automations.logs.related.contact')}: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{log.contact.name}</span>
+                              </span>
                             ) : null}
                             {log.deal?.name ? (
-                              <span>{t('automations.logs.related.deal')}: {log.deal.name}</span>
+                              <span className="px-2 py-1 bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-lg">
+                                {t('automations.logs.related.deal')}: <span className="text-zinc-900 dark:text-zinc-300 font-bold">{log.deal.name}</span>
+                              </span>
                             ) : null}
-                            {!log.contact?.name && !log.deal?.name ? (
-                              <span className="text-gray-400">—</span>
-                            ) : null}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </Card.Body>
-          </Card>
-        </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
         <Modal
           show={isModalOpen}
           toggle={toggleModal}

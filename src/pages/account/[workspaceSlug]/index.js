@@ -33,23 +33,21 @@ import fetcher from '@/lib/client/fetcher';
 
 const StatCard = ({ title, value, icon: Icon, color, index }) => (
   <motion.div 
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.05, duration: 0.5 }}
-    className="vysify-glass p-8 rounded-[2rem] group relative overflow-hidden transition-all duration-500 hover:border-indigo-500/40 hover:-translate-y-1"
+    transition={{ delay: index * 0.08, duration: 0.8, ease: "easeOut" }}
+    className="vysify-glass p-10 rounded-[2.5rem] group relative overflow-hidden transition-all duration-700 hover:border-indigo-500/40 hover:-translate-y-2 hover:shadow-3xl ring-1 ring-zinc-800/10"
   >
-    <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-indigo-500/10 transition-colors" />
-    <div className="flex items-center">
-      <div className={`flex-shrink-0 p-4 rounded-2xl bg-${color}-500/10 text-${color}-600 dark:text-${color}-400 shadow-sm border border-${color}-500/20 group-hover:scale-110 transition-transform duration-500`}>
-        <Icon className="h-6 w-6" aria-hidden="true" />
+    <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-all duration-700" />
+    <div className="flex items-center justify-between">
+      <div className="flex flex-col min-w-0">
+        <dt className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.3em] truncate mb-2.5 italic">{title}</dt>
+        <dd>
+          <div className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white leading-none tracking-tighter italic uppercase">{value}</div>
+        </dd>
       </div>
-      <div className="ml-6 w-0 flex-1">
-        <dl>
-          <dt className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] truncate mb-1.5">{title}</dt>
-          <dd>
-            <div className="text-3xl font-black text-zinc-900 dark:text-white leading-tight tracking-tight italic uppercase">{value}</div>
-          </dd>
-        </dl>
+      <div className={`flex-shrink-0 p-5 rounded-[1.75rem] bg-${color}-500/10 text-${color}-600 dark:text-${color}-400 shadow-premium border border-${color}-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700`}>
+        <Icon className="h-7 w-7 stroke-[2]" aria-hidden="true" />
       </div>
     </div>
   </motion.div>
@@ -58,48 +56,52 @@ const StatCard = ({ title, value, icon: Icon, color, index }) => (
 const ActivityFeed = ({ activities }) => {
   if (!activities || activities.length === 0) {
     return (
-      <div className="text-center text-zinc-400 dark:text-zinc-500 py-12 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] mt-4 font-bold uppercase tracking-widest text-[10px]">
-        Nenhuma atividade recente.
+      <div className="flex flex-col items-center justify-center p-16 text-center border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[3rem] mt-6 group/empty">
+        <div className="w-16 h-16 bg-zinc-50 dark:bg-zinc-900 rounded-[1.5rem] flex items-center justify-center mb-6 border border-zinc-200 dark:border-zinc-800 opacity-40 group-hover/empty:opacity-100 transition-all duration-1000">
+           <ClockIcon className="w-8 h-8 text-zinc-300" />
+        </div>
+        <p className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">No Recent Transmissions</p>
       </div>
     );
   }
 
   return (
-    <div className="flow-root mt-8 px-2">
-      <ul role="list" className="-mb-8">
+    <div className="flow-root mt-10 px-4">
+      <ul role="list" className="-mb-10">
         {activities.map((activity, activityIdx) => (
           <motion.li 
             key={activity.id}
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: activityIdx * 0.1 }}
+            transition={{ delay: activityIdx * 0.08, duration: 0.6 }}
           >
-            <div className="relative pb-10">
+            <div className="relative pb-12">
               {activityIdx !== activities.length - 1 ? (
                 <span
-                  className="absolute top-4 left-5 -ml-px h-full w-0.5 bg-zinc-100 dark:bg-zinc-800/50"
+                  className="absolute top-5 left-6 -ml-px h-full w-0.5 bg-gradient-to-b from-zinc-200 via-zinc-100 to-transparent dark:from-zinc-800 dark:via-zinc-900 dark:to-transparent"
                   aria-hidden="true"
                 />
               ) : null}
-              <div className="relative flex space-x-4">
-                <div>
-                  <span className="h-10 w-10 rounded-2xl bg-indigo-600 flex items-center justify-center ring-8 ring-white dark:ring-zinc-900 shadow-xl shadow-indigo-500/20">
-                    <UserGroupIcon className="h-5 w-5 text-white" aria-hidden="true" />
-                  </span>
+              <div className="relative flex space-x-6 items-start">
+                <div className="relative">
+                  <div className="h-12 w-12 rounded-[1.25rem] bg-zinc-950 dark:bg-zinc-900 flex items-center justify-center ring-8 ring-white dark:ring-black shadow-3xl shadow-indigo-500/10 transition-transform hover:scale-110">
+                    <UserGroupIcon className="h-5 w-5 text-indigo-400 stroke-[2]" aria-hidden="true" />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-white dark:border-black" />
                 </div>
-                <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
+                <div className="min-w-0 flex-1 pt-2 flex justify-between space-x-6">
                   <div>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 font-bold leading-tight">
-                      <span className="text-zinc-900 dark:text-zinc-100 italic uppercase">
-                        {activity.user?.name || 'System'}
+                    <p className="text-[15px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed italic">
+                      <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight">
+                        {activity.user?.name || 'Vysify System'}
                       </span>{' '}
-                      {activity.type === 'DEAL_CREATED' ? 'criou o negócio' : 'realizou uma ação'}{' '}
-                      <span className="text-zinc-900 dark:text-zinc-100 italic uppercase">
+                      <span className="opacity-70">{activity.type === 'DEAL_CREATED' ? 'initiated deal protocol for' : 'executed core action on'}</span>{' '}
+                      <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight text-indigo-600 dark:text-indigo-400">
                         {activity.deal?.name || activity.contact?.name || activity.title}
                       </span>
                     </p>
                   </div>
-                  <div className="text-right text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-600 pt-1 shrink-0">
+                  <div className="text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 pt-1 shrink-0 italic tabular-nums">
                     <time dateTime={activity.createdAt}>
                       {new Date(activity.createdAt).toLocaleDateString()}
                     </time>
@@ -117,42 +119,48 @@ const ActivityFeed = ({ activities }) => {
 const UpcomingTasks = ({ tasks }) => {
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="text-center text-zinc-400 dark:text-zinc-500 py-12 border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] mt-4 font-bold uppercase tracking-widest text-[10px] w-full">
-        Nenhuma tarefa pendente.
+      <div className="flex flex-col items-center justify-center p-16 text-center border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[3rem] mt-6 w-full opacity-40 italic">
+        <p className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.3em]">No Pending Protocols</p>
       </div>
     );
   }
 
   return (
-    <div className="flow-root mt-4 w-full">
-      <ul role="list" className="space-y-4">
+    <div className="flow-root mt-6 w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {tasks.map((task, idx) => (
-          <motion.li 
+          <motion.div 
             key={task.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: idx * 0.1 }}
-            className="p-5 bg-white/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-700/50 rounded-[1.5rem] hover:bg-white dark:hover:bg-zinc-800 transition-all group"
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: idx * 0.1, duration: 0.5 }}
+            className="p-8 bg-white/40 dark:bg-zinc-900/40 border border-zinc-100 dark:border-zinc-800 rounded-[2.5rem] hover:bg-white dark:hover:bg-zinc-900 transition-all group shadow-premium hover:shadow-3xl"
           >
-            <div className="flex items-center gap-4">
-              <div className={`h-10 w-10 shrink-0 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${task.priority === 'HIGH' ? 'bg-rose-500 shadow-rose-500/30' :
-                task.priority === 'MEDIUM' ? 'bg-amber-500 shadow-amber-500/30' : 'bg-emerald-500 shadow-emerald-500/30'
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center justify-between">
+                <div className={`h-12 w-12 shrink-0 rounded-2xl flex items-center justify-center shadow-premium transition-transform group-hover:scale-110 group-hover:rotate-6 ${
+                  task.priority === 'HIGH' ? 'bg-rose-500 shadow-rose-500/20' :
+                  task.priority === 'MEDIUM' ? 'bg-amber-500 shadow-amber-500/20' : 'bg-emerald-500 shadow-emerald-500/20'
                 }`}>
-                <span className="text-white text-xs font-black">!</span>
+                  <span className="text-white text-lg font-black italic">!</span>
+                </div>
+                <div className="text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 bg-zinc-50 dark:bg-zinc-950 px-4 py-2 rounded-xl border border-zinc-100 dark:border-zinc-800 shadow-inner italic">
+                  PROTO {new Date(task.dueDate).toLocaleDateString()}
+                </div>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-black text-zinc-900 dark:text-zinc-100 italic uppercase truncate leading-none mb-1">{task.title}</p>
-                <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-widest">
-                  {task.contact ? `Cliente: ${task.contact.name}` : task.deal ? `Negócio: ${task.deal.name}` : 'Tarefa Geral'}
-                </p>
-              </div>
-              <div className="text-right text-[9px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-600 bg-zinc-50 dark:bg-zinc-900 px-3 py-1.5 rounded-xl border border-zinc-100 dark:border-zinc-800">
-                {new Date(task.dueDate).toLocaleDateString()}
+                <p className="text-[17px] font-executive font-extrabold text-zinc-950 dark:text-zinc-100 italic uppercase tracking-tight mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{task.title}</p>
+                <div className="flex items-center gap-3">
+                   <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+                   <p className="text-[10px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-[0.2em] italic">
+                    {task.contact ? `Client: ${task.contact.name}` : task.deal ? `Deal: ${task.deal.name}` : 'General Operation'}
+                  </p>
+                </div>
               </div>
             </div>
-          </motion.li>
+          </motion.div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };

@@ -9,7 +9,10 @@ import {
   ClipboardDocumentIcon,
   EyeIcon,
   PencilSquareIcon,
+  ArrowRightIcon,
+  SparklesIcon,
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import AccountLayout from '@/layouts/AccountLayout';
 import Content from '@/components/Content/index';
@@ -155,121 +158,180 @@ const WebForms = () => {
     <AccountLayout>
       <OnboardingTour tourId="web-forms-tour" steps={webFormSteps} />
       <Meta title={`Web Forms - ${workspace?.name || 'Workspace'}`} />
-      <Content title="Web Forms (Form Builder)" subtitle="Build public forms to capture leads directly into your CRM pipelines.">
-        <div className="flex justify-end mb-5">
-          <button
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12"
+        >
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
+                <DocumentTextIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Integrations</span>
+            </div>
+            <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
+              Web Forms <span className="text-indigo-600">Builder</span>
+            </h1>
+            <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed">
+              Build public forms to capture leads directly into your CRM pipelines with zero code.
+            </p>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             id="btn-create-web-form"
-            className="flex items-center px-4 py-2 text-white bg-brand-600 rounded-md hover:bg-brand-700"
+            className="flex items-center px-8 py-4 text-white premium-gradient rounded-2xl shadow-xl shadow-indigo-500/25 font-bold text-sm uppercase tracking-widest active:scale-95 transition-all"
             onClick={toggleModal}
           >
-            <PlusIcon className="w-5 h-5 mr-2" />
+            <PlusIcon className="w-5 h-5 mr-3 stroke-[3]" />
             Create Web Form
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {error ? (
-          <div className="text-red-500">Failed to load web forms.</div>
-        ) : webForms.length === 0 ? (
-          <div className="text-center py-10 bg-white rounded-lg shadow border border-gray-200">
-            <DocumentTextIcon className="w-12 h-12 mx-auto text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No Web Forms created yet.</h3>
-            <p className="mt-1 text-sm text-gray-500">Create forms to automatically import leads to your CRM.</p>
-            <div className="mt-6">
-              <button
-                onClick={toggleModal}
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-brand-600 border border-transparent rounded-md shadow-sm hover:bg-brand-700"
-              >
-                <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                New Form
-              </button>
-            </div>
+          <div className="vysify-glass p-12 text-center text-red-500 rounded-[2.5rem]">
+            <SparklesIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
+            <p className="font-executive font-bold text-lg uppercase italic tracking-tight">Failed to load web forms</p>
           </div>
+        ) : webForms.length === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="vysify-glass p-20 text-center rounded-[3rem] border-dashed border-2 border-zinc-200 dark:border-zinc-800/50"
+          >
+            <div className="relative inline-block mb-8">
+              <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
+              <div className="relative w-24 h-24 bg-white dark:bg-zinc-900 rounded-[32px] shadow-premium flex items-center justify-center mx-auto border border-zinc-100 dark:border-zinc-800">
+                <DocumentTextIcon className="w-12 h-12 text-indigo-600 animate-pulse" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic tracking-tight mb-3">
+              No Web Forms <span className="text-zinc-400 font-medium">Created Yet</span>
+            </h3>
+            <p className="text-zinc-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed italic">
+              Empower your website with intelligent forms that convert visitors into CRM leads automatically.
+            </p>
+            <button
+              onClick={toggleModal}
+              className="inline-flex items-center px-8 py-4 text-sm font-black text-white bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest"
+            >
+              <PlusIcon className="mr-3 h-5 w-5 stroke-[3]" aria-hidden="true" />
+              Build Your First Form
+            </button>
+          </motion.div>
         ) : (
-          <div id="web-forms-list" className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {webForms.map((form) => (
-              <Card key={form.id}>
-                <Card.Body>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-900">{form.name}</h3>
-                      <p className="text-sm text-gray-500 mt-1">
-                        URL: <span className="text-brand-600 font-mono">/f/{form.slug}</span>
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                        {form.stageId && (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">
-                            Stage: {allStages.find(s => s.id === form.stageId)?.name || 'Unknown'}
-                          </span>
-                        )}
-                        {form.tagId && (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
-                            Tag: {tags.find(t => t.id === form.tagId)?.name || 'Unknown'}
-                          </span>
-                        )}
+          <motion.div 
+            id="web-forms-list" 
+            layout
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            <AnimatePresence>
+              {webForms.map((form, idx) => (
+                <motion.div
+                  key={form.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className="group vysify-glass p-8 rounded-[2.5rem] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-500 hover:-translate-y-2 border border-zinc-100/50 dark:border-zinc-800/50 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-colors" />
+                  
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center border border-indigo-100/50 dark:border-indigo-500/10">
+                        <DocumentTextIcon className="w-7 h-7 text-indigo-600" />
+                      </div>
+                      <div className="flex bg-zinc-50 dark:bg-zinc-800/50 rounded-xl p-1 border border-zinc-100 dark:border-zinc-700/50">
+                        <button
+                          onClick={() => openBuilder(form)}
+                          className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors"
+                          title="Edit Fields"
+                        >
+                          <PencilSquareIcon className="w-4.5 h-4.5" />
+                        </button>
+                        <button
+                          onClick={() => copyToClipboard(form.slug)}
+                          className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors"
+                          title="Copy Link"
+                        >
+                          <ClipboardDocumentIcon className="w-4.5 h-4.5" />
+                        </button>
+                        <a
+                          href={`/f/${form.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 text-zinc-400 hover:text-indigo-600 transition-colors"
+                          title="Preview"
+                        >
+                          <EyeIcon className="w-4.5 h-4.5" />
+                        </a>
                       </div>
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => openBuilder(form)}
-                        className="p-2 text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 rounded"
-                        title="Edit Form Fields"
-                      >
-                        <PencilSquareIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(form.slug)}
-                        className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded"
-                        title="Copy Public Link"
-                      >
-                        <ClipboardDocumentIcon className="w-5 h-5" />
-                      </button>
-                      <a
-                        href={`/f/${form.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 text-gray-500 hover:text-brand-600 hover:bg-brand-50 rounded inline-block"
-                        title="View Public Form"
-                      >
-                        <EyeIcon className="w-5 h-5" />
-                      </a>
+
+                    <div className="mb-8">
+                      <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none mb-3 group-hover:text-indigo-600 transition-colors italic uppercase">
+                        {form.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-400 dark:text-zinc-500 bg-zinc-50 dark:bg-zinc-800/30 px-3 py-1.5 rounded-lg border border-zinc-100/50 dark:border-zinc-700/50 w-fit">
+                        <span>URL:</span>
+                        <span className="text-indigo-600 dark:text-indigo-400 font-bold">/f/{form.slug}</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto flex flex-wrap gap-2 pt-6 border-t border-zinc-50 dark:border-zinc-800/50">
+                      {form.stageId && (
+                        <span className="px-3 py-1.5 bg-yellow-400/10 text-yellow-700 dark:text-yellow-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-yellow-200/50 dark:border-yellow-900/30">
+                          {allStages.find(s => s.id === form.stageId)?.name || 'Stage'}
+                        </span>
+                      )}
+                      {form.tagId && (
+                        <span className="px-3 py-1.5 bg-emerald-400/10 text-emerald-700 dark:text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-lg border border-emerald-200/50 dark:border-emerald-900/30">
+                          {tags.find(t => t.id === form.tagId)?.name || 'Tag'}
+                        </span>
+                      )}
+                      
                       <button
                         onClick={() => handleDeleteForm(form.id)}
-                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded"
-                        title="Delete Form"
+                        className="ml-auto p-2 text-zinc-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100"
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
-                </Card.Body>
-              </Card>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
+      </div>
 
         <Modal show={isModalOpen} toggle={toggleModal} title="Create Web Form">
-          <form onSubmit={handleCreateForm} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Form Name</label>
+          <form onSubmit={handleCreateForm} className="space-y-8 p-4">
+            <div className="space-y-2.5">
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Form Name</label>
               <input
                 type="text"
                 required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
-                placeholder="e.g. Contact Us"
+                className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive"
+                placeholder="e.g. Lead Generation"
                 value={newForm.name}
                 onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Public Slug URL</label>
-              <div className="mt-1 flex rounded-md shadow-sm">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
-                  /f/
-                </span>
+            <div className="space-y-2.5">
+              <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Public URL Slug</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+                  <span className="text-zinc-400 font-mono text-sm">/f/</span>
+                </div>
                 <input
                   type="text"
                   required
-                  className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-brand-500 focus:border-brand-500 sm:text-sm"
+                  className="w-full pl-12 pr-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-bold text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-mono"
                   placeholder="contact-us"
                   value={newForm.slug}
                   onChange={(e) => setNewForm({ ...newForm, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') })}
@@ -277,18 +339,18 @@ const WebForms = () => {
               </div>
             </div>
 
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">After Submission Actions</h4>
+            <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
+              <h4 className="text-[12px] font-black text-zinc-900 dark:text-white uppercase italic tracking-tight mb-6">Automation & Mapping</h4>
               
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Target Pipeline Stage</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2.5">
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Target Pipeline Stage</label>
                   <select
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all appearance-none cursor-pointer"
                     value={newForm.stageId}
                     onChange={(e) => setNewForm({ ...newForm, stageId: e.target.value })}
                   >
-                    <option value="">- Don&apos;t attach to a Deal -</option>
+                    <option value="">- Don&apos;t attach -</option>
                     {allStages.map((stage) => (
                       <option key={stage.id} value={stage.id}>
                         {stage.name}
@@ -296,10 +358,10 @@ const WebForms = () => {
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Apply Tag</label>
+                <div className="space-y-2.5">
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Apply Tag</label>
                   <select
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all appearance-none cursor-pointer"
                     value={newForm.tagId}
                     onChange={(e) => setNewForm({ ...newForm, tagId: e.target.value })}
                   >
@@ -314,23 +376,23 @@ const WebForms = () => {
               </div>
             </div>
 
-            <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-900 mb-2">Form Details</h4>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Submit Button Text</label>
+            <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800">
+              <h4 className="text-[12px] font-black text-zinc-900 dark:text-white uppercase italic tracking-tight mb-6">User Experience</h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2.5">
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Submit Text</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive"
                     value={newForm.submitText}
                     onChange={(e) => setNewForm({ ...newForm, submitText: e.target.value })}
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Success Message</label>
+                <div className="space-y-2.5">
+                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 ml-1">Success Message</label>
                   <input
                     type="text"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2"
+                    className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive"
                     value={newForm.successMessage}
                     onChange={(e) => setNewForm({ ...newForm, successMessage: e.target.value })}
                   />
@@ -338,10 +400,10 @@ const WebForms = () => {
               </div>
             </div>
 
-             <div className="flex justify-end pt-4 space-x-2">
+             <div className="flex justify-end pt-8 gap-4">
               <button
                 type="button"
-                className="px-4 py-2 border rounded text-gray-700 hover:bg-gray-50"
+                className="px-6 py-4 text-sm font-black text-zinc-400 uppercase tracking-widest hover:text-zinc-600 transition-colors"
                 onClick={toggleModal}
               >
                 Cancel
@@ -349,9 +411,9 @@ const WebForms = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 disabled:opacity-50"
+                className="px-10 py-4 bg-indigo-600 premium-gradient text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-glow-indigo/20 disabled:opacity-50 active:scale-95 transition-all"
               >
-                {isSubmitting ? 'Creating...' : 'Create Form'}
+                {isSubmitting ? 'Processing...' : 'Create Form'}
               </button>
             </div>
           </form>
@@ -364,7 +426,6 @@ const WebForms = () => {
             form={selectedForm}
           />
         )}
-      </Content>
     </AccountLayout>
   );
 };

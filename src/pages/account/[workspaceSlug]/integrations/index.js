@@ -128,20 +128,34 @@ const Integrations = () => {
 
   return (
     <AccountLayout>
-      <div className="py-12 bg-[#fdfdfe] min-h-screen">
+      <div className="py-16 min-h-screen">
         <div className="max-w-7xl mx-auto px-6 lg:px-10 mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-zinc-950 rounded-[14px] flex items-center justify-center shadow-glow-zinc/20">
-              <BoltIcon className="w-6 h-6 text-white" />
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 mb-6"
+          >
+            <div className="w-12 h-12 bg-indigo-600 rounded-[18px] flex items-center justify-center shadow-glow-indigo/20">
+              <BoltIcon className="w-7 h-7 text-white" />
             </div>
-            <span className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em]">Ecosystem</span>
-          </div>
-          <h1 className="text-4xl font-executive font-extrabold text-zinc-950 tracking-tighter leading-none mb-4">
-            {t('common.label.integrations')}
-          </h1>
-          <p className="text-zinc-500 font-medium text-lg max-w-2xl leading-relaxed text-balance">
-            {t('integrations.subtitle')} Use our official connectors to build a powerful omnichannel environment.
-          </p>
+            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Marketplace & Sync</span>
+          </motion.div>
+          <motion.h1 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-6"
+          >
+            {t('common.label.integrations')} <span className="text-indigo-600">Ecosystem</span>
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-zinc-500 font-medium text-xl max-w-2xl leading-relaxed italic"
+          >
+            {t('integrations.subtitle')} Expand your CRM capabilities with official, high-performance connectors.
+          </motion.p>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10 mt-6 space-y-20">
@@ -159,38 +173,38 @@ const Integrations = () => {
                 role="list" 
                 className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
               >
-                {category.items.map((item) => (
+                {category.items.map((item, idx) => (
                   <motion.li key={item.name} variants={itemAnim}>
                     <Link href={item.href} className="group block h-full">
-                      <div className="h-full bg-white rounded-[32px] p-8 border border-zinc-100 shadow-premium-sm hover:shadow-premium transition-all duration-500 relative overflow-hidden">
-                        <div className={`absolute top-0 right-0 w-32 h-32 bg-${item.color}-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-0 group-hover:opacity-60 transition-opacity duration-700`} />
+                      <div className="h-full vysify-glass p-8 rounded-[2.5rem] hover:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] transition-all duration-700 hover:-translate-y-2 border border-zinc-100/50 dark:border-zinc-800/50 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-3xl -mr-24 -mt-24 group-hover:bg-indigo-500/10 transition-colors duration-700" />
                         
                         <div className="relative z-10 flex flex-col h-full">
-                          <div className="flex justify-between items-start mb-6">
-                            <div className={`w-14 h-14 rounded-[20px] bg-${item.color}-50 flex items-center justify-center border border-${item.color}-100 group-hover:scale-110 transition-transform duration-500`}>
-                              <item.icon className={`w-7 h-7 text-${item.color}-500`} />
+                          <div className="flex justify-between items-start mb-8">
+                            <div className="w-16 h-16 rounded-[22px] bg-white dark:bg-zinc-900 flex items-center justify-center border border-zinc-100 dark:border-zinc-800 shadow-premium-sm group-hover:scale-110 group-hover:rotate-3 transition-all duration-500">
+                              <item.icon className="w-8 h-8 text-zinc-900 dark:text-white" />
                             </div>
-                            <div className="px-3 py-1 bg-zinc-50 rounded-full border border-zinc-100 group-hover:bg-white transition-colors">
-                              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none block">
+                            <div className="px-3 py-1.5 bg-zinc-50/50 dark:bg-zinc-800/50 rounded-lg border border-zinc-100/50 dark:border-zinc-700/50 backdrop-blur-sm">
+                              <span className="text-[9px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest leading-none block">
                                 {item.status}
                               </span>
                             </div>
                           </div>
-
+ 
                           <div className="mb-8">
-                            <h3 className="text-lg font-executive font-extrabold text-zinc-900 tracking-tight leading-none mb-2 group-hover:text-zinc-950">
+                            <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none mb-3 group-hover:text-indigo-600 transition-colors italic uppercase">
                               {item.name}
                             </h3>
-                            <p className="text-xs text-zinc-400 font-medium leading-relaxed">
+                            <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed italic">
                               {item.description}
                             </p>
                           </div>
-
-                          <div className="mt-auto flex items-center gap-2 pt-6 border-t border-zinc-50 group-hover:border-zinc-100 transition-colors">
-                            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest group-hover:text-zinc-950 transition-colors">
+ 
+                          <div className="mt-auto flex items-center gap-3 pt-6 border-t border-zinc-50 dark:border-zinc-800/50 group-hover:border-indigo-100 dark:group-hover:border-indigo-900/30 transition-colors">
+                            <span className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] italic group-hover:text-indigo-600 transition-colors">
                               {t('common.action.configure')}
                             </span>
-                            <ArrowRightIcon className="w-3.5 h-3.5 text-zinc-300 group-hover:text-zinc-950 group-hover:translate-x-1 transition-all" />
+                            <ArrowRightIcon className="w-4 h-4 text-zinc-300 group-hover:text-indigo-600 group-hover:translate-x-1.5 transition-all" />
                           </div>
                         </div>
                       </div>

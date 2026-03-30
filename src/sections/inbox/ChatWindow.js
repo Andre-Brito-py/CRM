@@ -270,72 +270,83 @@ const ChatWindow = ({
 
   if (!conversation) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/20 dark:bg-zinc-950/40 h-full p-12 text-center pb-32">
+      <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/20 dark:bg-black/40 h-full p-20 text-center relative overflow-hidden group/empty">
+        <div className="absolute inset-0 bg-grid-zinc-200/50 dark:bg-grid-white/[0.02] [mask-image:radial-gradient(ellipse_at_center,black,transparent)] pointer-events-none" />
         <motion.div 
-          initial={{ scale: 0.8, opacity: 0, rotate: -15 }}
-          animate={{ scale: 1, opacity: 1, rotate: -45 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-40 h-40 bg-white dark:bg-zinc-900 rounded-[3.5rem] shadow-premium flex items-center justify-center mb-12 border border-zinc-100 dark:border-zinc-800 relative overflow-hidden"
+          initial={{ scale: 0.8, opacity: 0, y: 40 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "circOut" }}
+          className="relative w-64 h-64 mb-16"
         >
-          <div className="absolute inset-0 bg-indigo-500/5 animate-pulse" />
-          <PaperAirplaneIcon className="w-14 h-14 text-zinc-100 dark:text-zinc-800 relative z-10" />
+          <div className="absolute inset-0 bg-indigo-600/10 blur-[100px] animate-pulse" />
+          <div className="relative w-full h-full bg-white dark:bg-zinc-900 rounded-[5rem] shadow-premium flex items-center justify-center border border-zinc-100 dark:border-zinc-800 transition-transform duration-1000 group-hover/empty:scale-110 group-hover/empty:rotate-3">
+            <PaperAirplaneIcon className="w-20 h-20 text-zinc-100 dark:text-zinc-800 -rotate-12" />
+          </div>
         </motion.div>
-        <h2 className="text-zinc-900 dark:text-white text-4xl font-black tracking-tighter mb-4 uppercase italic">
-          {t('inbox.chat.empty.title')}
-        </h2>
-        <p className="text-zinc-400 dark:text-zinc-500 text-lg font-bold max-w-sm mx-auto leading-relaxed italic tracking-tight opacity-70">
-          {t('inbox.chat.empty.subtitle')}
-        </p>
-        <div className="mt-20 opacity-20 hover:opacity-50 transition-all duration-700">
-          <Logo variant="full" className="scale-75 grayscale" />
+        
+        <div className="relative z-10 max-w-lg">
+          <h2 className="text-zinc-950 dark:text-white text-5xl font-executive font-extrabold tracking-tighter mb-6 uppercase italic leading-none">
+            {t('inbox.chat.empty.title')}
+          </h2>
+          <p className="text-zinc-400 dark:text-zinc-500 text-xl font-medium leading-relaxed italic tracking-tight opacity-80 mb-12">
+            {t('inbox.chat.empty.subtitle')}
+          </p>
+          <div className="flex items-center justify-center gap-4 opacity-30 hover:opacity-100 transition-all duration-1000">
+            <div className="w-12 h-[1px] bg-zinc-300 dark:bg-zinc-800" />
+            <Logo variant="full" className="scale-75 grayscale" />
+            <div className="w-12 h-[1px] bg-zinc-300 dark:bg-zinc-800" />
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-zinc-950 relative overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black relative overflow-hidden group/chat">
       {/* Header */}
-      <div className="px-8 py-5 border-b border-zinc-100 dark:border-zinc-800/50 flex justify-between items-center bg-white/70 dark:bg-zinc-900/40 backdrop-blur-3xl sticky top-0 z-30 shrink-0">
-        <div className="flex items-center gap-5">
+      <div className="px-10 py-6 border-b border-zinc-100 dark:border-zinc-800/50 flex justify-between items-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl sticky top-0 z-30 shrink-0 shadow-premium-sm">
+        <div className="flex items-center gap-6">
           {onBack && (
             <motion.button 
-              whileHover={{ x: -3 }}
+              whileHover={{ x: -3, scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={onBack} 
-              className="md:hidden p-2.5 -ml-2 text-zinc-400 hover:text-indigo-600 transition-colors"
+              className="md:hidden p-3 -ml-3 text-zinc-400 hover:text-indigo-600 transition-all"
             >
-              <ArrowLeftIcon className="w-6 h-6" />
+              <ArrowLeftIcon className="w-6 h-6 stroke-[2]" />
             </motion.button>
           )}
-          <div className="relative group">
-            <div className="w-14 h-14 bg-zinc-100 dark:bg-zinc-800 rounded-[1.5rem] flex items-center justify-center border-2 border-indigo-500/0 group-hover:border-indigo-500/30 transition-all duration-500 overflow-hidden relative shadow-sm">
-              {conversation.contact?.image ? (
-                <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-2xl font-black italic text-zinc-400 dark:text-zinc-600">
-                  {conversation.contact?.name?.charAt(0) || '?'}
-                </span>
-              )}
+          <div className="relative group/profile">
+            <div className="w-16 h-16 p-1 bg-zinc-100 dark:bg-zinc-900 rounded-[2.25rem] border border-zinc-200 dark:border-zinc-800 transition-all duration-700 overflow-hidden relative shadow-premium group-hover/profile:scale-110 group-hover/profile:rotate-3">
+              <div className="w-full h-full rounded-[1.75rem] overflow-hidden bg-white dark:bg-zinc-950 flex items-center justify-center">
+                {conversation.contact?.image ? (
+                  <img src={conversation.contact.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover/profile:scale-110" />
+                ) : (
+                  <span className="text-2xl font-executive font-black italic text-zinc-300 dark:text-zinc-700">
+                    {conversation.contact?.name?.charAt(0) || '?'}
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-white dark:bg-zinc-900 rounded-[10px] flex items-center justify-center shadow-lg border-2 border-white dark:border-zinc-900 z-10">
-              <PlatformIcon platform={conversation.platform} className="w-3 h-3" />
+            <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white dark:bg-zinc-900 rounded-[12px] flex items-center justify-center shadow-xl border-2 border-white dark:border-zinc-950 z-10 transition-transform group-hover/profile:scale-125">
+              <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5" />
             </div>
           </div>
           <div>
-            <h3 className="text-[18px] font-black text-zinc-900 dark:text-white tracking-tighter leading-none mb-2 uppercase italic">
+            <h3 className="text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none mb-2.5 uppercase italic">
               {conversation.contact?.name || conversation.externalId || t('common.unknown')}
             </h3>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 italic font-executive">
-                  ONLINE
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 italic">
+                  CHANNEL SECURED
                 </span>
               </div>
-              <span className="text-[10px] text-zinc-200 dark:text-zinc-800">•</span>
-              <div className="flex items-center gap-2">
-                <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5 text-zinc-400" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-zinc-500 italic">
+              <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
+              <div className="flex items-center gap-2.5">
+                <PlatformIcon platform={conversation.platform} className="w-4 h-4 text-zinc-400" />
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 italic">
                   {String(conversation.platform)}
                 </span>
               </div>
@@ -343,56 +354,56 @@ const ChatWindow = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-10">
           <motion.button
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => onToggleAutopilot?.(!conversation.autopilotEnabled)}
             disabled={!onToggleAutopilot || isTogglingAutopilot}
             className={classNames(
-              'group flex items-center gap-3 px-8 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl border-2 transition-all duration-700 italic shadow-xl',
+              'group flex items-center gap-4 px-10 py-4 text-[11px] font-black uppercase tracking-[0.2em] rounded-[1.75rem] border-2 transition-all duration-700 italic shadow-2xl',
               conversation.autopilotEnabled 
-                ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-600/30' 
-                : 'bg-zinc-50/50 dark:bg-zinc-800/50 border-zinc-100 dark:border-zinc-700/50 text-zinc-400 dark:text-zinc-500 hover:border-indigo-500/30 hover:text-indigo-600'
+                ? 'bg-zinc-950 border-indigo-500/50 text-white shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
+                : 'bg-white dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:border-indigo-500/30 hover:text-indigo-600'
             )}
           >
-            <SparklesIcon className={`w-4 h-4 ${conversation.autopilotEnabled ? 'animate-pulse' : 'text-zinc-400 group-hover:text-indigo-500'}`} />
-            <span className="hidden lg:inline mr-1">AUTOPILOT:</span> {conversation.autopilotEnabled ? 'ATIVADO' : 'DESLIGADO'}
+            <SparklesIcon className={`w-4 h-4 ${conversation.autopilotEnabled ? 'text-indigo-400 animate-pulse' : 'text-zinc-400 group-hover:text-indigo-500'}`} />
+            <span className="hidden lg:inline mr-1 text-indigo-400/70">AGENT MODE:</span> {conversation.autopilotEnabled ? 'AUTOPILOT' : 'MANUAL'}
           </motion.button>
 
-          <div className="h-10 w-[1px] bg-zinc-100 dark:bg-zinc-800/80 mx-2" />
+          <div className="h-12 w-[1px] bg-zinc-100 dark:bg-zinc-800/80" />
 
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="flex items-center group bg-zinc-100/50 dark:bg-zinc-800/40 p-2 pr-5 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-700/50 hover:bg-white dark:hover:bg-zinc-800/80 transition-all shadow-sm">
-              <div className="w-10 h-10 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden mr-3 shadow-inner transition-transform group-hover:scale-110">
+            <Menu.Button className="flex items-center group bg-zinc-50/50 dark:bg-zinc-900/40 p-2 pr-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 transition-all duration-500 hover:bg-white dark:hover:bg-zinc-900 shadow-sm hover:shadow-premium">
+              <div className="w-12 h-12 bg-white dark:bg-zinc-950 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden mr-4 shadow-inner transition-transform group-hover:scale-110">
                 {conversation.assignee?.image ? (
                   <img src={conversation.assignee.image} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <UserCircleIcon className="w-6 h-6 text-zinc-300 dark:text-zinc-700" />
+                  <UserCircleIcon className="w-7 h-7 text-zinc-200 dark:text-zinc-800" />
                 )}
               </div>
-              <div className="flex flex-col items-start mr-3">
-                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1.5 italic">RESPONSÁVEL</span>
-                <span className="text-[13px] font-black text-zinc-800 dark:text-zinc-200 leading-none uppercase italic tracking-tight">
-                  {conversation.assignee?.name || 'SEM AGENTE'}
+              <div className="flex flex-col items-start mr-4">
+                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em] leading-none mb-2 italic opacity-70">SCOPE OWNER</span>
+                <span className="text-[14px] font-executive font-black text-zinc-950 dark:text-zinc-100 leading-none uppercase italic tracking-tight">
+                  {conversation.assignee?.name || 'OPERATOR REQUIRED'}
                 </span>
               </div>
-              <ChevronDownIcon className="w-5 h-5 ml-1 text-zinc-300 group-hover:text-indigo-600 transition-colors" />
+              <ChevronDownIcon className="w-5 h-5 ml-2 text-zinc-300 group-hover:text-indigo-600 transition-colors duration-500" />
             </Menu.Button>
 
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enter="transition ease-out duration-300"
+              enterFrom="transform opacity-0 scale-95 translate-y-4"
               enterTo="transform opacity-100 scale-100 translate-y-0"
-              leave="transition ease-in duration-150"
+              leave="transition ease-in duration-200"
               leaveFrom="transform opacity-100 scale-100 translate-y-0"
-              leaveTo="transform opacity-0 scale-95 translate-y-2"
+              leaveTo="transform opacity-0 scale-95 translate-y-4"
             >
-              <Menu.Items className="absolute right-0 w-72 mt-4 origin-top-right vysify-glass rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.2)] ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
-                <div className="px-6 py-4 bg-zinc-50/50 dark:bg-zinc-950/30">
-                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] italic">SELECIONE O AGENTE</p>
+              <Menu.Items className="absolute right-0 w-80 mt-6 origin-top-right vysify-glass rounded-[2.5rem] shadow-3xl ring-1 ring-zinc-800/50 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                <div className="px-8 py-5 bg-zinc-50/50 dark:bg-zinc-950/50">
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">DELEGATION PROTOCOL</p>
                 </div>
                 <div className="py-2">
                   <Menu.Item>
@@ -400,8 +411,8 @@ const ChatWindow = ({
                       <button
                         onClick={() => onAssign(null)}
                         className={classNames(
-                          active ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600' : 'text-zinc-600 dark:text-zinc-400',
-                          'block w-full text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest italic'
+                          active ? 'bg-indigo-600 text-white' : 'text-zinc-600 dark:text-zinc-400',
+                          'block w-full text-left px-8 py-5 text-[11px] font-black uppercase tracking-[0.2em] italic transition-all'
                         )}
                       >
                         {t('inbox.filter.unassigned')}
@@ -414,20 +425,23 @@ const ChatWindow = ({
                         <button
                           onClick={() => onAssign(member.member.id)}
                           className={classNames(
-                            active ? 'bg-indigo-50 dark:bg-indigo-900/20' : '',
-                            'flex w-full items-center px-6 py-4 transition-all'
+                            active ? 'bg-zinc-50 dark:bg-zinc-900/50' : '',
+                            'flex w-full items-center px-8 py-5 transition-all group/agent'
                           )}
                         >
-                          <div className="w-10 h-10 rounded-xl overflow-hidden border border-zinc-100 dark:border-zinc-800 flex-shrink-0 shadow-sm mr-4">
+                          <div className="w-12 h-12 rounded-[1.25rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 flex-shrink-0 shadow-premium mr-5 transition-transform group-hover/agent:scale-110">
                             {member.member.image ? (
                               <img src={member.member.image} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <UserCircleIcon className="w-full h-full text-zinc-200 dark:text-zinc-800" />
                             )}
                           </div>
-                          <span className={`text-[12px] font-black uppercase tracking-tight italic ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-700 dark:text-zinc-400'}`}>
-                            {member.member.name || member.member.email}
-                          </span>
+                          <div className="flex flex-col items-start min-w-0">
+                            <span className={`text-[13px] font-executive font-black uppercase tracking-tight italic truncate w-full ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-950 dark:text-zinc-200'}`}>
+                              {member.member.name || member.member.email}
+                            </span>
+                            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mt-1 italic">Authorized Agent</span>
+                          </div>
                         </button>
                       )}
                     </Menu.Item>
@@ -437,9 +451,7 @@ const ChatWindow = ({
             </Transition>
           </Menu>
 
-          <div className="hidden xl:flex items-center gap-2 pl-6 border-l border-zinc-100 dark:border-zinc-800/80 ml-2">
-             <Logo variant="full" className="scale-90 origin-left opacity-30 grayscale hover:opacity-100 transition-all duration-1000" />
-          </div>
+          <Logo variant="full" className="hidden xl:block scale-75 origin-right opacity-20 grayscale hover:opacity-100 transition-all duration-1000" />
         </div>
       </div>
 
@@ -471,9 +483,9 @@ const ChatWindow = ({
       </div>
 
       {/* Input Area */}
-      <div className="p-8 bg-white/50 dark:bg-zinc-950/40 backdrop-blur-3xl border-t border-zinc-100 dark:border-zinc-800/50 shrink-0 z-20">
+      <div className="p-10 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl border-t border-zinc-100 dark:border-zinc-800/50 shrink-0 z-20 shadow-premium-lg">
         {/* Unified Toolbar */}
-        <div className="flex items-center gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex items-center gap-4 mb-8 overflow-x-auto pb-4 scrollbar-hide no-scrollbar -mx-2 px-2">
           <Paywall
             minPlan="PREMIUM"
             fallback={
@@ -481,55 +493,56 @@ const ChatWindow = ({
                 <button
                   type="button"
                   disabled
-                  className="flex items-center gap-3 px-6 py-3 bg-zinc-50/50 text-zinc-300 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest border border-zinc-100 opacity-50 italic"
+                  className="flex items-center gap-4 px-8 py-4 bg-zinc-50/50 text-zinc-300 rounded-[1.75rem] text-[10px] font-black uppercase tracking-[0.2em] border border-zinc-100 opacity-50 italic shadow-inner-premium"
                 >
                   <SparklesIcon className="w-4 h-4" />
-                  SUGESTÃO IA
+                  INTELLIGENCE
                 </button>
               </div>
             }
           >
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-5 shrink-0">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onGenerateResponse?.({ objective: aiObjective })}
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
-                className={`flex items-center gap-3 px-8 py-3 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest border transition-all duration-500 shadow-lg italic ${
+                className={`flex items-center gap-4 px-10 py-4 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border transition-all duration-700 shadow-3xl italic ${
                   aiSuggestOnlyEnabled 
-                    ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-500/20 hover:shadow-indigo-500/40 hover:-translate-y-0.5' 
-                    : 'bg-zinc-100 border-zinc-200 text-zinc-400'
+                    ? 'bg-zinc-950 border-indigo-500/50 text-indigo-400 shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
+                    : 'bg-zinc-50 border-zinc-100 text-zinc-400'
                 }`}
               >
-                <SparklesIcon className={`w-4 h-4 ${isGeneratingAI ? 'animate-spin' : ''}`} />
-                {isGeneratingAI ? 'PROCESSANDO...' : 'SUGESTÃO IA'}
+                <SparklesIcon className={`w-5 h-5 ${isGeneratingAI ? 'animate-spin' : ''}`} />
+                {isGeneratingAI ? 'SYNTHESIZING...' : 'GENERATE AI RESPONSE'}
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSummarize}
                 disabled={isSummarizingAI}
-                className="flex items-center gap-3 px-8 py-3 bg-white dark:bg-zinc-800 text-zinc-600 dark:text-zinc-200 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-700 hover:border-indigo-500/30 hover:text-indigo-600 transition-all shadow-sm italic"
+                className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shadow-premium italic"
               >
-                <DocumentTextIcon className="w-4 h-4" />
-                {isSummarizingAI ? 'LENDO...' : 'RESUMIR CHAT'}
+                <DocumentTextIcon className="w-5 h-5" />
+                {isSummarizingAI ? 'ANALYZING...' : 'SUMMARIZE STREAM'}
               </motion.button>
               
-              <div className="flex items-center gap-5 ml-4 p-1.5 bg-zinc-100/50 dark:bg-zinc-900/50 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800/80">
-                <label className="flex items-center gap-3 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 select-none cursor-pointer hover:text-indigo-600 transition-colors italic">
+              <div className="flex items-center gap-6 ml-2 p-2 bg-zinc-100/50 dark:bg-black/40 rounded-[2.25rem] border border-zinc-100 dark:border-zinc-800 shadow-inner-premium">
+                <label className="flex items-center gap-4 px-6 py-2.5 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 select-none cursor-pointer hover:text-indigo-600 transition-all duration-500 italic rounded-2xl">
                   <input
                     type="checkbox"
                     checked={Boolean(aiSuggestOnlyEnabled)}
                     onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
-                    className="h-4.5 w-4.5 rounded-lg border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500/20 transition-all"
+                    className="h-5 w-5 rounded-lg border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500/20 transition-all cursor-pointer"
                   />
-                  SUGERIR
+                  AUTOSUGGEST
                 </label>
+                <div className="h-6 w-[1px] bg-zinc-300 dark:bg-zinc-800" />
                 <select
                   value={aiObjective || ''}
                   onChange={(e) => onAiObjectiveChange?.(e.target.value)}
-                  className="h-10 rounded-[1.25rem] bg-white dark:bg-zinc-800 border border-zinc-100 dark:border-zinc-700 px-5 text-[10px] font-black uppercase tracking-widest text-zinc-600 dark:text-zinc-300 focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-500/30 transition-all italic appearance-none cursor-pointer"
+                  className="h-12 rounded-[1.75rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 px-8 text-[11px] font-black uppercase tracking-[0.2em] text-zinc-950 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all italic appearance-none cursor-pointer"
                 >
                   <option value="support">{t('inbox.ai.objective.support')}</option>
                   <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
@@ -540,45 +553,45 @@ const ChatWindow = ({
             </div>
           </Paywall>
 
-          <div className="h-8 w-[1px] bg-zinc-100 dark:bg-zinc-800 mx-4 shrink-0" />
+          <div className="h-10 w-[1px] bg-zinc-200 dark:bg-zinc-800 mx-6 shrink-0" />
 
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
             type="button"
             onClick={() => setIsScheduleModalOpen(true)}
             disabled={aiObjective !== 'schedule'}
-            className="flex items-center gap-3 px-8 py-3 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-700 hover:border-indigo-500/30 hover:text-indigo-600 transition-all shrink-0 disabled:opacity-30 shadow-sm italic"
+            className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shrink-0 disabled:opacity-30 shadow-premium italic"
           >
-            <CalendarDaysIcon className="w-4 h-4" />
+            <CalendarDaysIcon className="w-5 h-5" />
             {t('inbox.schedule.title')}
           </motion.button>
 
           <Menu as="div" className="relative inline-block text-left shrink-0">
-            <Menu.Button className="flex items-center gap-3 px-8 py-3 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-[1.25rem] text-[10px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-700 hover:border-indigo-500/30 hover:text-indigo-600 transition-all shadow-sm italic">
-              <DocumentDuplicateIcon className="w-4 h-4" />
+            <Menu.Button className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shadow-premium italic">
+              <DocumentDuplicateIcon className="w-5 h-5" />
               {t('inbox.templates.title')}
             </Menu.Button>
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enter="transition ease-out duration-300"
+              enterFrom="transform opacity-0 scale-95 translate-y-4"
               enterTo="transform opacity-100 scale-100 translate-y-0"
-              leave="transition ease-in duration-150"
+              leave="transition ease-in duration-200"
               leaveFrom="transform opacity-100 scale-100 translate-y-0"
-              leaveTo="transform opacity-0 scale-95 translate-y-2"
+              leaveTo="transform opacity-0 scale-95 translate-y-4"
             >
-              <Menu.Items className="absolute bottom-full left-0 mb-6 w-80 origin-bottom-left vysify-glass rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.2)] ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
-                <div className="px-6 py-5 bg-zinc-50/50 dark:bg-zinc-950/30 flex justify-between items-center">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">{t('inbox.templates.title')}</p>
-                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-2 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-xl transition-all">
-                    <PlusIcon className="w-4 h-4 text-indigo-500" />
+              <Menu.Items className="absolute bottom-full left-0 mb-8 w-96 origin-bottom-left vysify-glass rounded-[2.5rem] shadow-3xl ring-1 ring-zinc-800/50 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                <div className="px-10 py-6 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">{t('inbox.templates.title')}</p>
+                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-3 bg-zinc-950 text-white rounded-2xl hover:scale-110 transition-all shadow-glow-indigo">
+                    <PlusIcon className="w-5 h-5" />
                   </button>
                 </div>
-                <div className="py-2 max-h-80 overflow-y-auto custom-scrollbar">
+                <div className="py-2 max-h-[400px] overflow-y-auto custom-scrollbar no-scrollbar">
                   {templates.length === 0 ? (
-                    <div className="px-10 py-12 text-center opacity-40">
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">{t('inbox.templates.empty')}</p>
+                    <div className="px-12 py-20 text-center opacity-40">
+                      <p className="text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] italic">{t('inbox.templates.empty')}</p>
                     </div>
                   ) : (
                     templates.map((template) => (
@@ -588,12 +601,12 @@ const ChatWindow = ({
                             type="button"
                             onClick={() => onMessageChange(template.content)}
                             className={classNames(
-                              active ? 'bg-indigo-50 dark:bg-indigo-900/20' : '',
-                              'block w-full text-left px-8 py-5 group transition-all'
+                              active ? 'bg-zinc-50 dark:bg-zinc-900/50' : '',
+                              'block w-full text-left px-10 py-6 group transition-all'
                             )}
                           >
-                            <p className={`text-[15px] font-black mb-1 transition-colors uppercase italic tracking-tight ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-900 dark:text-zinc-100'}`}>{template.name}</p>
-                            <p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 truncate tracking-tight">{template.content}</p>
+                            <p className={`text-[17px] font-executive font-black mb-1.5 transition-colors uppercase italic tracking-tight ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-950 dark:text-white'}`}>{template.name}</p>
+                            <p className="text-[12px] font-medium text-zinc-500 dark:text-zinc-500 truncate tracking-tight italic opacity-70">{template.content}</p>
                           </button>
                         )}
                       </Menu.Item>
@@ -605,27 +618,27 @@ const ChatWindow = ({
           </Menu>
 
           <Menu as="div" className="relative inline-block text-left shrink-0">
-            <Menu.Button className="flex items-center gap-3 px-8 py-3 bg-white dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-[1.25rem] text-[11px] font-black uppercase tracking-widest border border-zinc-200 dark:border-zinc-700 hover:border-indigo-500/30 hover:text-indigo-600 transition-all shadow-sm italic">
-              <CreditCardIcon className="w-4 h-4" />
-              PRODUTOS
+            <Menu.Button className="flex items-center gap-4 px-10 py-4 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-[1.75rem] text-[11px] font-black uppercase tracking-[0.25em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-700 shadow-premium italic">
+              <CreditCardIcon className="w-5 h-5" />
+              INVENTORY
             </Menu.Button>
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="transform opacity-0 scale-95 translate-y-2"
+              enter="transition ease-out duration-300"
+              enterFrom="transform opacity-0 scale-95 translate-y-4"
               enterTo="transform opacity-100 scale-100 translate-y-0"
-              leave="transition ease-in duration-150"
+              leave="transition ease-in duration-200"
               leaveFrom="transform opacity-100 scale-100 translate-y-0"
-              leaveTo="transform opacity-0 scale-95 translate-y-2"
+              leaveTo="transform opacity-0 scale-95 translate-y-4"
             >
-              <Menu.Items className="absolute bottom-full left-0 mb-6 w-80 origin-bottom-left vysify-glass rounded-[2rem] shadow-[0_20px_60px_rgba(0,0,0,0.2)] ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800">
-                <div className="px-6 py-5 bg-zinc-50/50 dark:bg-zinc-950/30">
-                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic tracking-[0.2em]">PRODUTOS DISPONÍVEIS</p>
+              <Menu.Items className="absolute bottom-full left-0 mb-8 w-96 origin-bottom-left vysify-glass rounded-[2.5rem] shadow-3xl ring-1 ring-zinc-800/50 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
+                <div className="px-10 py-6 bg-zinc-50/50 dark:bg-zinc-950/50">
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">COMMERCIAL OFFERS</p>
                 </div>
-                <div className="py-2 max-h-80 overflow-y-auto custom-scrollbar">
+                <div className="py-2 max-h-[400px] overflow-y-auto custom-scrollbar no-scrollbar">
                   {paymentProducts.length === 0 ? (
-                    <div className="px-8 py-12 text-center opacity-40">
-                      <p className="text-[10px] font-black text-zinc-400 italic uppercase tracking-widest">Nenhum produto ativo</p>
+                    <div className="px-12 py-20 text-center opacity-40">
+                      <p className="text-[11px] font-black text-zinc-400 italic uppercase tracking-[0.2em]">Inventory Empty</p>
                     </div>
                   ) : (
                     paymentProducts.map((product) => (
@@ -635,17 +648,17 @@ const ChatWindow = ({
                             type="button"
                             onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
                             className={classNames(
-                              active ? 'bg-indigo-50 dark:bg-indigo-900/20' : '',
-                              'block w-full text-left px-8 py-5 transition-all'
+                              active ? 'bg-zinc-50 dark:bg-zinc-900/50' : '',
+                              'block w-full text-left px-10 py-7 transition-all group/prod'
                             )}
                           >
-                            <div className="flex justify-between items-start gap-4 mb-2">
-                              <p className={`text-[15px] font-black italic uppercase tracking-tight transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-900 dark:text-zinc-100'}`}>{product.name}</p>
-                              <span className="text-[11px] font-black text-emerald-600 bg-emerald-50 dark:bg-emerald-900/40 dark:text-emerald-400 px-2.5 py-1 rounded-xl shadow-sm tabular-nums">
+                            <div className="flex justify-between items-start gap-6 mb-3">
+                              <p className={`text-[17px] font-executive font-extrabold italic uppercase tracking-tight transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-950 dark:text-white'}`}>{product.name}</p>
+                              <span className="text-[12px] font-black text-white bg-zinc-950 px-4 py-1.5 rounded-2xl shadow-glow-indigo tabular-nums italic">
                                 {formatMoney(product.price, product.currency)}
                               </span>
                             </div>
-                            <p className="text-[9px] font-black text-zinc-300 dark:text-zinc-600 uppercase tracking-[0.2em] italic">Clique para inserir link</p>
+                            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] italic opacity-50 group-hover/prod:opacity-100 group-hover/prod:text-indigo-500 transition-all">LINK INJECTION PROTOCOL</p>
                           </button>
                         )}
                       </Menu.Item>
@@ -657,11 +670,12 @@ const ChatWindow = ({
           </Menu>
         </div>
 
-        <form onSubmit={handleSend} className="relative flex items-center gap-5 max-w-5xl mx-auto">
-          <div className="relative flex-1 group">
+        <form onSubmit={handleSend} className="relative flex items-center gap-8 max-w-6xl mx-auto">
+          <div className="relative flex-1 group/input">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-[3rem] blur-xl opacity-0 group-focus-within/input:opacity-100 transition duration-1000" />
             <textarea
               rows={1}
-              className="w-full px-8 py-5 bg-white dark:bg-zinc-800/80 border border-zinc-100 dark:border-zinc-700/50 rounded-[2.5rem] text-[15px] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all resize-none shadow-xl leading-relaxed max-h-60 font-medium custom-scrollbar italic"
+              className="relative w-full px-10 py-6 bg-white dark:bg-zinc-900/90 border border-zinc-100 dark:border-zinc-800 rounded-[3rem] text-[16px] dark:text-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all resize-none shadow-2xl leading-relaxed max-h-80 font-medium custom-scrollbar italic"
               placeholder={t('inbox.replyPlaceholder')}
               value={messageText || ''}
               onChange={(e) => {
@@ -678,13 +692,13 @@ const ChatWindow = ({
             />
           </div>
           <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.1, rotate: -5, y: -4 }}
+            whileTap={{ scale: 0.9 }}
             type="submit"
             disabled={!messageText?.trim()}
-            className="w-16 h-16 flex items-center justify-center premium-gradient text-white rounded-[2rem] shadow-2xl shadow-indigo-600/30 disabled:opacity-30 disabled:grayscale transition-all shrink-0"
+            className="w-20 h-20 flex items-center justify-center premium-gradient text-white rounded-[2.5rem] shadow-3xl shadow-indigo-600/40 disabled:opacity-30 disabled:grayscale transition-all shrink-0 group/send"
           >
-            <PaperAirplaneIcon className="w-7 h-7 -rotate-25 ml-1" />
+            <PaperAirplaneIcon className="w-9 h-9 -rotate-25 ml-1 transition-transform group-hover/send:scale-110" />
           </motion.button>
         </form>
       </div>

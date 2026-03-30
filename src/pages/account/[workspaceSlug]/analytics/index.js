@@ -9,6 +9,17 @@ import Card from '@/components/Card/index';
 import Paywall from '@/components/Paywall/index';
 import api from '@/lib/common/api';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowDownTrayIcon, 
+  PresentationChartLineIcon, 
+  UserGroupIcon, 
+  ChatBubbleLeftRightIcon,
+  FunnelIcon,
+  TrendingUpIcon,
+  ClockIcon,
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 import {
   Bar,
   BarChart,
@@ -244,7 +255,13 @@ const Analytics = () => {
 
   if (!data) return (
     <AccountLayout>
-      <div className="p-10 text-center text-gray-500 animate-pulse">{t('analytics.loading')}</div>
+      <div className="flex flex-col items-center justify-center py-40">
+        <div className="relative">
+          <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full animate-pulse" />
+          <div className="w-20 h-20 border-[6px] border-zinc-100 dark:border-zinc-800 border-t-indigo-600 rounded-full animate-spin relative z-10"></div>
+        </div>
+        <p className="text-zinc-400 font-black text-[10px] tracking-[0.4em] uppercase italic mt-12 animate-pulse">Calculating Intelligence</p>
+      </div>
     </AccountLayout>
   );
 
@@ -287,239 +304,380 @@ const Analytics = () => {
     <AccountLayout>
       <OnboardingTour tourId="analytics-tour" steps={analyticsSteps} />
       <Meta title={`${t('Analytics')} - ${workspaceSlug}`} />
-      <div id="analytics-header" className="flex justify-between items-end">
-        <Content.Title title={t('Analytics')} subtitle={t('analytics.subtitle')} />
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 bg-brand-600 text-white rounded hover:bg-brand-700 transition-colors text-sm font-medium mb-2 shadow-sm"
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12"
         >
-          {t('analytics.export.button')}
-        </button>
-      </div>
-      <Content.Divider />
-      <Content.Container>
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
+                <PresentationChartLineIcon className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Strategic Intelligence</span>
+            </div>
+            <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
+              Market <span className="text-indigo-600">Analytics</span>
+            </h1>
+            <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed italic">
+              Real-time insights into your sales performance and customer engagement.
+            </p>
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={exportToCSV}
+            className="flex items-center px-8 py-4 text-zinc-500 dark:text-zinc-400 bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 rounded-2xl hover:text-zinc-950 dark:hover:text-white hover:border-zinc-300 dark:hover:border-zinc-600 transition-all shadow-premium-sm font-black text-[11px] uppercase tracking-widest italic"
+          >
+            <ArrowDownTrayIcon className="w-5 h-5 mr-3" />
+            {t('analytics.export.button')}
+          </motion.button>
+        </motion.div>
         <div id="analytics-cards">
           <Paywall
             minPlan="STANDARD"
             message="Analytics avançados como funil de conversão, desempenho de vendedores e tendências de receita estão disponíveis no plano Standard ou superior."
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <Card.Body title={t('analytics.avgClosingTime.title')}>
-                  <div className="flex flex-col items-center justify-center h-full py-6">
-                    <CountUp value={avgClosingTime || 0} className="text-5xl font-bold text-brand-600" />
-                    <span className="text-gray-500 text-lg mt-2">{t('analytics.avgClosingTime.days')}</span>
-                    <p className="text-sm text-gray-400 mt-4 text-center">
-                      {t('analytics.avgClosingTime.subtitle')}
-                    </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.1 }}
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
+                      <ClockIcon className="w-5 h-5 text-indigo-600" />
+                    </div>
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">{t('analytics.avgClosingTime.title')}</span>
                   </div>
-                </Card.Body>
-              </Card>
-
-              <Card>
-                <Card.Body title="Taxa de conversão (últimos 90 dias)">
-                  <div className="flex flex-col items-center justify-center h-full py-6">
-                    <CountUp value={conversion?.last90Days?.rate || 0} className="text-5xl font-bold text-emerald-600" />
-                    <span className="text-gray-500 text-lg mt-2">%</span>
-                    <p className="text-sm text-gray-400 mt-4 text-center">
-                      {`${conversion?.last90Days?.won || 0} ganhos / ${conversion?.last90Days?.total || 0} negócios criados`}
-                    </p>
+                  <div className="flex items-baseline gap-3">
+                    <CountUp value={avgClosingTime || 0} className="text-6xl font-executive font-black text-zinc-950 dark:text-white tracking-tighter italic" />
+                    <span className="text-xl font-bold text-zinc-400 italic">DAYS</span>
                   </div>
-                </Card.Body>
-              </Card>
+                  <p className="text-sm text-zinc-400 font-medium mt-4 italic">{t('analytics.avgClosingTime.subtitle')}</p>
+                </div>
+              </motion.div>
 
-              <Card id="analytics-whatsapp">
-                <Card.Body title={t('analytics.whatsapp.title')}>
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.inbound')}</div>
-                      <div className="text-xl font-semibold text-gray-900">
-                        <CountUp value={messageTotals.inbound} />
-                      </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16" />
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-8">
+                    <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center border border-emerald-100 dark:border-emerald-800">
+                      <SparklesIcon className="w-5 h-5 text-emerald-600" />
                     </div>
-                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.outbound')}</div>
-                      <div className="text-xl font-semibold text-gray-900">
-                        <CountUp value={messageTotals.outbound} />
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-gray-50 border px-3 py-2">
-                      <div className="text-xs text-gray-500">{t('analytics.whatsapp.total')}</div>
-                      <div className="text-xl font-semibold text-gray-900">
-                        <CountUp value={messageTotals.total} />
-                      </div>
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">CONVERSION STRENGTH (90D)</span>
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <CountUp value={conversion?.last90Days?.rate || 0} className="text-6xl font-executive font-black text-emerald-600 tracking-tighter italic" />
+                    <span className="text-2xl font-bold text-zinc-400 italic font-executive">%</span>
+                  </div>
+                  <p className="text-sm text-zinc-400 font-medium mt-4 italic">
+                    {`${conversion?.last90Days?.won || 0} WON / ${conversion?.last90Days?.total || 0} CREATED`}
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                id="analytics-whatsapp"
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-zinc-950 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
+                    <ChatBubbleLeftRightIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.whatsapp.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 whitespace-nowrap">Global Message Volume</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mb-10">
+                  <div className="vysify-glass border-zinc-100 dark:border-zinc-800/50 p-5 rounded-[22px]">
+                    <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">{t('analytics.whatsapp.inbound')}</div>
+                    <div className="text-2xl font-executive font-black text-emerald-600 italic">
+                      <CountUp value={messageTotals.inbound} />
                     </div>
                   </div>
-
-                  {mounted ? (
-                    <div className="h-56">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" tick={{ fontSize: 11 }} />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#16a34a" isAnimationActive animationDuration={900} />
-                          <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#2563eb" isAnimationActive animationDuration={900} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  <div className="vysify-glass border-zinc-100 dark:border-zinc-800/50 p-5 rounded-[22px]">
+                    <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">{t('analytics.whatsapp.outbound')}</div>
+                    <div className="text-2xl font-executive font-black text-indigo-600 italic">
+                      <CountUp value={messageTotals.outbound} />
                     </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
-
-              <Card id="analytics-sellers">
-                <Card.Body title={t('analytics.sellers.title')}>
-                  {mounted ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={sellerPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
-                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
-                          <Tooltip formatter={(v, n) => (n === 'amount' ? formatCurrency(v) : v)} />
-                          <Legend />
-                          <Bar dataKey="amount" name={t('analytics.sellers.revenue')} fill="#2563eb" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                          <Bar dataKey="won" name={t('analytics.sellers.dealsWon')} fill="#16a34a" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                        </BarChart>
-                      </ResponsiveContainer>
+                  </div>
+                  <div className="vysify-glass border-zinc-100 dark:border-zinc-800/50 p-5 rounded-[22px]">
+                    <div className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1 italic">Total</div>
+                    <div className="text-2xl font-executive font-black text-zinc-900 dark:text-white italic">
+                      <CountUp value={messageTotals.total} />
                     </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+                  </div>
+                </div>
 
-              <Card>
-                <Card.Body title={t('analytics.tasksBySeller.title')}>
-                  {mounted ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={taskPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} height={60} angle={-20} textAnchor="end" />
-                          <YAxis tick={{ fontSize: 11 }} />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="completed" name={t('analytics.tasksBySeller.completed')} fill="#7c3aed" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                          <Bar dataKey="total" name={t('analytics.tasksBySeller.total')} fill="#94a3b8" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+                {mounted ? (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={whatsappTrendChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                        <XAxis dataKey="day" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <Tooltip 
+                          contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }}
+                        />
+                        <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#10b981" radius={[0, 0, 0, 0]} isAnimationActive animationDuration={1200} />
+                        <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#6366f1" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1200} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
 
-              <Card>
-                <Card.Body title={t('analytics.leadSources.title')}>
-                  {mounted ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Tooltip formatter={(v, n, p) => {
-                            const payload = p?.payload;
-                            if (!payload) return v;
-                            return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.name];
-                          }} />
-                          <Legend />
-                          <Pie
-                            data={leadSources}
-                            dataKey="amount"
-                            nameKey="name"
-                            outerRadius={90}
-                            isAnimationActive
-                            animationDuration={900}
-                          >
-                            {leadSources.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Pie>
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                id="analytics-sellers"
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl flex items-center justify-center border border-indigo-100 dark:border-indigo-800">
+                    <UserGroupIcon className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.sellers.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Individual Business Impact</p>
+                  </div>
+                </div>
 
-              <Card id="analytics-funnel">
-                <Card.Body title={t('analytics.salesFunnel.title')}>
-                  {mounted ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <FunnelChart>
-                          <Tooltip formatter={(v, n, p) => {
-                            const payload = p?.payload;
-                            if (!payload) return v;
-                            return [`${payload.count} ${t('analytics.deals')} • ${formatCurrency(payload.amount)}`, payload.stage];
-                          }} />
-                          <Funnel
-                            dataKey="count"
-                            data={funnelData || []}
-                            nameKey="stage"
-                            isAnimationActive
-                            animationDuration={900}
-                          >
-                            <LabelList position="right" fill="#111827" stroke="none" dataKey="stage" />
-                            {(funnelData || []).map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                            ))}
-                          </Funnel>
-                        </FunnelChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+                {mounted ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={sellerPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                        <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval={0} height={60} angle={-20} textAnchor="end" />
+                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={formatCompact} />
+                        <Tooltip 
+                           contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }}
+                           formatter={(v, n) => (n === 'amount' ? formatCurrency(v) : v)} 
+                        />
+                        <Bar dataKey="amount" name={t('analytics.sellers.revenue')} fill="#6366f1" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1200} />
+                        <Bar dataKey="won" name={t('analytics.sellers.dealsWon')} fill="#10b981" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1200} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
 
-              <Card className="col-span-1 md:col-span-2">
-                <Card.Body title={t('analytics.salesTrend.title')}>
-                  {mounted ? (
-                    <div className="h-72">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={salesTrendChart} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
-                          <Tooltip formatter={(v) => formatCurrency(v)} />
-                          <Line
-                            type="monotone"
-                            dataKey="amount"
-                            name={t('analytics.salesTrend.revenue')}
-                            stroke="#2563eb"
-                            strokeWidth={3}
-                            dot={false}
-                            isAnimationActive
-                            animationDuration={900}
-                          />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-xl flex items-center justify-center border border-purple-100 dark:border-purple-800">
+                    <SparklesIcon className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.tasksBySeller.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Execution Velocity</p>
+                  </div>
+                </div>
 
-              <Card className="col-span-1 md:col-span-2">
-                <Card.Body title="Receita por pipeline">
-                  {mounted ? (
-                    <div className="h-72">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={pipelineRevenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="pipeline" tick={{ fontSize: 11 }} interval={0} height={70} angle={-20} textAnchor="end" />
-                          <YAxis tick={{ fontSize: 11 }} tickFormatter={formatCompact} />
-                          <Tooltip formatter={(v, n) => (n === 'revenue' ? formatCurrency(v) : v)} />
-                          <Legend />
-                          <Bar dataKey="revenue" name="Receita" fill="#2563eb" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                          <Bar dataKey="won" name="Ganhos" fill="#16a34a" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={900} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : null}
-                </Card.Body>
-              </Card>
+                {mounted ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={taskPerformance} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                        <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval={0} height={60} angle={-20} textAnchor="end" />
+                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} />
+                        <Bar dataKey="completed" name={t('analytics.tasksBySeller.completed')} fill="#a855f7" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1200} />
+                        <Bar dataKey="total" name={t('analytics.tasksBySeller.total')} fill="#94a3b8" radius={[8, 8, 0, 0]} isAnimationActive opacity={0.3} animationDuration={1200} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center border border-blue-100 dark:border-blue-800">
+                    <UserGroupIcon className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.leadSources.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Channel Acquisition Meta</p>
+                  </div>
+                </div>
+
+                {mounted ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} formatter={(v, n, p) => {
+                          const payload = p?.payload;
+                          if (!payload) return v;
+                          return [`${payload.count} DEALS • ${formatCurrency(payload.amount)}`, payload.name];
+                        }} />
+                        <Pie
+                          data={leadSources}
+                          dataKey="amount"
+                          nameKey="name"
+                          innerRadius={60}
+                          outerRadius={90}
+                          paddingAngle={5}
+                          isAnimationActive
+                          animationDuration={1200}
+                        >
+                          {leadSources.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                          ))}
+                        </Pie>
+                        <Legend iconType="circle" />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                id="analytics-funnel"
+                className="vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-zinc-950 dark:bg-zinc-800 rounded-xl flex items-center justify-center border border-zinc-100 dark:border-zinc-800">
+                    <FunnelIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.salesFunnel.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Conversion Leak Analysis</p>
+                  </div>
+                </div>
+
+                {mounted ? (
+                  <div className="h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <FunnelChart>
+                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} formatter={(v, n, p) => {
+                          const payload = p?.payload;
+                          if (!payload) return v;
+                          return [`${payload.count} DEALS • ${formatCurrency(payload.amount)}`, payload.stage];
+                        }} />
+                        <Funnel
+                          dataKey="count"
+                          data={funnelData || []}
+                          nameKey="stage"
+                          isAnimationActive
+                          animationDuration={1200}
+                          opacity={0.8}
+                        >
+                          <LabelList position="right" fill="#94a3b8" stroke="none" dataKey="stage" style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }} />
+                          {(funnelData || []).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                          ))}
+                        </Funnel>
+                      </FunnelChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+                   <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8 }}
+                className="col-span-1 md:col-span-2 vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-glow-indigo/20">
+                    <PresentationChartLineIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">{t('analytics.salesTrend.title')}</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Long-term Revenue Momentum</p>
+                  </div>
+                </div>
+
+                {mounted ? (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={salesTrendChart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                        <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={formatCompact} />
+                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} formatter={(v) => formatCurrency(v)} />
+                        <Line
+                          type="monotone"
+                          dataKey="amount"
+                          name={t('analytics.salesTrend.revenue')}
+                          stroke="#6366f1"
+                          strokeWidth={4}
+                          dot={{ r: 6, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
+                          activeDot={{ r: 8, strokeWidth: 0 }}
+                          isAnimationActive
+                          animationDuration={1500}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 }}
+                className="col-span-1 md:col-span-2 vysify-glass p-10 rounded-[3rem] border border-zinc-100 dark:border-zinc-800"
+              >
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center shadow-glow-emerald/20">
+                    <SparklesIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-executive font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none italic uppercase">Revenue by Pipeline</h3>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-1 italic">Asset Distribution & Deal Flow</p>
+                  </div>
+                </div>
+
+                {mounted ? (
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={pipelineRevenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
+                        <XAxis dataKey="pipeline" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} interval={0} height={70} angle={-20} textAnchor="end" />
+                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={formatCompact} />
+                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} formatter={(v, n) => (n === 'revenue' ? formatCurrency(v) : v)} />
+                        <Bar dataKey="revenue" name="Revenue" fill="#6366f1" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1500} />
+                        <Bar dataKey="won" name="Won" fill="#10b981" radius={[8, 8, 0, 0]} isAnimationActive animationDuration={1500} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : null}
+              </motion.div>
             </div>
           </Paywall>
         </div>
-      </Content.Container>
+      </div>
     </AccountLayout>
   );
 };

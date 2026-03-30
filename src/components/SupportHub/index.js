@@ -1,13 +1,27 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import { useSession } from 'next-auth/react';
 import { useWorkspace } from '@/providers/workspace';
-import { XMarkIcon, ChatBubbleLeftRightIcon, PaperAirplaneIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { 
+  XMarkIcon, 
+  ChatBubbleLeftRightIcon, 
+  PaperAirplaneIcon, 
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  MagnifyingGlassIcon,
+  SparklesIcon,
+  QuestionMarkCircleIcon,
+  LifebuoyIcon,
+  BookOpenIcon,
+  PhoneIcon
+} from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const FAQ_DATA = [
   {
     id: 'payment',
     icon: '💳',
     title: 'Planos e Faturamento',
+    description: 'Gestão de assinaturas e métodos de pagamento.',
     items: [
       {
         q: 'Como altero meu plano?',
@@ -27,6 +41,7 @@ const FAQ_DATA = [
     id: 'whatsapp',
     icon: '📱',
     title: 'WhatsApp e Caixa de Entrada',
+    description: 'Configuração de canais e comunicação direta.',
     items: [
       {
         q: 'Como conectar meu WhatsApp?',
@@ -45,7 +60,8 @@ const FAQ_DATA = [
   {
     id: 'crm',
     icon: '🤝',
-    title: 'CRM e Automações (No-Code)',
+    title: 'CRM e Automações',
+    description: 'Gestão de funis, leads e automação no-code.',
     items: [
       {
         q: 'Como criar múltiplos funis (Pipelines)?',
@@ -58,21 +74,6 @@ const FAQ_DATA = [
       {
         q: 'Posso convidar mais pessoas da minha equipe?',
         a: 'Sim! A colaboração é ilimitada no Vysify (respeitando os limites de assentos do seu plano).\n\n1. Vá em "Configurações do Workspace" > "Equipe".\n2. Clique em "Convidar Membro".\n3. Insira o e-mail e defina a Role: "Admin" (acesso total) ou "Membro" (apenas operação).\n4. O convidado receberá um link de acesso instantâneo por e-mail.'
-      }
-    ]
-  },
-  {
-    id: 'forms',
-    icon: '📝',
-    title: 'Construtor Visual (WebForms)',
-    items: [
-      {
-        q: 'Preciso saber programar para captar leads?',
-        a: 'Absolutamente não. Em "Formulários", você encontrará nosso editor visual "Drag-and-Drop".\n\nVocê pode adicionar campos de Texto, Telefone, Seleção e mais. Após salvar, o sistema gera uma URL única (link) que você pode colocar na bio do seu Instagram, no seu site ou enviar por mensagem. Cada resposta gera um novo Lead automaticamente no seu CRM.'
-      },
-      {
-        q: 'Como integrar os formulários ao meu funil?',
-        a: 'Esta é a grande vantagem do WebForm integrado:\n\nDentro do editor do formulário, na aba "Configurações", você pode definir o "Mapeamento do Funil". Escolha exatamente em qual Funil e em qual Estágio o Lead deve ser criado após apertar o botão de enviar. Você também pode configurar para que uma Tag automática (ex: "Vindo do Instagram") seja aplicada ao novo contato.'
       }
     ]
   }
@@ -179,163 +180,273 @@ const SupportHub = () => {
   if (!session) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      {!isOpen ? (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="flex items-center justify-center w-14 h-14 bg-brand-600 text-white rounded-full shadow-lg hover:bg-brand-700 transition-colors"
-        >
-          <ChatBubbleLeftRightIcon className="w-7 h-7" />
-        </button>
-      ) : (
-        <div className="w-80 sm:w-80 w-[calc(100vw-2rem)] h-[450px] max-h-[85vh] bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-2xl shadow-xl flex flex-col drop-shadow-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 bg-brand-600 text-white">
-             {view !== 'menu' && view !== 'chat' && (
-               <button onClick={() => {
-                  if (view === 'answer') setView('faq');
-                  else setView('menu');
-               }} className="hover:bg-brand-700 p-1 rounded-full transition-colors mr-2 -ml-2">
-                 <ChevronLeftIcon className="w-5 h-5" />
-               </button>
-             )}
-            <h3 className="font-semibold text-lg flex-1 truncate">
-               {view === 'menu' && 'Central de Ajuda'}
-               {view === 'faq' && activeCategory?.title}
-               {view === 'answer' && 'Resposta'}
-               {view === 'chat' && 'Atendimento'}
-            </h3>
-            <button onClick={() => setIsOpen(false)} className="hover:bg-brand-700 p-1 rounded-full transition-colors">
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 bg-gray-50 dark:bg-zinc-800/50">
-            {view === 'menu' && (
-              <div className="flex flex-col gap-2 relative h-full">
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">Escoha uma categoria de dúvida:</p>
-                {FAQ_DATA.map((cat) => (
-                  <button
-                    key={cat.id}
-                    className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium flex items-center justify-between"
-                    onClick={() => {
-                      setActiveCategory(cat);
-                      setView('faq');
-                    }}
-                  >
-                    <span>{cat.icon} {cat.title}</span>
-                    <span className="text-gray-400 text-xs">&gt;</span>
-                  </button>
-                ))}
-                
-                <div className="mt-auto pt-4 border-t border-gray-200 dark:border-zinc-700">
-                  <p className="text-xs text-center text-gray-500 mb-2">Ainda não resolveu?</p>
-                  <button
-                    className="p-3 text-center w-full rounded-xl bg-brand-50 dark:bg-brand-900/20 border border-brand-200 dark:border-brand-900/40 hover:bg-brand-100 transition-colors shadow-sm text-sm font-bold text-brand-600 dark:text-brand-400"
-                    onClick={() => setView('chat')}
-                  >
-                    💬 Falar com Suporte Humano
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {view === 'faq' && activeCategory && (
-              <div className="flex flex-col gap-2">
-                {activeCategory.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    className="p-3 text-left w-full rounded-xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 hover:border-brand-300 transition-colors shadow-sm text-sm font-medium leading-tight"
-                    onClick={() => {
-                      setActiveQuestion(item);
-                      setView('answer');
-                    }}
-                  >
-                    {item.q}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {view === 'answer' && activeQuestion && (
-              <div className="flex flex-col gap-4">
-                 <h4 className="font-bold text-gray-900 dark:text-white leading-tight mt-2">{activeQuestion.q}</h4>
-                 <div className="p-4 bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 text-gray-700 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-line shadow-sm">
-                   {activeQuestion.a}
-                 </div>
-                 
-                 <div className="mt-4 flex flex-col gap-2 border-t border-gray-200 dark:border-zinc-700 pt-4">
-                   <p className="text-xs text-center text-gray-500 mb-1">Ajudou a resolver?</p>
-                   <button
-                     className="p-2 w-full rounded-lg bg-gray-200 dark:bg-zinc-700 hover:bg-gray-300 transition-colors text-sm font-medium"
-                     onClick={() => setView('menu')}
-                   >
-                     Sim, Obrigado!
-                   </button>
-                   <button
-                     className="p-2 w-full rounded-lg bg-brand-50 text-brand-600 hover:bg-brand-100 transition-colors text-sm font-medium"
-                     onClick={() => setView('chat')}
-                   >
-                     Não, Falar com Atendente
-                   </button>
-                 </div>
-              </div>
-            )}
-
-            {view === 'chat' && (
-              <div className="flex flex-col gap-4 h-full">
-                {messages.length === 0 ? (
-                  <div className="text-center my-auto px-4">
-                    <ChatBubbleLeftRightIcon className="w-10 h-10 mx-auto text-brand-300 mb-3" />
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Inicie um ticket</p>
-                    <p className="text-xs text-gray-500">Nossa equipe costuma responder o mais rápido possível nos horários comerciais.</p>
+    <div className="fixed bottom-8 right-8 z-50">
+      <AnimatePresence>
+        {!isOpen ? (
+          <motion.button
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => setIsOpen(true)}
+            className="flex items-center justify-center w-16 h-16 bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 rounded-[1.75rem] shadow-3xl shadow-indigo-600/20 border border-white/10 dark:border-zinc-200/20"
+          >
+            <QuestionMarkCircleIcon className="w-8 h-8 stroke-[1.5]" />
+          </motion.button>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="w-96 h-[600px] max-h-[85vh] vysify-glass rounded-[3rem] shadow-[0_32px_80px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden border border-white/40 dark:border-zinc-800/40"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-8 py-6 border-b border-zinc-100 dark:border-zinc-800/50 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-3xl shrink-0">
+               <div className="flex items-center gap-4">
+                  <AnimatePresence mode="wait">
+                    {view !== 'menu' && (
+                      <motion.button 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        onClick={() => {
+                          if (view === 'answer') setView('faq');
+                          else setView('menu');
+                        }}
+                        className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
+                      >
+                        <ChevronLeftIcon className="w-5 h-5 text-zinc-500" />
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                  <div>
+                    <h3 className="text-[15px] font-executive font-black text-zinc-950 dark:text-white uppercase tracking-tighter italic leading-none">
+                      {view === 'menu' && 'Vysify Protocol Agent'}
+                      {view === 'faq' && 'Category Directory'}
+                      {view === 'answer' && 'Information Retrieval'}
+                      {view === 'chat' && 'Secure Communication'}
+                    </h3>
+                    <div className="flex items-center gap-1.5 opacity-50">
+                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                       <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">System Ready</span>
+                    </div>
                   </div>
-                ) : (
-                  messages.map((m) => {
-                    const isMe = m.authorId === session.user.userId || m.author.role === 'USER'; // Approx check
-                    return (
-                      <div key={m.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                        <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-sm ${isMe ? 'bg-brand-600 text-white rounded-tr-sm' : 'bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white rounded-tl-sm'}`}>
-                          {m.content}
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            )}
-          </div>
-
-          {view === 'chat' && (
-             <form onSubmit={handleSendMessage} className="p-3 border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-2">
-               <input
-                 type="text"
-                 value={newMessage}
-                 onChange={(e) => setNewMessage(e.target.value)}
-                 disabled={loading}
-                 placeholder="Digite sua mensagem..."
-                 className="flex-1 bg-gray-100 dark:bg-zinc-800 border-transparent focus:bg-white focus:border-brand-500 focus:ring-0 rounded-full px-4 py-2 text-sm"
-               />
-               <button
-                 type="submit"
-                 disabled={loading || !newMessage.trim()}
-                 className="p-2 bg-brand-600 text-white rounded-full hover:bg-brand-700 disabled:opacity-50 transition-colors"
+               </div>
+               <button 
+                 onClick={() => setIsOpen(false)} 
+                 className="p-2 hover:bg-rose-500/10 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl transition-all group"
                >
-                 <PaperAirplaneIcon className="w-5 h-5" />
+                 <XMarkIcon className="w-5 h-5 text-zinc-400 group-hover:rotate-90 transition-transform" />
                </button>
-             </form>
-          )}
+            </div>
 
-          {view === 'chat' && (
-            <button
-               onClick={() => setView('menu')}
-               className="text-xs text-center p-2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 flex-shrink-0"
-            >
-              Voltar para Menu Principal
-            </button>
-          )}
-        </div>
-      )}
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+              <AnimatePresence mode="wait">
+                {view === 'menu' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="space-y-8"
+                  >
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">Knowledge Core</p>
+                       <div className="grid grid-cols-1 gap-3">
+                        {FAQ_DATA.map((cat, idx) => (
+                          <motion.button
+                            key={cat.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="p-5 text-left w-full rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 hover:border-indigo-500/30 hover:bg-white dark:hover:bg-zinc-900 transition-all shadow-sm group flex items-start gap-4"
+                            onClick={() => {
+                              setActiveCategory(cat);
+                              setView('faq');
+                            }}
+                          >
+                            <span className="text-2xl mt-1 grayscale group-hover:grayscale-0 transition-all transform group-hover:scale-110 duration-500">{cat.icon}</span>
+                            <div className="flex-1 min-w-0">
+                               <div className="flex items-center justify-between mb-0.5">
+                                 <span className="text-[14px] font-black text-zinc-900 dark:text-white uppercase tracking-tight italic">{cat.title}</span>
+                                 <ChevronRightIcon className="w-4 h-4 text-zinc-300 group-hover:translate-x-1 transition-transform" />
+                               </div>
+                               <p className="text-[11px] text-zinc-400 font-medium italic leading-none">{cat.description}</p>
+                            </div>
+                          </motion.button>
+                        ))}
+                       </div>
+                    </div>
+                    
+                    <div className="pt-8 border-t border-zinc-100 dark:border-zinc-800/50">
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic mb-4 text-center">Protocol Escalation</p>
+                      <motion.button
+                        whileHover={{ scale: 1.02, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="p-6 text-center w-full rounded-[2rem] bg-zinc-950 dark:bg-white border border-transparent shadow-2xl shadow-indigo-600/20 transition-all flex flex-col items-center gap-2 group"
+                        onClick={() => setView('chat')}
+                      >
+                        <ChatBubbleLeftRightIcon className="w-6 h-6 text-indigo-400 group-hover:scale-110 transition-transform" />
+                        <span className="text-[12px] font-black uppercase tracking-[0.15em] text-white dark:text-zinc-950 italic">Establish Human Link</span>
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {view === 'faq' && activeCategory && (
+                  <motion.div 
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="space-y-3"
+                  >
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic mb-6">Directory Information Nodes</p>
+                    {activeCategory.items.map((item, idx) => (
+                      <motion.button
+                        key={idx}
+                        initial={{ opacity: 0, y: 5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="p-5 text-left w-full rounded-2xl bg-white/50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800/50 hover:bg-white dark:hover:bg-zinc-900 hover:border-indigo-500/30 transition-all shadow-sm group"
+                        onClick={() => {
+                          setActiveQuestion(item);
+                          setView('answer');
+                        }}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-300 dark:bg-zinc-700 group-hover:bg-indigo-500 transition-colors" />
+                          <span className="text-[13px] font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-tight italic leading-tight group-hover:text-zinc-950 dark:group-hover:text-white">{item.q}</span>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+
+                {view === 'answer' && activeQuestion && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="space-y-6"
+                  >
+                     <div className="p-1 px-4 bg-indigo-500/10 border border-indigo-500/20 rounded-lg inline-block">
+                        <span className="text-[9px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest italic leading-none">RETRIEVED INTEL</span>
+                     </div>
+                     <h4 className="text-[19px] font-executive font-extrabold text-zinc-950 dark:text-white uppercase tracking-tighter italic leading-tight">{activeQuestion.q}</h4>
+                     <div className="p-8 bg-white/80 dark:bg-zinc-900/80 rounded-[2.5rem] border border-zinc-100 dark:border-zinc-800 shadow-premium-dark text-zinc-700 dark:text-zinc-300 text-sm leading-relaxed whitespace-pre-line italic">
+                       {activeQuestion.a}
+                     </div>
+                     
+                     <div className="pt-8 flex flex-col gap-3 border-t border-zinc-100 dark:border-zinc-800/50">
+                       <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic text-center">Protocol Satisfaction Audit</p>
+                       <div className="flex gap-3">
+                         <button
+                           className="flex-1 p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 hover:bg-emerald-500 dark:hover:bg-emerald-500 hover:text-white transition-all text-[11px] font-black uppercase italic tracking-widest"
+                           onClick={() => setView('menu')}
+                         >
+                           Satisfied
+                         </button>
+                         <button
+                           className="flex-1 p-4 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all text-[11px] font-black uppercase italic tracking-widest border border-indigo-500/20"
+                           onClick={() => setView('chat')}
+                         >
+                           Escalate
+                         </button>
+                       </div>
+                     </div>
+                  </motion.div>
+                )}
+
+                {view === 'chat' && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col h-[400px]"
+                  >
+                    <div className="flex-1 overflow-y-auto space-y-4 px-1 py-4 custom-scrollbar">
+                      {messages.length === 0 ? (
+                        <div className="text-center my-auto px-10 py-12 flex flex-col items-center justify-center h-full">
+                          <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="w-20 h-20 bg-indigo-500/10 rounded-[1.5rem] flex items-center justify-center mb-6"
+                          >
+                            <ChatBubbleLeftRightIcon className="w-10 h-10 text-indigo-600" />
+                          </motion.div>
+                          <p className="text-[14px] font-black text-zinc-900 dark:text-white uppercase tracking-tighter italic mb-2">Initiate Transmission</p>
+                          <p className="text-[11px] text-zinc-400 font-medium italic max-w-[200px]">Strategic operations agents are ready to receive your encrypted communication protocol.</p>
+                        </div>
+                      ) : (
+                        messages.map((m, idx) => {
+                          const isMe = m.authorId === session.user.userId || m.author.role === 'USER';
+                          return (
+                            <motion.div 
+                              key={m.id} 
+                              initial={{ opacity: 0, x: isMe ? 20 : -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
+                            >
+                              <div className={`max-w-[85%] rounded-[1.5rem] px-5 py-3 text-[13px] font-medium leading-relaxed italic shadow-sm border ${
+                                isMe 
+                                  ? 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-transparent rounded-tr-none' 
+                                  : 'bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border-zinc-100 dark:border-zinc-800 rounded-tl-none'
+                              }`}>
+                                {m.content}
+                              </div>
+                            </motion.div>
+                          );
+                        })
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+
+                    <div className="pt-6 mt-4 border-t border-zinc-100 dark:border-zinc-800/50">
+                       <form onSubmit={handleSendMessage} className="relative group">
+                         <input
+                           type="text"
+                           value={newMessage}
+                           onChange={(e) => setNewMessage(e.target.value)}
+                           disabled={loading}
+                           placeholder="Transmit message..."
+                           className="w-full bg-zinc-50 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-800 focus:border-indigo-500/50 focus:ring-0 rounded-2xl pl-6 pr-14 py-4 text-[13px] italic font-medium placeholder:text-zinc-400 transition-all"
+                         />
+                         <button
+                           type="submit"
+                           disabled={loading || !newMessage.trim()}
+                           className="absolute right-2 top-2 p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 disabled:opacity-30 transition-all shadow-glow-indigo group-hover:scale-105 active:scale-95"
+                         >
+                           <PaperAirplaneIcon className="w-5 h-5 stroke-[2]" />
+                         </button>
+                       </form>
+                       <button
+                         onClick={() => setView('menu')}
+                         className="w-full text-center mt-4 text-[9px] font-black text-zinc-400 hover:text-indigo-600 transition-colors uppercase tracking-[0.3em] italic"
+                       >
+                         Return to Knowledge Core
+                       </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
+            {/* Footer / Brand */}
+            <div className="px-8 py-4 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between shrink-0">
+               <div className="flex items-center gap-2">
+                  <BookOpenIcon className="w-3.5 h-3.5 text-zinc-400" />
+                  <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest italic">Vysify v2.4.0 • Enterprise Core</span>
+               </div>
+               <div className="flex gap-4">
+                  <PhoneIcon className="w-3.5 h-3.5 text-zinc-300 hover:text-indigo-500 transition-colors cursor-pointer" />
+                  <SparklesIcon className="w-3.5 h-3.5 text-zinc-300 hover:text-amber-500 transition-colors cursor-pointer" />
+               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

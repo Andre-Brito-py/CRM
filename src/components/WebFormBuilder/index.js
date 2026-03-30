@@ -108,13 +108,16 @@ const WebFormBuilder = ({ show, toggle, form }) => {
                   config.map((field, idx) => (
                     <Draggable key={field.id || idx} draggableId={String(field.id || idx)} index={idx}>
                       {(provided, snapshot) => (
-                        <div
+                        <motion.div
                           ref={provided.innerRef}
                           {...provided.draggableProps}
-                          className={`group bg-white p-6 rounded-[28px] border transition-all duration-300 ${
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.03 }}
+                          className={`group vysify-glass p-8 rounded-[3rem] border transition-all duration-500 ${
                             snapshot.isDragging 
-                              ? 'shadow-2xl border-brand-500/30 ring-4 ring-brand-500/5 rotate-1 z-50' 
-                              : 'shadow-premium border-zinc-100 hover:border-zinc-200'
+                              ? 'shadow-[0_40px_100px_rgba(0,0,0,0.25)] border-indigo-500/50 ring-8 ring-indigo-500/5 rotate-2 z-50 bg-white/90 dark:bg-zinc-900/90 scale-105' 
+                              : 'shadow-premium-sm border-zinc-100/50 dark:border-zinc-800/50 hover:border-indigo-500/30'
                           }`}
                         >
                           <div className="flex items-start gap-4">
@@ -148,17 +151,17 @@ const WebFormBuilder = ({ show, toggle, form }) => {
                                     placeholder="Enter label..."
                                   />
                                 </div>
-                                <div className="space-y-1.5">
-                                  <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-1">Type</label>
+                                <div className="space-y-2">
+                                  <label className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1">Field Type</label>
                                   <div className="relative">
                                     <select
                                       value={field.type}
                                       onChange={(e) => handleUpdateField(idx, { type: e.target.value })}
-                                      className="w-full h-11 pl-4 pr-10 bg-zinc-50 border border-zinc-100 rounded-2xl text-[14px] font-executive font-bold focus:bg-white focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500/30 transition-all appearance-none cursor-pointer"
+                                      className="w-full h-14 pl-6 pr-12 bg-zinc-50/50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-bold text-zinc-900 dark:text-white focus:bg-white dark:focus:bg-zinc-900 focus:ring-8 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all appearance-none cursor-pointer font-executive uppercase italic"
                                     >
                                       {FIELD_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                                     </select>
-                                    <ChevronUpDownIcon className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 pointer-events-none" />
+                                    <ChevronUpDownIcon className="absolute right-5 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-400 pointer-events-none" />
                                   </div>
                                 </div>
                                 <div className="space-y-1.5">
@@ -189,7 +192,7 @@ const WebFormBuilder = ({ show, toggle, form }) => {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </motion.div>
                       )}
                     </Draggable>
                   ))
