@@ -206,6 +206,34 @@ const SupportHub = () => {
     }
   };
 
+  const handleAnotherQuestion = () => {
+    setHistory(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        side: 'bot',
+        content: 'Sem problemas! O que mais você gostaria de saber? 😊',
+        showActions: true,
+        timestamp: new Date()
+      }
+    ]);
+  };
+
+  const handleEscalate = () => {
+    setView('human');
+    // If no human messages yet, add a bot greeting in the human view
+    if (humanMessages.length === 0) {
+      setHumanMessages([{
+        id: 'escalate-greeting',
+        author: { role: 'SUPERADMIN' },
+        content: 'Conectando você a um de nossos especialistas... Por favor, descreva seu problema com detalhes.',
+        createdAt: new Date()
+      }]);
+    }
+  };
+
+  if (!session) return null;
+
   const pickCategory = (cat) => {
     // Add user choice
     const userMsg = { id: Date.now(), side: 'user', content: cat.title, timestamp: new Date() };
@@ -335,7 +363,7 @@ const SupportHub = () => {
                                    </button>
                                  ))}
                                  <button 
-                                   onClick={() => setView('human')}
+                                   onClick={handleEscalate}
                                    className="flex items-center gap-3 px-4 py-2 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700 text-xs font-bold transition-all mt-1"
                                  >
                                    <ChatBubbleLeftRightIcon className="w-4 h-4" />
@@ -364,8 +392,8 @@ const SupportHub = () => {
                           {/* Answer satisfaction or more help? */}
                           {m.isAnswer && (
                             <div className="flex gap-2 mt-1">
-                               <button onClick={() => setView('chat')} className="px-3 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:text-indigo-600 transition-all uppercase italic">Outra Pergunta</button>
-                               <button onClick={() => setView('human')} className="px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all uppercase italic">Não resolveu</button>
+                               <button onClick={handleAnotherQuestion} className="px-3 py-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-[10px] font-bold text-zinc-500 hover:text-indigo-600 transition-all uppercase italic">Outra Pergunta</button>
+                               <button onClick={handleEscalate} className="px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/30 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 transition-all uppercase italic">Não resolveu</button>
                             </div>
                           )}
                         </div>
@@ -408,10 +436,6 @@ const SupportHub = () => {
                   <div className="flex items-center gap-2 opacity-30">
                     <BookOpenIcon className="w-3 h-3 text-zinc-500" />
                     <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest italic">Vysify v2.4.0 • Core</span>
-                  </div>
-                  <div className="flex gap-4">
-                    <PhoneIcon className="w-3 h-3 text-zinc-300 hover:text-indigo-500 transition-colors cursor-pointer" />
-                    <SparklesIcon className="w-3 h-3 text-zinc-300 hover:text-amber-500 transition-colors cursor-pointer" />
                   </div>
                </div>
             </div>
