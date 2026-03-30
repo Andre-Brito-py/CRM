@@ -45,34 +45,34 @@ const FAQ_DATA = [
   {
     id: 'crm',
     icon: '🤝',
-    title: 'CRM e Automações',
+    title: 'CRM e Automações (No-Code)',
     items: [
       {
         q: 'Como criar múltiplos funis (Pipelines)?',
-        a: 'No menu "Funil de Vendas", haverá um seletor de funis no topo. Clique lá e selecione "Criar Novo Funil". Você pode customizar os estágios depois.'
+        a: 'No menu "Funil de Vendas", você controla seus processos via blocos visuais arrastáveis (Kanban). É 100% No-Code: clique no seletor de funis no topo e em "Criar Novo". Você pode customizar estágios e cores depois.'
       },
       {
-        q: 'Como as regras de automação funcionam?',
-        a: 'No menu "Automações", você cria "Regras", que são baseadas em um "Gatilho" (ex: um negócio mudou de estágio) e uma "Ação" (ex: enviar mensagem no WhatsApp).'
+        q: 'Como as automações visuais funcionam?',
+        a: 'Nosso sistema de Automação é "No-Code" (sem necessidade de código). Você monta regras em uma interface simples: escolhe um "Gatilho" pronto (ex: negócio ganhou) e conecta com "Ações" automáticas (ex: enviar WhatsApp, chamar webhook, etc).'
       },
       {
         q: 'Posso convidar mais pessoas da minha equipe?',
-        a: 'Sim! Vá em "Membros" dentro das "Configurações" do Workspace e clique em "Convidar Membro" para enviar um convite para o e-mail da pessoa.'
+        a: 'Sim! Vá em "Membros" dentro das "Configurações" do Workspace e clique em "Convidar Membro" para enviar o convite, distribuindo a gestão dos negócios sem mexer em código.'
       }
     ]
   },
   {
     id: 'forms',
     icon: '📝',
-    title: 'Formulários (WebForms)',
+    title: 'Construtor Visual (WebForms)',
     items: [
       {
-        q: 'Como capto leads usando o sistema?',
-        a: 'Use o menu "Formulários" para criar um WebForm, ou usar Webhooks para se conectar a plataformas como Typeform/Facebook Ads.'
+        q: 'Preciso saber programar para captar leads?',
+        a: 'Não! Nosso Construtor Visual de Formulários é 100% "Drag-and-Drop" (arrastar e soltar). Vá em "Formulários" para criar uma página de captura incrível, adicionar campos personalizados e editar o visual em segundos.'
       },
       {
-        q: 'Onde encontro leads que vieram do formulário?',
-        a: 'Eles aparecem instantaneamente na sua tela de "Contatos" e também são adicionados ao funil que você conectou ao formulário.'
+        q: 'Como integrar os formulários ao meu funil?',
+        a: 'Na configuração visual do WebForm, e usando nossa engenharia No-Code, você escolhe exatamente em qual Estágio do Funil (Pipeline) aquele lead recém-captado irá acampar. É instantâneo.'
       }
     ]
   }
