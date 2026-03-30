@@ -35,9 +35,9 @@ const Modal = ({ children, show, title, toggle }) => {
             leaveFrom="opacity-100 scale-100 translate-y-0"
             leaveTo="opacity-0 scale-95 translate-y-4"
           >
-            <div className="relative inline-block w-full max-w-2xl p-10 overflow-hidden text-left align-middle transition-all transform vysify-glass rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.5)]">
+            <div className="relative inline-block w-full max-w-2xl p-6 sm:p-10 overflow-hidden text-left align-middle transition-all transform vysify-glass rounded-[2rem] sm:rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.5)]">
               {title && (
-                <Dialog.Title as="h2" className="text-3xl font-black leading-tight text-zinc-900 dark:text-white mb-6 tracking-tight">
+                <Dialog.Title as="h2" className="text-2xl sm:text-3xl font-black leading-tight text-zinc-900 dark:text-white mb-4 sm:mb-6 tracking-tight">
                   {title}
                 </Dialog.Title>
               )}
@@ -47,10 +47,10 @@ const Modal = ({ children, show, title, toggle }) => {
               </div>
 
               <button
-                className="absolute top-8 right-8 p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-white/10 rounded-full transition-all duration-300 z-50"
+                className="absolute top-4 right-4 sm:top-8 sm:right-8 p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-white/10 rounded-full transition-all duration-300 z-50"
                 onClick={toggle}
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
               {/* Decorative accent */}

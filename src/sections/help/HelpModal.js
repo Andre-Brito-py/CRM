@@ -363,7 +363,7 @@ const TUTORIAL_CONTENT = {
           <Step number={2} title='Escolha o preset do seu segmento' desc='Atualmente disponíveis:' />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { icon: BuildingOfficeIcon, name: 'Imobiliária', desc: 'Pipeline: Captação → Visita → Proposta → Fechamento. Campos: Tipo de Imóvel, Valor Avaliado, Tamanho (m²).' },
             { icon: BeakerIcon, name: 'Clínica Médica', desc: 'Pipeline: Agendamento → Consulta → Retorno. Campos: Convênio, Data Nascimento, Prontuário.' },
@@ -746,9 +746,9 @@ const HelpModal = ({ isOpen, toggle }) => {
 
   return (
     <Modal show={isOpen} title={mode === 'tutorials' ? '📚 Tutoriais No-Code' : t('help.modal.title')} toggle={toggle} size="large">
-      <div className="flex h-[560px] -m-6 border-t border-gray-100 dark:border-zinc-800">
+      <div className="flex flex-col sm:flex-row h-[75vh] sm:h-[600px] -m-6 border-t border-gray-100 dark:border-zinc-800 overflow-hidden">
         {/* ── Sidebar ─────────────────────────────────────────────── */}
-        <div className="w-64 flex-shrink-0 border-r border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900 flex flex-col">
+        <div className="w-full sm:w-64 shrink-0 border-b sm:border-b-0 sm:border-r border-gray-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 flex flex-col max-h-[35%] sm:max-h-none">
           {/* Mode switcher */}
           <div className="flex gap-1 p-3 pb-0">
             <button
@@ -783,7 +783,7 @@ const HelpModal = ({ isOpen, toggle }) => {
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-1">
+          <nav className="flex-1 overflow-y-auto px-3 pb-3 space-y-1 custom-scrollbar">
             {mode === 'help' && filteredCategories.map((cat) => {
               const Icon = cat.icon;
               const isActive = activeCategory === cat.key;
@@ -831,7 +831,7 @@ const HelpModal = ({ isOpen, toggle }) => {
         </div>
 
         {/* ── Content area ──────────────────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto p-8 dark:bg-zinc-950">
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 dark:bg-zinc-950 custom-scrollbar">
           {mode === 'help' && (
             <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
               <div className="flex items-center gap-4 mb-6">
