@@ -139,76 +139,85 @@ const Pipeline = () => {
     <AccountLayout>
       <OnboardingTour tourId="pipeline-tour" steps={pipelineSteps} />
       <Meta title={`Vysify - ${workspace?.name} | Pipeline`} />
-      <Content.Title
-        title="Pipeline"
-        subtitle="Orchestrate your sales funnel with precision"
-        className="font-executive"
-      />
-      <Content.Divider />
-      <div className="flex-1 flex flex-col h-full overflow-hidden px-5 py-5 md:px-10">
-        <div className="flex flex-col mb-8 space-y-4 lg:flex-row lg:justify-between lg:items-center lg:space-y-0">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <h2 className="text-2xl font-executive font-bold text-zinc-900 tracking-tight">
-              {pipeline?.name || 'Sales Pipeline'}
-            </h2>
+      <div className="flex flex-col gap-2 mb-10 px-6 sm:px-10 animate-in fade-in slide-in-from-top-4 duration-700">
+        <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white tracking-tight leading-none">Pipeline</h1>
+        <p className="text-zinc-500 dark:text-zinc-400 font-medium">Visualize e acelere o fluxo de vendas do seu negócio</p>
+      </div>
+
+      <div className="flex-1 flex flex-col h-full overflow-hidden px-6 sm:px-10 pb-10">
+        <div className="flex flex-col mb-10 space-y-6 lg:flex-row lg:justify-between lg:items-end lg:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-5">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 dark:text-indigo-400 opacity-80 pl-1">Funil Ativo</span>
+              <h2 className="text-2xl font-black text-zinc-900 dark:text-white tracking-tight flex items-center gap-3">
+                {pipeline?.name || 'Sales Pipeline'}
+                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/50 animate-pulse" />
+              </h2>
+            </div>
             {pipeline && (
               <Paywall minPlan="STANDARD" compact>
                 <button
                   id="pipeline-ai-insights-btn"
                   onClick={generateInsights}
                   disabled={isGeneratingInsights}
-                  className="flex items-center justify-center px-5 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-xl hover:bg-indigo-100 transition-all duration-300 shadow-sm shadow-indigo-500/5 group disabled:opacity-50"
+                  className="group relative px-6 py-2.5 bg-gradient-to-br from-indigo-500 to-indigo-700 hover:from-indigo-600 hover:to-indigo-800 text-white rounded-2xl shadow-lg shadow-indigo-600/20 active:scale-95 transition-all duration-300 disabled:opacity-50 overflow-hidden"
                 >
-                  {isGeneratingInsights ? (
-                    <span className="animate-pulse">Analyzing...</span>
-                  ) : (
-                    <>
-                      <SparklesIcon className="w-4 h-4 mr-2 text-indigo-400 group-hover:text-indigo-600 transition-colors" />
-                      Get AI Insights
-                    </>
-                  )}
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="flex items-center gap-2 relative z-10">
+                    {isGeneratingInsights ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <SparklesIcon className="w-4 h-4 text-white/90" />
+                    )}
+                    <span className="text-xs font-black uppercase tracking-widest">{isGeneratingInsights ? 'Analisando...' : 'IA Insights'}</span>
+                  </div>
                 </button>
               </Paywall>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             <a
               href={workspace?.slug ? `/api/workspace/${workspace.slug}/export?format=csv&entity=deals` : '#'}
-              className="flex items-center justify-center px-6 py-3 text-zinc-600 bg-white border border-zinc-200 rounded-2xl hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-300 shadow-sm font-medium text-sm group"
+              className="flex items-center justify-center px-6 py-3 text-zinc-600 dark:text-zinc-300 bg-white/50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 backdrop-blur-sm rounded-2xl hover:bg-white dark:hover:bg-zinc-800 transition-all duration-300 shadow-sm font-bold text-xs uppercase tracking-widest group"
               onClick={(e) => {
                 if (!workspace?.slug) e.preventDefault();
               }}
             >
-              <ArrowDownTrayIcon className="w-5 h-5 mr-3 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-              Export Deals CSV
+              <ArrowDownTrayIcon className="w-4 h-4 mr-2.5 text-zinc-400 group-hover:rotate-12 transition-transform" />
+              Exportar
             </a>
             <button
               id="pipeline-add-deal-btn"
-              className="flex items-center justify-center px-8 py-3 text-white bg-zinc-900 rounded-2xl hover:bg-zinc-800 transition-all duration-300 shadow-xl shadow-zinc-900/20 active:scale-95 font-bold text-sm"
+              className="flex items-center justify-center px-10 py-3.5 text-white bg-zinc-900 dark:bg-indigo-600 rounded-2xl hover:bg-zinc-800 dark:hover:bg-indigo-700 transition-all duration-300 shadow-xl shadow-zinc-900/10 dark:shadow-indigo-600/20 active:scale-95 font-black text-xs uppercase tracking-[0.1em]"
               onClick={toggleModal}
             >
-              <PlusIcon className="w-5 h-5 mr-2 stroke-[3]" />
-              Add Deal
+              <PlusIcon className="w-5 h-5 mr-1.5 stroke-[4]" />
+              Novo Negócio
             </button>
           </div>
         </div>
 
         {aiInsights && (
-          <div className="mb-10 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-900 p-8 rounded-[32px] border border-white/10 relative shadow-2xl shadow-indigo-900/20 overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32 transition-transform duration-700 group-hover:scale-110"></div>
+          <div className="mb-12 bg-gradient-to-br from-indigo-900 via-[#1e1b4b] to-zinc-950 p-10 rounded-[2.5rem] border border-white/5 relative shadow-3xl shadow-indigo-950/40 overflow-hidden group animate-in zoom-in-95 duration-500">
+            <div className="absolute -top-24 -right-24 w-80 h-80 bg-indigo-500/10 rounded-full blur-[100px] pointer-events-none group-hover:bg-indigo-500/20 transition-all duration-1000" />
+            <div className="absolute -bottom-24 -left-24 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+            
             <button
               onClick={() => setAiInsights(null)}
-              className="absolute top-4 right-4 p-2 bg-white/10 text-white/60 hover:text-white hover:bg-white/20 rounded-xl transition-all"
+              className="absolute top-6 right-6 p-2 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 rounded-2xl transition-all z-20"
             >
               <XMarkIcon className="w-5 h-5" />
             </button>
-            <div className="flex items-start relative z-10">
-              <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mr-6 border border-white/10 shadow-inner">
-                <SparklesIcon className="w-6 h-6 text-indigo-200" />
+            <div className="flex flex-col md:flex-row items-start gap-8 relative z-10 text-left">
+              <div className="w-16 h-16 bg-white/5 rounded-[20px] flex items-center justify-center shrink-0 border border-white/10 shadow-2xl">
+                <SparklesIcon className="w-8 h-8 text-indigo-400 animate-pulse" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-executive font-bold text-white mb-3 tracking-tight">AI Pipeline Intelligence</h3>
-                <p className="text-[15px] text-indigo-100/90 leading-relaxed font-medium whitespace-pre-wrap">{aiInsights}</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <h3 className="text-xl font-black text-white tracking-tight uppercase">Pipeline Intelligence</h3>
+                  <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-[9px] font-black uppercase tracking-widest border border-indigo-500/30">Análise Preditiva</span>
+                </div>
+                <p className="text-[17px] text-indigo-100/80 leading-relaxed font-medium whitespace-pre-wrap selection:bg-indigo-500/30">{aiInsights}</p>
               </div>
             </div>
           </div>
