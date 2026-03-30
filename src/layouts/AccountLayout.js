@@ -13,6 +13,7 @@ import { useWorkspace } from '@/providers/workspace';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import usePlanFeatures from '@/hooks/data/usePlanFeatures';
 import { useWorkspaces } from '@/hooks/data';
+import SupportHub from '@/components/SupportHub';
 
 const staticMenu = sidebarMenu();
 
@@ -190,6 +191,8 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
           </div>
         </div>
       </div>
+
+      <SupportHub />
     </main>
   );
 };

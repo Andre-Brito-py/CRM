@@ -55,6 +55,10 @@ const menu = () => [
         path: '/admin/finance/workspace-payment-settings',
       },
       {
+        name: 'Support Tickets',
+        path: '/admin/support',
+      },
+      {
         name: 'Finance / Platform Revenue',
         path: '/admin/finance/revenue',
       },

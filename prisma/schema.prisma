@@ -220,6 +220,9 @@ model User {
   internalChatChannelsAsB InternalChatChannel[] @relation("InternalChatUserB")
   internalChatMessages  InternalChatMessage[]
   internalChatBridgesCreated InternalChatBridge[]
+  supportTicketsCreated SupportTicket[] @relation("TicketCreator")
+  supportTicketsAssigned SupportTicket[] @relation("TicketAssignee")
+  supportMessages      SupportMessage[]
 
   @@unique([userCode, email])
   @@map("users")
@@ -439,6 +442,7 @@ model Workspace {
   internalChatChannels   InternalChatChannel[]
   internalChatMessages   InternalChatMessage[]
   internalChatBridgeWorkspaces InternalChatBridgeWorkspace[]
+  supportTickets         SupportTicket[]
   creator                User                     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
@@ -1182,4 +1186,48 @@ model WhatsAppUsageEvent {
   @@index([overageMode, createdAt])
   @@index([stripeSubscriptionId])
   @@map("whatsapp_usage_events")
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+model SupportTicket {
+  id          String              @id @default(cuid())
+  workspaceId String?
+  createdById String
+  assigneeId  String?
+  subject     String?
+  status      SupportTicketStatus @default(OPEN)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  deletedAt   DateTime?
+
+  workspace Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  createdBy User            @relation("TicketCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  assignee  User?           @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  messages  SupportMessage[]
+
+  @@index([workspaceId, status, deletedAt])
+  @@index([createdById, status])
+  @@map("support_tickets")
+}
+
+model SupportMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  authorId  String
+  content   String   @db.Text
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("support_messages")
 }
