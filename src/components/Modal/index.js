@@ -6,10 +6,10 @@ const Modal = ({ children, show, title, toggle }) => {
   return (
     <Transition appear as={Fragment} show={show}>
       <Dialog
-        className="fixed inset-0 z-50 overflow-y-auto text-gray-800"
+        className="fixed inset-0 z-50 overflow-y-auto"
         onClose={toggle}
       >
-        <div className="flex items-center justify-center h-screen p-5">
+        <div className="flex items-center justify-center min-h-screen p-4 text-center">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -19,33 +19,42 @@ const Modal = ({ children, show, title, toggle }) => {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-30" />
+            <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-[6px]" />
           </Transition.Child>
-          <span aria-hidden="true" className="inline-block align-middle">
+
+          <span aria-hidden="true" className="inline-block h-screen align-middle">
             &#8203;
           </span>
+
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
+            enterFrom="opacity-0 scale-95 translate-y-4"
+            enterTo="opacity-100 scale-100 translate-y-0"
             leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+            leaveFrom="opacity-100 scale-100 translate-y-0"
+            leaveTo="opacity-0 scale-95 translate-y-4"
           >
-            <div className="relative inline-block w-full max-w-2xl px-8 py-10 my-10 space-y-5 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl border dark:border-zinc-800">
+            <div className="relative inline-block w-full max-w-2xl p-10 overflow-hidden text-left align-middle transition-all transform vysify-glass rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.5)]">
               {title && (
-                <Dialog.Title as="h2" className="text-2xl font-bold leading-7 text-zinc-900 dark:text-white">
+                <Dialog.Title as="h2" className="text-3xl font-black leading-tight text-zinc-900 dark:text-white mb-6 tracking-tight">
                   {title}
                 </Dialog.Title>
               )}
-              {children}
+              
+              <div className="relative z-10 text-zinc-600 dark:text-zinc-300">
+                {children}
+              </div>
+
               <button
-                className="absolute top-6 right-6 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                className="absolute top-8 right-8 p-2.5 text-zinc-400 hover:text-zinc-100 hover:bg-white/10 rounded-full transition-all duration-300"
                 onClick={toggle}
               >
                 <XMarkIcon className="w-6 h-6" />
               </button>
+
+              {/* Decorative accent */}
+              <div className="absolute -top-24 -right-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl opacity-50" />
             </div>
           </Transition.Child>
         </div>

@@ -203,16 +203,16 @@ const Topbar = ({ menu, staticMenu }) => {
     <>
       <header
         id="topbar-nav"
-        className="sticky top-0 z-50 flex items-center justify-between px-6 h-16 glass-dark border-b border-white/5 shadow-2xl shadow-black/40"
+        className="sticky top-0 z-50 flex items-center justify-between px-8 h-20 bg-white/70 dark:bg-zinc-900/40 backdrop-blur-3xl border-b border-white/40 dark:border-zinc-800/40 shadow-2xl shadow-zinc-200/20 dark:shadow-none"
       >
         {/* Left: Logo */}
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-12">
           <Link href="/account" className="flex-shrink-0">
-            <Logo variant="full" forceLight className="scale-95 hover:scale-100 transition-transform duration-300" />
+            <Logo variant="full" className="scale-105 hover:scale-110 transition-transform duration-500" />
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
+          <nav className="hidden lg:flex items-center gap-2" aria-label="Navegação principal">
             {topSections
               .filter((section) => section.items?.length > 0)
               .map((section) => (
@@ -234,87 +234,96 @@ const Topbar = ({ menu, staticMenu }) => {
         </div>
 
         {/* Right: Notifications + User Menu */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {/* Notifications */}
           <Popover className="relative hidden sm:block">
             {({ open }) => (
               <>
                 <Popover.Button
-                  className={`flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 transition-all duration-200 ${open ? 'text-white bg-white/10 border-indigo-500/50' : 'text-zinc-400 hover:text-white hover:bg-white/10'}`}
+                  className={`flex items-center justify-center w-11 h-11 rounded-[1.2rem] transition-all duration-300 ${open ? 'text-indigo-600 bg-indigo-50 border-indigo-200' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-white bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-700/50 shadow-sm'}`}
                   title="Notificações"
                 >
-                  <BellIcon className="w-5 h-5" />
+                  <BellIcon className="w-5.5 h-5.5" />
                   {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500 shadow-[0_0_8px_rgba(139,92,246,0.8)]"></span>
+                    <span className="absolute top-2 right-2 flex h-3 w-3">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-3 w-3 bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.8)] border-2 border-white dark:border-zinc-900"></span>
                     </span>
                   )}
                 </Popover.Button>
 
                 <Transition
                   as={Fragment}
-                  enter="transition ease-out duration-200"
-                  enterFrom="opacity-0 translate-y-2 scale-95"
+                  enter="transition ease-out duration-300"
+                  enterFrom="opacity-0 translate-y-3 scale-95"
                   enterTo="opacity-100 translate-y-0 scale-100"
-                  leave="transition ease-in duration-150"
+                  leave="transition ease-in duration-200"
                   leaveFrom="opacity-100 translate-y-0 scale-100"
-                  leaveTo="opacity-0 translate-y-2 scale-95"
+                  leaveTo="opacity-0 translate-y-3 scale-95"
                 >
-                  <Popover.Panel className="absolute right-0 mt-3 w-80 origin-top-right bg-zinc-900 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] z-50 overflow-hidden backdrop-blur-xl">
-                    <div className="p-4 border-b border-white/5 flex items-center justify-between">
-                      <h3 className="text-sm font-bold text-white uppercase tracking-wider">Notificações</h3>
+                  <Popover.Panel className="absolute right-0 mt-4 w-[380px] origin-top-right vysify-glass rounded-[2.5rem] shadow-[0_32px_120px_rgba(0,0,0,0.15)] z-50 overflow-hidden">
+                    <div className="p-8 border-b border-zinc-100 dark:border-zinc-800/50 flex items-center justify-between">
+                      <h3 className="text-xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tight">Notificações</h3>
                       {unreadCount > 0 && (
                         <button
                           onClick={markAllAsRead}
-                          className="text-[10px] font-bold text-indigo-400 hover:text-indigo-300 uppercase underline decoration-indigo-500/30"
+                          className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 hover:opacity-70 uppercase tracking-widest italic flex items-center gap-2"
                         >
-                          Marcar todas como lidas
+                          <CheckCircleIcon className="w-4 h-4" />
+                          Limpar tudo
                         </button>
                       )}
                     </div>
-                    <div className="max-h-96 overflow-y-auto divide-y divide-white/5 custom-scrollbar">
+                    <div className="max-h-[500px] overflow-y-auto divide-y divide-zinc-50 dark:divide-zinc-800/50 custom-scrollbar">
                       {notifications.length === 0 ? (
-                        <div className="p-10 text-center">
-                          <BellSlashIcon className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
-                          <p className="text-xs text-zinc-500">Nenhuma notificação por aqui.</p>
+                        <div className="p-16 text-center">
+                          <BellSlashIcon className="w-12 h-12 mx-auto text-zinc-200 dark:text-zinc-800 mb-4" />
+                          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Tudo limpo por aqui</p>
                         </div>
                       ) : (
-                        notifications.map((n) => (
-                          <div
+                        notifications.map((n, idx) => (
+                          <motion.div
                             key={n.id}
-                            className={`p-4 hover:bg-white/5 transition-colors cursor-pointer group relative ${!n.isRead ? 'bg-white/[0.02]' : ''}`}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`p-6 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-all cursor-pointer group relative ${!n.isRead ? 'bg-indigo-50/20' : ''}`}
                             onClick={() => {
                               if (!n.isRead) markAsRead(n.id);
                               if (n.link) router.push(n.link);
                             }}
                           >
-                            {!n.isRead && (
-                              <div className="absolute top-4 left-2 w-1.5 h-1.5 rounded-full bg-indigo-500" />
-                            )}
-                            <div className="pl-2">
-                              <p className={`text-sm font-semibold ${!n.isRead ? 'text-white' : 'text-zinc-400'}`}>
-                                {n.title}
-                              </p>
-                              {n.content && (
-                                <p className="mt-1 text-xs text-zinc-500 truncate group-hover:whitespace-normal transition-all">
-                                  {n.content}
+                            <div className="flex gap-4">
+                              <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${!n.isRead ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400'}`}>
+                                <BellIcon className="w-5 h-5" />
+                              </div>
+                              <div className="min-w-0 pr-4">
+                                <p className={`text-sm leading-tight mb-1 font-bold ${!n.isRead ? 'text-zinc-900 dark:text-white' : 'text-zinc-500'}`}>
+                                  {n.title}
                                 </p>
-                              )}
-                              <p className="mt-2 text-[10px] text-zinc-600 font-medium">
-                                {new Date(n.createdAt).toLocaleString()}
-                              </p>
+                                {n.content && (
+                                  <p className="text-xs text-zinc-400 truncate group-hover:whitespace-normal group-hover:line-clamp-3 transition-all">
+                                    {n.content}
+                                  </p>
+                                )}
+                                <p className="mt-3 text-[9px] text-zinc-400 dark:text-zinc-500 font-black uppercase tracking-widest">
+                                  {new Date(n.createdAt).toLocaleString()}
+                                </p>
+                              </div>
                             </div>
-                          </div>
+                            {!n.isRead && (
+                              <div className="absolute top-1/2 -translate-y-1/2 right-6 w-2 h-2 rounded-full bg-indigo-500 shadow-glow-indigo" />
+                            )}
+                          </motion.div>
                         ))
                       )}
                     </div>
-                    <div className="p-3 bg-black/20 border-t border-white/5 flex items-center justify-center">
+                    <div className="p-5 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800/50 text-center">
                       <button
                         onClick={isSubscribed ? unsubscribe : subscribe}
-                        className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 hover:text-zinc-300 transition-colors uppercase tracking-widest"
+                        className="text-[9px] font-black text-zinc-400 hover:text-indigo-600 transition-colors uppercase tracking-[0.2em] italic"
                       >
-                        {isSubscribed ? '🔔 Desativar Notificações do Navegador' : '🔕 Ativar Notificações do Navegador'}
+                        {isSubscribed ? 'Desativar notificações Push' : 'Ativar notificações Push'}
                       </button>
                     </div>
                   </Popover.Panel>
@@ -323,110 +332,89 @@ const Topbar = ({ menu, staticMenu }) => {
             )}
           </Popover>
 
-          {/* Help Menu */}
-          <button
-            className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all duration-200"
-            onClick={() => setHelpOpen(true)}
-            title="Ajuda"
-          >
-            <QuestionMarkCircleIcon className="w-5 h-5" />
-          </button>
-
           {/* User menu */}
           <Menu as="div" className="relative">
             <Menu.Button
               id="topbar-user-menu"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm font-semibold"
+              className="flex items-center gap-3 pl-2 pr-5 py-1.5 rounded-[1.5rem] bg-zinc-100/50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-700 dark:text-zinc-300 hover:border-indigo-500/30 transition-all duration-300 group"
             >
-              <UserCircleIcon className="w-5 h-5 text-zinc-400" />
-              <span className="hidden sm:inline max-w-[120px] truncate">
-                {session?.user?.name || session?.user?.email}
-              </span>
-              <ChevronDownIcon className="w-4 h-4 text-zinc-500" />
+              <div className="w-10 h-10 rounded-2xl bg-white dark:bg-zinc-900 flex items-center justify-center border border-zinc-200 dark:border-zinc-700 shadow-sm group-hover:scale-105 transition-transform overflow-hidden relative">
+                {session?.user?.image ? (
+                   <img src={session.user.image} alt={session.user.name} className="w-full h-full object-cover" />
+                ) : (
+                  <UserCircleIcon className="w-7 h-7 text-zinc-400" />
+                )}
+              </div>
+              <div className="text-left hidden sm:block">
+                <p className="text-xs font-black text-zinc-900 dark:text-white uppercase tracking-tight italic leading-none mb-1">
+                  {session?.user?.name || session?.user?.email?.split('@')[0]}
+                </p>
+                <div className="flex items-center gap-1 opacity-50">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[9px] font-black uppercase tracking-widest">Conta Pro</span>
+                </div>
+              </div>
+              <ChevronDownIcon className="w-4 h-4 text-zinc-400 group-hover:translate-y-0.5 transition-transform" />
             </Menu.Button>
+            
             <Transition
               as={Fragment}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 scale-95 translate-y-2"
+              enter="transition ease-out duration-300"
+              enterFrom="opacity-0 scale-95 translate-y-3"
               enterTo="opacity-100 scale-100 translate-y-0"
-              leave="transition ease-in duration-150"
+              leave="transition ease-in duration-200"
               leaveFrom="opacity-100 scale-100 translate-y-0"
-              leaveTo="opacity-0 scale-95 translate-y-2"
+              leaveTo="opacity-0 scale-95 translate-y-3"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-60 origin-top-right bg-zinc-900 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] divide-y divide-white/5 z-50 overflow-hidden backdrop-blur-xl">
+              <Menu.Items className="absolute right-0 mt-4 w-64 origin-top-right vysify-glass rounded-[2rem] shadow-[0_32px_80px_rgba(0,0,0,0.2)] z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
                 {session?.user?.role === 'SUPERADMIN' && (
-                  <div className="p-2">
+                  <div className="p-3">
                     <Menu.Item>
                       <Link
                         href="/admin"
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                        className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 rounded-xl transition-all"
                       >
-                        <ComputerDesktopIcon className="w-4 h-4" />
+                        <ComputerDesktopIcon className="w-5 h-5 opacity-60" />
                         Admin Dashboard
                       </Link>
                     </Menu.Item>
                   </div>
                 )}
-                <div className="p-2">
-                  <Menu.Item>
-                    <Link
-                      href="/account/settings"
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                    >
-                      <CogIcon className="w-4 h-4" />
-                      {t('common.label.account')}
-                    </Link>
-                  </Menu.Item>
-                  <Menu.Item>
-                    <Link
-                      href="/account/billing"
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
-                    >
-                      <CreditCardIcon className="w-4 h-4" />
-                      {t('common.label.billing')}
-                    </Link>
-                  </Menu.Item>
+                <div className="p-3">
+                  {[
+                    { href: '/account/settings', icon: CogIcon, label: t('common.label.account') },
+                    { href: '/account/billing', icon: CreditCardIcon, label: t('common.label.billing') },
+                  ].map((item) => (
+                    <Menu.Item key={item.label}>
+                      <Link
+                        href={item.href}
+                        className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 rounded-xl transition-all"
+                      >
+                        <item.icon className="w-5 h-5 opacity-60" />
+                        {item.label}
+                      </Link>
+                    </Menu.Item>
+                  ))}
                   <Menu.Item>
                     <button
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-300 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+                      className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-indigo-500/10 rounded-xl transition-all"
                       onClick={toggleTheme}
                     >
                       {theme === 'dark' ? (
-                        <><SunIcon className="w-4 h-4" /><span>{t('common.label.light.mode')}</span></>
+                        <><SunIcon className="w-5 h-5 opacity-60" /><span>Modo Claro</span></>
                       ) : (
-                        <><MoonIcon className="w-4 h-4" /><span>{t('common.label.dark.mode')}</span></>
+                        <><MoonIcon className="w-5 h-5 opacity-60" /><span>Modo Escuro</span></>
                       )}
                     </button>
                   </Menu.Item>
                 </div>
-                <div className="p-2">
-                  {isImpersonating && (
-                    <Menu.Item>
-                      <button
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 rounded-xl transition-all"
-                        onClick={async () => {
-                          try {
-                            toast.loading('Saindo do masquerade...', { id: 'stop_masq' });
-                            const res = await api('/api/impersonation/stop', { method: 'POST' });
-                            if (res?.error?.msg) throw new Error(res.error.msg);
-                            toast.success('Masquerade finalizado', { id: 'stop_masq' });
-                            window.location.href = '/admin/users';
-                          } catch (e) {
-                            toast.error(e?.message || 'Falha ao finalizar masquerade', { id: 'stop_masq' });
-                          }
-                        }}
-                      >
-                        <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                        Parar masquerade
-                      </button>
-                    </Menu.Item>
-                  )}
+                <div className="p-3">
                   <Menu.Item>
                     <button
-                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm font-semibold text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-xl transition-all"
+                      className="flex items-center gap-3 w-full px-4 py-3 text-sm font-black text-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-500/10 rounded-xl transition-all uppercase tracking-widest italic"
                       onClick={logOut}
                     >
-                      <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                      <ArrowRightOnRectangleIcon className="w-5 h-5" />
                       {t('common.label.logout')}
                     </button>
                   </Menu.Item>
@@ -437,11 +425,11 @@ const Topbar = ({ menu, staticMenu }) => {
 
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-white transition-all"
+            className="lg:hidden flex items-center justify-center w-11 h-11 rounded-[1.2rem] bg-zinc-100/50 dark:bg-zinc-800/50 border border-zinc-200/50 dark:border-zinc-700/50 text-zinc-400 hover:text-zinc-900 transition-all"
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label="Toggle menu"
           >
-            {mobileOpen ? <XMarkIcon className="w-5 h-5" /> : <Bars3Icon className="w-5 h-5" />}
+            {mobileOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </button>
         </div>
       </header>
@@ -450,13 +438,12 @@ const Topbar = ({ menu, staticMenu }) => {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="md:hidden fixed top-16 inset-x-0 z-40 glass-dark border-b border-white/10 overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
+            className="lg:hidden fixed top-20 inset-x-4 z-40 vysify-glass rounded-[2rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden p-6"
           >
-            <div className="px-4 py-4 space-y-4 max-h-[80vh] overflow-y-auto">
+            <div className="space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <MobileWorkspaceSelector
                 workspace={workspace}
                 workspacesData={workspacesData}

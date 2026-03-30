@@ -120,29 +120,29 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
       {/* The sidebar is always rendered so the workspace selector is always visible */}
       <aside
         id="context-sidebar"
-        className="hidden md:flex flex-col flex-shrink-0 w-[220px] h-full glass-dark border-r border-white/5 overflow-hidden"
+        className="hidden md:flex flex-col flex-shrink-0 w-[260px] h-full bg-white/70 dark:bg-zinc-900/40 backdrop-blur-3xl border-r border-white/40 dark:border-zinc-800/40 overflow-hidden"
       >
         {/* ── Workspace Selector (always visible) ── */}
-        <div className="px-3 pt-5 pb-4 border-b border-white/5">
-          <span className="block px-2 mb-2 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+        <div className="px-6 pt-10 pb-8 border-b border-zinc-100 dark:border-zinc-800/50">
+          <span className="block px-1 mb-4 text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500 italic">
             {t('common.label.workspace')}
           </span>
 
           {/* Create button */}
           <button
             id="create-workspace-btn"
-            className="flex items-center gap-2 w-full px-3 py-2 mb-2 text-xs font-semibold text-white premium-gradient rounded-xl shadow-lg shadow-brand-500/20 hover:scale-[1.01] transition-all"
+            className="flex items-center justify-center gap-3 w-full px-5 py-3.5 mb-6 text-xs font-black text-white premium-gradient rounded-2xl shadow-xl shadow-indigo-500/20 hover:scale-[1.03] active:scale-95 transition-all group"
             onClick={() => setModalState(true)}
           >
-            <PlusIcon className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="truncate">{t('workspace.action.button.label')}</span>
+            <PlusIcon className="w-4 h-4 flex-shrink-0 group-hover:rotate-90 transition-transform duration-500" />
+            <span className="truncate italic uppercase tracking-widest">{t('workspace.action.button.label')}</span>
           </button>
 
           {/* Workspace listbox */}
           <Listbox value={workspace} onChange={handleWorkspaceChange}>
             <div className="relative">
-              <Listbox.Button className="relative w-full py-2.5 pl-3 pr-8 text-left bg-white/5 border border-white/10 rounded-xl text-xs text-zinc-300 hover:bg-white/10 transition-all focus:outline-none">
-                <span className="block truncate">
+              <Listbox.Button className="relative w-full py-4 pl-5 pr-10 text-left bg-zinc-50/50 dark:bg-zinc-800/30 border border-zinc-100 dark:border-zinc-700/50 rounded-2xl text-xs font-bold text-zinc-600 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800 transition-all focus:outline-none ring-offset-2 ring-indigo-500/10 focus:ring-4">
+                <span className="block truncate italic uppercase tracking-tight">
                   {isLoading
                     ? t('workspace.fetching')
                     : workspacesData?.workspaces?.length === 0
@@ -151,28 +151,29 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                         ? t('workspace.action.label.select')
                         : workspace.name}
                 </span>
-                <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none">
-                  <ChevronUpDownIcon className="w-3.5 h-3.5 text-zinc-500" />
+                <span className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                  <ChevronUpDownIcon className="w-4 h-4 text-zinc-400" />
                 </span>
               </Listbox.Button>
 
               {workspacesData?.workspaces?.length > 0 && (
-                <Listbox.Options className="absolute z-[70] w-full mt-1 py-1.5 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl max-h-40 overflow-y-auto">
+                <Listbox.Options className="absolute z-[70] w-full mt-3 py-2 vysify-glass rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] max-h-60 overflow-y-auto custom-scrollbar">
                   {workspacesData.workspaces.map((ws, i) => (
                     <Listbox.Option
                       key={i}
                       value={ws}
                       className={({ active }) =>
-                        `flex items-center gap-2 cursor-pointer px-3 py-2 text-xs transition-colors ${active ? 'bg-white/10 text-white' : 'text-zinc-400'
+                        `flex items-center gap-3 cursor-pointer px-5 py-3 text-xs transition-all ${active ? 'bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400' : 'text-zinc-500 hover:text-zinc-900'
                         }`
                       }
                     >
                       {({ selected }) => (
                         <>
-                          <span className={`flex-1 truncate ${selected ? 'font-semibold text-white' : ''}`}>
+                          <div className={`w-2 h-2 rounded-full shrink-0 transition-all ${selected ? 'bg-indigo-500 shadow-glow-indigo' : 'bg-transparent border border-zinc-300'}`} />
+                          <span className={`flex-1 truncate font-bold uppercase tracking-tight italic ${selected ? 'text-zinc-900 dark:text-white' : ''}`}>
                             {ws.name}
                           </span>
-                          {selected && <CheckIcon className="w-3.5 h-3.5 text-brand-400" />}
+                          {selected && <CheckIcon className="w-4 h-4 text-indigo-500" />}
                         </>
                       )}
                     </Listbox.Option>
@@ -184,78 +185,89 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
         </div>
 
         {/* ── Contextual nav items (section-dependent) ── */}
-        {visible && items.length > 0 && (
-          <>
+        {visible && (
+          <div className="flex flex-col flex-1 min-h-0">
             {/* Section Label */}
-            <div className="px-5 pt-5 pb-3">
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500 leading-none">
+            <div className="px-7 pt-10 pb-5">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-400 dark:text-zinc-500 leading-none italic">
                 {sectionLabel}
               </span>
             </div>
 
             {/* Items */}
-            <nav className="flex flex-col px-3 space-y-0.5 flex-1 pb-8 overflow-y-auto">
-              {items.map((item, idx) => {
-                const locked = isLocked(item);
-                const active = router.asPath === item.path;
-                const Icon = ITEM_ICONS[item.name] || CogIcon;
+            <nav className="flex flex-col px-4 space-y-2 flex-1 pb-10 overflow-y-auto custom-scrollbar">
+              {items.length > 0 ? (
+                items.map((item, idx) => {
+                  const locked = isLocked(item);
+                  const active = router.asPath === item.path;
+                  const Icon = ITEM_ICONS[item.name] || CogIcon;
 
-                return (
-                  <motion.div
-                    key={idx}
-                    whileHover={{ x: 3 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                  >
-                    <Link
-                      href={locked ? '#' : item.path}
-                      onClick={(e) => {
-                        if (locked) {
-                          e.preventDefault();
-                          toast(t('sidebar.premium.lockedToast'), {
-                            icon: '🔒',
-                            style: {
-                              borderRadius: '12px',
-                              background: '#18181b',
-                              color: '#fff',
-                              border: '1px solid rgba(255,255,255,0.1)',
-                            },
-                          });
-                        }
-                      }}
-                      prefetch={false}
-                      className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200 border border-transparent ${active
-                        ? 'text-white bg-brand-600/15 border-brand-500/30 shadow-[0_0_20px_rgba(139,92,246,0.08)]'
-                        : locked
-                          ? 'text-zinc-600 cursor-not-allowed grayscale'
-                          : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
-                        }`}
+                  return (
+                    <motion.div
+                      key={idx}
+                      whileHover={{ x: 4 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     >
-                      {active && (
-                        <motion.div
-                          layoutId="context-sidebar-pill"
-                          className="absolute left-0 w-0.5 h-5 bg-brand-500 rounded-r-full shadow-[0_0_12px_rgba(139,92,246,0.8)]"
-                        />
-                      )}
-                      <Icon
-                        className={`w-4 h-4 flex-shrink-0 transition-colors ${active ? 'text-brand-400' : 'text-zinc-500'
+                      <Link
+                        href={locked ? '#' : item.path}
+                        onClick={(e) => {
+                          if (locked) {
+                            e.preventDefault();
+                            toast(t('sidebar.premium.lockedToast'), {
+                              icon: '🔒',
+                              style: {
+                                borderRadius: '1.25rem',
+                                background: '#18181b',
+                                color: '#fff',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                padding: '1rem 1.5rem',
+                                fontSize: '13px',
+                                fontWeight: 'bold'
+                              },
+                            });
+                          }
+                        }}
+                        prefetch={false}
+                        className={`relative flex items-center gap-4 px-5 py-4 rounded-[1.25rem] text-[13px] font-black transition-all duration-300 group ${active
+                          ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/80 dark:bg-indigo-500/10 shadow-[0_4px_20px_rgba(99,102,241,0.08)]'
+                          : locked
+                            ? 'text-zinc-400 cursor-not-allowed opacity-50'
+                            : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50'
                           }`}
-                      />
-                      <span className="flex-1 truncate">{t(item.name)}</span>
-                      {locked && (
-                        <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-800/40 border border-white/5">
-                          <LockClosedIcon className="w-2.5 h-2.5 text-zinc-600" />
-                          <span className="text-[8px] font-bold text-zinc-600 tracking-wider">PRO</span>
-                        </div>
-                      )}
-                      {active && !locked && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse shadow-[0_0_6px_rgba(139,92,246,0.8)]" />
-                      )}
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                      >
+                        {active && (
+                          <motion.div
+                            layoutId="context-sidebar-pill"
+                            className="absolute left-0 w-1 h-6 bg-indigo-600 dark:bg-indigo-500 rounded-r-full shadow-glow-indigo"
+                          />
+                        )}
+                        <Icon
+                          className={`w-5 h-5 flex-shrink-0 transition-colors duration-500 ${active ? 'text-indigo-600 dark:text-indigo-500' : 'text-zinc-400 group-hover:text-indigo-500'
+                            }`}
+                        />
+                        <span className="flex-1 truncate uppercase tracking-tight italic">{t(item.name)}</span>
+                        
+                        {locked && (
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-zinc-800 text-white border border-white/5">
+                            <span className="text-[8px] font-black tracking-widest italic">ELITE</span>
+                          </div>
+                        )}
+                        
+                        {active && !locked && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 dark:bg-indigo-400 animate-pulse shadow-glow-indigo" />
+                        )}
+                      </Link>
+                    </motion.div>
+                  );
+                })
+              ) : (
+                <div className="px-6 py-10 text-center opacity-30 select-none">
+                  <RectangleStackIcon className="w-10 h-10 mx-auto mb-4 text-zinc-400" />
+                  <p className="text-[10px] font-black uppercase tracking-widest">Selecione uma categoria</p>
+                </div>
+              )}
             </nav>
-          </>
+          </div>
         )}
       </aside>
 

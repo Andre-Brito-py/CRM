@@ -115,6 +115,33 @@
   .avatar-premium {
     @apply transition-all duration-300 ring-2 ring-transparent hover:ring-indigo-500/50 hover:scale-105;
   }
+
+  .vysify-glass {
+    @apply backdrop-blur-2xl border bg-white/70 dark:bg-zinc-900/40 border-white/40 dark:border-zinc-800/40 shadow-2xl;
+  }
+
+  .form-input-premium {
+    @apply w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none text-zinc-900 dark:text-white font-medium placeholder-zinc-400 dark:placeholder-zinc-500;
+  }
+
+  .gradient-border {
+    position: relative;
+    border-radius: inherit;
+  }
+  
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(to bottom right, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 }
 
 /* Driver.js Elite Overhaul */

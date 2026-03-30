@@ -82,157 +82,167 @@ const AddDealModal = ({ isOpen, toggle, slug, stages }) => {
   };
 
   return (
-    <Modal show={isOpen} title="Add New Deal" toggle={toggle}>
-      <form onSubmit={handleCreateDeal} className="space-y-4 w-96">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-            Deal Name *
-          </label>
-          <input
-            type="text"
-            id="name"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
+    <Modal show={isOpen} title="ADICIONAR NEGÓCIO" toggle={toggle}>
+      <form onSubmit={handleCreateDeal} className="space-y-8 w-full max-w-xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label htmlFor="name" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Nome do Negócio *
+            </label>
+            <input
+              type="text"
+              id="name"
+              placeholder="Ex: Consultoria Premium"
+              className="form-input-premium"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
 
-        <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
-            Amount ($)
-          </label>
-          <input
-            type="number"
-            id="amount"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            step="0.01"
-          />
-        </div>
+          <div className="space-y-2">
+            <label htmlFor="amount" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Valor Estimado (R$)
+            </label>
+            <input
+              type="number"
+              id="amount"
+              placeholder="0.00"
+              className="form-input-premium"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              step="0.01"
+            />
+          </div>
 
-        <div>
-          <label htmlFor="stage" className="block text-sm font-medium text-gray-700">
-            Stage *
-          </label>
-          <select
-            id="stage"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
-            value={stageId}
-            onChange={(e) => setStageId(e.target.value)}
-            required
-          >
-            {stages?.map(stage => (
-              <option key={stage.id} value={stage.id}>{stage.name}</option>
-            ))}
-          </select>
-        </div>
+          <div className="space-y-2">
+            <label htmlFor="stage" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Etapa do Funil *
+            </label>
+            <select
+              id="stage"
+              className="form-input-premium appearance-none cursor-pointer"
+              value={stageId}
+              onChange={(e) => setStageId(e.target.value)}
+              required
+            >
+              {stages?.map(stage => (
+                <option key={stage.id} value={stage.id}>{stage.name.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label htmlFor="assignee" className="block text-sm font-medium text-gray-700">
-            Assignee
-          </label>
-          <select
-            id="assignee"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
-            value={userId}
-            onChange={(e) => setUserId(e.target.value)}
-          >
-            <option value="">Select an assignee...</option>
-            {membersData?.members?.map(member => (
-              <option key={member.member.id} value={member.member.id}>{member.member.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="priority" className="block text-sm font-medium text-gray-700">
-              Priority
+          <div className="space-y-2">
+            <label htmlFor="priority" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Prioridade
             </label>
             <select
               id="priority"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
+              className="form-input-premium appearance-none cursor-pointer"
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
             >
-              <option value="LOW">Low</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="HIGH">High</option>
+              <option value="LOW">BAIXA</option>
+              <option value="MEDIUM">MÉDIA</option>
+              <option value="HIGH">ALTA</option>
             </select>
           </div>
-          <div>
-            <label htmlFor="closeDate" className="block text-sm font-medium text-gray-700">
-              Close Date
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label htmlFor="assignee" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Responsável
+            </label>
+            <select
+              id="assignee"
+              className="form-input-premium appearance-none cursor-pointer"
+              value={userId}
+              onChange={(e) => setUserId(e.target.value)}
+            >
+              <option value="">SELECIONAR...</option>
+              {membersData?.members?.map(member => (
+                <option key={member.member.id} value={member.member.id}>{member.member.name?.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="closeDate" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Previsão de Fechamento
             </label>
             <input
               type="date"
               id="closeDate"
-              className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500"
+              className="form-input-premium"
               value={closeDate}
               onChange={(e) => setCloseDate(e.target.value)}
             />
           </div>
         </div>
 
-        <div>
-          <label htmlFor="contact" className="block text-sm font-medium text-gray-700">
-            Contact
-          </label>
-          <select
-            id="contact"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
-            value={contactId}
-            onChange={(e) => setContactId(e.target.value)}
-          >
-            <option value="">Select a contact...</option>
-            {contactsData?.contacts?.map(contact => (
-              <option key={contact.id} value={contact.id}>{contact.name}</option>
-            ))}
-          </select>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-2">
+            <label htmlFor="contact" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Contato Principal
+            </label>
+            <select
+              id="contact"
+              className="form-input-premium appearance-none cursor-pointer"
+              value={contactId}
+              onChange={(e) => setContactId(e.target.value)}
+            >
+              <option value="">VINCULAR CONTATO...</option>
+              {contactsData?.contacts?.map(contact => (
+                <option key={contact.id} value={contact.id}>{contact.name?.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="company" className="block text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.25em] pl-1 italic">
+              Empresa Relacionada
+            </label>
+            <select
+              id="company"
+              className="form-input-premium appearance-none cursor-pointer"
+              value={companyId}
+              onChange={(e) => setCompanyId(e.target.value)}
+            >
+              <option value="">VINCULAR EMPRESA...</option>
+              {companiesData?.companies?.map(company => (
+                <option key={company.id} value={company.id}>{company.name?.toUpperCase()}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div>
-          <label htmlFor="company" className="block text-sm font-medium text-gray-700">
-            Company
-          </label>
-          <select
-            id="company"
-            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded focus:outline-none focus:ring-brand-500 focus:border-brand-500 bg-white"
-            value={companyId}
-            onChange={(e) => setCompanyId(e.target.value)}
-          >
-            <option value="">Select a company...</option>
-            {companiesData?.companies?.map(company => (
-              <option key={company.id} value={company.id}>{company.name}</option>
-            ))}
-          </select>
+        <div className="bg-zinc-50/50 dark:bg-zinc-900/50 p-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800/50">
+          <h4 className="text-[10px] font-black text-indigo-500 dark:text-indigo-400 uppercase tracking-[0.3em] mb-4 pl-1 italic">Campos Personalizados</h4>
+          <CustomFieldsRenderer
+            fields={workspaceData?.workspace?.customFieldDefinitions}
+            values={customFields}
+            onChange={handleCustomFieldChange}
+            area="sales"
+          />
         </div>
 
-        <CustomFieldsRenderer
-          fields={workspaceData?.workspace?.customFieldDefinitions}
-          values={customFields}
-          onChange={handleCustomFieldChange}
-          area="sales"
-        />
-
-        <div className="flex justify-end pt-4 border-t border-gray-100">
-          <Button
+        <div className="flex flex-col sm:flex-row gap-4 pt-10 border-t border-zinc-100 dark:border-zinc-800/80">
+          <button
             type="button"
-            className="mr-2 text-gray-600 bg-white border border-gray-300 hover:bg-gray-50"
+            className="flex-1 px-8 py-4 text-[11px] font-black text-zinc-500 dark:text-zinc-400 bg-white/50 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-700/50 hover:bg-white dark:hover:bg-zinc-800 rounded-2xl transition-all uppercase tracking-widest italic"
             onClick={toggle}
             disabled={isSubmitting}
           >
-            Cancel
-          </Button>
-          <Button
+            Cancelar Emissão
+          </button>
+          <button
             type="submit"
-            className="text-white bg-brand-600 hover:bg-brand-700"
+            className="flex-[2] px-10 py-4 text-[11px] font-black text-white premium-gradient rounded-2xl shadow-xl shadow-indigo-500/25 active:scale-95 transition-all uppercase tracking-widest italic disabled:opacity-50"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Creating...' : 'Create Deal'}
-          </Button>
+            {isSubmitting ? 'Gerando Negócio...' : 'Confirmar Novo Negócio'}
+          </button>
         </div>
       </form>
     </Modal>
