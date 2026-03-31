@@ -36,9 +36,10 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
   // 2. Check daily limit (uses integration.workspaceId if context.workspaceId not provided)
   const workspaceId = context?.workspaceId || integration.workspaceId;
   const userId = context?.userId || null;
+  let limitCheck = null;
 
   if (workspaceId) {
-    const limitCheck = await checkWhatsAppLimit(workspaceId);
+    limitCheck = await checkWhatsAppLimit(workspaceId);
     if (!limitCheck.allowed) {
       throw new Error(limitCheck.error || 'WhatsApp daily message limit reached');
     }
@@ -74,12 +75,20 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
 
   // 4. Record the usage event (fire-and-forget, never blocks the response)
   if (workspaceId) {
+    if (limitCheck?.usedExtra) {
+      // Deduct from extra messages balance
+      await prisma.workspace.update({
+        where: { id: workspaceId },
+        data: { extraWaMessages: { decrement: 1 } },
+      }).catch(err => console.error('[whatsapp] Failed to deduct extraWaMessages', err));
+    }
+
     recordWhatsAppUsage({
       workspaceId,
       userId,
       messageId: wamid,
       direction: 'OUTBOUND',
-      overageMode: false,
+      overageMode: limitCheck?.usedExtra || false,
     });
   }
 

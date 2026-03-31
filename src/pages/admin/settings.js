@@ -62,6 +62,17 @@ const CATALOG = [
     ],
   },
   {
+    title: 'Add-ons (Pacotes Extras)',
+    items: [
+      { key: 'ADDON_WA_ENABLED', category: 'FINOPS', label: 'Habilitar pacote de WhatsApp (true/false)', secret: false, public: false },
+      { key: 'ADDON_WA_PRICE', category: 'FINOPS', label: 'Preço WhatsApp (Ex: 49.90)', secret: false, public: false },
+      { key: 'ADDON_WA_QUANTITY', category: 'FINOPS', label: 'Créditos WhatsApp (Ex: 10000)', secret: false, public: false },
+      { key: 'ADDON_AI_ENABLED', category: 'FINOPS', label: 'Habilitar pacote de IA (true/false)', secret: false, public: false },
+      { key: 'ADDON_AI_PRICE', category: 'FINOPS', label: 'Preço IA (Ex: 29.90)', secret: false, public: false },
+      { key: 'ADDON_AI_QUANTITY', category: 'FINOPS', label: 'Créditos IA (Ex: 50000)', secret: false, public: false },
+    ],
+  },
+  {
     title: 'Email',
     items: [
       { key: 'EMAIL_FROM', category: 'EMAIL', label: 'Email From', secret: false },

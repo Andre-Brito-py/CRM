@@ -135,6 +135,11 @@ const menu = (workspaceId, options = {}) => {
           ownerOnly: true,
         },
         {
+          name: 'Uso e Franquia',
+          path: `/account/${workspaceId}/settings/usage`,
+          ownerOnly: true,
+        },
+        {
           name: 'settings.advanced',
           path: `/account/${workspaceId}/settings/advanced`,
           ownerOnly: true,

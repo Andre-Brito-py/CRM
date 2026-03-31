@@ -86,6 +86,8 @@ const handler = async (req, res) => {
             await handleSubscriptionCreated({ requestId, session });
           } else if (session.mode === 'setup') {
             await handleSetupCompleted({ requestId, session });
+          } else if (session.mode === 'payment' && session.metadata?.addonType) {
+            await handleAddonPurchased({ requestId, session });
           }
           break;
         case 'customer.subscription.created':
@@ -147,6 +149,33 @@ const shouldDowngradeFromStripeStatus = (status) => {
   const normalized = String(status || '').trim().toLowerCase();
   return ['canceled', 'unpaid', 'incomplete_expired'].includes(normalized);
 };
+
+async function handleAddonPurchased({ requestId, session }) {
+  const metadata = session.metadata;
+  if (!metadata || !metadata.workspaceId || !metadata.addonType || !metadata.addonQuantity) return;
+
+  const workspaceId = metadata.workspaceId;
+  const addonType = metadata.addonType;
+  const quantity = Number(metadata.addonQuantity);
+
+  try {
+    if (addonType === 'whatsapp') {
+      await prisma.workspace.update({
+        where: { id: workspaceId },
+        data: { extraWaMessages: { increment: quantity } },
+      });
+      log({ level: 'info', msg: 'stripe_addon_whatsapp_purchased', requestId, workspaceId, quantity });
+    } else if (addonType === 'ai') {
+      await prisma.workspace.update({
+        where: { id: workspaceId },
+        data: { extraAiTokens: { increment: quantity } },
+      });
+      log({ level: 'info', msg: 'stripe_addon_ai_purchased', requestId, workspaceId, quantity });
+    }
+  } catch (err) {
+    log({ level: 'error', msg: 'stripe_addon_purchase_failed', requestId, workspaceId, error: err.message });
+  }
+}
 
 async function handleSubscriptionCreated({ requestId, session }) {
   const customerId = session.customer;

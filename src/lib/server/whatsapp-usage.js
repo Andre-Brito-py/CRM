@@ -48,6 +48,11 @@ async function getOutboundCountLast24h(workspaceId) {
  *   - error: string | null (set if sending should be hard-blocked)
  */
 export async function checkWhatsAppLimit(workspaceId) {
+  const workspace = await prisma.workspace.findUnique({
+    where: { id: workspaceId },
+    select: { extraWaMessages: true },
+  });
+
   const features = await getWorkspacePlanFeatures(workspaceId);
 
   // If there's no plan or maxWhatsAppMessages24h is not set, allow freely.
@@ -55,23 +60,28 @@ export async function checkWhatsAppLimit(workspaceId) {
     ? Number(features.maxWhatsAppMessages24h)
     : null;
 
+  const extraWaMessages = workspace?.extraWaMessages || 0;
+
   if (!limit || limit <= 0) {
-    return { allowed: true, overageMode: false, currentCount: 0, limit: null, error: null };
+    return { allowed: true, overageMode: false, currentCount: 0, limit: null, error: null, usedExtra: false };
   }
 
   const currentCount = await getOutboundCountLast24h(workspaceId);
 
   if (currentCount < limit) {
-    return { allowed: true, overageMode: false, currentCount, limit, error: null };
+    return { allowed: true, overageMode: false, currentCount, limit, error: null, usedExtra: false };
   }
 
-  // Limit exceeded — for now we hard-block. Future: allow overages with billing.
+  if (extraWaMessages > 0) {
+    return { allowed: true, overageMode: true, currentCount, limit, error: null, usedExtra: true };
+  }
+
   return {
     allowed: false,
     overageMode: false,
     currentCount,
     limit,
-    error: `Daily WhatsApp message limit reached (${currentCount}/${limit}). Limit resets every 24 hours.`,
+    error: `Limite diário do plano atingido (${currentCount}/${limit}) e sem saldo extra de mensagens. Recarregue seu plano.`,
   };
 }
 
