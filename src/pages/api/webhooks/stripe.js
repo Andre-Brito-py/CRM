@@ -159,19 +159,14 @@ async function handleAddonPurchased({ requestId, session }) {
   const quantity = Number(metadata.addonQuantity);
 
   try {
-    if (addonType === 'whatsapp') {
-      await prisma.workspace.update({
-        where: { id: workspaceId },
-        data: { extraWaMessages: { increment: quantity } },
-      });
-      log({ level: 'info', msg: 'stripe_addon_whatsapp_purchased', requestId, workspaceId, quantity });
-    } else if (addonType === 'ai') {
+    if (addonType === 'ai') {
       await prisma.workspace.update({
         where: { id: workspaceId },
         data: { extraAiTokens: { increment: quantity } },
       });
       log({ level: 'info', msg: 'stripe_addon_ai_purchased', requestId, workspaceId, quantity });
     }
+
   } catch (err) {
     log({ level: 'error', msg: 'stripe_addon_purchase_failed', requestId, workspaceId, error: err.message });
   }

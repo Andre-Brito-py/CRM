@@ -107,74 +107,8 @@ const UsageAndAddons = ({ isTeamOwner, workspace }) => {
       <Content.Container>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
-          {/* WHATSAPP CARD */}
-          <div className="relative group">
-            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl" />
-            <div className="relative bg-white dark:bg-zinc-900 border border-emerald-100 dark:border-emerald-900/30 rounded-3xl shadow-xl shadow-emerald-900/5 p-8 overflow-hidden">
-              <div className="absolute top-0 right-0 p-6 opacity-5">
-                <ChatBubbleLeftRightIcon className="w-48 h-48 text-emerald-900" />
-              </div>
-              
-              <div className="relative z-10">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/30">
-                    <ChatBubbleLeftRightIcon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-zinc-900 dark:text-white font-executive">WhatsApp Outbound</h2>
-                    <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Limite Diário e Recarga</p>
-                  </div>
-                </div>
-
-                {isLoading ? (
-                  <div className="animate-pulse space-y-4">
-                    <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4"></div>
-                    <div className="h-2 bg-zinc-200 dark:bg-zinc-800 rounded w-full"></div>
-                  </div>
-                ) : (
-                  <>
-                    <ProgressBar 
-                      current={usageData?.whatsapp?.totalOutbound24h || 0} 
-                      max={usageData?.whatsapp?.limit || 0} 
-                      colorClass="bg-gradient-to-r from-emerald-400 to-teal-500"
-                    />
-
-                    <div className="mt-8 pt-8 border-t border-emerald-50 dark:border-emerald-900/20">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-bold text-zinc-800 dark:text-zinc-200">Saldo Extra Disponível</span>
-                        <span className="px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300 rounded-full text-xs font-bold tracking-wider">
-                          NÃO EXPIRA
-                        </span>
-                      </div>
-                      <div className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-emerald-600 to-teal-800 dark:from-emerald-400 dark:to-teal-200 font-executive">
-                        {(usageData?.workspace?.extraWaMessages || 0).toLocaleString('pt-BR')} <span className="text-lg font-bold text-emerald-500">msgs</span>
-                      </div>
-                      <p className="text-xs font-medium text-zinc-500 mt-2 leading-relaxed">
-                        Este saldo só é consumido quando você atinge o limite do seu plano diário, garantindo que suas automações nunca parem.
-                      </p>
-                    </div>
-
-                    {usageData?.addons?.whatsapp?.enabled && (
-                      <button
-                        onClick={() => buyAddon('whatsapp')}
-                        disabled={isBuying || !isTeamOwner}
-                        className="mt-8 w-full group/btn relative inline-flex items-center justify-center gap-2 px-8 py-4 overflow-hidden rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm tracking-wide transition-all active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
-                      >
-                        <BoltIcon className="w-5 h-5 text-emerald-400 group-hover/btn:animate-pulse" />
-                        <span>Adicionar {usageData.addons.whatsapp.quantity.toLocaleString('pt-BR')} mensagens</span>
-                        <span className="px-2 py-0.5 ml-2 rounded-lg bg-zinc-800 dark:bg-zinc-700 text-emerald-400 text-xs font-black">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(usageData.addons.whatsapp.price)}
-                        </span>
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* AI CARD */}
-          <div className="relative group">
+          <div className="relative group lg:col-span-2 max-w-2xl mx-auto w-full">
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-600 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl" />
             <div className="relative bg-white dark:bg-zinc-900 border border-violet-100 dark:border-violet-900/30 rounded-3xl shadow-xl shadow-violet-900/5 p-8 overflow-hidden pointer-events-none opacity-50 cursor-not-allowed">
               <div className="absolute top-0 right-0 p-6 opacity-5">

@@ -33,13 +33,15 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
     throw new Error('Missing WhatsApp credentials');
   }
 
-  // 2. Check daily limit (uses integration.workspaceId if context.workspaceId not provided)
+  // 2. Check daily limit (always allowed now, but we fetch metadata for logging)
   const workspaceId = context?.workspaceId || integration.workspaceId;
   const userId = context?.userId || null;
   let limitCheck = null;
 
   if (workspaceId) {
     limitCheck = await checkWhatsAppLimit(workspaceId);
+    // Even though it's always allowed, we keep the check call to maintain the flow 
+    // and potentially catch configuration errors in checkWhatsAppLimit.
     if (!limitCheck.allowed) {
       throw new Error(limitCheck.error || 'WhatsApp daily message limit reached');
     }
@@ -73,24 +75,17 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
 
   const wamid = data.messages?.[0]?.id || null;
 
-  // 4. Record the usage event (fire-and-forget, never blocks the response)
+  // 4. Record the usage event (fire-and-forget, for internal FinOps tracking)
   if (workspaceId) {
-    if (limitCheck?.usedExtra) {
-      // Deduct from extra messages balance
-      await prisma.workspace.update({
-        where: { id: workspaceId },
-        data: { extraWaMessages: { decrement: 1 } },
-      }).catch(err => console.error('[whatsapp] Failed to deduct extraWaMessages', err));
-    }
-
     recordWhatsAppUsage({
       workspaceId,
       userId,
       messageId: wamid,
       direction: 'OUTBOUND',
-      overageMode: limitCheck?.usedExtra || false,
+      overageMode: false, // Overage mode is no longer applicable for WA
     });
   }
+
 
   return wamid;
 };

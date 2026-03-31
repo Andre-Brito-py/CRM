@@ -66,7 +66,6 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     maxAiRequests24h: plan?.features?.maxAiRequests24h ?? 50,
     maxAiTokens24h: defaultAiTokens24h,
     maxUploads24h: plan?.features?.maxUploads24h ?? 30,
-    maxWhatsAppMessages24h: plan?.features?.maxWhatsAppMessages24h ?? 0,
     freeTrialDays: plan?.features?.freeTrialDays ?? 0,
     isActive: plan ? plan.isActive : true,
   };
@@ -170,7 +169,6 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         maxAiRequests24h: Number(formData.maxAiRequests24h) || 50,
         maxAiTokens24h: Number(formData.maxAiTokens24h) || 30000,
         maxUploads24h: Number(formData.maxUploads24h) || 30,
-        maxWhatsAppMessages24h: Number(formData.maxWhatsAppMessages24h) || 0,
         freeTrialDays: Number(formData.freeTrialDays) || 0,
         allowedModules,
       };
@@ -366,7 +364,6 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
               { name: 'maxAiRequests24h', label: 'Max IA Requests (24h)' },
               { name: 'maxAiTokens24h', label: 'Max IA Tokens (24h)' },
               { name: 'maxUploads24h', label: 'Max Uploads (24h)' },
-              { name: 'maxWhatsAppMessages24h', label: '📱 Max WhatsApp Msgs (24h) — 0 = ilimitado' },
             ].map(({ name, label }) => (
               <div key={name}>
                 <label className="block text-xs font-medium text-gray-600">{label}</label>

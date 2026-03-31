@@ -20,13 +20,6 @@ const handler = async (req, res) => {
     // WA Stats
     const waStats = await getWhatsAppUsageStats(workspace.id);
 
-    // Configs do Painel Admin (Boolean cast handling)
-    const isWaEnabledStr = await getSystemConfig('ADDON_WA_ENABLED', 'true');
-    const isWaEnabled = typeof isWaEnabledStr === 'boolean' ? isWaEnabledStr : String(isWaEnabledStr).trim().toLowerCase() !== 'false';
-
-    const waPrice = await getSystemConfig('ADDON_WA_PRICE', 49.90);
-    const waQuantity = await getSystemConfig('ADDON_WA_QUANTITY', 10000);
-
     const isAiEnabledStr = await getSystemConfig('ADDON_AI_ENABLED', 'true');
     const isAiEnabled = typeof isAiEnabledStr === 'boolean' ? isAiEnabledStr : String(isAiEnabledStr).trim().toLowerCase() !== 'false';
 
@@ -43,11 +36,6 @@ const handler = async (req, res) => {
           ...waStats,
         },
         addons: {
-          whatsapp: {
-            enabled: isWaEnabled,
-            price: Number(waPrice),
-            quantity: Number(waQuantity),
-          },
           ai: {
             enabled: isAiEnabled,
             price: Number(aiPrice),
@@ -56,6 +44,7 @@ const handler = async (req, res) => {
         }
       }
     });
+
 
   } catch (error) {
     console.error('[usage-status] Error:', error);

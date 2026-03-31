@@ -36,19 +36,7 @@ const handler = async (req, res) => {
     let quantity = 0;
     let name = '';
     
-    if (addonType === 'whatsapp') {
-      const enabled = await getSystemConfig('ADDON_WA_ENABLED', 'true');
-      if (typeof enabled === 'boolean' ? !enabled : String(enabled).trim().toLowerCase() === 'false') {
-        return res.status(400).json({ error: { msg: 'Pacote de WhatsApp não está disponível no momento' } });
-      }
-      
-      const configPrice = await getSystemConfig('ADDON_WA_PRICE', 49.90);
-      const configQty = await getSystemConfig('ADDON_WA_QUANTITY', 10000);
-      
-      quantity = Number(configQty) || 10000;
-      price = Math.round(Number(configPrice) * 100);
-      name = `Pacote Extra - ${quantity.toLocaleString('pt-BR')} Mensagens WhatsApp`;
-    } else if (addonType === 'ai') {
+    if (addonType === 'ai') {
       const enabled = await getSystemConfig('ADDON_AI_ENABLED', 'true');
       if (typeof enabled === 'boolean' ? !enabled : String(enabled).trim().toLowerCase() === 'false') {
         return res.status(400).json({ error: { msg: 'Pacote de IA não está disponível no momento' } });
@@ -61,8 +49,9 @@ const handler = async (req, res) => {
       price = Math.round(Number(configPrice) * 100);
       name = `Pacote Extra - ${quantity.toLocaleString('pt-BR')} Tokens IA`;
     } else {
-      return res.status(400).json({ error: { msg: 'Tipo de Addon inválido. Valores permitidos: whatsapp, ai' } });
+      return res.status(400).json({ error: { msg: 'Tipo de Addon inválido. Valores permitidos: ai' } });
     }
+
 
     const paymentSession = await stripe.checkout.sessions.create({
       customer: customerPayment.paymentId,
