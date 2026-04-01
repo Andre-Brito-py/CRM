@@ -36,6 +36,37 @@ export default async function handler(req, res) {
     });
 
     if (!integration || !integration.enabled || !integration.credentials?.accessToken) {
+      if (workspaceSlug === 'acme-corp-premium') {
+        return res.status(200).json({
+          data: {
+            summary: {
+              spend: 12450.60,
+              impressions: 485000,
+              clicks: 12400,
+              leads: 842,
+              cpl: 14.78,
+              roas: 4.2,
+            },
+            trend: [
+              { date: '2026-03-01', value: 450 },
+              { date: '2026-03-05', value: 890 },
+              { date: '2026-03-10', value: 1200 },
+              { date: '2026-03-15', value: 1100 },
+              { date: '2026-03-20', value: 2500 },
+              { date: '2026-03-25', value: 3800 },
+              { date: '2026-03-31', value: 3510.60 },
+            ],
+            campaigns: [
+              { id: 'mock-1', name: 'Lead Gen - Brasil - Top Performers', status: 'ACTIVE', spend: 4500, leads: 320, cpl: 14.06, ctr: 2.8, channel: ['facebook', 'instagram'], adAccountName: 'Acme Premium Ads' },
+              { id: 'mock-2', name: 'Retargeting - Abandono de Carrinho', status: 'ACTIVE', spend: 2800.50, leads: 154, cpl: 18.18, ctr: 4.2, channel: ['instagram'], adAccountName: 'Acme Premium Ads' },
+              { id: 'mock-3', name: 'Brand Awareness - Q1 2026', status: 'PAUSED', spend: 5150.10, leads: 368, cpl: 13.99, ctr: 1.5, channel: ['facebook'], adAccountName: 'Acme Premium Ads' },
+            ],
+            isConnected: true,
+            isDemo: true,
+          },
+        });
+      }
+
       return res.status(200).json({
         data: {
           summary: { spend: 0, impressions: 0, clicks: 0, leads: 0, cpl: 0, roas: 0 },

@@ -1,16 +1,17 @@
 import React, { useMemo, useCallback } from 'react';
 import { AreaClosed, LinePath, Bar } from '@visx/shape';
-import { scaleTime, scaleLinear, scaleBand } from '@visx/scale';
+import { scaleTime, scaleLinear } from '@visx/scale';
 import { curveMonotoneX } from '@visx/curve';
 import { GridRows, GridColumns } from '@visx/grid';
 import { AxisBottom, AxisLeft } from '@visx/axis';
-import { withTooltip, Tooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
+import { withTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import { localPoint } from '@visx/event';
 import { LinearGradient } from '@visx/gradient';
 import { max, extent, bisector } from 'd3-array';
 import { timeFormat } from 'd3-time-format';
 import { motion } from 'framer-motion';
 import ParentSize from '@visx/responsive/lib/components/ParentSize';
+import { Group } from '@visx/group';
 
 const tooltipStyles = {
   ...defaultStyles,
@@ -54,9 +55,9 @@ const GlowingAreaChartBase = ({
   color = '#8b5cf6', // Violet 500
   secondaryColor = '#6366f1', // Indigo 500
   showGrid = true,
-  showTooltip = true,
+  enableTooltip = true, // Renamed from showTooltip to avoid shadowing HOC's showTooltip
   hideTooltip,
-  showTooltipData,
+  showTooltip, // Corrected from showTooltipData
   tooltipData,
   tooltipTop = 0,
   tooltipLeft = 0,
@@ -94,6 +95,7 @@ const GlowingAreaChartBase = ({
   
   const handleTooltip = useCallback(
     (event) => {
+      if (!data || data.length === 0 || !showTooltip) return;
       const { x } = localPoint(event) || { x: 0 };
       const xValue = xScale.invert(x - margin.left);
       const index = bisectDate(data, xValue, 1);
@@ -103,20 +105,20 @@ const GlowingAreaChartBase = ({
       if (d1 && getX(d1)) {
         d = xValue.valueOf() - getX(d0).valueOf() > getX(d1).valueOf() - xValue.valueOf() ? d1 : d0;
       }
-      showTooltipData({
+      showTooltip({
         tooltipData: { date: getX(d), value: getY(d) },
         tooltipLeft: x,
         tooltipTop: yScale(getY(d)) + margin.top,
       });
     },
-    [showTooltipData, yScale, xScale, data, margin.top, margin.left, getX, getY, bisectDate]
+    [showTooltip, yScale, xScale, data, margin.top, margin.left, getX, getY, bisectDate]
   );
 
   if (width < 10) return null;
 
   return (
-    <div style={{ position: 'relative' }}>
-      <svg width={width} height={height}>
+    <div style={{ position: 'relative', width, height }}>
+      <svg width={width} height={height} style={{ overflow: 'visible', display: 'block' }}>
         {/* Glow Filters */}
         <defs>
           <linearGradient id="area-gradient" x1="0" y1="0" x2="0" y2="1">
@@ -210,7 +212,7 @@ const GlowingAreaChartBase = ({
           </LinePath>
 
           {/* Hover / Tooltip Interaction Area */}
-          {showTooltip && (
+          {enableTooltip && (
             <Bar
               x={0}
               y={0}
@@ -226,7 +228,7 @@ const GlowingAreaChartBase = ({
           )}
 
           {/* Tooltip Indicator Crosshairs */}
-          {tooltipData && showTooltip && (
+          {tooltipData && enableTooltip && (
             <g>
               <line
                 x1={tooltipLeft - margin.left}
@@ -253,7 +255,7 @@ const GlowingAreaChartBase = ({
         </Group>
       </svg>
 
-      {tooltipData && showTooltip && (
+      {tooltipData && enableTooltip && (
         <TooltipWithBounds
           top={tooltipTop - 12}
           left={tooltipLeft + 12}
@@ -266,7 +268,6 @@ const GlowingAreaChartBase = ({
   );
 };
 
-import { Group } from '@visx/group';
 const GlowingAreaChartWithTooltip = withTooltip(GlowingAreaChartBase);
 
 // Export Responsive Wrapper
@@ -275,7 +276,7 @@ export default function GlowingAreaChart(props) {
   if (!props.data || props.data.length === 0) return <div className="w-full h-full flex items-center justify-center text-zinc-500 text-xs">Sem dados no período</div>;
   
   return (
-    <div className="w-full h-full" style={{ minHeight: 250 }}>
+    <div className="w-full h-full" style={{ minHeight: 250, minWidth: 0 }}>
       <ParentSize>
         {({ width, height }) => (
           <GlowingAreaChartWithTooltip width={width} height={height} {...props} />

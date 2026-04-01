@@ -273,16 +273,26 @@ const handler = async (req, res) => {
 
     // ── 3. Process deals chart in JS (already fetched) ─────────────────
     const salesByMonth = {};
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthLabel = d.toLocaleString('default', { month: 'short' });
+      // Use the first day of the month for the date field to satisfy scaleTime
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+      salesByMonth[monthLabel] = { name: monthLabel, date: dateStr, value: 0 };
+    }
+
     dealsLast6Months.forEach((deal) => {
-      const month = deal.createdAt.toLocaleString('default', { month: 'short' });
-      if (!salesByMonth[month]) {
-        salesByMonth[month] = { name: month, value: 0 };
-      }
-      const stageName = (deal.stage?.name || '').toLowerCase();
-      if (stageName === 'fechado' || stageName === 'closed' || stageName === 'won') {
-        salesByMonth[month].value += Number(deal.amount) || 0;
+      const monthLabel = deal.createdAt.toLocaleString('default', { month: 'short' });
+      if (salesByMonth[monthLabel]) {
+        const stageName = (deal.stage?.name || '').toLowerCase();
+        if (stageName === 'fechado' || stageName === 'closed' || stageName === 'won') {
+          salesByMonth[monthLabel].value += Number(deal.amount) || 0;
+        }
       }
     });
+
+    const salesData = Object.values(salesByMonth);
 
     const aiRequests24h = Number(aiRequestsAgg?._sum?.count) || 0;
     const uploadRequests24h = Number(uploadRequestsAgg?._sum?.count) || 0;
@@ -339,7 +349,7 @@ const handler = async (req, res) => {
         : null,
       nps: npsAnalytics || null,
       recentActivities,
-      salesData: isOwner ? Object.values(salesByMonth) : [],
+      salesData: isOwner ? salesData : [],
       upcomingTasks,
     });
   } catch (error) {

@@ -76,22 +76,34 @@ async function main() {
   // 2. Criar Contatos e Negócios Fakes (Deals) para gráficos bonitos
   const stages = pipeline.stages || await prisma.stage.findMany({ where: { pipelineId: pipeline.id }, orderBy: { order: 'asc' } });
   
-  const dealNames = [
-    { n: 'Projeto Oracle Migration', amt: 45000, c: 'John Doe', stage: stages[4].id }, // Ganho
-    { n: 'Licença Anual TechCorp', amt: 12500, c: 'Maria Silva', stage: stages[3].id }, // Proposta
-    { n: 'Consultoria UX/UI Banco', amt: 89000, c: 'Carlos Ruiz', stage: stages[2].id }, // Reunião
-    { n: 'Plano Enterprise CRM', amt: 3500, c: 'Anna Souza', stage: stages[4].id }, // Ganho
-    { n: 'Setup Infra AWS', amt: 62000, c: 'Robert King', stage: stages[1].id }, // Qualificado
-    { n: 'Mentoria Executiva', amt: 5000, c: 'Lucia Ferraz', stage: stages[4].id } // Ganho
+  const wonStageId = stages.find(s => s.name === 'Fechado/Ganho' || s.name === 'Won')?.id || stages[stages.length - 1].id;
+  const proposalStageId = stages.find(s => s.name === 'Proposta Enviada')?.id || stages[3].id;
+  const meetingStageId = stages.find(s => s.name === 'Reunião Agendada')?.id || stages[2].id;
+
+  console.log('📈 Gerando histórico de 6 meses para o gráfico de receita...');
+  
+  const historicalDeals = [
+    { name: 'Contrato Alpha', amount: 12500, monthsAgo: 5 },
+    { name: 'Licença Beta', amount: 8000, monthsAgo: 5 },
+    { name: 'Consultoria Gamma', amount: 15400, monthsAgo: 4 },
+    { name: 'Setup Delta', amount: 9200, monthsAgo: 4 },
+    { name: 'Retainer Epsilon', amount: 22000, monthsAgo: 3 },
+    { name: 'Projeto Zeta', amount: 18500, monthsAgo: 2 },
+    { name: 'Hardware Eta', amount: 31000, monthsAgo: 1 },
+    { name: 'Software Theta', amount: 45000, monthsAgo: 0 },
+    { name: 'Consulting Iota', amount: 12000, monthsAgo: 0 },
   ];
 
-  for (const d of dealNames) {
+  for (const hd of historicalDeals) {
+    const date = new Date();
+    date.setMonth(date.getMonth() - hd.monthsAgo);
+    
     const contact = await prisma.contact.create({
       data: {
         workspaceId: workspace.id,
-        name: d.c,
-        email: `${d.c.replace(' ', '').toLowerCase()}@exemplo.com`,
-        phone: '+5511999999999',
+        name: `Cliente ${hd.name.split(' ')[1]}`,
+        email: `${hd.name.toLowerCase().replace(' ', '_')}@democorp.com`,
+        createdAt: date
       }
     });
 
@@ -99,18 +111,65 @@ async function main() {
       data: {
         workspaceId: workspace.id,
         contactId: contact.id,
-        stageId: d.stage,
-        name: d.n,
-        amount: d.amt,
-        priority: d.amt > 20000 ? 'HIGH' : 'MEDIUM',
-        assigneeId: user.id
+        stageId: wonStageId,
+        name: hd.name,
+        amount: hd.amount,
+        priority: hd.amount > 20000 ? 'HIGH' : 'MEDIUM',
+        assigneeId: user.id,
+        createdAt: date
+      }
+    });
+
+    // Criar atividade para o feed
+    await prisma.activity.create({
+      data: {
+        workspaceId: workspace.id,
+        userId: user.id,
+        dealId: (await prisma.deal.findFirst({ where: { name: hd.name }, select: { id: true } })).id,
+        type: 'DEAL_CREATED',
+        title: `Protocolo ${hd.name} finalizado com sucesso`,
+        createdAt: date
       }
     });
   }
-  console.log(`✅ ${dealNames.length} Negócios importados pro Dashboard.`);
 
-  // 3. Criar Conversões Simuladas (WhatsApp)
-  const contacts = await prisma.contact.findMany({ where: { workspaceId: workspace.id } });
+  // 3. Criar Pesquisa NPS e Respostas
+  console.log('😊 Gerando dados de satisfação (NPS)...');
+  let survey = await prisma.npsSurvey.findFirst({ where: { workspaceId: workspace.id } });
+  if (!survey) {
+    survey = await prisma.npsSurvey.create({
+      data: {
+        workspaceId: workspace.id,
+        name: 'Pesquisa de Satisfação Q1',
+        triggerType: 'manual'
+      }
+    });
+  }
+
+  const npsScores = [10, 10, 9, 9, 8, 8, 7, 6, 10, 9, 8, 10, 4, 10];
+  for (const score of npsScores) {
+    const contact = await prisma.contact.create({
+      data: {
+        workspaceId: workspace.id,
+        name: `Feedbacker ${Math.floor(Math.random() * 1000)}`,
+        email: `feedback_${Math.random().toString(36).substring(7)}@test.com`,
+      }
+    });
+
+    await prisma.npsResponse.create({
+      data: {
+        workspaceId: workspace.id,
+        surveyId: survey.id,
+        contactId: contact.id,
+        score,
+        classification: score >= 9 ? 'promoter' : score >= 7 ? 'passive' : 'detractor',
+        feedbackText: score > 8 ? 'Excelente serviço!' : score < 6 ? 'Pode melhorar a agilidade.' : 'Bom atendimento.'
+      }
+    });
+  }
+
+  // 4. Criar Conversões Simuladas (WhatsApp)
+  const contacts = await prisma.contact.findMany({ where: { workspaceId: workspace.id }, take: 5 });
   for (const c of contacts) {
     const conv = await prisma.conversation.create({
       data: {
@@ -131,18 +190,26 @@ async function main() {
   }
   console.log(`✅ Conversas do WhatsApp simuladas.`);
 
-  // 4. Rate Limits Fake (Para simular gráficos de consumo de IA e API)
-  await prisma.rateLimitCounter.create({
-    data: {
-      key: `w:${workspace.id}:ai:summarize:day`,
-      count: 450,
-      resetAt: new Date(Date.now() + 86400000)
-    }
+  // 5. Rate Limits Fake (Para simular gráficos de consumo de IA e API)
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  await prisma.rateLimitCounter.upsert({
+    where: { key: `w:${workspace.id}:ai:summarize:day` },
+    update: { count: 342, resetAt: tomorrow },
+    create: { key: `w:${workspace.id}:ai:summarize:day`, count: 342, resetAt: tomorrow }
+  });
+
+  await prisma.rateLimitCounter.upsert({
+    where: { key: `w:${workspace.id}:upload:file:day` },
+    update: { count: 85, resetAt: tomorrow },
+    create: { key: `w:${workspace.id}:upload:file:day`, count: 85, resetAt: tomorrow }
   });
 
   console.log('🎉 Dados Premium gerados com sucesso!');
   console.log(`➡️ Email: ${userEmail}`);
   console.log(`➡️ Senha: SenhaForte123!`);
+  console.log(`➡️ Workspace: ${workspaceSlug}`);
 }
 
 main()

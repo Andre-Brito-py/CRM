@@ -393,7 +393,7 @@ const Workspace = () => {
                   {dashboardData?.salesData?.length > 0 ? (
                     <GlowingAreaChart
                        data={dashboardData.salesData}
-                       xKey="name"
+                       xKey="date"
                        yKey="value"
                        color="#6366f1"
                        formatYAxis={(val) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(val)}

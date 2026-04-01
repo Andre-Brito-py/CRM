@@ -88,8 +88,8 @@ const NeonBarChartBase = ({
   if (width < 10) return null;
 
   return (
-    <div style={{ position: 'relative' }}>
-      <svg width={width} height={height}>
+    <div style={{ position: 'relative', width, height }}>
+      <svg width={width} height={height} style={{ overflow: 'visible', display: 'block' }}>
         <defs>
           <filter id="neon-glow-bar" x="-20%" y="-20%" width="140%" height="140%">
             <feGaussianBlur stdDeviation="6" result="blur" />
@@ -200,7 +200,7 @@ export default function NeonBarChart(props) {
   if (!props.data || props.data.length === 0) return <div className="w-full h-full flex items-center justify-center text-zinc-500 text-xs">Sem dados no período</div>;
   
   return (
-    <div className="w-full h-full" style={{ minHeight: 250 }}>
+    <div className="w-full h-full" style={{ minHeight: 0 }}>
       <ParentSize>
         {({ width, height }) => (
           <NeonBarChartWithTooltip width={width} height={height} {...props} />

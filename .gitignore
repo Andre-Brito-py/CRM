@@ -40,3 +40,5 @@ yarn-error.log*
 /implementation_plan.md
 /manutencao
 /backups/
+/scripts/seed-preview.js
+
