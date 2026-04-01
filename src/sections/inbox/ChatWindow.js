@@ -68,6 +68,7 @@ const ChatWindow = ({
   isTogglingAutopilot = false,
   onBack
 }) => {
+  const { t } = useTranslation();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [replyingTo, setReplyingTo] = useState(null);
   const [newTemplateName, setNewTemplateName] = useState('');
