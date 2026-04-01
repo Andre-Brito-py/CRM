@@ -10,7 +10,7 @@ import {
   Footer,
   Stats,
   AppShowcase
-} from '@/sections';
+} from '@/sections/index';
 import Meta from '@/components/Meta';
 import { getAllPlans } from '@/prisma/services/plan';
 import prisma from '@/prisma/index';
