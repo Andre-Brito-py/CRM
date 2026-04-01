@@ -45,12 +45,17 @@ const createReqRes = ({ method = 'POST', headers = {}, body = {} } = {}) => {
   const res = {
     statusCode: 200,
     body: null,
+    headers: {},
     status(code) {
       this.statusCode = code;
       return this;
     },
     json(payload) {
       this.body = payload;
+      return this;
+    },
+    setHeader(key, value) {
+      this.headers[key] = value;
       return this;
     },
   };
@@ -60,7 +65,7 @@ const createReqRes = ({ method = 'POST', headers = {}, body = {} } = {}) => {
 describe('Password reset endpoints', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    rateLimit.mockResolvedValue({ ok: true });
+    rateLimit.mockResolvedValue({ ok: true, remaining: 10, resetAt: new Date().toISOString() });
     getSystemConfig.mockResolvedValue('https://app.vysify.com');
   });
 

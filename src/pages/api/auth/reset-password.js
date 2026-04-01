@@ -4,6 +4,7 @@ import isEmail from 'validator/lib/isEmail';
 
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
+import { rateLimit } from '@/lib/server/rateLimit';
 import { withRateLimit } from '@/lib/server/api-wrapper';
 
 export const config = {

@@ -57,12 +57,17 @@ const createReqRes = ({ method = 'POST', query = {}, headers = {}, body = {} } =
   const res = {
     statusCode: 200,
     body: null,
+    headers: {},
     status(code) {
       this.statusCode = code;
       return this;
     },
     json(payload) {
       this.body = payload;
+      return this;
+    },
+    setHeader(key, value) {
+      this.headers[key] = value;
       return this;
     },
   };
@@ -72,7 +77,7 @@ const createReqRes = ({ method = 'POST', query = {}, headers = {}, body = {} } =
 describe('AI Inbox endpoints', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    rateLimit.mockResolvedValue({ ok: true });
+    rateLimit.mockResolvedValue({ ok: true, remaining: 10, resetAt: new Date().toISOString() });
     getWorkspaceLimits.mockResolvedValue({ aiRequests24h: 15 });
     isModuleAllowed.mockResolvedValue(true);
     validateSession.mockResolvedValue({
@@ -185,11 +190,12 @@ describe('AI Inbox endpoints', () => {
 
       rateLimit.mockImplementation(async ({ key }) => {
         const k = String(key || '');
-        if (k.includes('ai:suggest-reply:5m')) return { ok: true };
-        if (k.includes('ai:suggest-reply:day')) return { ok: true };
-        if (k.includes('ai:tokens_overage:day')) return { ok: true, remaining: 199000, resetAt: new Date().toISOString() };
-        if (k.includes('ai:tokens:day')) return { ok: false, remaining: 0, resetAt: new Date().toISOString() };
-        return { ok: true };
+        const resetAt = new Date().toISOString();
+        if (k.includes('ai:suggest-reply:5m')) return { ok: true, remaining: 5, resetAt };
+        if (k.includes('ai:suggest-reply:day')) return { ok: true, remaining: 15, resetAt };
+        if (k.includes('ai:tokens_overage:day')) return { ok: true, remaining: 199000, resetAt };
+        if (k.includes('ai:tokens:day')) return { ok: false, remaining: 0, resetAt };
+        return { ok: true, remaining: 1, resetAt };
       });
 
       prisma.user.findUnique.mockResolvedValue({

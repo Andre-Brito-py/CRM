@@ -55,17 +55,22 @@ import messagesHandler from '@/pages/api/workspace/[workspaceSlug]/internal-chat
 import bridgesHandler from '@/pages/api/workspace/[workspaceSlug]/internal-chat/bridges/index';
 import bridgeHandler from '@/pages/api/workspace/[workspaceSlug]/internal-chat/bridges/[bridgeId]';
 
-const createReqRes = ({ method = 'GET', query = {}, body = {} } = {}) => {
-  const req = { method, query, body, headers: {} };
+const createReqRes = ({ method = 'GET', query = {}, body = {}, headers = {} } = {}) => {
+  const req = { method, query, body, headers };
   const res = {
     statusCode: 200,
     body: null,
+    headers: {},
     status(code) {
       this.statusCode = code;
       return this;
     },
     json(payload) {
       this.body = payload;
+      return this;
+    },
+    setHeader(key, value) {
+      this.headers[key] = value;
       return this;
     },
   };
