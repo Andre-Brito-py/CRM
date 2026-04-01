@@ -46,6 +46,25 @@ export default async function handler(req, res) {
 
     try {
       const isFreePlan = Boolean(features?.isFreePlan);
+      const isHighlighted = Boolean(features?.isHighlighted);
+
+      // If this new plan is highlighted, unhighlight others
+      if (isHighlighted) {
+        const otherHighlighted = await prisma.plan.findMany({
+          where: {
+            features: { path: ['isHighlighted'], equals: true }
+          }
+        });
+
+        for (const other of otherHighlighted) {
+          const updatedFeatures = { ...(other.features || {}), isHighlighted: false };
+          await prisma.plan.update({
+            where: { id: other.id },
+            data: { features: updatedFeatures }
+          });
+        }
+      }
+
       const desiredType = normalizePlanType(slug);
       const finalPrices = [];
 

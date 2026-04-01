@@ -67,6 +67,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
     maxAiTokens24h: defaultAiTokens24h,
     maxUploads24h: plan?.features?.maxUploads24h ?? 30,
     freeTrialDays: plan?.features?.freeTrialDays ?? 0,
+    isHighlighted: Boolean(plan?.features?.isHighlighted),
     isActive: plan ? plan.isActive : true,
   };
 
@@ -170,6 +171,7 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
         maxAiTokens24h: Number(formData.maxAiTokens24h) || 30000,
         maxUploads24h: Number(formData.maxUploads24h) || 30,
         freeTrialDays: Number(formData.freeTrialDays) || 0,
+        isHighlighted: Boolean(formData.isHighlighted),
         allowedModules,
       };
 
@@ -344,10 +346,20 @@ const PlanModal = ({ show, toggle, plan, onSave }) => {
                 disabled={Boolean(formData.isFreePlan)}
                 className="block w-full rounded-md border-amber-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 sm:text-sm border p-2 text-amber-700 font-bold bg-amber-50 disabled:opacity-60 disabled:cursor-not-allowed" />
             </div>
-            <div className="flex items-center pt-6">
-              <input id="isActiveCheck" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleChange}
-                className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded" />
-              <label htmlFor="isActiveCheck" className="ml-2 block text-sm text-gray-900 font-medium">Active</label>
+            <div className="flex items-center pt-6 gap-6">
+              <div className="flex items-center h-5">
+                <input id="isActiveCheck" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleChange}
+                  className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded" />
+                <label htmlFor="isActiveCheck" className="ml-2 block text-sm text-gray-900 font-medium whitespace-nowrap">Active</label>
+              </div>
+              <div className="flex items-center h-5">
+                <input id="isHighlightedCheck" name="isHighlighted" type="checkbox" checked={formData.isHighlighted} onChange={handleChange}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded shadow-sm" />
+                <label htmlFor="isHighlightedCheck" className="ml-2 block text-sm text-indigo-700 font-bold italic flex items-center gap-1 whitespace-nowrap">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  Destacar na Landing Page
+                </label>
+              </div>
             </div>
           </div>
         </div>

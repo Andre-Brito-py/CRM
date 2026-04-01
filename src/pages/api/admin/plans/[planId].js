@@ -39,6 +39,26 @@ export default async function handler(req, res) {
         return;
       }
 
+      const isHighlighted = Boolean(features?.isHighlighted);
+
+      // If this plan is being highlighted, unhighlight all others
+      if (isHighlighted) {
+        const otherHighlighted = await prisma.plan.findMany({
+          where: {
+            id: { not: planId },
+             features: { path: ['isHighlighted'], equals: true }
+          }
+        });
+
+        for (const other of otherHighlighted) {
+          const updatedFeatures = { ...(other.features || {}), isHighlighted: false };
+          await prisma.plan.update({
+            where: { id: other.id },
+            data: { features: updatedFeatures }
+          });
+        }
+      }
+
       const isFreePlan = Boolean(features?.isFreePlan);
       const desiredType = normalizePlanType(slug);
       const finalPrices = [];
