@@ -57,16 +57,14 @@ const NeonBarChartBase = ({
   formatYAxis,
   formatTooltipValue,
 }) => {
-  if (width < 10) return null;
-
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  const innerWidth = Math.max(0, width - margin.left - margin.right);
+  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
   // Accessors
-  const getX = (d) => String(d[xKey] || '');
-  const getY = (d) => Number(d[yKey] || 0);
+  const getX = useCallback((d) => String(d[xKey] || ''), [xKey]);
+  const getY = useCallback((d) => Number(d[yKey] || 0), [yKey]);
 
-  // Scales
+  // Scales with complete dependencies
   const xScale = useMemo(
     () =>
       scaleBand({
@@ -74,7 +72,7 @@ const NeonBarChartBase = ({
         domain: data.map(getX),
         padding: 0.4,
       }),
-    [innerWidth, data, xKey]
+    [innerWidth, data, getX]
   );
 
   const yScale = useMemo(
@@ -84,8 +82,10 @@ const NeonBarChartBase = ({
         domain: [0, (max(data, getY) || 0) * 1.2],
         nice: true,
       }),
-    [innerHeight, data, yKey]
+    [innerHeight, data, getY]
   );
+
+  if (width < 10) return null;
 
   return (
     <div style={{ position: 'relative' }}>

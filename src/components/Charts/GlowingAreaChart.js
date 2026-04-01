@@ -63,14 +63,12 @@ const GlowingAreaChartBase = ({
   formatYAxis,
   formatTooltipValue,
 }) => {
-  if (width < 10) return null;
-
-  const innerWidth = width - margin.left - margin.right;
-  const innerHeight = height - margin.top - margin.bottom;
+  const innerWidth = Math.max(0, width - margin.left - margin.right);
+  const innerHeight = Math.max(0, height - margin.top - margin.bottom);
 
   // Accessors
-  const getX = (d) => new Date(d[xKey]);
-  const getY = (d) => Number(d[yKey]);
+  const getX = useCallback((d) => new Date(d[xKey]), [xKey]);
+  const getY = useCallback((d) => Number(d[yKey]), [yKey]);
 
   // Scales
   const xScale = useMemo(
@@ -79,30 +77,31 @@ const GlowingAreaChartBase = ({
         range: [0, innerWidth],
         domain: extent(data, getX),
       }),
-    [innerWidth, data, xKey]
+    [innerWidth, data, getX]
   );
   const yScale = useMemo(
     () =>
       scaleLinear({
         range: [innerHeight, 0],
-        domain: [0, (max(data, getY) || 0) * 1.2], // 20% pading no topo
+        domain: [0, (max(data, getY) || 0) * 1.2], // 20% padding at top
         nice: true,
       }),
-    [innerHeight, data, yKey]
+    [innerHeight, data, getY]
   );
 
   // Tooltip handler
-  const bisectDate = bisector(getX).left;
+  const bisectDate = useMemo(() => bisector(getX).left, [getX]);
+  
   const handleTooltip = useCallback(
     (event) => {
       const { x } = localPoint(event) || { x: 0 };
-      const x0 = xScale.invert(x - margin.left);
-      const index = bisectDate(data, x0, 1);
+      const xValue = xScale.invert(x - margin.left);
+      const index = bisectDate(data, xValue, 1);
       const d0 = data[index - 1];
       const d1 = data[index];
       let d = d0;
       if (d1 && getX(d1)) {
-        d = x0.valueOf() - getX(d0).valueOf() > getX(d1).valueOf() - x0.valueOf() ? d1 : d0;
+        d = xValue.valueOf() - getX(d0).valueOf() > getX(d1).valueOf() - xValue.valueOf() ? d1 : d0;
       }
       showTooltipData({
         tooltipData: { date: getX(d), value: getY(d) },
@@ -110,8 +109,10 @@ const GlowingAreaChartBase = ({
         tooltipTop: yScale(getY(d)) + margin.top,
       });
     },
-    [showTooltipData, yScale, xScale, data, margin.top, margin.left]
+    [showTooltipData, yScale, xScale, data, margin.top, margin.left, getX, getY, bisectDate]
   );
+
+  if (width < 10) return null;
 
   return (
     <div style={{ position: 'relative' }}>
