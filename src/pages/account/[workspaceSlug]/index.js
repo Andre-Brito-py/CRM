@@ -11,19 +11,8 @@ import {
   ClockIcon,
   FaceSmileIcon,
 } from '@heroicons/react/24/outline';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-} from 'recharts';
+import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
+import NeonBarChart from '@/components/Charts/NeonBarChart';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -165,22 +154,7 @@ const UpcomingTasks = ({ tasks }) => {
   );
 };
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="vysify-glass p-4 rounded-2xl shadow-3xl">
-        <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-1.5 border-b border-zinc-100 dark:border-zinc-800 pb-1">{label}</p>
-        <p className="text-xl font-black text-indigo-600 dark:text-indigo-400 italic">
-          {new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-          }).format(payload[0].value)}
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
+
 
 const Workspace = () => {
   const { t } = useTranslation();
@@ -417,38 +391,14 @@ const Workspace = () => {
 
                 <div className="h-[350px] w-full mt-4">
                   {dashboardData?.salesData?.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={dashboardData.salesData}>
-                        <defs>
-                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.05} />
-                        <XAxis
-                          dataKey="name"
-                          axisLine={false}
-                          tickLine={false}
-                          tick={{ fill: '#71717a', fontSize: 9, fontWeight: 900 }}
-                          dy={15}
-                        />
-                        <YAxis
-                          hide
-                          domain={[0, 'auto']}
-                        />
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '5 5' }} />
-                        <Area
-                          type="monotone"
-                          dataKey="value"
-                          stroke="#6366f1"
-                          strokeWidth={5}
-                          fillOpacity={1}
-                          fill="url(#colorRevenue)"
-                          animationDuration={2500}
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                    <GlowingAreaChart
+                       data={dashboardData.salesData}
+                       xKey="name"
+                       yKey="value"
+                       color="#6366f1"
+                       formatYAxis={(val) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(val)}
+                       formatTooltipValue={(val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)}
+                    />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2.5rem]">
                       <ChartBarIcon className="w-12 h-12 text-zinc-200 dark:text-zinc-800 mb-6" />
@@ -488,32 +438,13 @@ const Workspace = () => {
                 </div>
 
                 <div className="h-[140px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      key={`dash-nps-dist-${workspace?.id}`}
+                  <NeonBarChart
                       data={dashboardData?.nps?.distribution || []}
-                      barCategoryGap={12}
-                    >
-                      <defs>
-                        <linearGradient id="dashNpsDistBar" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#6366f1" stopOpacity={1} />
-                          <stop offset="100%" stopColor="#a855f7" stopOpacity={0.8} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.05} />
-                      <XAxis dataKey="score" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 8, fontWeight: 900 }} tickMargin={10} />
-                      <YAxis hide allowDecimals={false} axisLine={false} tickLine={false} width={28} />
-                      <Tooltip />
-                      <Bar
-                        dataKey="count"
-                        fill="url(#dashNpsDistBar)"
-                        radius={[8, 8, 4, 4]}
-                        isAnimationActive
-                        animationDuration={1500}
-                        animationEasing="ease-out"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+                      xKey="score"
+                      yKey="count"
+                      color="#6366f1"
+                      showGrid={false}
+                  />
                 </div>
               </motion.div>
 

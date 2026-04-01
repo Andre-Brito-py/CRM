@@ -2,17 +2,8 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { motion } from 'framer-motion';
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  LineChart,
-  Line,
-} from 'recharts';
+import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
+import NeonBarChart from '@/components/Charts/NeonBarChart';
 
 import AccountLayout from '@/layouts/AccountLayout';
 import Content from '@/components/Content/index';
@@ -133,32 +124,12 @@ const Analytics = () => {
           <Card>
             <Card.Body title="Distribuição de notas">
               <div className="h-[280px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    key={`dist-${surveyId}-${from}-${to}`}
-                    data={metrics?.distribution || []}
-                    barCategoryGap={10}
-                  >
-                    <defs>
-                      <linearGradient id="npsDistBar" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#6366f1" stopOpacity={0.9} />
-                        <stop offset="100%" stopColor="#6366f1" stopOpacity={0.25} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.12} />
-                    <XAxis dataKey="score" axisLine={false} tickLine={false} tickMargin={10} />
-                    <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={28} />
-                    <Tooltip />
-                    <Bar
-                      dataKey="count"
-                      fill="url(#npsDistBar)"
-                      radius={[10, 10, 0, 0]}
-                      isAnimationActive
-                      animationDuration={900}
-                      animationEasing="ease-out"
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                <NeonBarChart
+                   data={metrics?.distribution || []}
+                   xKey="score"
+                   yKey="count"
+                   color="#6366f1"
+                />
               </div>
             </Card.Body>
           </Card>
@@ -169,25 +140,14 @@ const Analytics = () => {
         <Card>
           <Card.Body title="Tendência mensal">
             <div className="h-[280px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart key={`trend-${surveyId}-${from}-${to}`} data={metrics?.trend || []}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" opacity={0.12} />
-                  <XAxis dataKey="month" axisLine={false} tickLine={false} tickMargin={10} />
-                  <YAxis axisLine={false} tickLine={false} width={28} />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="nps"
-                    stroke="#0ea5e9"
-                    strokeWidth={3}
-                    dot={false}
-                    strokeLinecap="round"
-                    isAnimationActive
-                    animationDuration={1100}
-                    animationEasing="ease-out"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+               <GlowingAreaChart
+                 data={metrics?.trend || []}
+                 xKey="month"
+                 yKey="nps"
+                 color="#0ea5e9"
+                 formatYAxis={(val) => Math.round(val)}
+                 formatTooltipValue={(val) => Math.round(val)}
+               />
             </div>
           </Card.Body>
         </Card>

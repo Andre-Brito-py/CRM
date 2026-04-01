@@ -19,16 +19,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+
 
 import {
   CreditCardIcon,

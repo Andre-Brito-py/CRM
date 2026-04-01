@@ -37,6 +37,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
 
 const Analytics = () => {
   const { t, i18n } = useTranslation();
@@ -619,26 +620,15 @@ const Analytics = () => {
                 </div>
 
                 {mounted ? (
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={salesTrendChart} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.05} />
-                        <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                        <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={formatCompact} />
-                        <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backdropFilter: 'blur(10px)' }} formatter={(v) => formatCurrency(v)} />
-                        <Line
-                          type="monotone"
-                          dataKey="amount"
-                          name={t('analytics.salesTrend.revenue')}
-                          stroke="#6366f1"
-                          strokeWidth={4}
-                          dot={{ r: 6, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }}
-                          activeDot={{ r: 8, strokeWidth: 0 }}
-                          isAnimationActive
-                          animationDuration={1500}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
+                  <div className="h-80 w-full mt-4">
+                    <GlowingAreaChart
+                      data={salesTrendChart}
+                      xKey="month"
+                      yKey="amount"
+                      color="#6366f1"
+                      formatYAxis={formatCompact}
+                      formatTooltipValue={(v) => formatCurrency(v)}
+                    />
                   </div>
                 ) : null}
               </motion.div>

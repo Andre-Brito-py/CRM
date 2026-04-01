@@ -23,16 +23,7 @@ import { Dialog, Transition } from '@headlessui/react';
 import Card from '@/components/Card/index';
 import api from '@/lib/common/api';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Legend,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
 
 const WhatsAppSettings = () => {
   const router = useRouter();
@@ -295,42 +286,16 @@ const WhatsAppSettings = () => {
               </div>
 
               {mounted ? (
-                <div className="h-72 w-full mt-5 relative z-10">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={whatsappTrendChart} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorInbound" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorOutbound" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-                      <XAxis 
-                        dataKey="day" 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }} 
-                        dy={10}
-                      />
-                      <YAxis 
-                        axisLine={false} 
-                        tickLine={false} 
-                        tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }} 
-                      />
-                      <Tooltip 
-                        cursor={{ fill: '#f8fafc' }}
-                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.08)', padding: '12px' }}
-                      />
-                      <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-                      <Bar dataKey="inbound" name={t('analytics.whatsapp.inbound')} stackId="a" fill="#10b981" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive animationDuration={1200} />
-                      <Bar dataKey="outbound" name={t('analytics.whatsapp.outbound')} stackId="a" fill="#3b82f6" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive animationDuration={1200} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
+                  <div className="h-72 w-full mt-5 relative z-10">
+                    <GlowingAreaChart
+                      data={whatsappTrendChart}
+                      xKey="day"
+                      yKey="total"
+                      color="#10b981"
+                      formatYAxis={(v) => Math.round(v)}
+                      formatTooltipValue={(v) => Math.round(v)}
+                    />
+                  </div>
               ) : null}
             </div>
 
