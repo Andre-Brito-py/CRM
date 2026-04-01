@@ -40,50 +40,72 @@ export default function Home({ plans, promo, hasFreePlan }) {
 }
 
 export const getServerSideProps = async (context) => {
-  const session = await getServerSession(context.req, context.res, authOptions);
+  try {
+    const session = await getServerSession(context.req, context.res, authOptions);
 
-  if (session) {
+    if (session) {
+      return {
+        redirect: {
+          destination: '/account',
+          permanent: false,
+        },
+      };
+    }
+
+    // Fetch plans for the pricing section
+    let plansData = [];
+    try {
+      plansData = await getAllPlans();
+    } catch (e) {
+      console.error('Error fetching plans:', e);
+    }
+    
+    const plans = JSON.parse(JSON.stringify(plansData || []));
+
+    // Determine if there's a free plan
+    const activePlans = (plans || []).filter((p) => Boolean(p.isActive));
+    const hasFreePlan = activePlans.some((p) => (
+      Boolean(p.features?.isFreePlan) ||
+      String(p.slug || '').trim().toUpperCase() === 'FREE' ||
+      Number(p.price || 0) === 0
+    ));
+
+    // Fetch landing page promo settings
+    let settings = [];
+    try {
+      settings = await prisma.systemConfig.findMany({
+        where: {
+          key: {
+            in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE']
+          }
+        }
+      });
+    } catch (e) {
+      console.error('Error fetching system settings:', e);
+    }
+
+    const promo = {
+      enabled: settings.find(s => s.key === 'LANDING_PROMO_ENABLED')?.value === 'true',
+      text: settings.find(s => s.key === 'LANDING_PROMO_TEXT')?.value || '',
+      code: settings.find(s => s.key === 'LANDING_PROMO_CODE')?.value || ''
+    };
+
     return {
-      redirect: {
-        destination: '/account',
-        permanent: false,
+      props: {
+        plans: activePlans,
+        promo,
+        hasFreePlan
       },
     };
-  }
-
-  // Fetch plans for the pricing section
-  const plansData = await getAllPlans();
-  const plans = JSON.parse(JSON.stringify(plansData));
-
-  // Determine if there's a free plan
-  const activePlans = (plans || []).filter((p) => Boolean(p.isActive));
-  const hasFreePlan = activePlans.some((p) => (
-    Boolean(p.features?.isFreePlan) ||
-    String(p.slug || '').trim().toUpperCase() === 'FREE' ||
-    Number(p.price || 0) === 0
-  ));
-
-  // Fetch landing page promo settings
-  const settings = await prisma.setting.findMany({
-    where: {
-      key: {
-        in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE']
+  } catch (error) {
+    console.error('Index page crash:', error);
+    return {
+      props: {
+        plans: [],
+        promo: { enabled: false, text: '', code: '' },
+        hasFreePlan: true
       }
-    }
-  });
-
-  const promo = {
-    enabled: settings.find(s => s.key === 'LANDING_PROMO_ENABLED')?.value === 'true',
-    text: settings.find(s => s.key === 'LANDING_PROMO_TEXT')?.value || '',
-    code: settings.find(s => s.key === 'LANDING_PROMO_CODE')?.value || ''
-  };
-
-  return {
-    props: {
-      plans: activePlans,
-      promo,
-      hasFreePlan
-    },
-  };
+    };
+  }
 };
 
