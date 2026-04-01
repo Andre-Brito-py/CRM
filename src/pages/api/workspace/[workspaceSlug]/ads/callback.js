@@ -1,4 +1,4 @@
-import { authOptions } from '@/pages/api/auth/[...nextauth]';
+import { getAuthOptions } from '@/lib/server/auth';
 import { getServerSession } from 'next-auth/next';
 import prisma from '@/prisma/index';
 import { decryptSecret } from '@/lib/server/config';
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: { msg: 'Method not allowed' } });
   }
 
-  const session = await getServerSession(req, res, authOptions);
+  const session = await getServerSession(req, res, await getAuthOptions());
   if (!session) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
