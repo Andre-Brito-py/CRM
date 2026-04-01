@@ -39,6 +39,28 @@ import {
 } from 'recharts';
 import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
 
+const CountUp = ({ value, durationMs = 900, className = '' }) => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const target = Number(value || 0);
+    const start = performance.now();
+    let raf = 0;
+
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setCurrent(Math.round(eased * target));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [durationMs, value]);
+
+  return <span className={className}>{current}</span>;
+};
+
 const Analytics = () => {
   const { t, i18n } = useTranslation();
   const router = useRouter();
@@ -132,27 +154,7 @@ const Analytics = () => {
   const formatCompact = (value) =>
     new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(Number(value || 0));
 
-  const CountUp = ({ value, durationMs = 900, className = '' }) => {
-    const [current, setCurrent] = useState(0);
 
-    useEffect(() => {
-      const target = Number(value || 0);
-      const start = performance.now();
-      let raf = 0;
-
-      const tick = (now) => {
-        const t = Math.min(1, (now - start) / durationMs);
-        const eased = 1 - Math.pow(1 - t, 3);
-        setCurrent(Math.round(eased * target));
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-
-      raf = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(raf);
-    }, [durationMs, value]);
-
-    return <span className={className}>{current}</span>;
-  };
 
   const COLORS = ['#2563eb', '#7c3aed', '#16a34a', '#f59e0b', '#ef4444', '#06b6d4', '#a855f7', '#64748b'];
 

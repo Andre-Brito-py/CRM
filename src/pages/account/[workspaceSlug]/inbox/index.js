@@ -22,14 +22,31 @@ function classNames(...classes) {
 
 
 import {
-  CreditCardIcon,
-  CalendarDaysIcon,
-  EnvelopeIcon,
-  ChatBubbleLeftRightIcon,
-  CameraIcon,
-  FunnelIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+
+const CountUp = ({ value, durationMs = 900, className = '', enabled = true }) => {
+  const [current] = useState(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const target = Number(value || 0);
+    const start = performance.now();
+    let raf = 0;
+
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3);
+      // setCurrent(Math.round(eased * target)); 
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [durationMs, enabled, value]);
+
+  return <span className={className}>{current}</span>;
+};
 
 const Inbox = () => {
   const router = useRouter();
@@ -133,28 +150,7 @@ const Inbox = () => {
     }));
   }, [locale, whatsappAnalytics?.messageTrend]);
 
-  const CountUp = ({ value, durationMs = 900, className = '', enabled = true }) => {
-    const [current] = useState(0);
 
-    useEffect(() => {
-      if (!enabled) return;
-      const target = Number(value || 0);
-      const start = performance.now();
-      let raf = 0;
-
-      const tick = (now) => {
-        const t = Math.min(1, (now - start) / durationMs);
-        const eased = 1 - Math.pow(1 - t, 3);
-        // setCurrent(Math.round(eased * target)); // This line was commented out in the original, but it's part of a CountUp component. Keeping it as is.
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-
-      raf = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(raf);
-    }, [durationMs, enabled, value]);
-
-    return <span className={className}>{current}</span>;
-  };
 
   useEffect(() => {
     if (selectedId && conversationData?.data?.conversation) {

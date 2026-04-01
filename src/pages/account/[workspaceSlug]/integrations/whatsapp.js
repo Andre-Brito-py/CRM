@@ -25,6 +25,28 @@ import api from '@/lib/common/api';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 import GlowingAreaChart from '@/components/Charts/GlowingAreaChart';
 
+const CountUp = ({ value, durationMs = 900, className = '' }) => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const target = Number(value || 0);
+    const start = performance.now();
+    let raf = 0;
+
+    const tick = (now) => {
+      const t = Math.min(1, (now - start) / durationMs);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setCurrent(Math.round(eased * target));
+      if (t < 1) raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [durationMs, value]);
+
+  return <span className={className}>{current}</span>;
+};
+
 const WhatsAppSettings = () => {
   const router = useRouter();
   const { t, i18n } = useTranslation();
@@ -71,27 +93,7 @@ const WhatsAppSettings = () => {
     }));
   }, [locale, whatsappAnalytics?.messageTrend]);
 
-  const CountUp = ({ value, durationMs = 900, className = '' }) => {
-    const [current, setCurrent] = useState(0);
 
-    useEffect(() => {
-      const target = Number(value || 0);
-      const start = performance.now();
-      let raf = 0;
-
-      const tick = (now) => {
-        const t = Math.min(1, (now - start) / durationMs);
-        const eased = 1 - Math.pow(1 - t, 3);
-        setCurrent(Math.round(eased * target));
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-
-      raf = requestAnimationFrame(tick);
-      return () => cancelAnimationFrame(raf);
-    }, [durationMs, value]);
-
-    return <span className={className}>{current}</span>;
-  };
 
   const fetchIntegrations = useCallback(async () => {
     try {
