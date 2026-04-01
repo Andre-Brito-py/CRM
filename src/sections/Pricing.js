@@ -43,47 +43,49 @@ const Pricing = ({ products, promo }) => {
         ? (basePriceAnnual ? (basePriceAnnual / 12) : basePrice * 0.8)
         : basePrice;
         
-  const getPlanFeatures = (plan) => {
-    const f = plan.features || {};
-    const modules = f.allowedModules || {};
-    const items = [];
+      const f = plan.features || {};
 
-    // Numerical Limits
-    if (f.maxUsers) items.push(`Até ${f.maxUsers} ${f.maxUsers === 1 ? 'Usuário' : 'Usuários'}`);
-    if (f.maxContacts) items.push(`${f.maxContacts.toLocaleString()} Contatos`);
-    
-    // Key Modules (Mapping keys to labels)
-    const moduleLabels = {
-      inbox: "Atendimento WhatsApp",
-      pipeline: "Pipeline (Kanban)",
-      automations: "Automações de Fluxo",
-      ai_assistant: "Assistente de IA",
-      payments: "Pagamentos e Cobranças",
-      analytics: "Relatórios Avançados",
-      nps: "Pesquisas de NPS",
-      integrations: "API e Webhooks"
-    };
+      const getPlanFeatures = (p) => {
+        const features = p.features || {};
+        const modules = features.allowedModules || {};
+        const items = [];
 
-    Object.keys(moduleLabels).forEach(key => {
-      if (modules[key] !== false) {
-        items.push(moduleLabels[key]);
-      }
+        // Numerical Limits
+        if (features.maxUsers) items.push(`Até ${features.maxUsers} ${features.maxUsers === 1 ? 'Usuário' : 'Usuários'}`);
+        if (features.maxContacts) items.push(`${features.maxContacts.toLocaleString()} Contatos`);
+        
+        // Key Modules (Mapping keys to labels)
+        const moduleLabels = {
+          inbox: "Atendimento WhatsApp",
+          pipeline: "Pipeline (Kanban)",
+          automations: "Automações de Fluxo",
+          ai_assistant: "Assistente de IA",
+          payments: "Pagamentos e Cobranças",
+          analytics: "Relatórios Avançados",
+          nps: "Pesquisas de NPS",
+          integrations: "API e Webhooks"
+        };
+
+        Object.keys(moduleLabels).forEach(key => {
+          if (modules[key] !== false) {
+            items.push(moduleLabels[key]);
+          }
+        });
+
+        if (features.freeTrialDays > 0) items.push(`${features.freeTrialDays} Dias de Teste Grátis`);
+
+        return items;
+      };
+
+      return {
+        ...plan,
+        isPopular: Boolean(f.isHighlighted),
+        featuresList: getPlanFeatures(plan),
+        selectedPriceId: isAnnual ? selectedPrice?.stripePriceIdAnnual : selectedPrice?.stripePriceId,
+        displayPrice: formatCurrency(monthlyPrice, baseCurrency, i18n.language)
+      };
     });
-
-    if (f.freeTrialDays > 0) items.push(`${f.freeTrialDays} Dias de Teste Grátis`);
-
-    return items;
-  };
-
-  return {
-    ...plan,
-    isPopular: Boolean(f.isHighlighted),
-    featuresList: getPlanFeatures(plan),
-    selectedPriceId: isAnnual ? selectedPrice?.stripePriceIdAnnual : selectedPrice?.stripePriceId,
-    displayPrice: formatCurrency(monthlyPrice, baseCurrency, i18n.language)
-  };
-});
-}, [products, isAnnual, i18n.language, clientCurrency]);
+  }, [products, isAnnual, i18n.language, clientCurrency]);
 
 return (
 <section id="pricing" className="w-full py-40 bg-white relative overflow-hidden font-executive border-t border-zinc-100">
