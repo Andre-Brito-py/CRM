@@ -192,7 +192,7 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
         </div>
       </div>
 
-      <SupportHub />
+      {!immersive && <SupportHub />}
     </main>
   );
 };
