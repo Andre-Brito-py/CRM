@@ -29,14 +29,14 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 
 const AdminDashboard = () => {
   const { data: session } = useSession();
-  const { data, error } = useSWR(session ? '/api/admin/stats' : null, fetcher);
-  const { data: userData } = useSWR(session ? '/api/admin/users' : null, fetcher);
-  const { data: profitsData } = useSWR(session ? '/api/admin/profits' : null, fetcher);
+  const { data, error: statsError } = useSWR(session ? '/api/admin/stats' : null, fetcher);
+  const { data: userData, error: usersError } = useSWR(session ? '/api/admin/users' : null, fetcher);
+  const { data: profitsData, error: profitsError } = useSWR(session ? '/api/admin/profits' : null, fetcher);
 
   const stats = data?.data || { users: 0, workspaces: 0, payments: 0, uptime: 0 };
   const profits = profitsData?.data || { mrr: 0, marketplaceFees: 0, aiOverages: 0, totalProfit: 0 };
   const users = userData?.data?.users || [];
-  const isLoading = (!data && !error) || !profitsData;
+  const isLoading = (!data && !statsError) || (!profitsData && !profitsError);
 
   const formatUptime = (seconds) => {
     const d = Math.floor(seconds / (3600 * 24));

@@ -9,55 +9,61 @@ export default async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       // 1. Calculate Monthly Recurring Revenue (MRR) grouped by currency
-      const stripe = await getStripe();
       const mrrByCurrency = {};
-      let hasMore = true;
-      let startingAfter = undefined;
-      
-      while (hasMore) {
-        const subscriptions = await stripe.subscriptions.list({
-          status: 'active',
-          limit: 100,
-          starting_after: startingAfter,
-          expand: ['data.items.data.price'],
-        });
+      try {
+        const stripe = await getStripe();
+        let hasMore = true;
+        let startingAfter = undefined;
         
-        subscriptions.data.forEach(sub => {
-          const price = sub.items.data[0]?.price;
-          if (price) {
-            const currency = String(price.currency || 'usd').toUpperCase();
-            let amount = price.unit_amount || 0;
-            // Normalize to monthly equivalent
-            if (price.recurring?.interval === 'year') {
-              amount = amount / 12;
+        while (hasMore) {
+          const subscriptions = await stripe.subscriptions.list({
+            status: 'active',
+            limit: 100,
+            starting_after: startingAfter,
+            expand: ['data.items.data.price'],
+          });
+          
+          subscriptions.data.forEach(sub => {
+            const price = sub.items.data[0]?.price;
+            if (price) {
+              const currency = String(price.currency || 'usd').toUpperCase();
+              let amount = price.unit_amount || 0;
+              // Normalize to monthly equivalent
+              if (price.recurring?.interval === 'year') {
+                amount = amount / 12;
+              }
+              const monthlyAmount = amount / 100;
+              mrrByCurrency[currency] = (mrrByCurrency[currency] || 0) + monthlyAmount;
             }
-            const monthlyAmount = amount / 100;
-            mrrByCurrency[currency] = (mrrByCurrency[currency] || 0) + monthlyAmount;
+          });
+          
+          hasMore = subscriptions.has_more;
+          if (hasMore) {
+            startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
           }
-        });
-        
-        hasMore = subscriptions.has_more;
-        if (hasMore) {
-          startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
         }
+      } catch (stripeErr) {
+        console.warn('Could not fetch Stripe subscriptions for MRR:', stripeErr.message);
       }
 
-      // 2. Calculate Platform Fees grouped by currency
-      const platformFees = await prisma.payment.groupBy({
-        by: ['currency'],
-        _sum: { platformFee: true },
-        where: {
-          status: 'PAID',
-          deletedAt: null,
-          platformFee: { gt: 0 }
-        }
-      });
-
+      // 2. Calculate Platform Fees (Payment model has no currency field, assume BRL)
       const feesByCurrency = {};
-      platformFees.forEach(f => {
-        const curr = String(f.currency || 'BRL').toUpperCase();
-        feesByCurrency[curr] = Number(f._sum.platformFee) || 0;
-      });
+      try {
+        const platformFeeResult = await prisma.payment.aggregate({
+          _sum: { platformFee: true },
+          where: {
+            status: 'PAID',
+            deletedAt: null,
+            platformFee: { gt: 0 }
+          }
+        });
+        const totalFees = Number(platformFeeResult._sum.platformFee) || 0;
+        if (totalFees > 0) {
+          feesByCurrency['BRL'] = totalFees;
+        }
+      } catch (feeErr) {
+        console.warn('Could not fetch platform fees:', feeErr.message);
+      }
 
       // 3. Calculate AI Overage Billing grouped by currency
       const aiUsage = await prisma.aiUsageEvent.groupBy({
