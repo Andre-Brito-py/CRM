@@ -107,7 +107,7 @@ const handler = async (req, res) => {
 
     case 'POST':
       try {
-        const { direction, type, content, mediaUrl, status, externalId } = req.body;
+        const { direction, type, content, mediaUrl, status, externalId, quotedId } = req.body;
 
         // 1. Fetch conversation to check platform and get contact phone
         const conversation = await getConversation(conversationId);
@@ -117,6 +117,12 @@ const handler = async (req, res) => {
 
         if (conversation.workspaceId !== workspace.id) {
           return res.status(403).json({ error: { msg: 'Access denied' } });
+        }
+
+        let quotedExternalId = null;
+        if (quotedId) {
+          const qm = await prisma.message.findUnique({ where: { id: quotedId }, select: { externalId: true } });
+          quotedExternalId = qm?.externalId || null;
         }
 
         let sentMessageId = externalId;
@@ -175,7 +181,7 @@ const handler = async (req, res) => {
             }
 
             // Only send if it's a real user message (not system)
-            sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, resolvedContent);
+            sentMessageId = await sendWhatsAppMessage(integrationId, contactPhone, resolvedContent, { quotedId: quotedExternalId });
             messageStatus = 'SENT';
           } catch (waError) {
             log({ level: 'error', msg: 'whatsapp_send_failed', requestId, workspaceId: workspace.id, conversationId, error: waError });
@@ -241,7 +247,7 @@ const handler = async (req, res) => {
             }
 
             const { sendInstagramMessage } = await import('@/lib/server/instagram');
-            sentMessageId = await sendInstagramMessage(integrationId, contactId, resolvedContent);
+            sentMessageId = await sendInstagramMessage(integrationId, contactId, resolvedContent, { quotedId: quotedExternalId });
             messageStatus = 'SENT';
           } catch (igError) {
             log({ level: 'error', msg: 'instagram_send_failed', requestId, workspaceId: workspace.id, conversationId, error: igError });
@@ -256,7 +262,8 @@ const handler = async (req, res) => {
           content: resolvedContent,
           mediaUrl,
           status: messageStatus,
-          externalId: sentMessageId
+          externalId: sentMessageId,
+          quotedMessageId: quotedId
         });
 
         if ((direction || 'OUTBOUND') === 'OUTBOUND' && conversation.platform === 'EMAIL' && messageStatus === 'SENT') {

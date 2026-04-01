@@ -170,6 +170,9 @@ export const getConversation = async (id) => {
       },
       messages: {
         orderBy: { createdAt: 'asc' },
+        include: {
+          quotedMessage: true,
+        },
       },
     },
   });
@@ -195,7 +198,8 @@ export const updateConversation = async (id, data) => {
   return enrichConversationContact(conversation);
 };
 
-export const createMessage = async (conversationId, { direction, type, content, mediaUrl, status, externalId }) => {
+export const createMessage = async (conversationId, data) => {
+  const { direction, type, content, mediaUrl, status, externalId } = data;
   const message = await prisma.message.create({
     data: {
       conversationId,
@@ -205,6 +209,7 @@ export const createMessage = async (conversationId, { direction, type, content, 
       mediaUrl,
       status,
       externalId,
+      quotedMessageId: data.quotedMessageId,
     },
   });
 

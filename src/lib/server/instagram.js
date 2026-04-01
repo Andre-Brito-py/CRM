@@ -1,6 +1,6 @@
 import prisma from '@/prisma/index';
 
-export const sendInstagramMessage = async (integrationId, to, text) => {
+export const sendInstagramMessage = async (integrationId, to, text, options = {}) => {
   // 1. Get Integration Credentials
   const integration = await prisma.integration.findUnique({
     where: {
@@ -25,6 +25,10 @@ export const sendInstagramMessage = async (integrationId, to, text) => {
     recipient: { id: to },
     message: { text: text },
   };
+
+  if (options && options.quotedId) {
+    payload.message.reply_to = { mid: options.quotedId };
+  }
 
   const response = await fetch(url, {
     method: 'POST',

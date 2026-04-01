@@ -12,7 +12,8 @@ import {
   CalendarDaysIcon,
   EnvelopeIcon,
   ChatBubbleLeftRightIcon,
-  CameraIcon
+  CameraIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
@@ -67,8 +68,8 @@ const ChatWindow = ({
   isTogglingAutopilot = false,
   onBack
 }) => {
-  const { t } = useTranslation();
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
   const [newTemplateName, setNewTemplateName] = useState('');
   const [newTemplateContent, setNewTemplateContent] = useState('');
   const [isSummaryModalOpen, setIsSummaryModalOpen] = useState(false);
@@ -106,8 +107,9 @@ const ChatWindow = ({
   const handleSend = (e) => {
     e.preventDefault();
     if (messageText.trim()) {
-      onSendMessage(messageText);
+      onSendMessage(messageText, { quotedId: replyingTo?.id });
       onMessageChange('');
+      setReplyingTo(null);
     }
   };
 
@@ -476,6 +478,7 @@ const ChatWindow = ({
                   key={message.id}
                   message={message}
                   isMe={message.direction === 'OUTBOUND'}
+                  onReply={() => setReplyingTo(message)}
                 />
               ))}
             </div>
@@ -673,6 +676,37 @@ const ChatWindow = ({
             </Transition>
           </Menu>
         </div>
+
+        <AnimatePresence>
+          {replyingTo && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              className="max-w-5xl mx-auto mb-3 relative group"
+            >
+              <div className="vysify-glass rounded-2xl border border-indigo-500/30 overflow-hidden flex items-stretch">
+                <div className="w-1.5 bg-indigo-500" />
+                <div className="flex-1 p-3 px-5">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 italic">
+                      {replyingTo.direction === 'INBOUND' ? conversation?.contact?.name || 'Cliente' : 'Você'}
+                    </span>
+                    <button 
+                      onClick={() => setReplyingTo(null)}
+                      className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <p className="text-[13px] text-zinc-500 dark:text-zinc-400 line-clamp-1 italic font-medium">
+                    {replyingTo.content}
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleSend} className="relative flex items-center gap-2 sm:gap-3 max-w-5xl mx-auto">
           <div className="relative flex-1 group/input min-w-0">

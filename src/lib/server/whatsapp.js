@@ -57,6 +57,10 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
     text: { body: text },
   };
 
+  if (context && context.quotedId) {
+    payload.context = { message_id: context.quotedId };
+  }
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {

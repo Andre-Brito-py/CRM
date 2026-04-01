@@ -420,13 +420,13 @@ const Inbox = () => {
     }
   };
 
-
-  const handleSendMessage = async (content) => {
+  const handleSendMessage = async (content, options = {}) => {
     if (!workspaceSlug || !selectedId || !selectedConversation) return;
-
+ 
     const previousConversations = [...conversations];
     const previousDetail = { ...selectedConversation };
-
+    const quotedId = options?.quotedId || null;
+ 
     // 1. Prepare optimistic state
     const tempId = `temp-${Date.now()}`;
     const optimisticMessage = {
@@ -436,15 +436,17 @@ const Inbox = () => {
       content: content.trim(),
       createdAt: new Date().toISOString(),
       status: 'SENDING',
+      quotedMessageId: quotedId,
+      quotedMessage: quotedId ? selectedConversation.messages?.find(m => m.id === quotedId) : null
     };
-
+ 
     const optimisticConversation = {
       ...selectedConversation,
       messages: [...(selectedConversation.messages || []), optimisticMessage],
       lastMessage: optimisticMessage.content,
       updatedAt: optimisticMessage.createdAt,
     };
-
+ 
     // 2. Optimistic Update
     mutateConversations({
       data: {
@@ -456,7 +458,7 @@ const Inbox = () => {
     mutateConversation({ data: { conversation: optimisticConversation } }, false);
     setSelectedConversation(optimisticConversation);
     setMessageText(''); // Clear input optimistically
-
+ 
     try {
       const response = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}`, {
         method: 'POST',
@@ -464,7 +466,8 @@ const Inbox = () => {
         body: JSON.stringify({
           content,
           direction: 'OUTBOUND',
-          type: selectedConversation.platform === 'EMAIL' ? 'EMAIL' : 'TEXT',
+          type: (selectedConversation.platform || '').toUpperCase() === 'EMAIL' ? 'EMAIL' : 'TEXT',
+          quotedId
         }),
       });
 
