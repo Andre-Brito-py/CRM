@@ -1,7 +1,7 @@
 import SmartTransparentImage from '@/components/SmartTransparentImage/index';
 import Link from 'next/link';
 
-const Logo = ({ variant = 'full', className = '', href = '/account', forceLight = false }) => {
+const Logo = ({ variant = 'full', className = '', href = '/', forceLight = false }) => {
     const isFull = variant === 'full';
     const alt = 'Vysify Logo';
 
