@@ -1,3 +1,4 @@
+import { withRateLimit } from '@/lib/server/api-wrapper';
 import { validateSession } from '@/config/api-validation';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { getMembersByWorkspaceId } from '@/prisma/services/membership';
@@ -26,4 +27,8 @@ const handler = async (req, res) => {
   return res.status(405).json({ errors: { error: { msg: `${method} method unsupported` } } });
 };
 
-export default handler;
+export default withRateLimit(handler, {
+    limit: 60,
+    windowMs: 60_000,
+    keyPrefix: 'api:workspace:members:'
+});

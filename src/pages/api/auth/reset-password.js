@@ -4,7 +4,7 @@ import isEmail from 'validator/lib/isEmail';
 
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
-import { rateLimit } from '@/lib/server/rateLimit';
+import { withRateLimit } from '@/lib/server/api-wrapper';
 
 export const config = {
     api: {
@@ -34,13 +34,6 @@ const handler = async (req, res) => {
     const requestId = String(req.headers['x-request-id'] || '').trim() || null;
     const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const jitterMs = (base, spread) => base + crypto.randomInt(0, spread + 1);
-
-    const rl = await rateLimit({ req, limit: 30, windowMs: 10 * 60_000 });
-    if (!rl.ok) {
-        log({ level: 'warn', msg: 'auth_reset_password_rate_limited', requestId });
-        await sleep(jitterMs(220, 360));
-        return res.status(429).json({ error: { msg: 'Too Many Requests' } });
-    }
 
     try {
         const email = req.body?.email ? String(req.body.email) : '';
@@ -124,4 +117,8 @@ const handler = async (req, res) => {
     }
 };
 
-export default handler;
+export default withRateLimit(handler, {
+    limit: 10,
+    windowMs: 5 * 60_000,
+    keyPrefix: 'auth:reset-password:'
+});

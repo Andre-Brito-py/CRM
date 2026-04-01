@@ -116,6 +116,8 @@ const buildEmail = ({ email, resetUrl, appUrl }) => {
     };
 };
 
+import { withRateLimit } from '@/lib/server/api-wrapper';
+
 const handler = async (req, res) => {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: { msg: `${req.method} method unsupported` } });
@@ -134,12 +136,6 @@ const handler = async (req, res) => {
             },
         });
     };
-
-    const rl = await rateLimit({ req, limit: 30, windowMs: 10 * 60_000 });
-    if (!rl.ok) {
-        log({ level: 'warn', msg: 'auth_forgot_password_rate_limited', requestId });
-        return genericOk();
-    }
 
     try {
         const email = req.body?.email ? String(req.body.email) : '';
@@ -215,4 +211,8 @@ const handler = async (req, res) => {
     }
 };
 
-export default handler;
+export default withRateLimit(handler, { 
+    limit: 15, 
+    windowMs: 15 * 60_000, 
+    keyPrefix: 'auth:forgot-password:' 
+});

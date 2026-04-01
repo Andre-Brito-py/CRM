@@ -1,3 +1,4 @@
+import { withRateLimit } from '@/lib/server/api-wrapper';
 import { validateSession } from '@/config/api-validation';
 import { getConversations, createConversation } from '@/prisma/services/conversation';
 import { getWorkspace } from '@/prisma/services/workspace';
@@ -59,4 +60,8 @@ const handler = async (req, res) => {
   }
 };
 
-export default handler;
+export default withRateLimit(handler, {
+    limit: 120, // Higher limit for inbox as it refreshes often
+    windowMs: 60_000,
+    keyPrefix: 'api:workspace:inbox:'
+});

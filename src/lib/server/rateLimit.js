@@ -63,13 +63,24 @@ const rateLimitPostgres = async ({ req, limit = 60, windowMs = 60_000, key, incr
 
 export const rateLimit = async ({ req, limit = 60, windowMs = 60_000, key, increment = 1 }) => {
   const store = String(process.env.RATE_LIMIT_STORE || 'postgres').trim().toLowerCase();
+  
+  // Skip logic (Internal/Loopback) - Always allow localhost during dev but limit in production
+  const bucketKey = getKey({ req, key });
+  if (process.env.NODE_ENV === 'development' && bucketKey === '::1') return { ok: true, remaining: limit, resetAt: Date.now() + windowMs };
+
   if (store !== 'postgres') {
     return rateLimitMemory({ req, limit, windowMs, key, increment });
   }
 
   try {
-    return await rateLimitPostgres({ req, limit, windowMs, key, increment });
-  } catch {
+    const result = await rateLimitPostgres({ req, limit, windowMs, key, increment });
+    if (!result.ok) {
+        console.warn(`[RATELIMIT] Blocked: ${bucketKey} (Hits: ${limit - result.remaining}/${limit})`);
+    }
+    return result;
+  } catch (error) {
+    // If DB fails, we fallback to memory so the site doesn't crash
+    console.error(`[RATELIMIT] DB Error, falling back to memory:`, error?.message || error);
     return rateLimitMemory({ req, limit, windowMs, key, increment });
   }
 };
