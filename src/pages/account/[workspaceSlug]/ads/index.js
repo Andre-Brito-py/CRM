@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { motion } from 'framer-motion';
-import { ChartBarIcon, CursorArrowRaysIcon, ArrowTrendingUpIcon, PlusCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { ChartBarIcon, CursorArrowRaysIcon, ArrowTrendingUpIcon, PlusCircleIcon, ExclamationTriangleIcon, LockClosedIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
 import AccountLayout from '@/layouts/AccountLayout';
@@ -46,7 +46,8 @@ const AdsDashboard = () => {
       if (response && response.data && response.data.url) {
         window.location.href = response.data.url;
       } else {
-        toast.error('Erro ao gerar URL de conexão.');
+        const errorMsg = response?.error?.msg || 'Erro ao gerar URL de conexão.';
+        toast.error(errorMsg);
         setIsConnecting(false);
       }
     } catch (err) {
@@ -72,6 +73,64 @@ const AdsDashboard = () => {
   const campaigns = metrics.campaigns || [];
   const summary = metrics.summary || { spend: 0, leads: 0, cpl: 0, roas: 0 };
   const trend = metrics.trend || [];
+
+  if (fetchError?.status === 403) {
+    return (
+      <AccountLayout>
+        <Meta title={`Vysify - ${workspaceSlug} | Acesso Restrito`} />
+        <div className="flex flex-col items-center justify-center min-h-[70vh] p-4 text-center">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="vysify-glass p-16 rounded-[3rem] max-w-2xl border border-indigo-500/20 shadow-2xl relative overflow-hidden"
+          >
+            {/* Background Glow */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[80px] -mr-32 -mt-32 rounded-full" />
+            
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-indigo-500/10 rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 border border-indigo-500/20">
+                <LockClosedIcon className="w-10 h-10 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              
+              <h1 className="text-4xl font-black uppercase text-zinc-900 dark:text-white mb-4 italic tracking-tighter">
+                Recurso <span className="text-indigo-600 dark:text-indigo-400">Exclusivo</span>
+              </h1>
+              
+              <p className="text-zinc-500 dark:text-zinc-400 font-bold uppercase tracking-widest text-[11px] mb-8 italic">
+                O módulo de Meta Ads Analytics não faz parte do seu plano atual.
+              </p>
+              
+              <div className="space-y-6 mb-10 text-left bg-zinc-50/50 dark:bg-zinc-900/50 p-8 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                <p className="text-sm text-zinc-600 dark:text-zinc-300 font-medium italic">
+                  Libere agora para monitorar seu ROI, Custo por Lead e investimento direto do seu painel Vysify.
+                </p>
+                <ul className="space-y-3">
+                   {[
+                     'Monitoramento de Gastos em Tempo Real',
+                     'Custo por Lead (CPL) preciso',
+                     'Relatório detalhado de Campanhas',
+                     'Previsão de ROAS'
+                   ].map(feat => (
+                     <li key={feat} className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 italic">
+                        <div className="w-1.5 h-1.5 rounded-full bg-indigo-500" />
+                        {feat}
+                     </li>
+                   ))}
+                </ul>
+              </div>
+              
+              <button 
+                onClick={() => router.push(`/account/${workspaceSlug}/settings/plan`)}
+                className="w-full bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 font-black uppercase tracking-[0.2em] italic py-5 rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-indigo-500/20"
+              >
+                Fazer Upgrade do Plano
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AccountLayout>
+    );
+  }
 
   return (
     <AccountLayout>

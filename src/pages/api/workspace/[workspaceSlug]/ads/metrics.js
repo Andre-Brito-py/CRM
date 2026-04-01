@@ -1,6 +1,6 @@
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
-import { getWorkspaceLimits } from '@/lib/server/subscription';
+import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -23,6 +23,16 @@ export default async function handler(req, res) {
 
     if (!workspace) {
       return res.status(404).json({ error: { msg: 'Workspace not found' } });
+    }
+
+    // Check if the plan allows Meta Ads
+    const isAllowed = await isModuleAllowed(workspace.id, 'meta_ads');
+    if (!isAllowed) {
+      return res.status(403).json({ 
+        error: { 
+          msg: 'Sua assinatura atual não inclui o módulo de Meta Ads Analytics. Faça o upgrade para liberar esta função.' 
+        } 
+      });
     }
 
     // Check integration status

@@ -20,7 +20,7 @@ const DEFAULT_FREE_MODULES = {
     templates: true,
     integrations: false,
     payments: false,
-    ads: false,
+    meta_ads: false,
 };
 
 const ALL_MODULES_ENABLED = {
@@ -39,7 +39,7 @@ const ALL_MODULES_ENABLED = {
     templates: true,
     integrations: true,
     payments: true,
-    ads: true,
+    meta_ads: true,
 };
 
 /**

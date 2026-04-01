@@ -31,6 +31,7 @@ const AVAILABLE_MODULES = [
   { key: 'templates', label: 'Templates de Mensagem' },
   { key: 'integrations', label: 'Integrações (Webhooks, APIs)' },
   { key: 'payments', label: 'Pagamentos / Cobranças' },
+  { key: 'meta_ads', label: 'Meta Ads Analytics' },
 ];
 
 const DEFAULT_MODULES = {};

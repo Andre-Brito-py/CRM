@@ -24,6 +24,17 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: { msg: 'Workspace not found' } });
     }
 
+    // Check if the plan allows Meta Ads
+    const { isModuleAllowed } = await import('@/lib/server/subscription');
+    const isAllowed = await isModuleAllowed(workspace.id, 'meta_ads');
+    if (!isAllowed) {
+      return res.status(403).json({ 
+        error: { 
+          msg: 'Sua assinatura atual não inclui o módulo de Meta Ads Analytics. Faça o upgrade para liberar esta função.' 
+        } 
+      });
+    }
+
     // Fetch the META_CLIENT_ID from the super admin settings (SystemConfig table)
     const clientConfig = await prisma.systemConfig.findFirst({
       where: { key: 'META_CLIENT_ID' }
