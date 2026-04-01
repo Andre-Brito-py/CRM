@@ -21,6 +21,7 @@ const SECRET_KEYS = new Set([
   'AWS_S3_SECRET_ACCESS_KEY',
   'VAPID_PRIVATE_KEY',
   'CRON_SECRET',
+  'META_CLIENT_SECRET',
 ]);
 
 const isSecretKey = (key) => SECRET_KEYS.has(String(key || '').toUpperCase());

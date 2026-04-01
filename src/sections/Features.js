@@ -7,7 +7,10 @@ import {
   ArrowPathIcon,
   GlobeAltIcon,
   ShieldCheckIcon,
-  BoltIcon
+  BoltIcon,
+  MegaphoneIcon,
+  ArrowTrendingUpIcon,
+  CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 
 const Features = () => {
@@ -186,7 +189,117 @@ const Features = () => {
              </div>
           </motion.div>
           
+          {/* === NEW: META ADS NATIVE === */}
+          <motion.div
+            variants={itemVariants}
+            className="md:col-span-6 group relative bg-gradient-to-br from-[#0f0c29] via-[#1a1050] to-[#24243e] border border-indigo-500/20 rounded-[40px] shadow-2xl hover:border-indigo-400/40 transition-all duration-500 overflow-hidden flex flex-col md:flex-row"
+          >
+            {/* Background glow effects */}
+            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 blur-[120px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-violet-600/10 blur-[100px] rounded-full translate-x-1/4 translate-y-1/4 pointer-events-none" />
+
+            {/* Left: Content */}
+            <div className="relative z-10 md:w-[45%] p-10 md:p-14 flex flex-col justify-center">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-indigo-500/10 border border-indigo-400/20 rounded-full w-fit">
+                <MegaphoneIcon className="w-4 h-4 text-indigo-400" />
+                <span className="text-[10px] font-black text-indigo-400 tracking-[0.2em] uppercase">Novo — Meta Ads Native</span>
+              </div>
+
+              <h3 className="text-4xl lg:text-5xl font-black uppercase tracking-tight text-white leading-[0.9] mb-6">
+                Gerencie seus Anúncios <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400">sem sair do CRM.</span>
+              </h3>
+
+              <p className="text-zinc-400 text-base font-medium leading-relaxed mb-8 max-w-md">
+                Conecte suas contas do Facebook e Instagram e veja o ROI real de cada campanha. Do anúncio à venda no WhatsApp, tudo rastreado em um único lugar.
+              </p>
+
+              {/* KPI Metrics Row */}
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                {[
+                  { label: 'Leads Gerados', value: '312', icon: <CursorArrowRaysIcon className="w-4 h-4" /> },
+                  { label: 'CPL Médio', value: 'R$ 13', icon: <ChartBarIcon className="w-4 h-4" /> },
+                  { label: 'ROAS', value: '4.2x', icon: <ArrowTrendingUpIcon className="w-4 h-4" /> },
+                ].map((m) => (
+                  <div key={m.label} className="bg-white/5 border border-white/10 rounded-2xl p-4">
+                    <div className="flex items-center gap-1.5 text-indigo-400 mb-2">{m.icon}</div>
+                    <div className="text-2xl font-black text-white">{m.value}</div>
+                    <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">{m.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Feature Checklist */}
+              <ul className="space-y-2">
+                {[
+                  'Click-to-WhatsApp Ads com atribuição automática',
+                  'Leads de formulários caindo direto no Pipeline',
+                  'Dashboard de ROI por campanha e por criativo',
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-zinc-300 text-sm font-medium">
+                    <span className="w-5 h-5 rounded-full bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-2.5 h-2.5 text-indigo-400" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+
+              {/* Channel Badges */}
+              <div className="flex items-center gap-3 mt-8">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#1877f2]/10 border border-[#1877f2]/20 rounded-xl">
+                  <svg className="w-4 h-4 text-[#1877f2]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                  </svg>
+                  <span className="text-[10px] font-black text-[#1877f2] uppercase tracking-wider">Facebook</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#e1306c]/10 border border-[#e1306c]/20 rounded-xl">
+                  <svg className="w-4 h-4 text-[#e1306c]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                  <span className="text-[10px] font-black text-[#e1306c] uppercase tracking-wider">Instagram</span>
+                </div>
+                <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-wider">+ WhatsApp Nativo</span>
+              </div>
+            </div>
+
+            {/* Right: Product Screenshot */}
+            <div className="relative z-10 md:w-[55%] p-6 md:p-8 flex items-center justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30, scale: 0.97 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-lg relative"
+              >
+                {/* Glow behind image */}
+                <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-3xl" />
+                <div className="relative rounded-[28px] overflow-hidden border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.5)] group-hover:shadow-[0_40px_80px_rgba(99,102,241,0.2)] transition-all duration-700">
+                  <img
+                    src="/images/showcase/ads-management.png"
+                    alt="Meta Ads Manager Lite — Dashboard Vysify"
+                    className="w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105"
+                  />
+                  {/* Overlay shimmer on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0f0c29]/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                </div>
+                {/* Floating badge — LIVE */}
+                <div className="absolute -top-3 -right-3 z-20 flex items-center gap-2 px-3 py-1.5 bg-indigo-600 rounded-full shadow-lg border border-indigo-400/50">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                  </span>
+                  <span className="text-[10px] font-black text-white uppercase tracking-widest">Beta Disponível</span>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+          {/* === END: META ADS NATIVE === */}
+
           {/* Main Feature: WhatsApp Automation */}
+
           <motion.div 
             variants={itemVariants}
             className="md:col-span-3 group relative p-10 bg-white border border-zinc-100 rounded-[40px] shadow-2xl hover:border-indigo-500/30 transition-all duration-500 overflow-hidden flex flex-col min-h-[400px]"

@@ -87,6 +87,13 @@ const CATALOG = [
     ],
   },
   {
+    title: 'Meta Ads (OAuth)',
+    items: [
+      { key: 'META_CLIENT_ID', category: 'INTEGRATIONS', label: 'Meta Client/App ID', secret: false },
+      { key: 'META_CLIENT_SECRET', category: 'INTEGRATIONS', label: 'Meta Client Secret', secret: true },
+    ],
+  },
+  {
     title: 'Domínios (Vercel)',
     items: [
       { key: 'VERCEL_API_URL', category: 'INTEGRATIONS', label: 'Vercel API URL', secret: false },

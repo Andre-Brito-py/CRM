@@ -61,6 +61,12 @@ const menu = (workspaceId, options = {}) => {
           moduleKey: 'analytics',
           ownerOnly: true,
         },
+        {
+          name: 'Anúncios (Meta Ads)',
+          path: `/account/${workspaceId}/ads`,
+          moduleKey: 'ads',
+          ownerOnly: true,
+        },
       ],
     },
     {

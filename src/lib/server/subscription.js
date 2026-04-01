@@ -20,6 +20,7 @@ const DEFAULT_FREE_MODULES = {
     templates: true,
     integrations: false,
     payments: false,
+    ads: false,
 };
 
 const ALL_MODULES_ENABLED = {
@@ -38,6 +39,7 @@ const ALL_MODULES_ENABLED = {
     templates: true,
     integrations: true,
     payments: true,
+    ads: true,
 };
 
 /**
@@ -103,6 +105,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
             aiRequests24h: f.maxAiRequests24h || 100,
             aiTokens24h: f.maxAiTokens24h || 30000,
             uploads24h: f.maxUploads24h || 50,
+            maxAdAccounts: f.maxAdAccounts || null,
             plan: subscription.plan.name,
             allowedModules: f.allowedModules || ALL_MODULES_ENABLED,
             freeTrialDays,
@@ -138,6 +141,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         aiRequests24h: planType === 'FREE' ? 100 : planType === 'STANDARD' ? 1000 : 10000,
         aiTokens24h: planType === 'FREE' ? 30000 : planType === 'STANDARD' ? 300000 : 1000000,
         uploads24h: planType === 'FREE' ? 30 : planType === 'STANDARD' ? 500 : 5000,
+        maxAdAccounts: planType === 'FREE' ? 1 : null,
         plan: planType,
         allowedModules: planType === 'FREE' ? DEFAULT_FREE_MODULES : ALL_MODULES_ENABLED,
         freeTrialDays: legacyTrialDays,
