@@ -26,7 +26,7 @@ const CouponsAdmin = () => {
     value: '',
     duration: 'once',
     durationInMonths: '',
-    currency: 'USD',
+    currency: 'BRL',
     maxRedemptions: '',
   });
 
@@ -84,7 +84,7 @@ const CouponsAdmin = () => {
       if (!res.ok) throw new Error(res.error?.msg || 'Erro na criação');
       toast.success('Cupom criado com sucesso');
       setShowModal(false);
-      setFormData({ name: '', type: 'percentage', value: '', duration: 'once', durationInMonths: '', currency: 'USD', maxRedemptions: '' });
+      setFormData({ name: '', type: 'percentage', value: '', duration: 'once', durationInMonths: '', currency: 'BRL', maxRedemptions: '' });
       fetchCoupons();
     } catch (error) {
       toast.error(error.message || 'Erro ao criar cupom');
@@ -250,6 +250,22 @@ const CouponsAdmin = () => {
                 />
               </div>
             </div>
+
+            {formData.type === 'fixed' && (
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Moeda (Currency)</label>
+                <select
+                  className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-zinc-900 outline-none"
+                  value={formData.currency}
+                  onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                >
+                  <option value="BRL">Real (BRL)</option>
+                  <option value="USD">Dólar (USD)</option>
+                  <option value="EUR">Euro (EUR)</option>
+                </select>
+                <p className="mt-1 text-[10px] text-zinc-400 font-medium italic">Nota: A moeda deve ser a mesma dos seus planos cadastrados.</p>
+              </div>
+            )}
             <div>
               <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Duração do Desconto</label>
               <select

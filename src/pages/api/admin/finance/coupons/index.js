@@ -56,7 +56,7 @@ const handler = async (req, res) => {
             stripeCouponId: stripeCoupon.id,
             amountOff: amountOff ? Number(amountOff) : null,
             percentOff: percentOff ? Number(percentOff) : null,
-            currency: currency || 'USD',
+            currency: currency || 'BRL',
             duration,
             durationInMonths: durationInMonths ? Number(durationInMonths) : null,
             maxRedemptions: maxRedemptions ? Number(maxRedemptions) : null,
