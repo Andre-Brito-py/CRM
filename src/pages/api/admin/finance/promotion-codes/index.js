@@ -46,17 +46,18 @@ const handler = async (req, res) => {
           couponId: coupon.stripeCouponId,
           code,
           maxRedemptions: maxRedemptions ? Number(maxRedemptions) : null,
-          expiresAt,
+          expiresAt: (expiresAt && expiresAt !== '') ? expiresAt : null,
         });
 
         // 2. Save in DB
+        const parsedExpiresAt = (expiresAt && expiresAt !== '') ? new Date(expiresAt) : null;
         const promoCode = await prisma.promotionCode.create({
           data: {
             code,
             couponId,
             stripePromoId: stripePromo.id,
             maxRedemptions: maxRedemptions ? Number(maxRedemptions) : null,
-            expiresAt: expiresAt ? new Date(expiresAt) : null,
+            expiresAt: parsedExpiresAt,
           }
         });
 

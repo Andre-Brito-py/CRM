@@ -77,10 +77,11 @@ const CouponsAdmin = () => {
         payload.amountOff = formData.value;
       }
 
-      await api('/api/admin/finance/coupons', {
+      const res = await api('/api/admin/finance/coupons', {
         method: 'POST',
         body: payload,
       });
+      if (!res.ok) throw new Error(res.error?.msg || 'Erro na criação');
       toast.success('Cupom criado com sucesso');
       setShowModal(false);
       setFormData({ name: '', type: 'percentage', value: '', duration: 'once', durationInMonths: '', currency: 'USD', maxRedemptions: '' });
@@ -95,10 +96,11 @@ const CouponsAdmin = () => {
   const handleDeleteCoupon = async (id) => {
     if (!confirm('Deseja realmente excluir este cupom? (Isso o desativará no Stripe também)')) return;
     try {
-      await api('/api/admin/finance/coupons', {
+      const res = await api('/api/admin/finance/coupons', {
         method: 'DELETE',
         body: { id },
       });
+      if (!res.ok) throw new Error(res.error?.msg || 'Erro ao excluir');
       toast.success('Cupom excluído');
       fetchCoupons();
     } catch (error) {
@@ -110,13 +112,14 @@ const CouponsAdmin = () => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      await api('/api/admin/finance/promotion-codes', {
+      const res = await api('/api/admin/finance/promotion-codes', {
         method: 'POST',
         body: {
           couponId: selectedCoupon.id,
           ...promoData,
         },
       });
+      if (!res.ok) throw new Error(res.error?.msg || 'Erro ao gerar');
       toast.success('Código promocional gerado');
       setShowPromoModal(false);
       setPromoData({ code: '', maxRedemptions: '', expiresAt: '' });
@@ -130,10 +133,11 @@ const CouponsAdmin = () => {
 
   const togglePromoStatus = async (promoId, currentStatus) => {
     try {
-      await api('/api/admin/finance/promotion-codes', {
+      const res = await api('/api/admin/finance/promotion-codes', {
         method: 'PATCH',
         body: { id: promoId, isActive: !currentStatus },
       });
+      if (!res.ok) throw new Error(res.error?.msg || 'Erro na atualização');
       fetchPromoCodes(selectedCoupon.id);
       toast.success('Status atualizado');
     } catch (error) {
