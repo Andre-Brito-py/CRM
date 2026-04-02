@@ -20,15 +20,27 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como altero meu plano?',
-        a: 'Para alterar seu plano, clique no seu nome no canto superior direito e selecione "Configurações da Conta" > "Faturamento".\n\nLá você poderá visualizar seu plano atual e as opções de Upgrade ou Downgrade. Ao mudar de plano, o Stripe calcula automaticamente o valor proporcional (prorata) para o restante do seu ciclo de faturamento atual.'
+        a: 'Vá em "Configurações da Conta" → "Faturamento" e clique em "Alterar Plano". A mudança é instantânea via Stripe — o valor proporcional (prorata) do ciclo atual é calculado automaticamente.'
       },
       {
         q: 'Como atualizo meu cartão de crédito?',
-        a: 'Acesse "Configurações da Conta" > "Faturamento" e clique em "Gerenciar Pagamentos". Isso abrirá o Portal de Cobrança seguro da Stripe.\n\nNo portal, você pode adicionar um novo método de pagamento, definir um cartão como principal ou visualizar faturas passadas.'
+        a: 'Acesse "Configurações da Conta" → "Faturamento" e clique em "Gerenciar Pagamentos". Isso abre o Portal seguro da Stripe onde você adiciona ou troca o método de pagamento.'
       },
       {
         q: 'Por que fui cobrado a mais?',
-        a: 'Existem três motivos principais: \n1. Overage de IA (uso excedente após o limite do plano).\n2. Marketplace Fees (comissões de vendas integradas).\n3. Provisão de Números extras (WhatsApp).\n\nVocê pode auditar todos os custos detalhados na aba de Faturamento.'
+        a: 'Os motivos mais comuns são:\n1. Overage de IA (uso excedente acima do limite do plano).\n2. Créditos de WhatsApp extras adquiridos.\n3. Prorata de upgrade de plano no meio do ciclo.\n\nAudit todos os custos em "Faturamento → Histórico de Invoices".'
+      },
+      {
+        q: 'Como baixo um recibo ou nota fiscal?',
+        a: 'Em "Configurações" → "Faturamento" → "Histórico de Invoices", cada cobrança tem um botão para baixar o recibo em PDF diretamente do Stripe.'
+      },
+      {
+        q: 'Posso comprar créditos extras sem mudar de plano?',
+        a: 'Sim! Em "Faturamento" você encontra pacotes de créditos avulsos para IA e WhatsApp. Útil quando a cota mensal acaba antes do fim do ciclo sem precisar fazer upgrade de plano.'
+      },
+      {
+        q: 'O que acontece quando o trial termina?',
+        a: 'Ao fim do trial, o sistema pede um cartão de crédito para continuar. Se não for adicionado, o workspace fica somente-leitura. Os dados não são apagados imediatamente — você tem 7 dias para regularizar.'
       }
     ]
   },
@@ -36,43 +48,232 @@ const FAQ_DATA = [
     id: 'whatsapp',
     icon: '📱',
     title: 'WhatsApp e Inbox',
-    description: 'Canais e comunicação direta.',
+    description: 'Canais, mensagens e atendimento.',
     items: [
       {
         q: 'Como conectar meu WhatsApp?',
-        a: 'Vá em "Configurações do Workspace" > "WhatsApp" e clique em "Conectar Número". Você precisará do Phone Number ID e Business Account ID do painel Meta Cloud API.'
+        a: 'Vá em "Configurações do Workspace" → "WhatsApp" → "Adicionar Número".\n\nVocê precisará do:\n• Phone Number ID\n• WhatsApp Business Account ID\n• Token de Acesso do Usuário do Sistema\n\nTodo obtidos no painel Meta for Developers.'
       },
       {
-        q: 'Minha conexão caiu, o que fazer?',
-        a: 'Verifique se seu Token da Meta expirou ou se o Webhook está apontando para o endereço correto no painel de desenvolvedor da Meta.'
+        q: 'Minha conexão WhatsApp caiu, o que fazer?',
+        a: 'Verifique:\n1. Se o Token da Meta expirou (tokens de usuário expiram em 60 dias; use token de Sistema permanente).\n2. Se o Webhook URL está correto no painel da Meta.\n3. Se o Verify Token bate com o cadastrado.\n\nReconecte em "Configurações → WhatsApp".'
       },
       {
-        q: 'Como a IA do Autopilot funciona?',
-        a: 'O Autopilot sugere respostas no Inbox ou responde automaticamente 24/7. Configure o "Contexto de Negócio" em "Configurações > IA" para melhores resultados.'
+        q: 'Como conectar o Instagram Direct?',
+        a: 'Vá em "Configurações" → "Instagram" → "Adicionar Conta". Você precisará do:\n• Facebook Page ID (da página vinculada ao Instagram)\n• Instagram Business Account ID\n• Token com permissões instagram_manage_messages e pages_messaging.'
+      },
+      {
+        q: 'Como funciona o Autopilot (IA)?',
+        a: 'Quando o Autopilot está ativo em uma conversa, a IA responde automaticamente usando o contexto do seu negócio cadastrado em "Configurações → IA". Ideal para fora do horário comercial.\n\nO agente pode retomar o controle a qualquer momento clicando em "Autopilot: Off".'
+      },
+      {
+        q: 'Como usar os Templates de Mensagem?',
+        a: 'Em qualquer conversa aberta, clique no ícone de balão com raios (⚡) ou pressione Ctrl+/ para abrir os templates. Clique num template para inserir no campo de mensagem. Variáveis como {{contact.firstName}} são preenchidas automaticamente.'
+      },
+      {
+        q: 'Como atribuir conversas a um agente?',
+        a: 'Dentro da conversa, clique em "Assign Member" no painel lateral direito e selecione o membro da equipe. Você também pode criar Automações para atribuir automaticamente por palavra-chave, tag ou horário.'
+      },
+      {
+        q: 'Como resolver/fechar uma conversa?',
+        a: 'No topo da janela de chat, clique no botão de status e selecione "Resolvida". A conversa sai da fila principal mas permanece acessível no histórico para consulta futura.'
       }
     ]
   },
   {
     id: 'crm',
     icon: '🤝',
-    title: 'CRM e Automações',
-    description: 'Funis, leads e automação no-code.',
+    title: 'CRM e Contatos',
+    description: 'Gestão de leads, empresas e negócios.',
     items: [
       {
-        q: 'Como criar múltiplos funis?',
-        a: 'No menu "Funil de Vendas", use o seletor de funis no topo e clique em "Criar Novo Funil". Defina as etapas do seu processo customizado.'
+        q: 'Como importar contatos em massa?',
+        a: 'Em "Contatos", clique em "Importar CSV". Arraste o arquivo e mapeie cada coluna para o campo correspondente no CRM (Nome, E-mail, Telefone, etc.). O sistema detecta e mescla duplicatas automaticamente pelo e-mail ou telefone.'
       },
       {
-        q: 'Como as automações funcionam?',
-        a: 'Nossas automações seguem a lógica: QUANDO [Gatilho] -> FAÇA [Ação]. Configure em "Automações" para automatizar respostas e movimentação de Leads.'
+        q: 'Como criar e usar Funis de Vendas?',
+        a: 'Acesse "Funil de Vendas" no menu lateral. No seletor de funis no topo, clique em "Criar Novo Funil". Defina as etapas (colunas) do seu processo e arraste os cards de negócios entre elas.\n\nPara múltiplos funis, crie um por tipo de venda (ex: B2B e Varejo).'
       },
       {
-        q: 'Posso convidar minha equipe?',
-        a: 'Sim! Vá em "Configurações do Workspace" > "Equipe" e clique em "Convidar Membro" via e-mail.'
+        q: 'Como funcionam as Automações?',
+        a: 'As automações seguem a lógica: SE [Gatilho acontecer] + QUANDO [Condições forem verdadeiras] → FAÇA [Ação].\n\nGatilhos: nova mensagem, mudança de estágio, NPS respondido, cobrança paga/falhou, tag adicionada.\nAções: enviar WhatsApp, e-mail, atribuir, criar tarefa, mover deal, chamar webhook e mais.'
+      },
+      {
+        q: 'Como adicionar Campos Personalizados?',
+        a: 'Vá em "Configurações" → "Campos Personalizados". Crie campos de qualquer tipo: texto, número, seleção, checkbox, moeda, URL, telefone ou data.\n\nEles aparecerão automaticamente no perfil dos contatos e nos filtros de listagem.'
+      },
+      {
+        q: 'Como criar e vincular Empresas (B2B)?',
+        a: 'No menu "Empresas", clique em "+ Nova Empresa". Após criar, acesse um Contato e no campo "Empresa" vincule-o. Todos os deals e histórico dos contatos vinculados aparecem consolidados na página da empresa.'
+      },
+      {
+        q: 'Como usar as Tags?',
+        a: 'No perfil de um contato, acesse a aba "Tags" e adicione ou crie tags (ex: VIP, Lead Frio, Urgente). Tags são usadas como filtros na listagem e como condições em Automações para segmentar ações.'
+      },
+      {
+        q: 'Como registrar atividades (ligações, reuniões, notas)?',
+        a: 'No perfil do contato, acesse a aba "Atividades" e clique em "Registrar Atividade". Escolha o tipo (Nota, Ligação ou Reunião), preencha o título, data e detalhes. O registro fica na linha do tempo cronológica do contato.'
+      }
+    ]
+  },
+  {
+    id: 'automations',
+    icon: '⚡',
+    title: 'Automações e Workflows',
+    description: 'Regras automáticas e fluxos de trabalho.',
+    items: [
+      {
+        q: 'Como criar uma automação de boas-vindas?',
+        a: 'Em "Automações", clique em "Criar Regra".\n• Gatilho: Nova mensagem recebida\n• Ação: Enviar mensagem WhatsApp com template de boas-vindas\n\nUse variáveis como {{contact.firstName}} para personalizar. Ative e teste com o Simulador antes de ligar.'
+      },
+      {
+        q: 'Como testar uma automação antes de ativar?',
+        a: 'Em qualquer regra criada (mesmo sem ativar), clique em "Simulador". Insira um Contact ID ou Deal ID opcionais e clique em "Simular". O sistema mostra se a regra dispararia e o preview da ação gerada.'
+      },
+      {
+        q: 'Como criar alertas de SLA (tempo de resposta)?',
+        a: 'Crie uma automação com:\n• Gatilho: Mensagem recebida\n• Condição: Horário entre 09h e 18h\n• Ação: Aguardar 15 min → Criar tarefa "Cliente sem resposta há 15 min" para o responsável\n\nIsso garante que nenhum cliente fique sem atendimento por muito tempo.'
+      },
+      {
+        q: 'Como ver os logs de execução das automações?',
+        a: 'Clique na automação desejada e acesse a aba "Logs". As últimas 20 execuções são listadas com: data/hora, evento disparador, se executou ou não e o motivo. Essencial para depurar problemas.'
+      },
+      {
+        q: 'Como criar uma sequência de múltiplas ações?',
+        a: 'Na hora de escolher a Ação, selecione "Múltiplas Ações". Você pode adicionar quantas ações quiser em sequência, com atrasos (Delay) entre elas.\n\nExemplo: (1) Responder automaticamente → (2) Aguardar 2h → (3) Criar tarefa de follow-up.'
+      }
+    ]
+  },
+  {
+    id: 'nps',
+    icon: '⭐',
+    title: 'NPS e Satisfação',
+    description: 'Pesquisas de satisfação e feedback.',
+    items: [
+      {
+        q: 'Como criar e enviar uma pesquisa NPS?',
+        a: 'Acesse "NPS → Pesquisas" → "Nova Pesquisa". Defina o nome, mensagem de abertura e agradecimento.\n\nPara enviar:\n• Manual: copie o link direto e compartilhe.\n• Automático: crie uma Automação com gatilho "Deal ganho" e ação "Enviar Pesquisa NPS via WhatsApp/E-mail".'
+      },
+      {
+        q: 'Como interpretar o score NPS?',
+        a: 'O NPS vai de -100 a +100, calculado como % Promotores (9-10) menos % Detratores (0-6):\n\n• Abaixo de 0: Zona Crítica\n• 0 a 30: Zona de Aperfeiçoamento\n• 30 a 70: Zona de Qualidade\n• Acima de 70: Zona de Excelência\n\nBenchmark médio B2B no Brasil é ~40.'
+      },
+      {
+        q: 'Como criar alertas para notas baixas?',
+        a: 'Crie uma Automação com gatilho "NPS Detrator recebido". Como ação, crie uma tarefa urgente para o gerente ligar para o cliente em até 24h.\n\nIsso permite salvar clientes insatisfeitos antes que churn aconteça.'
+      },
+      {
+        q: 'Como ver as respostas individuais?',
+        a: 'Na seção "NPS → Respostas", você vê cada avaliação com: nota (0-10), comentário do cliente, nome e data. Use os filtros de pontuação e período para encontrar padrões.'
+      }
+    ]
+  },
+  {
+    id: 'meta_ads',
+    icon: '📊',
+    title: 'Meta Ads Analytics',
+    description: 'Análise de campanhas do Facebook e Instagram.',
+    items: [
+      {
+        q: 'Como conectar minha conta de anúncios?',
+        a: 'No menu "Meta Ads", clique em "Conectar Meta Ads Cloud". Você será redirecionado para o Facebook para autorizar o Vysify via OAuth 2.0.\n\nSua senha nunca é compartilhada — apenas um token de acesso é salvo, criptografado.'
+      },
+      {
+        q: 'Quais métricas aparecem no painel?',
+        a: 'O painel mostra os dados dos últimos 30 dias:\n• 💰 Investimento total em campanhas\n• 👥 Leads totais gerados\n• 📉 Custo por Lead (CPL) médio\n• 📈 ROAS (Retorno sobre Investimento em Anúncios)\n\nTambém há um gráfico de gastos diários e uma tabela de campanhas individuais.'
+      },
+      {
+        q: 'Recebi erro ao conectar. O que fazer?',
+        a: 'Verifique:\n1. Se as configurações de OAuth estão corretas no Super Admin (Client ID e Secret da Meta API).\n2. Se sua conta Meta tem permissão de Administrador no Business Manager.\n3. Se há pelo menos uma conta de anúncios ativa vinculada ao perfil.\n\nSe o erro persistir, contate o suporte com o código de erro exibido.'
+      },
+      {
+        q: 'Este módulo tem custo extra?',
+        a: 'O módulo de Meta Ads Analytics em si não gera custo adicional pela Vysify — seu uso está incluído no plano que inclui este módulo.\n\nOs gastos com os anúncios em si continuam sendo cobrados diretamente pelo Facebook/Meta conforme seu orçamento de campanha. A Vysify apenas lê os dados, não gerencia os gastos.'
+      }
+    ]
+  },
+  {
+    id: 'ai',
+    icon: '🤖',
+    title: 'Inteligência Artificial',
+    description: 'IA, respostas automáticas e resumos.',
+    items: [
+      {
+        q: 'Como treinar a IA com os dados da minha empresa?',
+        a: 'Acesse "Configurações do Workspace" → "Contexto de IA". Preencha com:\n• Descrição dos seus produtos/serviços e preços\n• Público-alvo e suas dores\n• Tom de voz (formal, descontraído, técnico)\n• Diferenciais competitivos\n• Perguntas frequentes e respostas padrão\n\nQuanto mais detalhado, mais precisas as respostas geradas.'
+      },
+      {
+        q: 'Como gerar uma resposta com IA no Inbox?',
+        a: 'Dentro de uma conversa aberta, clique no ícone ✨ (estrela) na barra de ferramentas acima do campo de mensagem. A IA analisará o histórico da conversa e o contexto do seu negócio e gerará uma sugestão de resposta. Você pode editar antes de enviar.'
+      },
+      {
+        q: 'Como resumir uma conversa com IA?',
+        a: 'No painel lateral de uma conversa, clique em "Resumir com IA". O sistema gera um resumo estruturado com: problema do cliente, o que foi prometido e próximo passo recomendado. Ideal para passar o atendimento entre agentes.'
+      },
+      {
+        q: 'Meus créditos de IA acabaram. O que fazer?',
+        a: 'Quando os créditos de IA se esgotam, o sistema mostra um aviso e solicita confirmação para continuar com cobrança por overage, ou você pode comprar um pacote de créditos extras em "Faturamento → Créditos de IA".'
+      },
+      {
+        q: 'Como funciona o AI Insights no Pipeline?',
+        a: 'Clique no botão ✨ no topo do Pipeline de Vendas. A IA analisa todos os deals abertos e gera um relatório com:\n• Gargalos identificados por estágio\n• Deals em risco de esfriar (sem atividade recente)\n• Recomendações de próximo passo para cada negócio'
+      }
+    ]
+  },
+  {
+    id: 'team',
+    icon: '👥',
+    title: 'Equipe e Configurações',
+    description: 'Membros, permissões e configurações gerais.',
+    items: [
+      {
+        q: 'Como convidar membros para o workspace?',
+        a: 'Vá em "Configurações" → "Equipe" → "Convidar Membro". Informe o e-mail e o papel (Admin ou Member). O convidado recebe um e-mail de aceite.\n\nAlternativamente, gere um link de convite compartilhável para onboarding em massa.'
+      },
+      {
+        q: 'Qual a diferença entre Owner, Admin e Member?',
+        a: '• Owner: acesso total (billing, configurações, todos os dados)\n• Admin: gerencia automações, pipelines, equipe e integrações\n• Member: acessa apenas Inbox, Contatos, Deals e Tarefas — não vê dados financeiros nem configurações sensíveis'
+      },
+      {
+        q: 'Como remover um membro da equipe?',
+        a: 'Em "Configurações → Equipe", clique nos três pontos ao lado do membro e selecione "Remover". O acesso é revogado imediatamente. Conversas e deals atribuídos a ele ficam como "Não atribuídos".'
+      },
+      {
+        q: 'Como configurar 2FA (autenticação em 2 fatores)?',
+        a: 'Acesse "Conta" → "Segurança" → "Autenticação 2FA" e clique em "Configurar 2FA". Escaneie o QR Code com Google Authenticator, Authy ou 1Password e insira o código de 6 dígitos para ativar.'
+      },
+      {
+        q: 'Como aplicar presets de indústria?',
+        a: 'Em "Configurações do Workspace" → "Presets de Indústria", escolha o segmento (Imobiliária, Clínicas, Agência, etc.) e clique em "Aplicar Preset". O sistema cria automaticamente Pipelines, Campos Personalizados e Tags pré-configurados para aquele setor.'
       }
     ]
   }
 ];
+
+// Keyword search: finds the best matching FAQ item across all categories
+const findFaqByKeyword = (query) => {
+  const q = query.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const keywords = q.split(/\s+/).filter(w => w.length > 2);
+
+  let best = null;
+  let bestScore = 0;
+
+  for (const cat of FAQ_DATA) {
+    for (const item of cat.items) {
+      const target = (item.q + ' ' + item.a + ' ' + cat.title)
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+      const score = keywords.reduce((acc, kw) => acc + (target.includes(kw) ? 1 : 0), 0);
+      if (score > bestScore) {
+        bestScore = score;
+        best = { ...item, category: cat.title };
+      }
+    }
+  }
+  return bestScore > 0 ? best : null;
+};
+
 
 const SupportHub = () => {
   const { data: session } = useSession();
@@ -161,16 +362,24 @@ const SupportHub = () => {
       setHistory(prev => [...prev, userMsg]);
       setNewMessage('');
       
-      // Simulate bot thinking/search
       setLoading(true);
       setTimeout(() => {
-        const botMsg = { 
-          id: Date.now() + 1, 
-          side: 'bot', 
-          content: 'Entendi. Estou procurando nos meus documentos... No momento, recomendo conferir as categorias principais ou detalhar mais sua dúvida para eu te ajudar melhor.',
-          showActions: true,
-          timestamp: new Date() 
-        };
+        const match = findFaqByKeyword(text);
+        const botMsg = match
+          ? {
+              id: Date.now() + 1,
+              side: 'bot',
+              content: `Encontrei algo sobre **${match.category}** que pode ajudar:\n\n**${match.q}**\n\n${match.a}`,
+              isAnswer: true,
+              timestamp: new Date()
+            }
+          : {
+              id: Date.now() + 1,
+              side: 'bot',
+              content: 'Não encontrei uma resposta exata para essa dúvida. 🤔\n\nTente reformular ou selecione uma categoria abaixo para navegar pelos tópicos disponíveis:',
+              showActions: true,
+              timestamp: new Date()
+            };
         setHistory(prev => [...prev, botMsg]);
         setLoading(false);
       }, 800);
