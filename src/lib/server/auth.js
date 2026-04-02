@@ -183,7 +183,7 @@ const createEmailProvider = () =>
     },
   });
 
-const buildBaseAuthOptions = () => {
+const buildBaseAuthOptions = (req) => {
   const secret = process.env.NEXTAUTH_SECRET || null;
   if (process.env.NODE_ENV === 'production' && !secret) {
     throw new Error('NEXTAUTH_SECRET is missing');
@@ -205,6 +205,9 @@ const buildBaseAuthOptions = () => {
             )
           );
           if (!requireCardOnSignup) return true;
+
+          const skipSetup = req?.cookies?.vysify_skip_setup;
+          if (skipSetup === '1') return true;
 
           const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
           if (!paymentsSecretKey) return true;
@@ -354,7 +357,7 @@ const buildBaseAuthOptions = () => {
   };
 };
 
-export const getAuthOptions = async () => {
+export const getAuthOptions = async (req) => {
   const providers = [];
   const google = await getGoogleOauthConfig();
   if (google.ok) {
@@ -369,7 +372,7 @@ export const getAuthOptions = async () => {
   providers.push(createCredentialsProvider());
   providers.push(createEmailProvider());
 
-  return { ...buildBaseAuthOptions(), providers };
+  return { ...buildBaseAuthOptions(req), providers };
 };
 
 export const authOptions = {

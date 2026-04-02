@@ -8,6 +8,7 @@ import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
 import { useTranslation } from 'react-i18next';
 import { redirectToCheckout } from '@/lib/client/stripe';
+import { getDefaultCurrencyForLang } from '@/lib/common/currency';
 
 const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => {
     const router = useRouter();
@@ -180,6 +181,24 @@ const Register = ({ plans, initialPlanSlug, initialInterval, showFreePlan }) => 
     };
 
     const signInWithSocial = (socialId) => {
+        const normalizedSlug = String(formData.planSlug || '').trim().toUpperCase();
+        const selectedPlan = (plans || []).find((p) => String(p?.slug || '').toUpperCase() === normalizedSlug) || null;
+        
+        if (selectedPlan && normalizedSlug !== 'FREE') {
+            const isAnnual = formData.interval === 'year';
+            let planPriceId = formData.priceId || null;
+            if (!planPriceId) {
+                const targetCurrency = getDefaultCurrencyForLang(window.navigator.language);
+                const priceObj = selectedPlan.prices?.find(p => p.currency === targetCurrency) || selectedPlan.prices?.find(p => p.currency === 'USD') || selectedPlan.prices?.[0];
+                planPriceId = isAnnual ? (priceObj ? priceObj.stripePriceIdAnnual : selectedPlan.stripePriceIdAnnual) : (priceObj ? priceObj.stripePriceId : selectedPlan.stripePriceId);
+            }
+            if (planPriceId) {
+                document.cookie = `vysify_skip_setup=1; path=/; max-age=3600`;
+                localStorage.setItem('vysify_oauth_pending_price_id', planPriceId);
+            }
+        } else {
+            localStorage.removeItem('vysify_oauth_pending_price_id');
+        }
         signIn(socialId, { callbackUrl: '/account' });
     };
 

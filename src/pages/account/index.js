@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import { ChevronRightIcon, PlusIcon } from '@heroicons/react/24/outline';
@@ -10,6 +10,7 @@ import Meta from '@/components/Meta/index';
 import { useInvitations, useWorkspaces } from '@/hooks/data/index';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
+import { redirectToCheckout } from '@/lib/client/stripe';
 import { useWorkspace } from '@/providers/workspace';
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +23,37 @@ const Welcome = () => {
   const { setWorkspace } = useWorkspace();
   const { t } = useTranslation();
   const [isSubmitting, setSubmittingState] = useState(false);
+
+  useEffect(() => {
+    const pendingPriceId = localStorage.getItem('vysify_oauth_pending_price_id');
+    if (pendingPriceId) {
+      localStorage.removeItem('vysify_oauth_pending_price_id');
+      document.cookie = 'vysify_skip_setup=; Max-Age=0; path=/;';
+      
+      const doSubscribe = async () => {
+        setSubmittingState(true);
+        toast.loading(t('common.loading.checkout', 'Redirecionando para pagamento seguro...'), { duration: 5000, id: 'checkout-loading' });
+        try {
+          const response = await api(`/api/payments/subscription/${pendingPriceId}`, {
+            method: 'POST',
+          });
+          if (response?.data?.sessionId) {
+            await redirectToCheckout(response.data.sessionId);
+          } else {
+            toast.dismiss('checkout-loading');
+            toast.error('Não foi possível iniciar o checkout');
+            setSubmittingState(false);
+          }
+        } catch (e) {
+          toast.dismiss('checkout-loading');
+          toast.error('Erro ao iniciar assinatura');
+          setSubmittingState(false);
+        }
+      };
+      
+      doSubscribe();
+    }
+  }, [t]);
 
   const accept = (memberId) => {
     setSubmittingState(true);
