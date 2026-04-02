@@ -77,7 +77,10 @@ export const deleteCoupon = async (couponId) => {
 export const createPromotionCode = async ({ couponId, code, maxRedemptions, expiresAt }) => {
   const stripe = await getStripe();
   return await stripe.promotionCodes.create({
-    coupon: couponId,
+    promotion: {
+      type: 'coupon',
+      coupon: couponId,
+    },
     code,
     max_redemptions: maxRedemptions || undefined,
     expires_at: expiresAt ? Math.floor(new Date(expiresAt).getTime() / 1000) : undefined,
