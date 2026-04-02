@@ -360,7 +360,9 @@ const Topbar = ({ menu, staticMenu }) => {
                 </p>
                 <div className="flex items-center gap-1 opacity-50">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[9px] font-black uppercase tracking-widest">Conta Pro</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest">
+                    {userSubscription === 'FREE' ? (t('landing.pricing.free') || 'Grátis') : `Conta ${userSubscription}`}
+                  </span>
                 </div>
               </div>
               <ChevronDownIcon className="w-4 h-4 text-zinc-400 group-hover:translate-y-0.5 transition-transform" />

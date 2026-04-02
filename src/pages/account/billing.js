@@ -160,7 +160,7 @@ const Billing = ({ invoices, products }) => {
   };
 
   const toggleModal = () => setModalVisibility(!showModal);
-  const currentSubscription = session?.user?.subscription || 'FREE';
+  const currentSubscription = subscriptionStatus?.subscriptionType || session?.user?.subscription || 'FREE';
 
   useEffect(() => {
     let mounted = true;
