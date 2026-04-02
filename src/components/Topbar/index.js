@@ -80,7 +80,7 @@ const ITEM_ICONS = {
   'common.label.presets': BoltIcon,
 };
 
-const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];
+// Icons and constants...
 
 const Topbar = ({ menu, staticMenu }) => {
   const { t } = useTranslation();
@@ -102,6 +102,15 @@ const Topbar = ({ menu, staticMenu }) => {
     workspace?.slug ? `/api/workspace/${workspace.slug}/notifications` : null,
     { refreshInterval: 30000 } // Refresh every 30s
   );
+
+  const { data: subscriptionData } = useSWR(
+    workspace?.slug ? `/api/payments/subscription/status?workspaceSlug=${workspace.slug}` : `/api/payments/subscription/status`,
+    { refreshInterval: 60000 } // Refresh every minute
+  );
+
+  const userSubscriptionData = subscriptionData?.data || null;
+  const planName = userSubscriptionData?.planName || (userSubscriptionData?.subscriptionType === 'FREE' ? 'Grátis' : '');
+  const allowedModules = userSubscriptionData?.features?.allowedModules || {};
 
   const notifications = notificationsData?.notifications || [];
   const unreadCount = notificationsData?.unreadCount || 0;
@@ -162,11 +171,16 @@ const Topbar = ({ menu, staticMenu }) => {
     });
   };
 
-  const userSubscription = session?.user?.subscription || 'FREE';
   const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
 
-  const isItemLocked = (itemName) =>
-    PREMIUM_FEATURES.includes(itemName) && userSubscription === 'FREE' && !isSuperAdmin;
+  const isItemLocked = (item) => {
+    if (isSuperAdmin) return false;
+    // If a moduleKey is defined, check if it's explicitly allowed in the plan
+    if (item.moduleKey) {
+      return allowedModules[item.moduleKey] === false;
+    }
+    return false;
+  };
 
   // Determine active top-level section from path
   const isSettingsPath = router.asPath.includes('/settings');
@@ -361,7 +375,7 @@ const Topbar = ({ menu, staticMenu }) => {
                 <div className="flex items-center gap-1 opacity-50">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span className="text-[9px] font-black uppercase tracking-widest">
-                    {userSubscription === 'FREE' ? (t('landing.pricing.free') || 'Grátis') : `Conta ${userSubscription}`}
+                    {planName ? `Plano ${planName}` : (t('landing.pricing.free') || 'Grátis')}
                   </span>
                 </div>
               </div>
@@ -599,7 +613,7 @@ const NavDropdown = ({
             {/* Menu items */}
             <div className="p-2">
               {section.items.map((item, idx) => {
-                const locked = isItemLocked(item.name);
+                const locked = isItemLocked(item);
                 const active = router.asPath === item.path;
                 const Icon = ITEM_ICONS[item.name] || CogIcon;
                 return (
@@ -720,7 +734,7 @@ const MobileSection = ({ section, t, router, workspace, workspacesData, isLoadin
             <div className="px-3 pb-3 space-y-1">
 
               {section.items.map((item, idx) => {
-                const locked = isItemLocked(item.name);
+                const locked = isItemLocked(item);
                 const active = router.asPath === item.path;
                 const Icon = ITEM_ICONS[item.name] || CogIcon;
                 return (

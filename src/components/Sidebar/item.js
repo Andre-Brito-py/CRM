@@ -6,18 +6,26 @@ import { LockClosedIcon } from '@heroicons/react/24/outline';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
 
-const PREMIUM_FEATURES = ['Automations', 'Analytics', 'Message Templates'];
+import { useWorkspace } from '@/providers/workspace';
+import useSWR from 'swr';
 
 const Item = ({ data, isLoading, closeMenu }) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
+  const { workspace } = useWorkspace();
   const router = useRouter();
 
+  const { data: subscriptionData } = useSWR(
+    workspace?.slug ? `/api/payments/subscription/status?workspaceSlug=${workspace.slug}` : `/api/payments/subscription/status`,
+    { refreshInterval: 60000 }
+  );
+
+  const allowedModules = subscriptionData?.data?.features?.allowedModules || {};
   const isActive = router.asPath === data.path;
-  const isPremiumFeature = PREMIUM_FEATURES.includes(data.name);
-  const userSubscription = session?.user?.subscription || 'FREE';
   const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
-  const isLocked = isPremiumFeature && userSubscription === 'FREE' && !isSuperAdmin;
+
+  // Check if the module is locked based on the dynamic plan configuration
+  const isLocked = !isSuperAdmin && data.moduleKey && allowedModules[data.moduleKey] === false;
 
   const handleClick = (e) => {
     if (isLocked) {
@@ -32,8 +40,6 @@ const Item = ({ data, isLoading, closeMenu }) => {
         }
       });
     } else {
-      // For non-locked items, we want to allow the Link to handle it.
-      // If closeMenu exists (mobile), call it but don't prevent navigation.
       if (closeMenu) closeMenu();
     }
   };
