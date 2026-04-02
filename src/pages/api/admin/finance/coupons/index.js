@@ -46,6 +46,7 @@ const handler = async (req, res) => {
           currency,
           duration,
           durationInMonths: durationInMonths ? Number(durationInMonths) : null,
+          maxRedemptions: maxRedemptions ? Number(maxRedemptions) : null,
         });
 
         // 2. Save in DB

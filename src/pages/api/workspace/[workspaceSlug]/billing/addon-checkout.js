@@ -57,6 +57,7 @@ const handler = async (req, res) => {
       customer: customerPayment.paymentId,
       mode: 'payment',
       payment_method_types: ['card'], // pix não é suportado out-of-the-box sem config extra na stripe, manter card
+      allow_promotion_codes: true,
       line_items: [
         {
           price_data: {

@@ -50,12 +50,13 @@ export const getProducts = async () => {
   return products?.data.reverse();
 };
 
-export const createCoupon = async ({ name, amountOff, percentOff, currency, duration, durationInMonths }) => {
+export const createCoupon = async ({ name, amountOff, percentOff, currency, duration, durationInMonths, maxRedemptions }) => {
   const stripe = await getStripe();
   const params = {
     name,
     duration,
     duration_in_months: duration === 'repeating' ? durationInMonths : undefined,
+    max_redemptions: maxRedemptions || undefined,
   };
 
   if (amountOff) {

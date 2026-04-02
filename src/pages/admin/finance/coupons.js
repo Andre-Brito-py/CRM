@@ -27,6 +27,7 @@ const CouponsAdmin = () => {
     duration: 'once',
     durationInMonths: '',
     currency: 'USD',
+    maxRedemptions: '',
   });
 
   const [promoData, setPromoData] = useState({
@@ -68,6 +69,7 @@ const CouponsAdmin = () => {
         duration: formData.duration,
         durationInMonths: formData.durationInMonths,
         currency: formData.currency,
+        maxRedemptions: formData.maxRedemptions,
       };
       if (formData.type === 'percentage') {
         payload.percentOff = formData.value;
@@ -81,7 +83,7 @@ const CouponsAdmin = () => {
       });
       toast.success('Cupom criado com sucesso');
       setShowModal(false);
-      setFormData({ name: '', type: 'percentage', value: '', duration: 'once', durationInMonths: '', currency: 'USD' });
+      setFormData({ name: '', type: 'percentage', value: '', duration: 'once', durationInMonths: '', currency: 'USD', maxRedemptions: '' });
       fetchCoupons();
     } catch (error) {
       toast.error(error.message || 'Erro ao criar cupom');
@@ -268,6 +270,17 @@ const CouponsAdmin = () => {
                 />
               </div>
             )}
+            <div>
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Limite de Usos (Opcional)</label>
+              <input
+                type="number"
+                min="1"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-zinc-900 outline-none"
+                placeholder="Ex: 50"
+                value={formData.maxRedemptions}
+                onChange={(e) => setFormData({ ...formData, maxRedemptions: e.target.value })}
+              />
+            </div>
             <div className="pt-4">
               <Button
                 type="submit"
@@ -300,6 +313,28 @@ const CouponsAdmin = () => {
                 >
                   Gerar
                 </Button>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Limite de Usos (Opcional)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm outline-none"
+                    placeholder="Ex: 100"
+                    value={promoData.maxRedemptions}
+                    onChange={(e) => setPromoData({ ...promoData, maxRedemptions: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-1">Validade (Opcional)</label>
+                  <input
+                    type="datetime-local"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-sm outline-none"
+                    value={promoData.expiresAt}
+                    onChange={(e) => setPromoData({ ...promoData, expiresAt: e.target.value })}
+                  />
+                </div>
               </div>
             </form>
 
