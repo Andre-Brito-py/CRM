@@ -785,7 +785,7 @@ const TUTORIAL_CONTENT = {
         </div>
 
         <TipBox>
-          Para resultados mais precisos, instale o <b>Pixel do Facebook</b> no seu site e configure eventos de conversão de "Lead". Isso garante que cada formulário preenchido seja contabilizado corretamente no CPL.
+          Para resultados mais precisos, instale o <b>Pixel do Facebook</b> no seu site e configure eventos de conversão de &quot;Lead&quot;. Isso garante que cada formulário preenchido seja contabilizado corretamente no CPL.
         </TipBox>
       </div>
     ),
