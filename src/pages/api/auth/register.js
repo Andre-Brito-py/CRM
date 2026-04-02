@@ -90,7 +90,7 @@ const handler = async (req, res) => {
             return res.status(429).json({ error: { msg: 'Too Many Requests' } });
         }
 
-        const existingUser = await prisma.user.findFirst({
+        let user = await prisma.user.findFirst({
             where: {
                 email: {
                     equals: normalizedEmail,
@@ -99,75 +99,94 @@ const handler = async (req, res) => {
             },
         });
 
-        if (existingUser) {
-            await sleep(jitterMs(600, 900));
-            log({ level: 'info', msg: 'auth_register_existing_email', requestId });
-            return res.status(201).json(successPayload);
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email: normalizedEmail,
-                password: hashedPassword,
-                termsVersion,
-                termsAcceptedAt: new Date(),
-                twoFactorEnabled: false,
-            },
-        });
-
-        if (companyName && String(companyName).trim().length > 0) {
-            try {
-                const { createWorkspace } = await import('@/prisma/services/workspace');
-                const slugify = (await import('slugify')).default;
-                let baseSlug = slugify(String(companyName).trim().toLowerCase(), { strict: true });
-                if (!baseSlug) baseSlug = crypto.randomBytes(4).toString('hex');
-                await createWorkspace(user.id, normalizedEmail, String(companyName).trim(), baseSlug);
-            } catch (err) {
-                log({ level: 'warn', msg: 'auth_register_workspace_create_failed', error: err });
+        if (user) {
+            const isPasswordValid = user.password ? await bcrypt.compare(String(password), user.password) : false;
+            if (!isPasswordValid) {
+                await sleep(jitterMs(600, 900));
+                log({ level: 'info', msg: 'auth_register_existing_email_blocked', requestId });
+                return res.status(201).json(successPayload);
             }
-        }
 
-        const token = crypto.randomBytes(32).toString('hex');
-        await prisma.emailVerificationToken.deleteMany({
-            where: {
-                email: {
-                    equals: normalizedEmail,
-                    mode: 'insensitive',
+            const customerPayment = await getPayment(normalizedEmail);
+            if (customerPayment?.paymentId) {
+                const stripe = await getStripe();
+                const paymentMethods = await stripe.paymentMethods.list({
+                    customer: customerPayment.paymentId,
+                    type: 'card',
+                    limit: 1,
+                });
+                const hasCard = Array.isArray(paymentMethods?.data) && paymentMethods.data.length > 0;
+                if (hasCard) {
+                    await sleep(jitterMs(600, 900));
+                    log({ level: 'info', msg: 'auth_register_existing_user_has_card', requestId });
+                    return res.status(201).json(successPayload);
+                }
+            }
+            log({ level: 'info', msg: 'auth_register_existing_user_retrying_payment', requestId });
+        } else {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            user = await prisma.user.create({
+                data: {
+                    name,
+                    email: normalizedEmail,
+                    password: hashedPassword,
+                    termsVersion,
+                    termsAcceptedAt: new Date(),
+                    twoFactorEnabled: false,
                 },
-            },
-        });
-        await prisma.emailVerificationToken.create({
-            data: {
-                userId: user.id,
-                email: normalizedEmail,
-                token,
-                expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            },
-        });
+            });
 
-        const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
-        const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+            if (companyName && String(companyName).trim().length > 0) {
+                try {
+                    const { createWorkspace } = await import('@/prisma/services/workspace');
+                    const slugify = (await import('slugify')).default;
+                    let baseSlug = slugify(String(companyName).trim().toLowerCase(), { strict: true });
+                    if (!baseSlug) baseSlug = crypto.randomBytes(4).toString('hex');
+                    await createWorkspace(user.id, normalizedEmail, String(companyName).trim(), baseSlug);
+                } catch (err) {
+                    log({ level: 'warn', msg: 'auth_register_workspace_create_failed', error: err });
+                }
+            }
 
-        try {
-          await sendMail({
-            html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
-          <h2>Welcome to Vysify, ${name}!</h2>
-          <p>Please click the button below to verify your email address and activate your account.</p>
-          <a href="${verificationUrl}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #14b8a6; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email</a>
-          <p>Or paste this link into your browser:<br/><a href="${verificationUrl}">${verificationUrl}</a></p>
-          <p>This link expires in 24 hours.</p>
-        </div>
-      `,
-            subject: '[Vysify] Confirm your email address',
-            text: `Welcome to Vysify, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
-            to: normalizedEmail,
-          });
-        } catch (mailErr) {
-          log({ level: 'warn', msg: 'auth_register_verification_email_failed', requestId, error: mailErr });
+            const token = crypto.randomBytes(32).toString('hex');
+            await prisma.emailVerificationToken.deleteMany({
+                where: {
+                    email: {
+                        equals: normalizedEmail,
+                        mode: 'insensitive',
+                    },
+                },
+            });
+            await prisma.emailVerificationToken.create({
+                data: {
+                    userId: user.id,
+                    email: normalizedEmail,
+                    token,
+                    expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                },
+            });
+
+            const appUrl = await getSystemConfig('APP_URL', process.env.APP_URL);
+            const verificationUrl = `${appUrl}/api/auth/verify-email?token=${token}&email=${encodeURIComponent(normalizedEmail)}`;
+
+            try {
+                await sendMail({
+                    html: `
+            <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #333;">
+              <h2>Welcome to Vysify, ${name}!</h2>
+              <p>Please click the button below to verify your email address and activate your account.</p>
+              <a href="${verificationUrl}" style="display: inline-block; padding: 10px 20px; color: white; background-color: #14b8a6; text-decoration: none; border-radius: 5px; font-weight: bold;">Verify Email</a>
+              <p>Or paste this link into your browser:<br/><a href="${verificationUrl}">${verificationUrl}</a></p>
+              <p>This link expires in 24 hours.</p>
+            </div>
+          `,
+                    subject: '[Vysify] Confirm your email address',
+                    text: `Welcome to Vysify, ${name}! Please verify your email by opening this link: ${verificationUrl}`,
+                    to: normalizedEmail,
+                });
+            } catch (mailErr) {
+                log({ level: 'warn', msg: 'auth_register_verification_email_failed', requestId, error: mailErr });
+            }
         }
 
         const requireCardOnSignup = isTruthy(

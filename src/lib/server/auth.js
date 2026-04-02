@@ -197,6 +197,14 @@ const buildBaseAuthOptions = (req) => {
         if (!user?.id) return false;
         if (provider === 'credentials') return true;
 
+        const getCookie = (name) => {
+          if (req?.cookies && req.cookies[name]) return req.cookies[name];
+          const cookieHeader = req?.headers?.cookie;
+          if (!cookieHeader) return null;
+          const match = cookieHeader.match(new RegExp('(^| )' + name + '=([^;]+)'));
+          return match ? match[2] : null;
+        };
+
         try {
           const requireCardOnSignup = isTruthy(
             await getSystemConfig(
@@ -206,7 +214,16 @@ const buildBaseAuthOptions = (req) => {
           );
           if (!requireCardOnSignup) return true;
 
-          const skipSetup = req?.cookies?.vysify_skip_setup;
+          const skipSetup = getCookie('vysify_skip_setup');
+          
+          log({ 
+            level: 'info', 
+            msg: 'auth_signin_check_skip_setup', 
+            provider, 
+            userId: user.id, 
+            skipSetup: !!skipSetup 
+          });
+
           if (skipSetup === '1') return true;
 
           const paymentsSecretKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
