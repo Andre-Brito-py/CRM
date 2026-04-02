@@ -29,7 +29,12 @@ import {
   CommandLineIcon,
   CpuChipIcon,
   ArrowPathRoundedSquareIcon,
-  PresentationChartLineIcon
+  PresentationChartLineIcon,
+  MegaphoneIcon,
+  FaceSmileIcon,
+  LockClosedIcon,
+  CursorArrowRaysIcon,
+  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 
 const sanitizeHelpHtml = (input) => {
@@ -101,13 +106,14 @@ const sanitizeHelpHtml = (input) => {
 const HELP_CATEGORIES = [
   { key: 'crm', icon: UsersIcon },
   { key: 'pipelines', icon: RectangleStackIcon },
-  { key: 'ai_context', icon: CpuChipIcon },
   { key: 'inbox', icon: InboxIcon },
-  { key: 'nps', icon: PresentationChartLineIcon },
   { key: 'tasks', icon: CheckCircleIcon },
-  { key: 'custom_fields', icon: Cog6ToothIcon },
   { key: 'automations', icon: ArrowPathRoundedSquareIcon },
   { key: 'analytics', icon: SparklesIcon },
+  { key: 'nps', icon: PresentationChartLineIcon },
+  { key: 'meta_ads', icon: MegaphoneIcon },
+  { key: 'custom_fields', icon: Cog6ToothIcon },
+  { key: 'ai_context', icon: CpuChipIcon },
   { key: 'integrations', icon: GlobeAltIcon },
   { key: 'billing', icon: CreditCardIcon },
   { key: 'team', icon: UsersIcon },
@@ -716,6 +722,70 @@ const TUTORIAL_CONTENT = {
         </div>
         <TipBox>
           Lembre-se de ativar a permissão de &quot;Acesso a Mensagens&quot; nas configurações do seu App na Meta para que o sistema consiga ler os Directs.
+        </TipBox>
+      </div>
+    ),
+  },
+  meta_ads: {
+    icon: MegaphoneIcon,
+    title: 'Meta Ads Analytics',
+    subtitle: 'Gerenciamento de Anúncios',
+    render: () => (
+      <div className="space-y-6">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+          O módulo de <b>Meta Ads Analytics</b> conecta o Vysify diretamente ao Meta Business Suite, permitindo monitorar todos os seus anúncios do Facebook e Instagram — investimento, leads gerados, CPL e ROAS — sem sair da plataforma.
+        </p>
+
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/40 rounded-xl">
+          <p className="text-xs font-bold text-blue-700 dark:text-blue-300 mb-1">📋 Pré-requisitos</p>
+          <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-disc pl-4">
+            <li>Conta no Meta Business Suite com permissão de Administrador</li>
+            <li>Pelo menos uma Campanha ativa no Gerenciador de Anúncios do Facebook</li>
+            <li>Plano Vysify que inclua o módulo de Meta Ads Analytics</li>
+          </ul>
+        </div>
+
+        <div className="space-y-4">
+          <Step number={1} title='Acesse o painel de Meta Ads' desc='No menu lateral do workspace, clique em "Meta Ads" (ícone de megafone). Disponível apenas em planos que incluem este módulo.' />
+          <Step number={2} title='Clique em "Conectar Meta Ads Cloud"' desc='O botão azul do Facebook aparece na tela inicial. Clique nele para iniciar o fluxo de autorização OAuth 2.0 com a Meta.' />
+          <Step number={3} title='Autorize o Vysify no Facebook' desc='Uma janela do Facebook abrirá solicitando permissão de acesso às suas contas de anúncio. Clique em "Continuar como [seu nome]" e confirme as permissões.' />
+          <Step number={4} title='Retorne ao painel automaticamente' desc='Após a autorização, você será redirecionado de volta ao Vysify. O sistema carregará automaticamente os dados das suas campanhas dos últimos 30 dias.' />
+          <Step number={5} title='Analise os KPIs principais' desc='O painel exibirá 4 cartões principais:' />
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { icon: ChartBarIcon, name: 'Investimento', desc: 'Total gasto em todas as campanhas ativas e pausadas nos últimos 30 dias.' },
+            { icon: CursorArrowRaysIcon, name: 'Leads Totais', desc: 'Número de conversões de lead registradas pelo Pixel do Facebook ou formulários de lead.' },
+            { icon: ArrowTrendingUpIcon, name: 'Custo por Lead (CPL)', desc: 'Investimento dividido por Leads. Quanto menor, melhor a eficiência da campanha.' },
+            { icon: SparklesIcon, name: 'ROAS', desc: 'Retorno sobre o Investimento em Anúncios. Calculado quando dados de receita estiverem disponíveis.' },
+          ].map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <div key={kpi.name} className="p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl">
+                <div className="text-brand-600 dark:text-blue-400 mb-2"><Icon className="w-5 h-5" /></div>
+                <p className="text-sm font-bold text-zinc-800 dark:text-zinc-100 mb-1">{kpi.name}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">{kpi.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="space-y-4">
+          <Step number={6} title='Analise o gráfico de Performance de Investimento' desc='O gráfico de área mostra a evolução dos gastos diários ao longo do mês. Identifique picos de gasto e correlacione com mudanças de campanha.' />
+          <Step number={7} title='Consulte o Relatório de Campanhas' desc='A tabela inferior lista todas as campanhas individuais com: nome, status (ACTIVE/PAUSED), gasto, leads gerados, CPL e conta de anúncio. Ordene pela coluna que preferir.' />
+          <Step number={8} title='Desconecte quando necessário' desc='Para revogar o acesso, clique no botão vermelho "Desconectar" no canto superior direito do painel. Os dados meta são apagados e você pode reconectar a qualquer momento.' />
+        </div>
+
+        <div className="mt-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-700/40 rounded-xl">
+          <p className="text-xs font-bold text-indigo-700 dark:text-indigo-400 mb-2">🔒 Segurança & Privacidade</p>
+          <p className="text-xs text-indigo-700 dark:text-indigo-500 leading-relaxed">
+            O acesso é feito via <b>OAuth 2.0</b> oficial da Meta — o Vysify nunca vê nem armazena sua senha do Facebook. Somente o <b>token de acesso</b> é salvo, criptografado, para consultar a API de métricas. Você pode revogar o acesso a qualquer momento diretamente nas suas configurações do Facebook em <i>Configurações → Apps e Sites</i>.
+          </p>
+        </div>
+
+        <TipBox>
+          Para resultados mais precisos, instale o <b>Pixel do Facebook</b> no seu site e configure eventos de conversão de "Lead". Isso garante que cada formulário preenchido seja contabilizado corretamente no CPL.
         </TipBox>
       </div>
     ),
