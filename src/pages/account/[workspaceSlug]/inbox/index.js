@@ -627,7 +627,7 @@ const Inbox = () => {
                   </div>
 
                   <Link
-                    href={`/account/${workspaceSlug}/settings`}
+                    href={`/account/${workspaceSlug}/settings/general`}
                     className="group relative p-4 bg-zinc-900 rounded-[22px] border border-zinc-800 text-zinc-500 hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
                     title="Intelligence Settings"
                   >

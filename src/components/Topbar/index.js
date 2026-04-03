@@ -466,7 +466,7 @@ const Topbar = ({ menu, staticMenu }) => {
             initial={{ opacity: 0, scale: 0.95, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -20 }}
-            className="lg:hidden fixed top-20 inset-x-4 z-40 vysify-glass rounded-[2rem] shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden p-6"
+            className="lg:hidden fixed top-20 inset-x-4 z-40 vysify-glass rounded-[2rem] shadow-[0_40px_100px_rgba(0,0,0,0.15)] dark:shadow-[0_40px_100px_rgba(0,0,0,0.5)] overflow-hidden p-6"
           >
             <div className="space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
               <MobileWorkspaceSelector
@@ -581,8 +581,8 @@ const NavDropdown = ({
     >
       <button
         className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${isActive
-          ? 'text-white bg-white/10'
-          : 'text-zinc-400 hover:text-white hover:bg-white/5'
+          ? 'text-zinc-900 dark:text-white bg-zinc-100 dark:bg-white/10'
+          : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5'
           }`}
       >
         {t(section.label) || section.label}
@@ -604,7 +604,7 @@ const NavDropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute top-full left-0 mt-2 w-64 glass-dark border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden z-50"
+            className="absolute top-full left-0 mt-2 w-64 vysify-glass rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden z-50"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -631,10 +631,10 @@ const NavDropdown = ({
                       setOpen(false);
                     }}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group ${active
-                      ? 'text-white bg-brand-600/20 border border-brand-500/30'
+                      ? 'text-zinc-900 dark:text-white bg-brand-600/10 dark:bg-brand-600/20 border border-brand-500/20 dark:border-brand-500/30'
                       : locked
-                        ? 'text-zinc-600 cursor-not-allowed'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                        ? 'text-zinc-500 cursor-not-allowed'
+                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
                       }`}
                   >
                     <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-brand-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
@@ -716,7 +716,7 @@ const MobileSection = ({ section, t, router, workspace, workspacesData, isLoadin
   return (
     <div className="border border-white/5 rounded-2xl overflow-hidden">
       <button
-        className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-zinc-300 hover:text-white hover:bg-white/5 transition-all"
+        className="flex items-center justify-between w-full px-4 py-3 text-sm font-semibold text-zinc-500 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5 transition-all"
         onClick={() => setExpanded(!expanded)}
       >
         {t(section.label) || section.label}
@@ -749,7 +749,7 @@ const MobileSection = ({ section, t, router, workspace, workspacesData, isLoadin
                         close();
                       }
                     }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${active ? 'text-white bg-indigo-600/20' : locked ? 'text-zinc-600' : 'text-zinc-400 hover:text-white hover:bg-white/5'
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all ${active ? 'text-zinc-900 dark:text-white bg-indigo-600/10 dark:bg-indigo-600/20' : locked ? 'text-zinc-500' : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5'
                       }`}
                   >
                     <Icon className="w-4 h-4 flex-shrink-0" />

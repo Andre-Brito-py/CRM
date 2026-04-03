@@ -184,10 +184,10 @@ const Billing = ({ invoices, products }) => {
   return (
     <AccountLayout>
       <OnboardingTour tourId="billing-tour" steps={billingSteps} />
-      <Meta title="Vysify - Billing" />
+      <Meta title={`Vysify - ${t('common.label.billing')}`} />
       <Content.Title
-        title="Billing & Subscription"
-        subtitle="Manage your professional plan and invoicing"
+        title={t('billing.title')}
+        subtitle={t('billing.subtitle')}
         className="font-executive"
       />
       <Content.Divider />
@@ -195,67 +195,65 @@ const Billing = ({ invoices, products }) => {
         <div id="subscription-card">
           <Card>
             <Card.Body
-              title="Premium Subscription"
-              subtitle={`Current status: ${currentSubscription}`}
+              title={t('billing.subscription.title')}
+              subtitle={t('billing.subscription.status.label', { status: currentSubscription })}
             >
               <div className="p-6 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-100 dark:border-zinc-800 rounded-2xl text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium">
                 <p className="text-sm">
-                  Professional and Enterprise accounts unlock the full power of Vysify.
-                  Manage unlimited contacts, advanced pipelines, and team collaboration
-                  with our executive suite.
+                  {t('billing.subscription.description')}
                 </p>
               </div>
               {pendingDowngrade && (
                 <div className="mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
                   <div className="text-sm font-bold">
-                    Mudança de plano agendada
+                    {t('billing.downgrade.scheduled.title')}
                   </div>
                   <div className="text-sm mt-1">
-                    Seu plano será alterado para <span className="font-bold">{pendingDowngrade.subscriptionType}</span>
+                    {t('billing.downgrade.scheduled.message', { plan: pendingDowngrade.subscriptionType })}
                     {pendingEffectiveAt ? (
-                      <> em <span className="font-bold">{pendingEffectiveAt.toLocaleDateString()}</span></>
+                      <>{t('billing.downgrade.scheduled.date', { date: pendingEffectiveAt.toLocaleDateString() })}</>
                     ) : (
-                      <> na próxima cobrança</>
+                      <>{t('billing.downgrade.scheduled.next_billing')}</>
                     )}
-                    . Até lá, você mantém os recursos do seu plano atual.
+                    {t('billing.downgrade.scheduled.footer')}
                   </div>
                 </div>
               )}
             </Card.Body>
             <Card.Footer>
-              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Secure Stripe Payment</span>
+              <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{t('billing.payment.secure')}</span>
               <Button
                 id="manage-plan-btn"
                 className="text-white bg-zinc-900 rounded-xl hover:bg-zinc-800 transition-all font-bold px-8"
                 disabled={isSubmitting}
                 onClick={toggleModal}
               >
-                Manage Plan
+                {t('billing.action.manage')}
               </Button>
             </Card.Footer>
           </Card>
         </div>
         <Modal
           show={showModal}
-          title="Upgrade Subscription"
+          title={t('billing.modal.upgrade.title')}
           toggle={toggleModal}
         >
           <div className="space-y-0 text-sm text-gray-600">
-            <p>You are currently under the {currentSubscription} plan</p>
+            <p>{t('billing.modal.upgrade.current', { plan: currentSubscription })}</p>
           </div>
           {pendingDowngrade && (
             <div className="mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900">
               <div className="text-sm font-bold">
-                Downgrade já agendado
+                {t('billing.downgrade.scheduled.title')}
               </div>
               <div className="text-sm mt-1">
-                O plano muda para <span className="font-bold">{pendingDowngrade.subscriptionType}</span>
+                {t('billing.downgrade.scheduled.message', { plan: pendingDowngrade.subscriptionType })}
                 {pendingEffectiveAt ? (
-                  <> em <span className="font-bold">{pendingEffectiveAt.toLocaleDateString()}</span></>
+                  <>{t('billing.downgrade.scheduled.date', { date: pendingEffectiveAt.toLocaleDateString() })}</>
                 ) : (
-                  <> na próxima cobrança</>
+                  <>{t('billing.downgrade.scheduled.next_billing')}</>
                 )}
-                . Até lá, você mantém os recursos do plano atual.
+                {t('billing.downgrade.scheduled.footer')}
               </div>
             </div>
           )}
@@ -265,7 +263,7 @@ const Billing = ({ invoices, products }) => {
               disabled={isSubmitting}
               onClick={openBillingPortal}
             >
-              Open Billing Portal
+              {t('billing.action.portal')}
             </Button>
             {currentSubscription !== 'FREE' && (
               <button
@@ -273,7 +271,7 @@ const Billing = ({ invoices, products }) => {
                 disabled={isSubmitting}
                 onClick={handleCancelClick}
               >
-                Cancelar Assinatura
+                {t('billing.action.cancel')}
               </button>
             )}
           </div>
@@ -309,10 +307,10 @@ const Billing = ({ invoices, products }) => {
                       onClick={() => subscribe(product.prices.id)}
                     >
                       {isSubmitting
-                        ? 'Wait...'
+                        ? t('billing.action.subscribe.wait')
                         : product.prices.id
-                          ? `Assinar Mensal`
-                          : 'Indisponível'}
+                          ? t('billing.action.subscribe.monthly')
+                          : t('billing.action.subscribe.unavailable')}
                     </Button>
                     {product.prices.id_annual && (
                       <Button
@@ -320,7 +318,7 @@ const Billing = ({ invoices, products }) => {
                         disabled={isSubmitting}
                         onClick={() => subscribe(product.prices.id_annual)}
                       >
-                        Assinar Anual
+                        {t('billing.action.subscribe.annual')}
                       </Button>
                     )}
                   </div>
@@ -332,38 +330,37 @@ const Billing = ({ invoices, products }) => {
 
         <Modal
           show={showCancelModal}
-          title="Confirmar Cancelamento"
+          title={t('billing.modal.cancel.title')}
           toggle={() => setCancelModalVisibility(false)}
         >
           <div className="space-y-4 py-2">
             <p className="text-sm text-zinc-600 leading-relaxed font-executive">
-              Você está prestes a cancelar sua assinatura <strong>{currentSubscription}</strong>.
+              {t('billing.modal.cancel.message', { status: currentSubscription })}
             </p>
 
             {cancelPreview?.isAnnual && cancelPreview?.fee > 0 && (
               <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-red-900">
                 <div className="text-sm font-bold flex items-center">
-                  <span className="mr-2">⚠️</span> Taxa de Cancelamento Antecipado
+                  <span className="mr-2">⚠️</span> {t('billing.modal.cancel.fee.title')}
                 </div>
                 <div className="text-sm mt-1">
-                  Como você possui um plano anual com {cancelPreview.remainingMonths} meses restantes,
-                  será aplicada uma multa de <strong>{cancelPreview.feePercentage}%</strong> sobre o valor mensal equivalente.
+                  {t('billing.modal.cancel.fee.description', { months: cancelPreview.remainingMonths, percentage: cancelPreview.feePercentage })}
                 </div>
                 <div className="mt-3 text-lg font-bold text-red-700">
-                  Valor da Taxa: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: cancelPreview.currency }).format(cancelPreview.fee)}
+                  {t('billing.modal.cancel.fee.amount', { amount: new Intl.NumberFormat(router.locale === 'pt-BR' ? 'pt-BR' : 'en-US', { style: 'currency', currency: cancelPreview.currency }).format(cancelPreview.fee) })}
                 </div>
-                <p className="text-[10px] mt-2 text-red-600 uppercase tracking-widest font-bold">Cobrança única via Stripe</p>
+                <p className="text-[10px] mt-2 text-red-600 uppercase tracking-widest font-bold">{t('billing.modal.cancel.fee.footer')}</p>
               </div>
             )}
 
             {!cancelPreview?.isAnnual && (
               <p className="text-sm text-zinc-500 bg-zinc-50 p-4 rounded-xl border border-zinc-100 italic">
-                Sua assinatura mensal será encerrada ao final do período atual.
+                {t('billing.modal.cancel.monthly.message')}
               </p>
             )}
 
             <p className="text-sm text-zinc-600 leading-relaxed font-executive">
-              Deseja realmente prosseguir? Esta ação não pode ser desfeita e você perderá acesso aos recursos premium imediatamente após o processamento.
+              {t('billing.modal.cancel.confirm_message')}
             </p>
           </div>
           <div className="mt-6 flex items-center space-x-3">
@@ -372,22 +369,22 @@ const Billing = ({ invoices, products }) => {
               disabled={isCancelling}
               onClick={confirmCancellation}
             >
-              {isCancelling ? 'Processando...' : 'Confirmar e Cancelar'}
+              {isCancelling ? t('billing.action.processing') : t('billing.modal.cancel.action.confirm')}
             </Button>
             <Button
               className="px-6 text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-all font-bold py-3"
               disabled={isCancelling}
               onClick={() => setCancelModalVisibility(false)}
             >
-              Voltar
+              {t('billing.action.back')}
             </Button>
           </div>
         </Modal>
       </Content.Container>
       <div className="mt-16">
         <Content.Title
-          title="Invoices"
-          subtitle="Reference your past transactions"
+          title={t('billing.invoices.title')}
+          subtitle={t('billing.invoices.subtitle')}
           className="font-executive"
         />
       </div>
@@ -399,9 +396,9 @@ const Billing = ({ invoices, products }) => {
               <table className="min-w-full divide-y divide-zinc-100">
                 <thead className="bg-zinc-50/50">
                   <tr className="text-left font-executive">
-                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Invoice Number</th>
-                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
-                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Status</th>
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">{t('billing.invoices.table.number')}</th>
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">{t('billing.invoices.table.date')}</th>
+                    <th className="px-8 py-4 text-[11px] font-bold text-zinc-400 uppercase tracking-widest">{t('billing.invoices.table.status')}</th>
                     <th className="px-8 py-4 text-right" />
                   </tr>
                 </thead>
@@ -447,8 +444,7 @@ const Billing = ({ invoices, products }) => {
           </Content.Container>
         ) : (
           <Content.Empty>
-            Once you&apos;ve paid for something on Vysify, invoices will show
-            up here
+            {t('billing.invoices.empty')}
           </Content.Empty>
         )}
       </div>
