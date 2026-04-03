@@ -62,21 +62,13 @@ export const getServerSideProps = async (context) => {
     
     const plans = JSON.parse(JSON.stringify(plansData || []));
 
-    // Determine if there's a free plan
-    const activePlans = (plans || []).filter((p) => Boolean(p.isActive));
-    const hasFreePlan = activePlans.some((p) => (
-      Boolean(p.features?.isFreePlan) ||
-      String(p.slug || '').trim().toUpperCase() === 'FREE' ||
-      Number(p.price || 0) === 0
-    ));
-
-    // Fetch landing page promo settings
+    // Fetch landing page promo settings and plan visibility settings
     let settings = [];
     try {
       settings = await prisma.systemConfig.findMany({
         where: {
           key: {
-            in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE']
+            in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE', 'PLANS_SHOW_FREE']
           }
         }
       });
@@ -89,6 +81,32 @@ export const getServerSideProps = async (context) => {
       text: settings.find(s => s.key === 'LANDING_PROMO_TEXT')?.value || '',
       code: settings.find(s => s.key === 'LANDING_PROMO_CODE')?.value || ''
     };
+
+    const plansShowFree = settings.find(s => s.key === 'PLANS_SHOW_FREE')?.value !== 'false';
+
+    // Determine if there's a free plan and filter visible plans
+    const activePlans = (plans || []).filter((p) => {
+      const isActive = Boolean(p.isActive);
+      const isVisible = p.features?.isVisible !== false;
+      const isFreePlan = (
+        Boolean(p.features?.isFreePlan) ||
+        String(p.slug || '').trim().toUpperCase() === 'FREE' ||
+        Number(p.price || 0) === 0
+      );
+
+      if (!isActive || !isVisible) return false;
+      if (isFreePlan && !plansShowFree) return false;
+
+      return true;
+    });
+
+    const hasFreePlan = activePlans.some((p) => {
+      return (
+        Boolean(p.features?.isFreePlan) ||
+        String(p.slug || '').trim().toUpperCase() === 'FREE' ||
+        Number(p.price || 0) === 0
+      );
+    });
 
     return {
       props: {
