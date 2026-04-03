@@ -195,7 +195,7 @@ const ConversationList = ({
                     onClick={() => onSelect(conversation)}
                     className={`group flex flex-col p-5 sm:p-6 lg:p-8 cursor-pointer transition-all duration-500 relative rounded-[1.75rem] sm:rounded-[2.5rem] border overflow-hidden ${
                       isActive 
-                        ? 'bg-zinc-950 border-zinc-800 shadow-3xl ring-1 ring-zinc-800' 
+                        ? 'bg-indigo-600 dark:bg-zinc-950 border-indigo-500 dark:border-zinc-800 shadow-3xl ring-1 ring-indigo-500 dark:ring-zinc-800' 
                         : 'bg-white/40 dark:bg-zinc-900/40 border-transparent hover:bg-white dark:hover:bg-zinc-900 hover:border-zinc-100 dark:hover:border-zinc-800/50 hover:shadow-premium'
                     }`}
                   >
@@ -211,7 +211,7 @@ const ConversationList = ({
                       <div className="flex items-center min-w-0">
                         <div className="relative flex-shrink-0">
                           <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-[1.25rem] sm:rounded-[1.75rem] lg:rounded-[2rem] flex items-center justify-center border transition-all duration-700 overflow-hidden shadow-premium ${
-                            isActive ? 'bg-zinc-900 border-zinc-800' : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 group-hover:scale-105'
+                            isActive ? 'bg-indigo-700 dark:bg-zinc-900 border-indigo-500 dark:border-zinc-800' : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 group-hover:scale-105'
                           }`}>
                             {conversation.contact?.image ? (
                               <img src={conversation.contact.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -228,7 +228,7 @@ const ConversationList = ({
                               conversation.assignee.image ? (
                                 <img src={conversation.assignee.image} alt="" className="w-full h-full rounded-[10px] object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-zinc-950 text-white rounded-[10px] flex items-center justify-center text-[10px] font-black italic">
+                                <div className="w-full h-full bg-indigo-900 dark:bg-zinc-950 text-white rounded-[10px] flex items-center justify-center text-[10px] font-black italic">
                                   {conversation.assignee.name?.charAt(0).toUpperCase()}
                                 </div>
                               )
@@ -236,39 +236,39 @@ const ConversationList = ({
                               <div className="w-3 h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700" />
                             )}
                           </div>
-                        </div>
-                        <div className="ml-3 sm:ml-4 lg:ml-5 min-w-0">
+                        </div>                        <div className="ml-3 sm:ml-4 lg:ml-5 min-w-0">
                           <h3 className={`text-[14px] sm:text-[15px] lg:text-[17px] font-executive font-extrabold transition-all truncate italic uppercase tracking-tight mb-1 sm:mb-1.5 ${
                             isActive ? 'text-white' : 'text-zinc-950 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
                           }`}>
                             {conversation.contact?.name || conversation.externalId || t('common.unknown')}
                           </h3>
                           <div className="flex items-center gap-2">
-                             <div className={`w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? 'bg-indigo-500 shadow-glow-indigo animate-pulse' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
-                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic ${isActive ? 'text-zinc-500' : 'text-zinc-400'}`}>
+                             <div className={`w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? (isActive ? 'bg-white shadow-glow-white animate-pulse' : 'bg-indigo-500 shadow-glow-indigo animate-pulse') : (isActive ? 'bg-white/20' : 'bg-zinc-300 dark:bg-zinc-700')}`} />
+                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic ${isActive ? 'text-indigo-100/70 dark:text-zinc-500' : 'text-zinc-400'}`}>
                                Secured via {conversation.platform}
                              </span>
                           </div>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-black uppercase tracking-[0.15em] tabular-nums italic transition-colors ${isActive ? 'text-zinc-600' : 'text-zinc-400'}`}>
+                      <span className={`text-[10px] font-black uppercase tracking-[0.15em] tabular-nums italic transition-colors ${isActive ? 'text-indigo-100/70 dark:text-zinc-600' : 'text-zinc-400'}`}>
                         {conversation.updatedAt && formatDistanceToNow(new Date(conversation.updatedAt), { addSuffix: false, locale: dateFnsLocale })}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between gap-6 pl-1 relative z-10">
                       <p className={`text-[13px] line-clamp-1 leading-relaxed font-executive font-medium italic ${
-                        isActive ? 'text-zinc-400' : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-300'
+                        isActive ? 'text-indigo-50/80 dark:text-zinc-400' : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-300'
                       }`}>
                         {conversation.lastMessage || 'Transmission pending...'}
                       </p>
                       {conversation.status === 'PENDING' && (
-                        <div className="flex-shrink-0 px-3 py-1 bg-indigo-600 text-[8px] text-white font-black uppercase tracking-[0.2em] rounded-full shadow-glow-indigo italic">
+                        <div className={`flex-shrink-0 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] rounded-full italic ${isActive ? 'bg-white text-indigo-600 shadow-glow-white' : 'bg-indigo-600 text-white shadow-glow-indigo'}`}>
                            Live
                         </div>
                       )}
                     </div>
                   </motion.div>
+
                 );
               })}
             </AnimatePresence>

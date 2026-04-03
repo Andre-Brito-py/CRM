@@ -217,9 +217,9 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                               icon: '🔒',
                               style: {
                                 borderRadius: '1.25rem',
-                                background: '#18181b',
-                                color: '#fff',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                background: 'var(--bg-toast)',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border-primary)',
                                 padding: '1rem 1.5rem',
                                 fontSize: '13px',
                                 fontWeight: 'bold'
@@ -248,7 +248,7 @@ const ContextSidebar = ({ items = [], sectionLabel = '', visible = true, allowed
                         <span className="flex-1 truncate uppercase tracking-tight italic">{t(item.name)}</span>
                         
                         {locked && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-zinc-800 text-white border border-white/5">
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-zinc-900 dark:bg-zinc-800 text-white border border-white/10 dark:border-white/5">
                             <span className="text-[8px] font-black tracking-widest italic">ELITE</span>
                           </div>
                         )}

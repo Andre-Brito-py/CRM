@@ -367,7 +367,7 @@ const ChatWindow = ({
             className={classNames(
               'group flex items-center gap-2 sm:gap-4 px-4 py-3 sm:px-6 sm:py-3.5 lg:px-10 lg:py-4 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] rounded-[1.25rem] sm:rounded-[1.75rem] border-2 transition-all duration-700 italic shadow-2xl',
               conversation.autopilotEnabled 
-                ? 'bg-zinc-950 border-indigo-500/50 text-white shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
+                ? 'bg-indigo-600 dark:bg-zinc-950 border-indigo-500 dark:border-zinc-800 text-white shadow-glow-indigo/20 ring-1 ring-indigo-500 dark:ring-zinc-800' 
                 : 'bg-white dark:bg-zinc-900/50 border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:border-indigo-500/30 hover:text-indigo-600'
             )}
           >
@@ -380,8 +380,8 @@ const ChatWindow = ({
           <div className="hidden lg:block h-12 w-[1px] bg-zinc-100 dark:bg-zinc-800/80" />
 
           <Menu as="div" className="hidden sm:block relative inline-block text-left">
-            <Menu.Button className="flex items-center group bg-zinc-50/50 dark:bg-zinc-900/40 p-2 pr-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 transition-all duration-500 hover:bg-white dark:hover:bg-zinc-900 shadow-sm hover:shadow-premium">
-              <div className="w-12 h-12 bg-white dark:bg-zinc-950 rounded-[1.5rem] border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden mr-4 shadow-inner transition-transform group-hover:scale-110">
+            <Menu.Button className="flex items-center group bg-zinc-100/50 dark:bg-zinc-900/40 p-2 pr-6 rounded-[2rem] border border-zinc-100 dark:border-zinc-800 transition-all duration-500 hover:bg-white dark:hover:bg-zinc-900 shadow-sm hover:shadow-premium">
+              <div className="w-12 h-12 bg-white dark:bg-zinc-950 rounded-[1.5rem] border border-zinc-200 dark:border-zinc-800 flex items-center justify-center overflow-hidden mr-4 shadow-inner transition-transform group-hover:scale-110">
                 {conversation.assignee?.image ? (
                   <img src={conversation.assignee.image} alt="" className="w-full h-full object-cover" />
                 ) : (
@@ -515,8 +515,8 @@ const ChatWindow = ({
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
                 className={`flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em] border transition-all duration-500 shadow-lg italic shrink-0 ${
                   aiSuggestOnlyEnabled 
-                    ? 'bg-zinc-950 border-indigo-500/50 text-indigo-400 shadow-glow-indigo/20 ring-1 ring-indigo-500/20' 
-                    : 'bg-zinc-50 border-zinc-100 text-zinc-400'
+                    ? 'bg-indigo-600 dark:bg-zinc-950 border-indigo-500 dark:border-indigo-500/50 text-white dark:text-indigo-400 shadow-glow-indigo/20 dark:shadow-glow-indigo/20 ring-1 ring-indigo-500 dark:ring-indigo-500/20' 
+                    : 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500'
                 }`}
               >
                 <SparklesIcon className={`w-3.5 h-3.5 shrink-0 ${isGeneratingAI ? 'animate-spin' : ''}`} />
@@ -592,7 +592,7 @@ const ChatWindow = ({
               <Menu.Items className="absolute bottom-full left-0 mb-8 w-96 origin-bottom-left vysify-glass rounded-[2.5rem] shadow-3xl ring-1 ring-zinc-800/50 focus:outline-none z-50 overflow-hidden divide-y divide-zinc-100 dark:divide-zinc-800/50">
                 <div className="px-10 py-6 bg-zinc-50/50 dark:bg-zinc-950/50 flex justify-between items-center">
                   <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">{t('inbox.templates.title')}</p>
-                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-3 bg-zinc-950 text-white rounded-2xl hover:scale-110 transition-all shadow-glow-indigo">
+                  <button type="button" onClick={() => setIsTemplateModalOpen(true)} className="p-3 bg-indigo-600 dark:bg-zinc-950 text-white rounded-2xl hover:scale-110 transition-all shadow-glow-indigo">
                     <PlusIcon className="w-5 h-5" />
                   </button>
                 </div>
@@ -662,7 +662,7 @@ const ChatWindow = ({
                           >
                             <div className="flex justify-between items-start gap-6 mb-3">
                               <p className={`text-[17px] font-executive font-extrabold italic uppercase tracking-tight transition-colors ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-950 dark:text-white'}`}>{product.name}</p>
-                              <span className="text-[12px] font-black text-white bg-zinc-950 px-4 py-1.5 rounded-2xl shadow-glow-indigo tabular-nums italic">
+                              <span className="text-[12px] font-black text-white bg-indigo-600 dark:bg-zinc-950 px-4 py-1.5 rounded-2xl shadow-glow-indigo tabular-nums italic">
                                 {formatMoney(product.price, product.currency)}
                               </span>
                             </div>

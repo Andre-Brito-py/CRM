@@ -169,7 +169,7 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
         position="bottom-left"
         toastOptions={{
           duration: 10000,
-          className: 'dark:bg-zinc-900 dark:text-white dark:border dark:border-zinc-800',
+          className: 'vysify-glass border border-zinc-100 dark:border-zinc-800 text-zinc-900 dark:text-white shadow-premium',
         }}
       />
 

@@ -47,7 +47,7 @@ const MessageBubble = ({ message, isMe, onReply }) => {
           <div
             className={`px-8 py-5 text-[15px] leading-relaxed shadow-premium-lg transition-all relative group overflow-hidden ${
               isMe
-                ? 'bg-zinc-950 text-white rounded-[2.5rem] rounded-tr-[10px] border border-zinc-800 shadow-glow-indigo/10'
+                ? 'bg-indigo-600 dark:bg-zinc-950 text-white rounded-[2.5rem] rounded-tr-[10px] border border-indigo-500 dark:border-zinc-800 shadow-glow-indigo/10'
                 : 'vysify-glass text-zinc-950 dark:text-zinc-100 rounded-[2.5rem] rounded-tl-[10px] border border-zinc-100 dark:border-zinc-800 shadow-premium'
             }`}
           >
@@ -58,7 +58,7 @@ const MessageBubble = ({ message, isMe, onReply }) => {
             {/* Quoted Message */}
             {message.quotedMessage && (
               <div className={`mb-4 p-3 px-4 rounded-2xl border-l-[3px] text-[13px] italic font-medium opacity-80 ${
-                isMe ? 'bg-white/5 border-indigo-400 text-zinc-300' : 'bg-zinc-100 dark:bg-black/20 border-indigo-500 text-zinc-600 dark:text-zinc-400'
+                isMe ? 'bg-indigo-700/50 dark:bg-white/5 border-indigo-300 dark:border-indigo-400 text-white/90 dark:text-zinc-300' : 'bg-zinc-100 dark:bg-black/20 border-indigo-500 text-zinc-600 dark:text-zinc-400'
               }`}>
                 <p className="line-clamp-2">{message.quotedMessage.content}</p>
               </div>

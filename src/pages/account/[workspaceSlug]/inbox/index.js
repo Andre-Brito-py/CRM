@@ -605,11 +605,11 @@ const Inbox = () => {
           ) : (
             <div className="flex flex-1 overflow-hidden bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 relative">
               {/* Column 1: Global Small Sidebar (WhatsApp Web style) — hidden on mobile */}
-              <div className="hidden sm:flex flex-col items-center py-8 w-[85px] bg-zinc-950 dark:bg-black border-r border-zinc-800 shrink-0 z-[70] relative">
+              <div className="hidden sm:flex flex-col items-center py-8 w-[85px] bg-white dark:bg-black border-r border-zinc-100 dark:border-zinc-800 shrink-0 z-[70] relative">
                 <div className="flex flex-col items-center gap-8 w-full">
                   <Link
                     href={`/account/${workspaceSlug}`}
-                    className="group relative p-4 bg-zinc-900 rounded-[22px] border border-zinc-800 text-zinc-500 hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
+                    className="group relative p-4 bg-zinc-50 dark:bg-zinc-900 rounded-[22px] border border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
                     title="Executive Dashboard"
                   >
                     <svg className="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
@@ -628,7 +628,7 @@ const Inbox = () => {
 
                   <Link
                     href={`/account/${workspaceSlug}/settings/general`}
-                    className="group relative p-4 bg-zinc-900 rounded-[22px] border border-zinc-800 text-zinc-500 hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
+                    className="group relative p-4 bg-zinc-50 dark:bg-zinc-900 rounded-[22px] border border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
                     title="Intelligence Settings"
                   >
                     <svg className="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -637,7 +637,7 @@ const Inbox = () => {
                 <div className="mt-auto pb-8">
                   <div className="relative group">
                     <div className="absolute inset-0 bg-white/5 blur-xl group-hover:bg-white/10 transition-all rounded-full" />
-                    <div className="relative w-12 h-12 rounded-[18px] bg-zinc-900 border border-zinc-800 font-executive font-black flex items-center justify-center text-white shadow-2xl transition-transform group-hover:scale-105">
+                    <div className="relative w-12 h-12 rounded-[18px] bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 font-executive font-black flex items-center justify-center text-zinc-900 dark:text-white shadow-2xl transition-transform group-hover:scale-105">
                       {session?.user?.name?.charAt(0) || 'U'}
                     </div>
                   </div>
@@ -710,7 +710,7 @@ const Inbox = () => {
                       animate={{ x: 0 }}
                       exit={{ x: '100%' }}
                       transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-                      className="absolute inset-y-0 right-0 w-[340px] bg-zinc-950 text-white border-l border-amber-500/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col"
+                      className="absolute inset-y-0 right-0 w-[340px] bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white border-l border-amber-500/20 shadow-[0_0_40px_rgba(0,0,0,0.5)] z-50 flex flex-col"
                     >
                       {/* Header */}
                       <div className="p-4 border-b border-amber-500/20 flex justify-between items-center shrink-0 bg-gradient-to-r from-amber-900/30 to-transparent">
