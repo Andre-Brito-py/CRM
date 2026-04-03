@@ -45,6 +45,7 @@ export const createWorkspace = async (creatorId, email, name, slug) => {
     text: createText({ code: workspace.inviteCode, name }),
     to: email,
   });
+  return workspace;
 };
 
 export const deleteWorkspace = async (id, email, slug) => {

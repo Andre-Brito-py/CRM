@@ -97,15 +97,15 @@ export const getWorkspaceLimits = async (workspaceId) => {
         return {
             members: membersLimit,
             pendingInvites: pendingInvitesLimit,
-            webhooks: f.maxWebhooks || f.maxUsers || null,
-            automations: f.maxAutomations || null,
-            whatsappIntegrations: f.maxWhatsApp || 5,
-            instagramIntegrations: f.maxInstagram || 5,
-            contacts: f.maxContacts || null,
-            aiRequests24h: f.maxAiRequests24h || 100,
-            aiTokens24h: f.maxAiTokens24h || 30000,
-            uploads24h: f.maxUploads24h || 50,
-            maxAdAccounts: f.maxAdAccounts || null,
+            webhooks: f.maxWebhooks ?? f.maxUsers ?? null,
+            automations: f.maxAutomations ?? null,
+            whatsappIntegrations: f.maxWhatsApp ?? 5,
+            instagramIntegrations: f.maxInstagram ?? 5,
+            contacts: f.maxContacts ?? null,
+            aiRequests24h: f.maxAiRequests24h ?? 100,
+            aiTokens24h: f.maxAiTokens24h ?? 30000,
+            uploads24h: f.maxUploads24h ?? 50,
+            maxAdAccounts: f.maxAdAccounts ?? null,
             plan: subscription.plan.name,
             allowedModules: f.allowedModules || ALL_MODULES_ENABLED,
             freeTrialDays,
@@ -121,15 +121,54 @@ export const getWorkspaceLimits = async (workspaceId) => {
 
     const planType = await getSubscriptionStatus(workspace?.creator?.email);
 
-    // Calcula trial para planos free legados (14 dias padrão)
-    const legacyTrialDays = planType === 'FREE' ? 14 : 0;
-    let trialExpiresAt = null;
-    if (legacyTrialDays > 0 && workspace?.createdAt) {
-        const created = new Date(workspace.createdAt);
-        trialExpiresAt = new Date(created.getTime() + legacyTrialDays * 24 * 60 * 60 * 1000);
+    // Tenta carregar as configurações do plano a partir do banco de dados (Painel Admin) baseado no slug
+    const dbPlan = await prisma.plan.findUnique({
+        where: { slug: planType.toUpperCase() },
+    });
+
+    if (dbPlan?.features) {
+        const f = dbPlan.features;
+        const membersLimit = typeof f.maxUsers === 'number' ? f.maxUsers : null;
+        const pendingInvitesLimit = typeof f.maxPendingInvites === 'number'
+            ? f.maxPendingInvites
+            : typeof membersLimit === 'number'
+                ? Math.max(20, membersLimit * 5)
+                : null;
+
+        const freeTrialDays = f.freeTrialDays || (planType === 'FREE' ? 14 : 0);
+        let trialExpiresAt = null;
+        if (freeTrialDays > 0 && workspace?.createdAt) {
+            const created = new Date(workspace.createdAt);
+            trialExpiresAt = new Date(created.getTime() + freeTrialDays * 24 * 60 * 60 * 1000);
+        }
+
+        return {
+            members: membersLimit,
+            pendingInvites: pendingInvitesLimit,
+            webhooks: f.maxWebhooks ?? f.maxUsers ?? null,
+            automations: f.maxAutomations ?? null,
+            whatsappIntegrations: f.maxWhatsApp ?? 5,
+            instagramIntegrations: f.maxInstagram ?? 5,
+            contacts: f.maxContacts ?? null,
+            aiRequests24h: f.maxAiRequests24h ?? 100,
+            aiTokens24h: f.maxAiTokens24h ?? 30000,
+            uploads24h: f.maxUploads24h ?? 50,
+            maxAdAccounts: f.maxAdAccounts ?? null,
+            plan: dbPlan.name || planType,
+            allowedModules: f.allowedModules || (planType === 'FREE' ? DEFAULT_FREE_MODULES : ALL_MODULES_ENABLED),
+            freeTrialDays,
+            trialExpiresAt,
+        };
     }
 
-    // Valores Legados Hardcoded
+    // Valores Legados Hardcoded (Fallback do Fallback se o plano não existir no banco)
+    const legacyTrialDays = planType === 'FREE' ? 14 : 0;
+    let trialExpiresAtFallback = null;
+    if (legacyTrialDays > 0 && workspace?.createdAt) {
+        const created = new Date(workspace.createdAt);
+        trialExpiresAtFallback = new Date(created.getTime() + legacyTrialDays * 24 * 60 * 60 * 1000);
+    }
+
     return {
         members: planType === 'FREE' ? 3 : planType === 'STANDARD' ? 10 : null,
         pendingInvites: planType === 'FREE' ? 10 : planType === 'STANDARD' ? 50 : null,
@@ -145,7 +184,7 @@ export const getWorkspaceLimits = async (workspaceId) => {
         plan: planType,
         allowedModules: planType === 'FREE' ? DEFAULT_FREE_MODULES : ALL_MODULES_ENABLED,
         freeTrialDays: legacyTrialDays,
-        trialExpiresAt,
+        trialExpiresAt: trialExpiresAtFallback,
     };
 };
 

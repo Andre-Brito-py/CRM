@@ -142,7 +142,20 @@ const handler = async (req, res) => {
                     const slugify = (await import('slugify')).default;
                     let baseSlug = slugify(String(companyName).trim().toLowerCase(), { strict: true });
                     if (!baseSlug) baseSlug = crypto.randomBytes(4).toString('hex');
-                    await createWorkspace(user.id, normalizedEmail, String(companyName).trim(), baseSlug);
+                    const workspace = await createWorkspace(user.id, normalizedEmail, String(companyName).trim(), baseSlug);
+
+                    if (workspace?.id) {
+                        const freePlan = await prisma.plan.findUnique({ where: { slug: 'FREE' } });
+                        if (freePlan) {
+                            await prisma.platformSubscription.create({
+                                data: {
+                                    workspaceId: workspace.id,
+                                    planId: freePlan.id,
+                                    status: 'active',
+                                },
+                            });
+                        }
+                    }
                 } catch (err) {
                     log({ level: 'warn', msg: 'auth_register_workspace_create_failed', error: err });
                 }
