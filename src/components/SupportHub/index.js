@@ -306,7 +306,7 @@ const SupportHub = () => {
 
   const fetchTickets = async () => {
     try {
-      const res = await fetch('/api/user/support/tickets');
+      const res = await fetch('/api/user/support');
       if (res.ok) {
         const data = await res.json();
         setTickets(data.tickets);
@@ -396,7 +396,7 @@ const SupportHub = () => {
       setLoading(true);
       try {
         if (!currentTicketId) {
-          const res = await fetch('/api/user/support/tickets', {
+          const res = await fetch('/api/user/support', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -408,6 +408,7 @@ const SupportHub = () => {
           if (res.ok) {
             const data = await res.json();
             setCurrentTicketId(data.ticket.id);
+            await fetchHumanMessages(data.ticket.id);
           }
         } else {
           await fetch(`/api/user/support/tickets/${currentTicketId}/messages`, {
