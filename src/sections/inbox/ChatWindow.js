@@ -84,6 +84,10 @@ const ChatWindow = ({
   const [isScheduling, setIsScheduling] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [isRescheduling, setIsRescheduling] = useState(false);
+  const [isSaveContactModalOpen, setIsSaveContactModalOpen] = useState(false);
+  const [newContactName, setNewContactName] = useState('');
+  const [newContactEmail, setNewContactEmail] = useState('');
+  const [isSavingContact, setIsSavingContact] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -271,6 +275,39 @@ const ChatWindow = ({
     }
   };
 
+  const handleSaveContact = async (e) => {
+    e.preventDefault();
+    if (!workspaceSlug || !conversation?.id || !newContactName) return;
+
+    setIsSavingContact(true);
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/inbox/${conversation.id}/save-contact`, {
+        method: 'POST',
+        body: {
+          name: newContactName,
+          email: newContactEmail,
+        },
+      });
+
+      if (res?.status >= 400) throw new Error(res?.error?.msg || 'Failed to save contact');
+      
+      toast.success(t('whatsapp.settings.updated') || 'Contact saved successfully');
+      setIsSaveContactModalOpen(false);
+      setNewContactName('');
+      setNewContactEmail('');
+      
+      // Trigger a refresh of the page/data if possible, or wait for SWR refresh
+      if (typeof window !== 'undefined') {
+        window.location.reload(); 
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Failed to save contact');
+    } finally {
+      setIsSavingContact(false);
+    }
+  };
+
   if (!conversation) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center bg-zinc-50/20 dark:bg-black/40 h-full p-20 text-center relative overflow-hidden group/empty">
@@ -355,6 +392,17 @@ const ChatWindow = ({
               </div>
             </div>
           </div>
+          {!conversation.contactId && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setIsSaveContactModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-sm italic ml-4 shrink-0"
+            >
+              <PlusIcon className="w-3.5 h-3.5" />
+              SALVAR CONTATO
+            </motion.button>
+          )}
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 shrink-0">
@@ -1106,6 +1154,90 @@ const ChatWindow = ({
                       {t('common.action.cancel')}
                     </button>
                   </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Save Contact Modal */}
+      <Transition appear show={isSaveContactModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={() => !isSavingContact && setIsSaveContactModalOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-6 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-400"
+                enterFrom="opacity-0 scale-95 translate-y-8"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="ease-in duration-300"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 translate-y-8"
+              >
+                <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-[40px] bg-white dark:bg-zinc-900 p-12 text-left align-middle shadow-premium transition-all border border-zinc-100 dark:border-zinc-800">
+                  <div className="mb-10 text-center">
+                    <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-[32px] flex items-center justify-center mx-auto mb-6 border border-emerald-100/50 dark:border-emerald-500/20 shadow-glow-emerald/10">
+                      <UserCircleIcon className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <Dialog.Title as="h3" className="text-3xl font-executive font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tighter uppercase italic">
+                      Identificar Contato
+                    </Dialog.Title>
+                    <p className="text-zinc-400 dark:text-zinc-500 font-medium mt-2 text-[15px] italic">Salve este número na sua lista de contatos</p>
+                  </div>
+
+                  <form onSubmit={handleSaveContact} className="space-y-8">
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Nome Completo</label>
+                      <input
+                        required
+                        type="text"
+                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-emerald-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-emerald-500/30 transition-all font-executive italic"
+                        value={newContactName}
+                        onChange={(e) => setNewContactName(e.target.value)}
+                        placeholder="Ex: João Silva"
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">E-mail (Opcional)</label>
+                      <input
+                        type="email"
+                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-emerald-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-emerald-500/30 transition-all font-executive italic"
+                        value={newContactEmail}
+                        onChange={(e) => setNewContactEmail(e.target.value)}
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-4 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsSaveContactModalOpen(false)}
+                        className="flex-1 px-8 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[28px] text-[12px] font-black uppercase tracking-[0.2em] hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all italic"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSavingContact || !newContactName}
+                        className="flex-[2] px-8 py-5 premium-gradient text-white rounded-[28px] text-[12px] font-black uppercase tracking-[0.2em] shadow-glow-indigo/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 italic"
+                      >
+                        {isSavingContact ? 'Salvando...' : 'Confirmar e Salvar'}
+                      </button>
+                    </div>
+                  </form>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
