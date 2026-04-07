@@ -272,13 +272,18 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
   const accessToken = integration?.credentials?.accessToken ? String(integration.credentials.accessToken) : null;
 
   // 2. Find or Create Contact
-  // We need to normalize phone number if possible, but for now exact match
+  // We normalize the incoming 'from' (usually just digits) to search for common variations
+  const fromDigits = from.replace(/\D/g, '');
   let contact = await prisma.contact.findFirst({
     where: {
       workspaceId: workspace.id,
       OR: [
         { phone: from },
         { phone: `+${from}` },
+        { phone: fromDigits },
+        { phone: `+${fromDigits}` },
+        // Also check if the number in DB starts with country code or not
+        { phone: { endsWith: fromDigits.length > 8 ? fromDigits.slice(-8) : fromDigits } }
       ]
     }
   });
