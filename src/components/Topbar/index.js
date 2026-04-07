@@ -604,7 +604,7 @@ const NavDropdown = ({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute top-full left-0 mt-2 w-64 vysify-glass rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden z-50"
+            className="absolute top-full left-0 mt-2 w-64 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/60 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] overflow-hidden z-50"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
@@ -630,14 +630,15 @@ const NavDropdown = ({
                       }
                       setOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group ${active
-                      ? 'text-zinc-900 dark:text-white bg-brand-600/10 dark:bg-brand-600/20 border border-brand-500/20 dark:border-brand-500/30'
-                      : locked
-                        ? 'text-zinc-500 cursor-not-allowed'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 group ${
+                      active
+                        ? 'text-zinc-900 dark:text-white bg-brand-600/10 dark:bg-brand-600/20 border border-brand-500/20 dark:border-brand-500/30'
+                        : locked
+                          ? 'text-zinc-400 cursor-not-allowed'
+                          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100/80 dark:hover:bg-white/5'
                       }`}
                   >
-                    <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-brand-400' : 'text-zinc-500 group-hover:text-zinc-300'}`} />
+                    <Icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-brand-400' : locked ? 'text-zinc-400' : 'text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300'}`} />
                     <span className="flex-1">{t(item.name)}</span>
                     {locked && (
                       <span className="text-[9px] font-bold text-zinc-600 bg-zinc-800/50 border border-white/5 rounded-md px-1.5 py-0.5">PRO</span>
