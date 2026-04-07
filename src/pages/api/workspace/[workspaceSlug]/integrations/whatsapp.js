@@ -51,7 +51,7 @@ export default async function handler(req, res) {
       const integrations = await prisma.integration.findMany({
         where: {
           workspaceId: workspace.id,
-          provider: 'WHATSAPP',
+          provider: { in: ['WHATSAPP', 'whatsapp'] },
         },
       });
 
@@ -85,25 +85,41 @@ export default async function handler(req, res) {
       const currentCount = await prisma.integration.count({
         where: {
           workspaceId: workspace.id,
-          provider: 'WHATSAPP'
+          provider: { in: ['WHATSAPP', 'whatsapp'] }
         }
       });
 
-      // 2. Validate against Subscription Limit
+      // 2. Validate against Subscription Limit (only if creating a NEW one)
       const isSuperAdmin = session?.user?.role === 'SUPERADMIN';
-      if (!isSuperAdmin) {
+      if (!isSuperAdmin && currentCount === 0) {
         const canAdd = await canAddWhatsAppIntegration(workspace.id, currentCount);
         if (!canAdd) {
           return res.status(403).json({ error: { msg: 'LIMIT_REACHED', details: 'Please upgrade your plan to add more WhatsApp numbers.' } });
         }
       }
 
-      // 3. Create the new integration
-      const integration = await prisma.integration.create({
-        data: {
+      // 3. Upsert the integration (Update if exists, Create if not)
+      const integration = await prisma.integration.upsert({
+        where: {
+          workspaceId_provider: {
+            workspaceId: workspace.id,
+            provider: 'WHATSAPP'
+          }
+        },
+        update: {
+          name: safeName || `WhatsApp Number`,
+          enabled: enabled !== false,
+          credentials: {
+            phoneNumberId: safePhoneNumberId,
+            accessToken: safeAccessToken,
+            verifyToken: safeVerifyToken,
+            businessAccountId: safeBusinessAccountId,
+          },
+        },
+        create: {
           workspaceId: workspace.id,
           provider: 'WHATSAPP',
-          name: safeName || `WhatsApp Number ${currentCount + 1}`,
+          name: safeName || `WhatsApp Number`,
           enabled: enabled !== false,
           credentials: {
             phoneNumberId: safePhoneNumberId,

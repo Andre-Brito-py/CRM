@@ -121,24 +121,33 @@ const WhatsAppSettings = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
+      let response;
       if (currentEditId) {
-        await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/${currentEditId}`, {
+        response = await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/${currentEditId}`, {
           method: 'PUT',
           body: config,
         });
-        toast.success(t('whatsapp.settings.updated'));
       } else {
-        await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp`, {
+        response = await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp`, {
           method: 'POST',
           body: config,
         });
+      }
+
+      if (!response.ok) {
+        throw response;
+      }
+
+      if (currentEditId) {
+        toast.success(t('whatsapp.settings.updated'));
+      } else {
         toast.success(t('whatsapp.settings.added'));
       }
 
       setShowModal(false);
       fetchIntegrations();
     } catch (error) {
-      toast.error(`${error?.error?.msg || t('whatsapp.settings.saveFailed')}`);
+      toast.error(`${error?.error?.msg || error?.message || t('whatsapp.settings.saveFailed')}`);
     } finally {
       setIsSaving(false);
     }
