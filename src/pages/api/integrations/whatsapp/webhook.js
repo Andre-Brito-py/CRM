@@ -163,10 +163,13 @@ export default async function handler(req, res) {
           },
         });
 
-        const integration = workspace?.integrations[0];
+        const integration = workspace?.integrations.find(
+          (i) => i.credentials?.verifyToken === token
+        );
 
-        if (integration && integration.credentials?.verifyToken === token) {
+        if (integration) {
           log({ level: 'info', msg: 'whatsapp_webhook_verified', requestId, workspaceSlug });
+          res.setHeader('Content-Type', 'text/plain');
           res.status(200).send(challenge);
         } else {
           log({ level: 'warn', msg: 'whatsapp_webhook_verify_failed', requestId, workspaceSlug });
