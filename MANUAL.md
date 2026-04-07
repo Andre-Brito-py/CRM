@@ -136,56 +136,72 @@ Visualize o status de saúde da aplicação em tempo real:
 
 Este guia detalha como conectar seus canais de comunicação externos ao Vysify.
 
+> **Como chegar à tela de Integrações no Vysify:**
+> 1. No menu superior, clique em **Área de Trabalho**
+> 2. Na barra lateral esquerda, clique em **INTEGRAÇÕES**
+
 ### 1. WhatsApp Cloud API (Oficial)
 Para conectar seu WhatsApp, você deve utilizar a API oficial da Meta.
 
-**Pré-requisitos na Meta:**
+**Etapa 1 — Configuração na Meta (developers.facebook.com):**
 1. Crie uma conta de desenvolvedor em [developers.facebook.com](https://developers.facebook.com/).
-2. Crie um App do tipo **Business**.
-3. Adicione o produto **WhatsApp** ao seu App.
-4. Vá em **Configurações da API** e adicione o seu número de telefone.
-5. Em **Configuração do Webhook**, clique em Editar e insira:
-   - **URL de Callback**: A URL gerada pelo Vysify em `Configurações > WhatsApp`.
-   - **Verify Token**: O token que você definiu no Vysify.
-   - **Campos de Inscrição**: Marque a opção `messages`.
+2. Crie um App do tipo **Business** e selecione o caso de uso **"Conectar no WhatsApp"**.
+3. Vá em **Casos de uso → Conectar no WhatsApp → Configuração da API**.
+4. Na tela, você encontrará:
+   - **Identificação do número de telefone** → *Phone Number ID*
+   - **Identificação da conta do WhatsApp Business** → *Business Account ID*
+   - **Token de acesso** → clique em **"Copiar"** ao lado do campo
 
-**Configuração no Vysify:**
-1. Vá em **Configurações do Workspace > Integrações > WhatsApp**.
-2. Clique em **Adicionar Número** e preencha:
+**Etapa 2 — Configuração no Vysify:**
+1. No menu superior, clique em **Área de Trabalho**.
+2. Na barra lateral, clique em **INTEGRAÇÕES**.
+3. Selecione **WhatsApp** e clique em **Adicionar Número**.
+4. Preencha os campos:
    - **Phone Number ID**: Obtido no painel da Meta.
-   - **WABA ID (Business Account ID)**: Obtido no painel da Meta.
-   - **Access Token**: Use um **Token de Sistema Permanente** (gerado em Configurações do Negócio na Meta) para evitar expiração.
-3. Teste enviando uma mensagem para o número configurado.
+   - **Business Account ID (WABA ID)**: Obtido no painel da Meta.
+   - **Access Token**: Copiado do painel da Meta (token temporário de 24h para testes).
+   - **Verify Token**: Qualquer texto (ex: `vysify123`) — você usará o mesmo valor no Webhook da Meta.
+5. Copie a **URL de Webhook** gerada pelo Vysify.
+
+**Etapa 3 — Configurar Webhook na Meta:**
+1. Na Meta, vá em: **Seu App → WhatsApp → Configuração**.
+2. Cole a URL de Webhook do Vysify no campo **URL de Callback**.
+3. Preencha o **Verify Token** com o mesmo valor que você usou no Vysify.
+4. Clique em **Verificar e Salvar**.
+5. Em **Webhook Fields**, marque a opção `messages`.
 
 ### 2. Email Omnichannel (Inbound)
 Receba e responda e-mails diretamente no seu Inbox centralizado.
 
 **Passo a passo:**
-1. No Vysify, acesse **Configurações > Integrações > Email**.
-2. Ative o serviço para gerar sua **URL de Inbound Webhook**.
-3. No seu provedor de e-mail transacional (ex: **Postmark**, **SendGrid** ou **Mailgun**):
+1. No menu superior, clique em **Área de Trabalho**.
+2. Na barra lateral, clique em **INTEGRAÇÕES** e selecione **Email**.
+3. Ative o serviço para gerar sua **URL de Inbound Webhook**.
+4. No seu provedor de e-mail transacional (ex: **Postmark**, **SendGrid** ou **Mailgun**):
    - Crie uma regra de **Inbound Webhook**.
    - Cole a URL gerada pelo Vysify.
    - Configure o encaminhamento do seu e-mail corporativo (ex: `ajuda@suaempresa.com`) para o e-mail de entrada do seu provedor.
-4. O Vysify processará automaticamente os e-mails recebidos e os transformará em conversas no Inbox.
+5. O Vysify processará automaticamente os e-mails recebidos e os transformará em conversas no Inbox.
 
 ### 3. Instagram Direct
 Vincule suas mensagens do Instagram ao CRM.
 
 **Passo a passo:**
 1. Certifique-se de que sua conta do Instagram é **Business** e está vinculada a uma **Página do Facebook**.
-2. No Vysify, vá em **Configurações > Integrações > Instagram**.
-3. Autentique-se via Facebook e conceda as permissões de `instagram_manage_messages`.
-4. Selecione a conta do Instagram desejada.
-5. As mensagens recebidas via Direct aparecerão automaticamente no seu Inbox.
+2. No menu superior, clique em **Área de Trabalho**.
+3. Na barra lateral, clique em **INTEGRAÇÕES** e selecione **Instagram**.
+4. Autentique-se via Facebook e conceda as permissões de `instagram_manage_messages`.
+5. Selecione a conta do Instagram desejada.
+6. As mensagens recebidas via Direct aparecerão automaticamente no seu Inbox.
 
 ### 4. Gmail Sync
 Sincronize seu histórico de e-mails corporativos.
 
-1. Acesse **Configurações > Integrações > Gmail**.
-2. Clique em **Connect Gmail**.
-3. Realize o login na sua conta Google Workspace e autorize o Vysify.
-4. O sistema começará a sincronizar seus contatos e histórico de e-mails para as timelines do CRM.
+1. No menu superior, clique em **Área de Trabalho**.
+2. Na barra lateral, clique em **INTEGRAÇÕES** e selecione **Gmail**.
+3. Clique em **Connect Gmail**.
+4. Realize o login na sua conta Google Workspace e autorize o Vysify.
+5. O sistema começará a sincronizar seus contatos e histórico de e-mails para as timelines do CRM.
 
 ---
 

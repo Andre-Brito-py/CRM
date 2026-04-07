@@ -52,19 +52,19 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como vincular meu WhatsApp Business?',
-        a: 'O processo é feito via **Meta Cloud API**:\n1. Acesse o [Meta for Developers](https://developers.facebook.com).\n2. Crie um App **Business** e adicione o produto **WhatsApp**.\n3. Copie o **Phone Number ID** e o **WABA ID**.\n4. Gere um **Token Permanente** (System User) para evitar quedas.\n5. No Vysify, vá em "Configurações > WhatsApp" e preencha os dados.'
+        a: 'O processo é feito em 2 partes:\n\n🔵 NA META (developers.facebook.com):\n1. Crie ou acesse um App do tipo Business.\n2. Clique em "Casos de uso" → "Conectar no WhatsApp" → "Configuração da API".\n3. Copie o **Phone Number ID** e o **Business Account ID** exibidos na página.\n4. Copie o **Token de Acesso** (clique em "Copiar" ao lado do campo).\n\n🟢 NO VYSIFY:\n1. No menu superior, clique em **Área de Trabalho**.\n2. Na barra lateral esquerda, clique em **INTEGRAÇÕES**.\n3. Selecione **WhatsApp**.\n4. Clique em **Adicionar Número** e preencha os campos com as credenciais copiadas da Meta.'
       },
       {
         q: 'Como configurar o Webhook na Meta?',
-        a: 'No painel da Meta, vá em "WhatsApp > Configuração":\n1. Use a URL de Callback fornecida pelo Vysify.\n2. Defina o Verify Token igual ao que você salvou no CRM.\n3. Em "Webhook Fields", inscreva-se no campo **messages**.\n\nSem isso, as mensagens recebidas não aparecerão no seu Inbox.'
+        a: 'Após adicionar o número no Vysify, copie a **URL de Webhook** gerada.\n\nNa Meta, vá em: Seu App → "WhatsApp" → "Configuração":\n1. Cole a URL de Webhook do Vysify no campo **URL de Callback**.\n2. Preencha o **Verify Token** com o mesmo valor que você usou no Vysify.\n3. Clique em **Verificar e Salvar**.\n4. Em "Webhook Fields", inscreva-se no campo **messages**.\n\nSem isso, as mensagens recebidas não aparecerão no seu Inbox.'
       },
       {
         q: 'Posso usar meu número pessoal?',
-        a: 'Sim, mas ele será convertido em uma conta de API do WhatsApp (WABA). Você não poderá mais usar o app oficial do WhatsApp no seu celular para este número. Recomendamos usar um número exclusivo para atendimento web.'
+        a: 'Sim, mas ele será convertido em uma conta de API do WhatsApp (WABA). Você não poderá mais usar o app oficial do WhatsApp no seu celular para este número. Recomendamos usar um número exclusivo para atendimento.'
       },
       {
         q: 'Minha conexão WhatsApp caiu, o que fazer?',
-        a: 'Verifique:\n1. Se o seu **System User Token** ainda é válido.\n2. Se o Webhook URL está com status "Válido" na Meta.\n3. Se o saldo da sua conta Meta Business está em dia (existem custos por conversão na Meta).'
+        a: 'Verifique:\n1. Se o seu Token de Acesso ainda é válido (tokens temporários expiram em 24h).\n2. Se o Webhook URL está com status "Válido" na Meta.\n3. Reconecte em: **Área de Trabalho → INTEGRAÇÕES → WhatsApp** e atualize o token.'
       }
     ]
   },
@@ -76,11 +76,11 @@ const FAQ_DATA = [
     items: [
       {
         q: 'Como configurar o Email Inbound (Omnichannel)?',
-        a: 'O Vysify funciona recebendo webhooks de e-mail:\n1. Ative o serviço em "Configurações > Email" e copie a **URL de Inbound**.\n2. Vá ao seu provedor (ex: **Postmark**, **SendGrid** ou **Mailgun**).\n3. Crie um endpoint de Webhook com a URL do Vysify.\n4. Configure o encaminhamento (Forwarding) do seu e-mail real para o e-mail de entrada do seu provedor.'
+        a: 'No Vysify:\n1. No menu superior, clique em **Área de Trabalho**.\n2. Na barra lateral, clique em **INTEGRAÇÕES**.\n3. Selecione **Email** e ative o serviço.\n4. Copie a **URL de Inbound** gerada.\n5. No seu provedor de e-mail (ex: **Postmark**, **SendGrid**), crie um webhook de inbound e cole a URL do Vysify.'
       },
       {
         q: 'Como vincular minha conta Gmail?',
-        a: 'Vá em "Configurações > Integrações > Gmail". Clique em **Connect Gmail** e siga o fluxo de autorização do Google OAuth 2.0. Isso sincronizará seus e-mails e contatos automaticamente.'
+        a: 'No Vysify:\n1. Clique em **Área de Trabalho** no menu superior.\n2. Na barra lateral, clique em **INTEGRAÇÕES**.\n3. Selecione **Gmail** e clique em **Connect Gmail**.\n4. Siga o fluxo de autorização do Google (OAuth 2.0).\n\nAprovado o acesso, seus e-mails e contatos serão sincronizados automaticamente.'
       },
       {
         q: 'O e-mail fica salvo no registro do contato?',
