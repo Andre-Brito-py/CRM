@@ -20,7 +20,7 @@ import {
   InformationCircleIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-import AccountLayout from '@/components/AccountLayout';
+import AccountLayout from '@/layouts/AccountLayout';
 import Content from '@/components/Content';
 import Meta from '@/components/Meta';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ import api from '@/lib/common/api';
 import classNames from 'classnames';
 import ChatWindow from '@/sections/inbox/ChatWindow';
 import ConversationList from '@/sections/inbox/ConversationList';
-import OnboardingTour from '@/components/OnboardingTour';
+import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
 const Inbox = () => {
   const router = useRouter();
