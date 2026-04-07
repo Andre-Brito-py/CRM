@@ -1,4 +1,4 @@
-import { verify } from 'otplib';
+import { authenticator } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
@@ -37,7 +37,7 @@ const handler = async (req, res) => {
         }
 
         // Verify token
-        const isValid = await verify({
+        const isValid = authenticator.verify({
             token,
             secret: user.twoFactorSecret
         });

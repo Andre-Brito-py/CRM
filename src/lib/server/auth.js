@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { verify } from 'otplib';
+import { authenticator } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -108,7 +108,7 @@ const createCredentialsProvider = () =>
           throw new Error('2FA_REQUIRED');
         }
 
-        const isValidToken = await verify({
+        const isValidToken = authenticator.verify({
           token,
           secret: user.twoFactorSecret
         });
