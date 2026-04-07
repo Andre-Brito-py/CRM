@@ -155,17 +155,27 @@ export default async function handler(req, res) {
       if (mode === 'subscribe' && workspaceSlug) {
         // Find the integration for this workspace to check the verify token
         const workspace = await prisma.workspace.findFirst({
-          where: { slug: workspaceSlug },
+          where: { 
+            slug: {
+              equals: workspaceSlug,
+              mode: 'insensitive'
+            }
+          },
           include: {
             integrations: {
-              where: { provider: 'WHATSAPP' },
+              where: { 
+                provider: {
+                  in: ['WHATSAPP', 'whatsapp']
+                }
+              },
             },
           },
         });
 
-        const integration = workspace?.integrations.find(
-          (i) => i.credentials?.verifyToken === token
-        );
+        const integration = workspace?.integrations.find((i) => {
+          const creds = typeof i.credentials === 'string' ? JSON.parse(i.credentials || '{}') : (i.credentials || {});
+          return String(creds?.verifyToken || '').trim() === String(token).trim();
+        });
 
         if (integration) {
           log({ level: 'info', msg: 'whatsapp_webhook_verified', requestId, workspaceSlug });
