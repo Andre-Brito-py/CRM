@@ -47,36 +47,44 @@ const FAQ_DATA = [
   {
     id: 'whatsapp',
     icon: '📱',
-    title: 'WhatsApp e Inbox',
-    description: 'Canais, mensagens e atendimento.',
+    title: 'WhatsApp e Canais',
+    description: 'Vincule sua conta oficial e atenda seus clientes.',
     items: [
       {
-        q: 'Como conectar meu WhatsApp?',
-        a: 'Vá em "Configurações do Workspace" → "WhatsApp" → "Adicionar Número".\n\nVocê precisará do:\n• Phone Number ID\n• WhatsApp Business Account ID\n• Token de Acesso do Usuário do Sistema\n\nTodo obtidos no painel Meta for Developers.'
+        q: 'Como vincular meu WhatsApp Business?',
+        a: 'O processo é feito via **Meta Cloud API**:\n1. Acesse o [Meta for Developers](https://developers.facebook.com).\n2. Crie um App **Business** e adicione o produto **WhatsApp**.\n3. Copie o **Phone Number ID** e o **WABA ID**.\n4. Gere um **Token Permanente** (System User) para evitar quedas.\n5. No Vysify, vá em "Configurações > WhatsApp" e preencha os dados.'
+      },
+      {
+        q: 'Como configurar o Webhook na Meta?',
+        a: 'No painel da Meta, vá em "WhatsApp > Configuração":\n1. Use a URL de Callback fornecida pelo Vysify.\n2. Defina o Verify Token igual ao que você salvou no CRM.\n3. Em "Webhook Fields", inscreva-se no campo **messages**.\n\nSem isso, as mensagens recebidas não aparecerão no seu Inbox.'
+      },
+      {
+        q: 'Posso usar meu número pessoal?',
+        a: 'Sim, mas ele será convertido em uma conta de API do WhatsApp (WABA). Você não poderá mais usar o app oficial do WhatsApp no seu celular para este número. Recomendamos usar um número exclusivo para atendimento web.'
       },
       {
         q: 'Minha conexão WhatsApp caiu, o que fazer?',
-        a: 'Verifique:\n1. Se o Token da Meta expirou (tokens de usuário expiram em 60 dias; use token de Sistema permanente).\n2. Se o Webhook URL está correto no painel da Meta.\n3. Se o Verify Token bate com o cadastrado.\n\nReconecte em "Configurações → WhatsApp".'
+        a: 'Verifique:\n1. Se o seu **System User Token** ainda é válido.\n2. Se o Webhook URL está com status "Válido" na Meta.\n3. Se o saldo da sua conta Meta Business está em dia (existem custos por conversão na Meta).'
+      }
+    ]
+  },
+  {
+    id: 'email_integration',
+    icon: '✉️',
+    title: 'Integração de E-mail',
+    description: 'Vincule seu e-mail corporativo ao Inbox.',
+    items: [
+      {
+        q: 'Como configurar o Email Inbound (Omnichannel)?',
+        a: 'O Vysify funciona recebendo webhooks de e-mail:\n1. Ative o serviço em "Configurações > Email" e copie a **URL de Inbound**.\n2. Vá ao seu provedor (ex: **Postmark**, **SendGrid** ou **Mailgun**).\n3. Crie um endpoint de Webhook com a URL do Vysify.\n4. Configure o encaminhamento (Forwarding) do seu e-mail real para o e-mail de entrada do seu provedor.'
       },
       {
-        q: 'Como conectar o Instagram Direct?',
-        a: 'Vá em "Configurações" → "Instagram" → "Adicionar Conta". Você precisará do:\n• Facebook Page ID (da página vinculada ao Instagram)\n• Instagram Business Account ID\n• Token com permissões instagram_manage_messages e pages_messaging.'
+        q: 'Como vincular minha conta Gmail?',
+        a: 'Vá em "Configurações > Integrações > Gmail". Clique em **Connect Gmail** e siga o fluxo de autorização do Google OAuth 2.0. Isso sincronizará seus e-mails e contatos automaticamente.'
       },
       {
-        q: 'Como funciona o Autopilot (IA)?',
-        a: 'Quando o Autopilot está ativo em uma conversa, a IA responde automaticamente usando o contexto do seu negócio cadastrado em "Configurações → IA". Ideal para fora do horário comercial.\n\nO agente pode retomar o controle a qualquer momento clicando em "Autopilot: Off".'
-      },
-      {
-        q: 'Como usar os Templates de Mensagem?',
-        a: 'Em qualquer conversa aberta, clique no ícone de balão com raios (⚡) ou pressione Ctrl+/ para abrir os templates. Clique num template para inserir no campo de mensagem. Variáveis como {{contact.firstName}} são preenchidas automaticamente.'
-      },
-      {
-        q: 'Como atribuir conversas a um agente?',
-        a: 'Dentro da conversa, clique em "Assign Member" no painel lateral direito e selecione o membro da equipe. Você também pode criar Automações para atribuir automaticamente por palavra-chave, tag ou horário.'
-      },
-      {
-        q: 'Como resolver/fechar uma conversa?',
-        a: 'No topo da janela de chat, clique no botão de status e selecione "Resolvida". A conversa sai da fila principal mas permanece acessível no histórico para consulta futura.'
+        q: 'O e-mail fica salvo no registro do contato?',
+        a: 'Sim! Uma vez integrado, todo e-mail enviado ou recebido é registrado cronologicamente na timeline do contato no CRM, permitindo que toda a equipe tenha o contexto da conversa.'
       }
     ]
   },

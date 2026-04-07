@@ -4,6 +4,7 @@ import { useRouter } from 'next/compat/router';
 import { getProviders, signIn, useSession } from 'next-auth/react';
 import toast, { Toaster } from 'react-hot-toast';
 import isEmail from 'validator/lib/isEmail';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 import Button from '@/components/Button/index';
 import Meta from '@/components/Meta/index';
@@ -19,6 +20,7 @@ const Login = ({ hasFreePlan }) => {
   const [password, setPassword] = useState('');
   const [token2fa, setToken2fa] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState('LOGIN'); // LOGIN, 2FA, MAGIC_LINK, FORGOT_PASSWORD
 
   const [isSubmitting, setSubmittingState] = useState(false);
@@ -227,7 +229,7 @@ const Login = ({ hasFreePlan }) => {
                   <div className="flex flex-col space-y-1.5">
                     <label className="text-sm font-semibold text-gray-700">{t('auth.login.emailLabel', 'Email')}</label>
                     <input
-                      className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400"
+                      className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400 text-zinc-900 font-medium"
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="seu@email.com"
                       type="email"
@@ -243,14 +245,28 @@ const Login = ({ hasFreePlan }) => {
                         {t('auth.login.forgotPassword', 'Esqueceu a senha?')}
                       </button>
                     </div>
-                    <input
-                      className="px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400"
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      type="password"
-                      value={password}
-                      required
-                    />
+                    <div className="relative group/pass">
+                      <input
+                        className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm placeholder:text-gray-400 text-zinc-900 font-medium pr-12"
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-indigo-600 transition-colors"
+                        title={showPassword ? t('auth.login.hidePassword', 'Ocultar senha') : t('auth.login.showPassword', 'Mostrar senha')}
+                      >
+                        {showPassword ? (
+                          <EyeSlashIcon className="w-5 h-5" />
+                        ) : (
+                          <EyeIcon className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
