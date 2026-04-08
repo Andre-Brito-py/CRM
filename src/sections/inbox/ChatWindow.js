@@ -388,7 +388,7 @@ const ChatWindow = ({
               {conversation.contactId && (
                 <button
                   onClick={handleOpenContactModal}
-                  className="p-1 text-zinc-400 hover:text-indigo-600 transition-colors"
+                  className="p-1 text-zinc-400 hover:text-indigo-600 transition-colors shrink-0"
                   title="Editar Contato"
                 >
                   <PencilIcon className="w-4 h-4" />
@@ -411,20 +411,21 @@ const ChatWindow = ({
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 shrink-0">
           {!conversation.contactId && (
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleOpenContactModal}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-sm italic ml-4 shrink-0"
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all shadow-sm italic shrink-0"
             >
               <PlusIcon className="w-3.5 h-3.5" />
-              SALVAR CONTATO
+              <span className="hidden sm:inline">SALVAR CONTATO</span>
+              <span className="sm:hidden">SALVAR</span>
             </motion.button>
           )}
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 shrink-0">
           <motion.button
             whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
