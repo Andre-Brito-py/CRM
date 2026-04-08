@@ -13,7 +13,8 @@ import {
   EnvelopeIcon,
   ChatBubbleLeftRightIcon,
   CameraIcon,
-  XMarkIcon
+  XMarkIcon,
+  PencilIcon
 } from '@heroicons/react/24/outline';
 import { Menu, Transition, Dialog } from '@headlessui/react';
 import MessageBubble from './MessageBubble';
