@@ -96,11 +96,19 @@ const Topbar = ({ menu, staticMenu }) => {
   const [isSubmitting, setSubmittingState] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [isImpersonating, setIsImpersonating] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [prevUnreadCount, setPrevUnreadCount] = useState(0);
   const validName = name.length > 0 && name.length <= 16;
+
+  // Base64 notification sound (soft ping)
+  const notificationSound = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU1vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT19vT18=');
+  }, []);
 
   const { data: notificationsData, mutate: mutateNotifications } = useSWR(
     workspace?.slug ? `/api/workspace/${workspace.slug}/notifications` : null,
-    { refreshInterval: 30000 } // Refresh every 30s
+    { refreshInterval: 10000 } // Refresh every 10s for faster response
   );
 
   const { data: subscriptionData } = useSWR(
@@ -138,7 +146,26 @@ const Topbar = ({ menu, staticMenu }) => {
     if (typeof document === 'undefined') return;
     const cookie = document.cookie || '';
     setIsImpersonating(cookie.includes('vysify_impersonating=1'));
+    
+    // Load sound preference
+    const savedSound = localStorage.getItem('vysify_sound_enabled');
+    setSoundEnabled(savedSound === 'true');
   }, []);
+
+  useEffect(() => {
+    if (notificationsData?.unreadCount > prevUnreadCount) {
+      if (soundEnabled && notificationSound) {
+        notificationSound.play().catch(e => console.log('Sound blocked by browser policy'));
+      }
+    }
+    setPrevUnreadCount(notificationsData?.unreadCount || 0);
+  }, [notificationsData?.unreadCount, soundEnabled, notificationSound, prevUnreadCount]);
+
+  const toggleSound = () => {
+    const newVal = !soundEnabled;
+    setSoundEnabled(newVal);
+    localStorage.setItem('vysify_sound_enabled', String(newVal));
+  };
 
 
 
@@ -332,7 +359,14 @@ const Topbar = ({ menu, staticMenu }) => {
                         ))
                       )}
                     </div>
-                    <div className="p-5 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800/50 text-center">
+                    <div className="p-5 bg-zinc-50/50 dark:bg-zinc-900/50 border-t border-zinc-100 dark:border-zinc-800/50 flex flex-col items-center gap-3">
+                      <button
+                        onClick={toggleSound}
+                        className="text-[9px] font-black text-zinc-500 hover:text-indigo-600 transition-colors uppercase tracking-[0.2em] italic flex items-center gap-2"
+                      >
+                         <div className={`w-3 h-3 rounded-full ${soundEnabled ? 'bg-indigo-500 shadow-glow-indigo' : 'bg-zinc-300'}`} />
+                         {soundEnabled ? 'Aviso sonoro ativado' : 'Ativar aviso sonoro'}
+                      </button>
                       <button
                         onClick={isSubscribed ? unsubscribe : subscribe}
                         className="text-[9px] font-black text-zinc-400 hover:text-indigo-600 transition-colors uppercase tracking-[0.2em] italic"

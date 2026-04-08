@@ -226,12 +226,40 @@ export const createMessage = async (conversationId, data) => {
     });
 
     if (conversation?.assigneeId) {
+      // Notify specifically the assignee
       createNotification(conversation.workspaceId, {
         userId: conversation.assigneeId,
         title: 'Nova Mensagem Recebida',
         content: content || 'Você recebeu uma nova mensagem.',
         link: `/account/${conversation.workspace.slug}/inbox?id=${conversationId}`,
       }).catch(err => console.error('Notification error:', err));
+    } else {
+      // Notify all workspace members if unassigned
+      const members = await prisma.member.findMany({
+        where: { 
+          workspaceId: conversation.workspaceId,
+          deletedAt: null,
+          member: {
+            id: { not: undefined }
+          }
+        },
+        select: {
+          member: {
+            select: { id: true }
+          }
+        }
+      });
+
+      for (const m of members) {
+        if (m.member?.id) {
+          createNotification(conversation.workspaceId, {
+            userId: m.member.id,
+            title: 'Nova Conversa (Não Atribuída)',
+            content: content || 'Uma nova mensagem chegou e não tem responsável.',
+            link: `/account/${conversation.workspace.slug}/inbox?id=${conversationId}`,
+          }).catch(err => console.error('Notification error:', err));
+        }
+      }
     }
   }
 

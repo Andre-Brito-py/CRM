@@ -1,6 +1,7 @@
 import prisma from '@/prisma/index';
 import { processAutomation } from '@/prisma/services/automation';
 import { createActivity } from '@/prisma/services/activity';
+import { createMessage } from '@/prisma/services/conversation';
 import { log, reportError } from '@/lib/server/logger';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { getSystemConfig } from '@/lib/server/config';
@@ -333,23 +334,19 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
     });
   }
 
-  // 4. Create Message
-  let message = await prisma.message.create({
-    data: {
-      conversationId: conversation.id,
-      direction: 'INBOUND',
-      type: toMessageType(msgType),
-      content: body,
-      mediaUrl: mediaId ? `whatsapp:media:${mediaId}` : null,
-      externalId: wamid,
-      status: 'RECEIVED',
-    }
+  // 4. Create Message using the service to trigger notifications and updates
+  let message = await createMessage(conversation.id, {
+    direction: 'INBOUND',
+    type: toMessageType(msgType),
+    content: body,
+    mediaUrl: mediaId ? `whatsapp:media:${mediaId}` : null,
+    externalId: wamid,
+    status: 'RECEIVED',
   });
 
-  // 5. Update Conversation timestamp
-  conversation = await prisma.conversation.update({
-    where: { id: conversation.id },
-    data: { updatedAt: new Date() }
+  // 5. Fetch updated conversation (already updated by createMessage)
+  conversation = await prisma.conversation.findUnique({
+    where: { id: conversation.id }
   });
 
   const shouldAttemptProcessing = Boolean(mediaId && accessToken);

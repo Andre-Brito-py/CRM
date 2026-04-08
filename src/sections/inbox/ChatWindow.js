@@ -47,6 +47,7 @@ const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
 
 const ChatWindow = ({
   conversation,
+  isLoadingHistory = false,
   onSendMessage,
   onAssign,
   members = [],
@@ -512,7 +513,17 @@ const ChatWindow = ({
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar relative">
         <div className="absolute inset-0 bg-grid-zinc-200/40 dark:bg-grid-white/[0.01] [mask-image:radial-gradient(ellipse_at_center,black,transparent)] pointer-events-none" />
         <AnimatePresence mode="popLayout">
-          {conversation.messages?.length === 0 ? (
+          {isLoadingHistory ? (
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="flex flex-col items-center justify-center h-full space-y-4"
+            >
+               <div className="w-8 h-8 border-4 border-indigo-100 border-t-indigo-500 rounded-full animate-spin" />
+               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 animate-pulse">Recuperando histórico...</p>
+            </motion.div>
+          ) : conversation.messages?.length === 0 ? (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

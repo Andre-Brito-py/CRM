@@ -65,6 +65,10 @@ const Inbox = () => {
     workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox` : null
   );
 
+  const { data: conversationData, mutate: mutateConversation, isValidating: isValidatingConversation, isLoading: isLoadingConversation } = useSWR(
+    workspaceSlug && selectedId ? `/api/workspace/${workspaceSlug}/inbox/${selectedId}` : null
+  );
+
   const { data: membersData } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/members` : null
   );
@@ -80,16 +84,19 @@ const Inbox = () => {
   const { data: productsData } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/payment-products` : null
   );
+  
+  // No longer needed as it's defined above
 
   const conversations = conversationsData?.data?.conversations || [];
   const members = membersData?.data?.members || [];
   const templates = templatesData?.data?.templates || [];
   const paymentProducts = productsData?.data?.products || [];
 
-  const selectedConversation = useMemo(() => 
-    conversations.find((c) => c.id === selectedId),
-    [conversations, selectedId]
-  );
+  const selectedConversation = useMemo(() => {
+    const listResult = conversations.find((c) => c.id === selectedId);
+    if (!conversationData?.data?.conversation) return listResult;
+    return conversationData.data.conversation;
+  }, [conversations, selectedId, conversationData]);
 
   const handleSendMessage = async (content, type = 'TEXT', metadata = null) => {
     if (!workspaceSlug || !selectedId) return;
@@ -102,6 +109,7 @@ const Inbox = () => {
 
       if (res.status === 200 || res.status === 201) {
         mutateConversations();
+        mutateConversation();
         setMessageText('');
       } else {
         toast.error(res.error?.msg || 'Failed to send message');
@@ -122,6 +130,7 @@ const Inbox = () => {
 
       if (res.status === 200) {
         mutateConversations();
+        mutateConversation();
         toast.success(t('common.success'));
       }
     } catch (error) {
@@ -280,6 +289,7 @@ const Inbox = () => {
       }
       
       mutateConversations();
+      mutateConversation();
     } catch (error) {
       console.error(error);
       toast.error(error.message);
@@ -417,6 +427,7 @@ const Inbox = () => {
               >
                 <ChatWindow
                   conversation={selectedConversation}
+                  isLoadingHistory={isLoadingConversation || (selectedId && !selectedConversation)}
                   messages={selectedConversation?.messages || []}
                   onSendMessage={handleSendMessage}
                   members={members}
