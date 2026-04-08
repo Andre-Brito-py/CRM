@@ -202,37 +202,37 @@ const ConversationList = ({
                     transition={{ delay: idx * 0.05, duration: 0.5 }}
                     key={conversation.id}
                     onClick={() => onSelect(conversation)}
-                    className={`group flex flex-col p-5 sm:p-6 lg:p-8 cursor-pointer transition-all duration-500 relative rounded-[1.75rem] sm:rounded-[2.5rem] border overflow-hidden ${
+                    className={`group flex flex-col p-4 sm:p-5 lg:p-6 cursor-pointer transition-all relative rounded-2xl border overflow-hidden ${
                       isActive 
-                        ? 'bg-indigo-600 dark:bg-zinc-950 border-indigo-500 dark:border-zinc-800 shadow-3xl ring-1 ring-indigo-500 dark:ring-zinc-800' 
-                        : 'bg-white/40 dark:bg-zinc-900/40 border-transparent hover:bg-white dark:hover:bg-zinc-900 hover:border-zinc-100 dark:hover:border-zinc-800/50 hover:shadow-premium'
+                        ? 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 shadow-sm' 
+                        : 'bg-transparent border-transparent hover:bg-zinc-50 dark:hover:bg-zinc-900 hover:border-zinc-200/50 dark:hover:border-zinc-800/50'
                     }`}
                   >
                     {isActive && (
                       <motion.div 
                         layoutId="active-indicator"
-                        transition={{ type: 'spring', bounce: 0.3, duration: 0.6 }}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-indigo-600 rounded-l-full z-20 shadow-glow-indigo" 
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                        className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 z-20" 
                       />
                     )}
                     
                     <div className="flex items-start justify-between mb-3 sm:mb-6 relative z-10">
                       <div className="flex items-center min-w-0">
                         <div className="relative flex-shrink-0">
-                          <div className={`w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-[1.25rem] sm:rounded-[1.75rem] lg:rounded-[2rem] flex items-center justify-center border transition-all duration-700 overflow-hidden shadow-premium ${
-                            isActive ? 'bg-indigo-700 dark:bg-zinc-900 border-indigo-500 dark:border-zinc-800' : 'bg-white dark:bg-zinc-800 border-zinc-100 dark:border-zinc-700 group-hover:scale-105'
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center border overflow-hidden ${
+                            isActive ? 'bg-indigo-50 dark:bg-zinc-900 border-indigo-100 dark:border-zinc-800' : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'
                           }`}>
                             {conversation.contact?.image ? (
-                              <img src={conversation.contact.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                              <img src={conversation.contact.image} alt="" className="w-full h-full object-cover" />
                             ) : (
-                              <span className={`text-2xl font-executive font-black italic ${isActive ? 'text-white' : 'text-zinc-300 dark:text-zinc-700'}`}>
+                              <span className={`text-lg font-bold ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-500 dark:text-zinc-400'}`}>
                                 {conversation.contact?.name?.charAt(0) || '?'}
                               </span>
                             )}
                           </div>
                           
                           {/* Assignee/Status Overlay */}
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-white dark:bg-zinc-950 rounded-[10px] sm:rounded-[12px] flex items-center justify-center shadow-premium border-2 border-white dark:border-zinc-950 z-20 transition-transform group-hover:scale-110">
+                          <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-white dark:bg-zinc-900 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-900 z-20">
                             {conversation.assignee ? (
                               conversation.assignee.image ? (
                                 <img src={conversation.assignee.image} alt="" className="w-full h-full rounded-[8px] sm:rounded-[10px] object-cover" />
@@ -246,33 +246,33 @@ const ConversationList = ({
                             )}
                           </div>
                         </div>                        <div className="ml-3 sm:ml-4 lg:ml-5 min-w-0">
-                          <h3 className={`text-[14px] sm:text-[15px] lg:text-[17px] font-executive font-extrabold transition-all truncate italic uppercase tracking-tight mb-1 sm:mb-1.5 ${
-                            isActive ? 'text-white' : 'text-zinc-950 dark:text-zinc-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
+                          <h3 className={`text-sm sm:text-base font-semibold truncate mb-0.5 ${
+                            isActive ? 'text-zinc-900 dark:text-white' : 'text-zinc-700 dark:text-zinc-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400'
                           }`}>
                             {conversation.contact?.name || conversation.externalId || t('common.unknown')}
                           </h3>
-                          <div className="flex items-center gap-2 min-w-0">
-                             <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? (isActive ? 'bg-white shadow-glow-white animate-pulse' : 'bg-indigo-500 shadow-glow-indigo animate-pulse') : (isActive ? 'bg-white/20' : 'bg-zinc-300 dark:bg-zinc-700')}`} />
-                             <PlatformIcon platform={conversation.platform} className={`flex-shrink-0 w-3.5 h-3.5 ${isActive ? 'text-white' : ''}`} />
-                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic truncate ${isActive ? 'text-indigo-100/70 dark:text-zinc-500' : 'text-zinc-400'}`}>
-                               Secured via {conversation.platform}
+                          <div className="flex items-center gap-1.5 min-w-0">
+                             <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? 'bg-indigo-500' : 'bg-zinc-300 dark:bg-zinc-700'}`} />
+                             <PlatformIcon platform={conversation.platform} className={`flex-shrink-0 w-3 h-3 ${isActive ? 'text-zinc-500' : 'text-zinc-400'}`} />
+                             <span className={`text-[11px] font-medium truncate ${isActive ? 'text-zinc-500' : 'text-zinc-500'}`}>
+                                {String(conversation.platform).toLowerCase()}
                              </span>
                           </div>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-black uppercase tracking-[0.15em] tabular-nums italic transition-colors ${isActive ? 'text-indigo-100/70 dark:text-zinc-600' : 'text-zinc-400'}`}>
+                      <span className={`text-xs tabular-nums font-medium transition-colors ${isActive ? 'text-zinc-500' : 'text-zinc-400'}`}>
                         {conversation.updatedAt && formatDistanceToNow(new Date(conversation.updatedAt), { addSuffix: false, locale: dateFnsLocale })}
                       </span>
                     </div>
                     
-                    <div className="flex items-center justify-between gap-6 pl-1 relative z-10">
-                      <p className={`text-[13px] line-clamp-1 leading-relaxed font-executive font-medium italic ${
-                        isActive ? 'text-indigo-50/80 dark:text-zinc-400' : 'text-zinc-500 dark:text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-300'
+                    <div className="flex items-center justify-between gap-4 mt-1 relative z-10">
+                      <p className={`text-[13px] line-clamp-1 leading-relaxed ${
+                        isActive ? 'text-zinc-600 dark:text-zinc-400' : 'text-zinc-500 dark:text-zinc-500'
                       }`}>
                         {conversation.lastMessage || 'Transmission pending...'}
                       </p>
                       {conversation.status === 'PENDING' && (
-                        <div className={`flex-shrink-0 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] rounded-full italic ${isActive ? 'bg-white text-indigo-600 shadow-glow-white' : 'bg-indigo-600 text-white shadow-glow-indigo'}`}>
+                        <div className="flex-shrink-0 px-2 py-0.5 text-[9px] font-bold uppercase rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400">
                            Live
                         </div>
                       )}

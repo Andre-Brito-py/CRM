@@ -45,45 +45,40 @@ const MessageBubble = ({ message, isMe, onReply }) => {
       <div className={`flex items-center gap-4 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
         <div className={`flex flex-col max-w-[85vw] sm:max-w-md lg:max-w-lg ${isMe ? 'items-end' : 'items-start'}`}>
           <div
-            className={`px-8 py-5 text-[15px] leading-relaxed shadow-premium-lg transition-all relative group overflow-hidden ${
+            className={`px-4 py-3 sm:px-5 sm:py-3.5 text-[15px] leading-relaxed shadow-sm transition-all relative group ${
               isMe
-                ? 'bg-indigo-600 dark:bg-zinc-950 text-white rounded-[2.5rem] rounded-tr-[10px] border border-indigo-500 dark:border-zinc-800 shadow-glow-indigo/10'
-                : 'vysify-glass text-zinc-950 dark:text-zinc-100 rounded-[2.5rem] rounded-tl-[10px] border border-zinc-100 dark:border-zinc-800 shadow-premium'
+                ? 'bg-zinc-900 dark:bg-zinc-800 text-white rounded-2xl rounded-tr-sm'
+                : 'bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 rounded-2xl rounded-tl-sm border border-zinc-200/50 dark:border-zinc-800'
             }`}
           >
-            {isMe && (
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] -mr-16 -mt-16 pointer-events-none" />
-            )}
-
             {/* Quoted Message */}
             {message.quotedMessage && (
-              <div className={`mb-4 p-3 px-4 rounded-2xl border-l-[3px] text-[13px] italic font-medium opacity-80 ${
-                isMe ? 'bg-indigo-700/50 dark:bg-white/5 border-indigo-300 dark:border-indigo-400 text-white/90 dark:text-zinc-300' : 'bg-zinc-100 dark:bg-black/20 border-indigo-500 text-zinc-600 dark:text-zinc-400'
+              <div className={`mb-3 p-3 rounded-lg border-l-2 text-[13px] ${
+                isMe ? 'bg-white/10 border-white/30 text-white/90' : 'bg-zinc-200/50 dark:bg-white/5 border-zinc-400 text-zinc-600 dark:text-zinc-400'
               }`}>
                 <p className="line-clamp-2">{message.quotedMessage.content}</p>
               </div>
             )}
 
-            <p className="whitespace-pre-wrap font-executive font-medium italic tracking-tight relative z-10">
+            <p className="whitespace-pre-wrap">
               {message.content}
             </p>
           </div>
           
-          <div className={`mt-3 flex items-center gap-4 px-4 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-            <span className="text-[9px] font-black uppercase tracking-[0.25em] text-zinc-400 dark:text-zinc-600 tabular-nums italic">
+          <div className={`mt-1.5 flex items-center gap-2 px-1 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+            <span className="text-xs text-zinc-400 dark:text-zinc-500 tabular-nums">
               {message.createdAt ? formatDistanceToNow(new Date(message.createdAt), { addSuffix: false, locale: dateFnsLocale }) : ''}
             </span>
             {isMe && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 {message.status === 'FAILED' ? (
-                  <div className="flex items-center gap-1.5 text-red-500 animate-pulse">
-                    <span className="text-[8px] font-black uppercase tracking-widest">Error</span>
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-glow-red" />
+                  <div className="flex items-center gap-1 text-red-500">
+                    <span className="text-[10px] font-medium uppercase">Error</span>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-1.5 grayscale opacity-50">
-                    <div className="w-1 h-1 rounded-full bg-indigo-500" />
-                    <div className="w-1 h-1 rounded-full bg-indigo-500/50" />
+                  <div className="flex items-center gap-0.5 opacity-50">
+                    <div className="w-1 h-1 rounded-full bg-zinc-500" />
+                    <div className="w-1 h-1 rounded-full bg-zinc-500" />
                   </div>
                 )}
               </div>
