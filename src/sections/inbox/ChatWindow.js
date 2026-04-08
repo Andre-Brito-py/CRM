@@ -90,6 +90,10 @@ const ChatWindow = ({
   const [newContactName, setNewContactName] = useState('');
   const [newContactEmail, setNewContactEmail] = useState('');
   const [isSavingContact, setIsSavingContact] = useState(false);
+  const [isSendTemplateModalOpen, setIsSendTemplateModalOpen] = useState(false);
+  const [forceTemplateName, setForceTemplateName] = useState('');
+  const [forceTemplateLanguage, setForceTemplateLanguage] = useState('pt_BR');
+  const [isForcingTemplate, setIsForcingTemplate] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -313,6 +317,40 @@ const ChatWindow = ({
       toast.error(error.message || 'Failed to save contact');
     } finally {
       setIsSavingContact(false);
+    }
+  };
+
+  const handleForceTemplate = async (e) => {
+    e.preventDefault();
+    if (!workspaceSlug || !conversation?.externalId || !forceTemplateName) return;
+
+    setIsForcingTemplate(true);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/inbox/start-chat`, {
+        method: 'POST',
+        body: {
+          phone: conversation.externalId,
+          templateName: forceTemplateName,
+          languageCode: forceTemplateLanguage,
+        },
+      });
+
+      if (response.status >= 400 || response.error) {
+        throw new Error(response.error?.details || response.error?.msg || 'Falha ao processar reativação');
+      }
+
+      toast.success('Conversa reativada e template disparado com sucesso!');
+      setIsSendTemplateModalOpen(false);
+      setForceTemplateName('');
+      
+      setTimeout(() => {
+        if (typeof window !== 'undefined') window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Falha ao reenviar template oficial');
+    } finally {
+      setIsForcingTemplate(false);
     }
   };
 
@@ -651,6 +689,18 @@ const ChatWindow = ({
           >
             <CalendarDaysIcon className="w-3.5 h-3.5" />
             {t('inbox.schedule.title')}
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
+            type="button"
+            onClick={() => setIsSendTemplateModalOpen(true)}
+            className="flex items-center gap-2 px-5 py-2.5 bg-brand-600 premium-gradient text-white rounded-2xl text-[9px] font-black uppercase tracking-[0.15em] border border-transparent hover:shadow-glow-emerald transition-all duration-500 shrink-0 shadow-sm italic"
+          >
+            <SparklesIcon className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">FORÇAR TEMPLATE (24H)</span>
+            <span className="sm:hidden">TEMPLATE!</span>
           </motion.button>
 
           <Menu as="div" className="relative inline-block text-left shrink-0">
@@ -1267,6 +1317,105 @@ const ChatWindow = ({
                         className="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-[22px] text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-indigo/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 italic"
                       >
                         {isSavingContact ? 'SALVANDO...' : 'SALVAR CONTATO'}
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Force Template Modal */}
+      <Transition appear show={isSendTemplateModalOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-[150]" onClose={() => !isForcingTemplate && setIsSendTemplateModalOpen(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto z-[150]">
+            <div className="flex min-h-full items-center justify-center p-6 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-400"
+                enterFrom="opacity-0 scale-95 translate-y-8"
+                enterTo="opacity-100 scale-100 translate-y-0"
+                leave="ease-in duration-300"
+                leaveFrom="opacity-100 scale-100 translate-y-0"
+                leaveTo="opacity-0 scale-95 translate-y-8"
+              >
+                <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-[40px] bg-white dark:bg-zinc-900 p-12 text-left align-middle shadow-premium transition-all border border-zinc-100 dark:border-zinc-800">
+                  <div className="mb-10 text-center">
+                    <div className="w-20 h-20 bg-brand-50 dark:bg-brand-900/20 rounded-[32px] flex items-center justify-center mx-auto mb-6 border border-brand-100/50 dark:border-brand-500/20 shadow-glow-emerald/10">
+                      <SparklesIcon className="w-10 h-10 text-brand-600 dark:text-brand-400" />
+                    </div>
+                    <Dialog.Title as="h3" className="text-[18px] font-executive font-black text-center text-zinc-900 dark:text-white uppercase italic tracking-wider mb-2">
+                      REATIVAR CONVERSA (TEMPLATE)
+                    </Dialog.Title>
+                    <p className="text-[12px] font-medium text-center text-zinc-500 dark:text-zinc-400 mb-8 italic">
+                      A janela de 24 horas da Meta fechou. Para voltar a interagir, você precisa disparar um Modelo Oficial aprovado pelo WhatsApp.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleForceTemplate} className="space-y-8">
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Modelo de Mensagem (Template)</label>
+                      <select
+                        required
+                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-brand-500/30 transition-all font-executive italic appearance-none cursor-pointer"
+                        value={forceTemplateName}
+                        onChange={(e) => setForceTemplateName(e.target.value)}
+                      >
+                        <option value="">Selecione o modelo oficial</option>
+                        {templates.length > 0 ? (
+                          templates.map((tpl) => (
+                            <option key={tpl.id} value={tpl.name}>
+                              {tpl.name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="hello_world">hello_world</option>
+                        )}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Idioma do Modelo</label>
+                      <select
+                        required
+                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-brand-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-brand-500/30 transition-all font-executive italic appearance-none cursor-pointer"
+                        value={forceTemplateLanguage}
+                        onChange={(e) => setForceTemplateLanguage(e.target.value)}
+                      >
+                        <option value="pt_BR">Português (Brasil)</option>
+                        <option value="en_US">Inglês (Estados Unidos)</option>
+                        <option value="es_ES">Espanhol</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center gap-4 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsSendTemplateModalOpen(false)}
+                        className="flex-1 px-8 py-5 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-[28px] text-[12px] font-black uppercase tracking-[0.2em] hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all italic"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isForcingTemplate || !forceTemplateName}
+                        className="flex-[2] px-8 py-5 bg-emerald-600 premium-gradient text-white rounded-[28px] text-[12px] font-black uppercase tracking-[0.2em] shadow-glow-emerald hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 italic"
+                      >
+                        {isForcingTemplate ? 'Enviando...' : 'Reativar Conversa'}
                       </button>
                     </div>
                   </form>
