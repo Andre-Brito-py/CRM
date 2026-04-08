@@ -45,6 +45,7 @@ const Inbox = () => {
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const [newChatPhone, setNewChatPhone] = useState('');
   const [newChatTemplate, setNewChatTemplate] = useState('');
+  const [newChatLanguage, setNewChatLanguage] = useState('pt_BR');
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
@@ -283,6 +284,7 @@ const Inbox = () => {
         body: {
           phone: newChatPhone,
           templateName: newChatTemplate,
+          languageCode: newChatLanguage,
         },
       });
 
@@ -536,6 +538,19 @@ const Inbox = () => {
                           ) : (
                             <option value="hello_world">hello_world</option>
                           )}
+                        </select>
+                      </div>
+                      <div className="space-y-2.5">
+                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Idioma do Modelo</label>
+                        <select
+                          required
+                          className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive italic appearance-none cursor-pointer"
+                          value={newChatLanguage}
+                          onChange={(e) => setNewChatLanguage(e.target.value)}
+                        >
+                          <option value="pt_BR">Português (Brasil)</option>
+                          <option value="en_US">Inglês (Estados Unidos)</option>
+                          <option value="es_ES">Espanhol</option>
                         </select>
                       </div>
 
