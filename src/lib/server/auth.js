@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { verifySync } from 'otplib';
+import { authenticator } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -104,11 +104,12 @@ const createCredentialsProvider = () =>
 
       if (user.twoFactorEnabled) {
         const token = String(credentials.token2fa || '').replace(/\s/g, '');
-        if (token.length !== 6) {
+        // Ensure token is exactly 6 digits
+        if (!/^\d{6}$/.test(token)) {
           throw new Error('2FA_REQUIRED');
         }
 
-        const isValidToken = verifySync({
+        const isValidToken = authenticator.verify({
           token,
           secret: user.twoFactorSecret
         });
@@ -277,7 +278,6 @@ const buildBaseAuthOptions = (req) => {
             },
             setup_intent_data: {
               metadata: {
-                customerId: customerPayment.customerId,
                 purpose: 'signup_setup',
               },
             },

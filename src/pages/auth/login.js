@@ -354,7 +354,7 @@ const Login = ({ hasFreePlan }) => {
 
               <form className="space-y-6" onSubmit={signInWithCredentials}>
                 <input
-                  className="w-full px-4 py-5 bg-white border-2 border-gray-100 rounded-2xl text-center text-4xl font-black tracking-[0.4em] focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm"
+                  className="w-full px-4 py-5 bg-gray-100 border-2 border-gray-200 rounded-2xl text-center text-4xl font-black tracking-[0.4em] text-gray-900 focus:ring-2 focus:ring-indigo-600 focus:border-transparent outline-none transition shadow-sm"
                   onChange={(e) => setToken2fa(e.target.value)}
                   placeholder="000000"
                   type="text"

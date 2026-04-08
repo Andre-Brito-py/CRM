@@ -1,4 +1,4 @@
-import { generateSecret, generateURI } from 'otplib';
+import { authenticator } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
@@ -38,7 +38,7 @@ const handler = async (req, res) => {
         // Generate or get existing secret
         let secret = user.twoFactorSecret;
         if (!secret || req.body?.reset) {
-            secret = generateSecret();
+            secret = authenticator.generateSecret();
             await prisma.user.update({
                 where: { id: userId },
                 data: { twoFactorSecret: secret }
@@ -46,11 +46,11 @@ const handler = async (req, res) => {
         }
 
         const userEmail = user.email || 'user@vysify.com';
-        const otpauth = generateURI({
-            issuer: 'Vysify',
-            label: userEmail,
-            secret: secret
-        });
+        const otpauth = authenticator.keyuri(
+            userEmail,
+            'Vysify',
+            secret
+        );
 
         if (!otpauth) {
             throw new Error('Failed to generate OTPAuth URI');
