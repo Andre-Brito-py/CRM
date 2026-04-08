@@ -1,10 +1,11 @@
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/server/auth';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
 import { createAuditActivity } from '@/prisma/services/activity';
 
 export default async function handler(req, res) {
-    const session = await getSession({ req });
+    const session = await getServerSession(req, res, authOptions);
     if (!session) {
         res.status(401).json({ error: { msg: 'Unauthorized' } });
         return;
