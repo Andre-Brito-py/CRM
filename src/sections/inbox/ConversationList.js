@@ -1,9 +1,18 @@
 import { useMemo, useState, useEffect } from 'react';
-import { UserCircleIcon, FunnelIcon, MagnifyingGlassIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon, FunnelIcon, MagnifyingGlassIcon, SparklesIcon, ChatBubbleLeftRightIcon, EnvelopeIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { formatDistanceToNow } from 'date-fns';
 import { enUS, ptBR, es, fr, de, it } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const PlatformIcon = ({ platform, className = "w-4 h-4" }) => {
+  switch (String(platform).toUpperCase()) {
+    case 'WHATSAPP': return <ChatBubbleLeftRightIcon className={`${className} text-emerald-500`} />;
+    case 'EMAIL': return <EnvelopeIcon className={`${className} text-indigo-500`} />;
+    case 'INSTAGRAM': return <CameraIcon className={`${className} text-pink-500`} />;
+    default: return <ChatBubbleLeftRightIcon className={`${className} text-zinc-400`} />;
+  }
+};
 
 const ConversationList = ({
   conversations,
@@ -223,17 +232,17 @@ const ConversationList = ({
                           </div>
                           
                           {/* Assignee/Status Overlay */}
-                          <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-white dark:bg-zinc-900 rounded-[12px] flex items-center justify-center shadow-xl border-2 border-white dark:border-zinc-900 z-20 transition-transform group-hover:scale-110">
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-white dark:bg-zinc-950 rounded-[10px] sm:rounded-[12px] flex items-center justify-center shadow-premium border-2 border-white dark:border-zinc-950 z-20 transition-transform group-hover:scale-110">
                             {conversation.assignee ? (
                               conversation.assignee.image ? (
-                                <img src={conversation.assignee.image} alt="" className="w-full h-full rounded-[10px] object-cover" />
+                                <img src={conversation.assignee.image} alt="" className="w-full h-full rounded-[8px] sm:rounded-[10px] object-cover" />
                               ) : (
-                                <div className="w-full h-full bg-indigo-900 dark:bg-zinc-950 text-white rounded-[10px] flex items-center justify-center text-[10px] font-black italic">
+                                <div className="w-full h-full bg-indigo-900 dark:bg-zinc-900 text-white rounded-[8px] sm:rounded-[10px] flex items-center justify-center text-[9px] font-black italic">
                                   {conversation.assignee.name?.charAt(0).toUpperCase()}
                                 </div>
                               )
                             ) : (
-                              <div className="w-3 h-3 bg-zinc-100 dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700" />
+                              <div className="w-2.5 h-2.5 bg-zinc-100 dark:bg-zinc-800 rounded-full border border-zinc-200 dark:border-zinc-700 shadow-inner" />
                             )}
                           </div>
                         </div>                        <div className="ml-3 sm:ml-4 lg:ml-5 min-w-0">
@@ -242,9 +251,10 @@ const ConversationList = ({
                           }`}>
                             {conversation.contact?.name || conversation.externalId || t('common.unknown')}
                           </h3>
-                          <div className="flex items-center gap-2">
-                             <div className={`w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? (isActive ? 'bg-white shadow-glow-white animate-pulse' : 'bg-indigo-500 shadow-glow-indigo animate-pulse') : (isActive ? 'bg-white/20' : 'bg-zinc-300 dark:bg-zinc-700')}`} />
-                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic ${isActive ? 'text-indigo-100/70 dark:text-zinc-500' : 'text-zinc-400'}`}>
+                          <div className="flex items-center gap-2 min-w-0">
+                             <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? (isActive ? 'bg-white shadow-glow-white animate-pulse' : 'bg-indigo-500 shadow-glow-indigo animate-pulse') : (isActive ? 'bg-white/20' : 'bg-zinc-300 dark:bg-zinc-700')}`} />
+                             <PlatformIcon platform={conversation.platform} className={`flex-shrink-0 w-3 h-3 ${isActive ? 'text-white' : ''}`} />
+                             <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic truncate ${isActive ? 'text-indigo-100/70 dark:text-zinc-500' : 'text-zinc-400'}`}>
                                Secured via {conversation.platform}
                              </span>
                           </div>
