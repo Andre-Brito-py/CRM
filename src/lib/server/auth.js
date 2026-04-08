@@ -103,20 +103,45 @@ const createCredentialsProvider = () =>
       }
 
       if (user.twoFactorEnabled) {
-        const token = String(credentials.token2fa || '').replace(/\s/g, '');
-        // Ensure token is exactly 6 digits
-        if (!/^\d{6}$/.test(token)) {
+        const token = String(credentials.token2fa || '').replace(/\s/g, '').toUpperCase();
+        
+        // Handle Backup Codes (8 characters)
+        const isBackupCode = /^[A-Z0-9]{8}$/.test(token);
+        const isTotpToken = /^\d{6}$/.test(token);
+
+        if (!isBackupCode && !isTotpToken) {
           throw new Error('2FA_REQUIRED');
         }
 
-        const isValidToken = authenticator.verify({
-          token,
-          secret: user.twoFactorSecret
-        });
+        if (isBackupCode) {
+          const backupCodes = user.twoFactorBackupCodes || [];
+          const codeIndex = backupCodes.indexOf(token);
+          
+          if (codeIndex === -1) {
+            await sleep(250);
+            throw new Error('Invalid backup code');
+          }
 
-        if (isValidToken !== true) {
-          await sleep(200);
-          throw new Error('Invalid 2FA code');
+          // Revoke the used backup code
+          const updatedCodes = backupCodes.filter((_, i) => i !== codeIndex);
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { twoFactorBackupCodes: updatedCodes }
+          });
+          
+          log({ level: 'info', msg: 'auth_2fa_backup_code_used', userId: user.id });
+        } else {
+          // Handle TOTP
+          const isValidToken = authenticator.verify({
+            token,
+            secret: user.twoFactorSecret,
+            window: 1 // Allow 1 step (30s) before/after for clock drift
+          });
+
+          if (isValidToken !== true) {
+            await sleep(200);
+            throw new Error('Invalid 2FA code');
+          }
         }
       }
 

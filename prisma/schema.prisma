@@ -196,6 +196,7 @@ model User {
   password              String?
   twoFactorEnabled      Boolean          @default(false)
   twoFactorSecret       String?
+  twoFactorBackupCodes  String[]         @default([])
   onboardingStatus      Json?            @default("{}")
   termsVersion          String?
   termsAcceptedAt       DateTime?

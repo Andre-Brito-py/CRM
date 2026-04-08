@@ -62,11 +62,13 @@ const Inbox = () => {
   }, []);
 
   const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useSWR(
-    workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox` : null
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox` : null,
+    { refreshInterval: 3000 }
   );
 
   const { data: conversationData, mutate: mutateConversation, isValidating: isValidatingConversation, isLoading: isLoadingConversation } = useSWR(
-    workspaceSlug && selectedId ? `/api/workspace/${workspaceSlug}/inbox/${selectedId}` : null
+    workspaceSlug && selectedId ? `/api/workspace/${workspaceSlug}/inbox/${selectedId}` : null,
+    { refreshInterval: 3000 }
   );
 
   const { data: membersData } = useSWR(
@@ -93,23 +95,31 @@ const Inbox = () => {
   const paymentProducts = productsData?.data?.products || [];
 
   const selectedConversation = useMemo(() => {
-    const listResult = conversations.find((c) => c.id === selectedId);
-    if (!conversationData?.data?.conversation) return listResult;
-    return conversationData.data.conversation;
+    if (!selectedId) return null;
+    const conversation = conversationData?.data?.conversation;
+    // If we have the full conversation data with the same ID, use it
+    if (conversation && conversation.id === selectedId) {
+      return conversation;
+    }
+    // Fallback to the list version while loading
+    return conversations.find((c) => c.id === selectedId);
   }, [conversations, selectedId, conversationData]);
 
   const handleSendMessage = async (content, type = 'TEXT', metadata = null) => {
     if (!workspaceSlug || !selectedId) return;
 
     try {
-      const res = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}/messages`, {
+      const res = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}`, {
         method: 'POST',
         body: { content, type, metadata },
       });
 
       if (res.status === 200 || res.status === 201) {
-        mutateConversations();
-        mutateConversation();
+        // Run mutations in parallel and await them for consistency
+        await Promise.all([
+          mutateConversations(),
+          mutateConversation()
+        ]);
         setMessageText('');
       } else {
         toast.error(res.error?.msg || 'Failed to send message');

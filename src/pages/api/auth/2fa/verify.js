@@ -2,7 +2,8 @@ import { authenticator } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
-
+import { rateLimit } from '@/lib/server/rateLimit';
+ 
 export const config = {
     api: {
         bodyParser: {
@@ -10,50 +11,99 @@ export const config = {
         },
     },
 };
-
+ 
 const handler = async (req, res) => {
     try {
         if (req.method !== 'POST') {
             return res.status(405).json({ error: { msg: 'Method Unsupported' } });
         }
-
+ 
         const session = await validateSession(req, res);
         if (!session) return;
         const requestId = String(req.headers['x-request-id'] || '').trim() || null;
         const userId = session.user?.userId || session.user?.id;
-
-        const { token, enable } = req.body;
-
+ 
+        const { token, enable, secret } = req.body;
+ 
         if (!token) {
             return res.status(400).json({ error: { msg: 'Token is required' } });
         }
-
+ 
+        // Rate Limit Check
+        const rl = await rateLimit({ req, limit: 10, windowMs: 5 * 60_000, key: `auth:2fa:verify:${userId}` });
+        if (!rl.ok) {
+            return res.status(429).json({ error: { msg: 'Too many attempts. Please wait 5 minutes.' } });
+        }
+ 
         const user = await prisma.user.findUnique({
             where: { id: userId }
         });
-
-        if (!user || !user.twoFactorSecret) {
-            return res.status(400).json({ error: { msg: '2FA setup not found for user' } });
+ 
+        if (!user) {
+            return res.status(404).json({ error: { msg: 'User not found' } });
         }
-
+ 
+        // Determine which secret to use:
+        // 1. If 'secret' is provided in body, it's a new setup verification.
+        // 2. Otherwise use the stored secret.
+        const secretToVerify = secret || user.twoFactorSecret;
+ 
+        if (!secretToVerify) {
+            return res.status(400).json({ error: { msg: '2FA setup not found. Please start setup again.' } });
+        }
+ 
         // Verify token
         const isValid = authenticator.verify({
             token,
-            secret: user.twoFactorSecret
+            secret: secretToVerify
         });
-
+ 
         if (isValid !== true) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
         }
-
+ 
+        // Create update payload
+        const updateData = {};
+ 
+        // If a new secret was verified, save it
+        if (secret) {
+            updateData.twoFactorSecret = secret;
+        }
+ 
         // Update 2FA status
         if (enable !== undefined) {
+            updateData.twoFactorEnabled = enable;
+ 
+            // Generate backup codes if being enabled for the first time OR secret is new
+            const hasBackupCodes = user.twoFactorBackupCodes && user.twoFactorBackupCodes.length > 0;
+            if (enable === true && (!hasBackupCodes || secret)) {
+                const codes = Array.from({ length: 10 }, () =>
+                    Math.random().toString(36).substring(2, 10).toUpperCase()
+                );
+                updateData.twoFactorBackupCodes = codes;
+                
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: updateData
+                });
+ 
+                return res.status(200).json({
+                    data: {
+                        success: true,
+                        enabled: true,
+                        backupCodes: codes
+                    }
+                });
+            }
+        }
+ 
+        if (Object.keys(updateData).length > 0) {
             await prisma.user.update({
                 where: { id: userId },
-                data: { twoFactorEnabled: enable }
+                data: updateData
             });
         }
-
+ 
         return res.status(200).json({ data: { success: true, enabled: enable } });
     } catch (error) {
         console.error('[2FA VERIFY ERROR]:', error);

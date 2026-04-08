@@ -18,8 +18,11 @@ const SecuritySettings = () => {
     const [showSetupModal, setShowSetupModal] = useState(false);
 
     const [qrCodeUrl, setQrCodeUrl] = useState('');
+    const [setupSecret, setSetupSecret] = useState('');
     const [token2fa, setToken2fa] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [backupCodes, setBackupCodes] = useState([]);
+    const [showBackupCodesModal, setShowBackupCodesModal] = useState(false);
 
     useEffect(() => {
         if (session?.user) {
@@ -35,6 +38,7 @@ const SecuritySettings = () => {
 
             if (response.data?.qrCodeUrl) {
                 setQrCodeUrl(response.data.qrCodeUrl);
+                setSetupSecret(response.data.secret);
                 setShowSetupModal(true);
             } else {
                 throw new Error(response.error?.msg || 'Failed to get QR code');
@@ -54,7 +58,11 @@ const SecuritySettings = () => {
         try {
             const response = await api('/api/auth/2fa/verify', {
                 method: 'POST',
-                body: JSON.stringify({ token: token2fa, enable: true }),
+                body: JSON.stringify({ 
+                    token: token2fa, 
+                    enable: true,
+                    secret: setupSecret // Pass the pending secret for verification
+                }),
             });
 
             if (response.data.success) {
@@ -62,6 +70,14 @@ const SecuritySettings = () => {
                 setIs2FAEnabled(true);
                 setShowSetupModal(false);
                 setToken2fa('');
+                setSetupSecret('');
+                
+                // If backup codes were returned, show them
+                if (response.data.backupCodes) {
+                    setBackupCodes(response.data.backupCodes);
+                    setShowBackupCodesModal(true);
+                }
+                
                 await update(); // Update NextAuth session
             }
         } catch (error) {
@@ -168,6 +184,49 @@ const SecuritySettings = () => {
                             </Button>
                         </div>
                     </form>
+                </div>
+            </Modal>
+
+            <Modal show={showBackupCodesModal} toggle={() => setShowBackupCodesModal(false)}>
+                <div className="p-6">
+                    <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-2xl flex items-center justify-center mb-6">
+                        <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                    
+                    <h3 className="text-xl font-bold mb-2 text-zinc-900 dark:text-white">2FA Ativado com Sucesso!</h3>
+                    <p className="text-zinc-600 dark:text-zinc-400 mb-6 font-medium">
+                        Guarde estes códigos de backup em um local seguro. Cada código pode ser usado apenas uma vez para acessar sua conta caso você perca seu dispositivo.
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3 mb-8 bg-zinc-50 dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                        {backupCodes.map((code, idx) => (
+                            <div key={idx} className="flex items-center space-x-3">
+                                <span className="text-xs text-zinc-400 font-mono">{String(idx + 1).padStart(2, '0')}.</span>
+                                <span className="text-[15px] font-black tracking-wider text-zinc-800 dark:text-zinc-200 font-mono">{code}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-col space-y-3">
+                        <Button 
+                            className="w-full py-4 justify-center bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:opacity-90 transition-all font-bold text-base rounded-xl"
+                            onClick={() => {
+                                const text = backupCodes.join('\n');
+                                navigator.clipboard.writeText(text);
+                                toast.success('Códigos copiados para a área de transferência!');
+                            }}
+                        >
+                            Copiar Todos os Códigos
+                        </Button>
+                        <Button 
+                            className="w-full py-4 justify-center bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-bold transition-all rounded-xl"
+                            onClick={() => setShowBackupCodesModal(false)}
+                        >
+                            Entendi, salvei os códigos
+                        </Button>
+                    </div>
                 </div>
             </Modal>
         </AccountLayout>

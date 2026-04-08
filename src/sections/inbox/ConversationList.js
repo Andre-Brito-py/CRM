@@ -238,7 +238,7 @@ const ConversationList = ({
                                 <img src={conversation.assignee.image} alt="" className="w-full h-full rounded-[8px] sm:rounded-[10px] object-cover" />
                               ) : (
                                 <div className="w-full h-full bg-indigo-900 dark:bg-zinc-900 text-white rounded-[8px] sm:rounded-[10px] flex items-center justify-center text-[9px] font-black italic">
-                                  {conversation.assignee.name?.charAt(0).toUpperCase()}
+                                  {conversation.assignee.name?.charAt(0)?.toUpperCase() || '?'}
                                 </div>
                               )
                             ) : (
@@ -253,7 +253,7 @@ const ConversationList = ({
                           </h3>
                           <div className="flex items-center gap-2 min-w-0">
                              <div className={`flex-shrink-0 w-1.5 h-1.5 rounded-full ${conversation.status === 'PENDING' ? (isActive ? 'bg-white shadow-glow-white animate-pulse' : 'bg-indigo-500 shadow-glow-indigo animate-pulse') : (isActive ? 'bg-white/20' : 'bg-zinc-300 dark:bg-zinc-700')}`} />
-                             <PlatformIcon platform={conversation.platform} className={`flex-shrink-0 w-3 h-3 ${isActive ? 'text-white' : ''}`} />
+                             <PlatformIcon platform={conversation.platform} className={`flex-shrink-0 w-3.5 h-3.5 ${isActive ? 'text-white' : ''}`} />
                              <span className={`text-[9px] font-black uppercase tracking-[0.2em] italic truncate ${isActive ? 'text-indigo-100/70 dark:text-zinc-500' : 'text-zinc-400'}`}>
                                Secured via {conversation.platform}
                              </span>

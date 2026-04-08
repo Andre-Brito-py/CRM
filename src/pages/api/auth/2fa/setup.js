@@ -35,32 +35,27 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found' } });
         }
 
-        // Generate or get existing secret
-        let secret = user.twoFactorSecret;
-        if (!secret || req.body?.reset) {
-            secret = authenticator.generateSecret();
-            await prisma.user.update({
-                where: { id: userId },
-                data: { twoFactorSecret: secret }
-            });
-        }
-
+        // Generate a new secret for setup
+        // We don't save it to user.twoFactorSecret yet to avoid breaking current 2FA
+        // The verify.js endpoint will commit it once the user proves they have it configured.
+        const secret = authenticator.generateSecret();
+        
         const userEmail = user.email || 'user@vysify.com';
         const otpauth = authenticator.keyuri(
             userEmail,
             'Vysify',
             secret
         );
-
-        if (!otpauth) {
-            throw new Error('Failed to generate OTPAuth URI');
-        }
-
-        // Generate QR Code as SVG
-        const svgString = await QRCode.toString(otpauth, { type: 'svg' });
-        const qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(svgString).toString('base64')}`;
-
-        return res.status(200).json({ data: { qrCodeUrl } });
+ 
+         if (!otpauth) {
+             throw new Error('Failed to generate OTPAuth URI');
+         }
+ 
+         // Generate QR Code as SVG
+         const svgString = await QRCode.toString(otpauth, { type: 'svg' });
+         const qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(svgString).toString('base64')}`;
+ 
+         return res.status(200).json({ data: { qrCodeUrl, secret } });
     } catch (error) {
         console.error('[2FA SETUP ERROR]:', error);
         log({ level: 'error', msg: 'auth_2fa_setup_failed', userId: session?.user?.id, error: error.message });
