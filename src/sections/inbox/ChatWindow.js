@@ -89,6 +89,7 @@ const ChatWindow = ({
   const [isSaveContactModalOpen, setIsSaveContactModalOpen] = useState(false);
   const [newContactName, setNewContactName] = useState('');
   const [newContactEmail, setNewContactEmail] = useState('');
+  const [newContactPhone, setNewContactPhone] = useState('');
   const [isSavingContact, setIsSavingContact] = useState(false);
   const [isSendTemplateModalOpen, setIsSendTemplateModalOpen] = useState(false);
   const [forceTemplateName, setForceTemplateName] = useState('');
@@ -284,6 +285,7 @@ const ChatWindow = ({
   const handleOpenContactModal = () => {
     setNewContactName(conversation?.contact?.name || '');
     setNewContactEmail(conversation?.contact?.email || '');
+    setNewContactPhone(conversation?.contact?.phone || conversation?.externalId || '');
     setIsSaveContactModalOpen(true);
   };
 
@@ -298,6 +300,7 @@ const ChatWindow = ({
         body: {
           name: newContactName,
           email: newContactEmail,
+          phone: newContactPhone,
         },
       });
 
@@ -371,10 +374,10 @@ const ChatWindow = ({
         </motion.div>
         
         <div className="relative z-10 max-w-lg">
-          <h2 className="text-zinc-950 dark:text-white text-5xl font-executive font-extrabold tracking-tighter mb-6 uppercase italic leading-none">
+          <h2 className="text-zinc-900 dark:text-white text-3xl font-semibold tracking-tight mb-4 uppercase">
             {t('inbox.chat.empty.title')}
           </h2>
-          <p className="text-zinc-400 dark:text-zinc-500 text-xl font-medium leading-relaxed italic tracking-tight opacity-80 mb-12">
+          <p className="text-zinc-500 text-lg font-medium opacity-80 mb-12">
             {t('inbox.chat.empty.subtitle')}
           </p>
           <div className="flex items-center justify-center gap-4 opacity-30 hover:opacity-100 transition-all duration-1000">
@@ -408,7 +411,7 @@ const ChatWindow = ({
                 {conversation.contact?.image ? (
                   <img src={conversation.contact.image} alt="" className="w-full h-full object-cover transition-transform duration-700 group-hover/profile:scale-110" />
                 ) : (
-                  <span className="text-base sm:text-lg lg:text-2xl font-executive font-black italic text-zinc-300 dark:text-zinc-700">
+                  <span className="text-base sm:text-lg lg:text-xl font-bold text-zinc-400 dark:text-zinc-600">
                     {conversation.contact?.name?.charAt(0) || '?'}
                   </span>
                 )}
@@ -420,7 +423,7 @@ const ChatWindow = ({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2 mb-1.5 sm:mb-2.5">
-              <h3 className="text-[14px] sm:text-[16px] lg:text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none uppercase italic truncate">
+              <h3 className="text-[15px] sm:text-[17px] lg:text-[19px] font-semibold text-zinc-900 dark:text-white tracking-tight truncate">
                 {conversation.contact?.name || conversation.externalId || t('common.unknown')}
               </h3>
               {conversation.contactId && (
@@ -434,17 +437,17 @@ const ChatWindow = ({
               )}
             </div>
             <div className="flex items-center gap-2 sm:gap-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-400 italic">
-                  CHANNEL SECURED
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                  Channel Secured
                 </span>
               </div>
               <div className="w-[1px] h-3 bg-zinc-200 dark:bg-zinc-800" />
-              <div className="flex items-center gap-2.5">
-                <PlatformIcon platform={conversation.platform} className="w-4 h-4 text-zinc-400" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500 italic">
-                  {String(conversation.platform)}
+              <div className="flex items-center gap-2">
+                <PlatformIcon platform={conversation.platform} className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="text-[11px] font-medium text-zinc-500 capitalize">
+                  {String(conversation.platform).toLowerCase()}
                 </span>
               </div>
             </div>
@@ -629,15 +632,15 @@ const ChatWindow = ({
                 whileTap={{ scale: 0.97 }}
                 onClick={() => onGenerateResponse?.({ objective: aiObjective })}
                 disabled={isGeneratingAI || !aiSuggestOnlyEnabled}
-                className={`flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em] border transition-all duration-500 shadow-lg italic shrink-0 ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-4 lg:py-2 rounded-lg text-xs font-semibold transition-all duration-300 shadow-sm shrink-0 ${
                   aiSuggestOnlyEnabled 
-                    ? 'bg-indigo-600 dark:bg-zinc-950 border-indigo-500 dark:border-indigo-500/50 text-white dark:text-indigo-400 shadow-glow-indigo/20 dark:shadow-glow-indigo/20 ring-1 ring-indigo-500 dark:ring-indigo-500/20' 
-                    : 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500'
+                    ? 'bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50 dark:border-indigo-500/30' 
+                    : 'bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-800'
                 }`}
               >
                 <SparklesIcon className={`w-3.5 h-3.5 shrink-0 ${isGeneratingAI ? 'animate-spin' : ''}`} />
-                <span className="hidden sm:inline">{isGeneratingAI ? 'SYNTHESIZING...' : 'GENERATE AI RESPONSE'}</span>
-                <span className="sm:hidden">{isGeneratingAI ? 'AI...' : 'AI GEN'}</span>
+                <span className="hidden sm:inline">{isGeneratingAI ? 'Synthesizing...' : 'Generate Suggestion'}</span>
+                <span className="sm:hidden">{isGeneratingAI ? 'AI...' : 'Auto'}</span>
               </motion.button>
 
               <motion.button
@@ -645,28 +648,28 @@ const ChatWindow = ({
                 whileTap={{ scale: 0.97 }}
                 onClick={handleSummarize}
                 disabled={isSummarizingAI}
-                className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-5 lg:py-2.5 bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-100 rounded-xl sm:rounded-2xl text-[9px] sm:text-[10px] font-black uppercase tracking-[0.1em] sm:tracking-[0.15em] border border-zinc-200 dark:border-zinc-800 hover:border-indigo-500/30 hover:text-indigo-600 transition-all duration-500 shadow-sm italic shrink-0"
+                className="flex items-center gap-1.5 sm:gap-2 px-3 py-2 sm:px-4 sm:py-2 lg:px-4 lg:py-2 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-semibold border border-zinc-200/80 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors shadow-sm shrink-0"
               >
-                <DocumentTextIcon className="w-3.5 h-3.5 shrink-0" />
-                <span className="hidden sm:inline">{isSummarizingAI ? 'ANALYZING...' : 'SUMMARIZE STREAM'}</span>
-                <span className="sm:hidden">{isSummarizingAI ? '...' : 'SUMA.'}</span>
+                <DocumentTextIcon className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">{isSummarizingAI ? 'Analyzing...' : 'Summarize Thread'}</span>
+                <span className="sm:hidden">{isSummarizingAI ? '...' : 'Suma.'}</span>
               </motion.button>
               
-              <div className="hidden lg:flex items-center gap-3 ml-1 p-1.5 bg-zinc-100/50 dark:bg-black/40 rounded-2xl border border-zinc-100 dark:border-zinc-800 shadow-inner-premium">
-                <label className="flex items-center gap-2 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-zinc-400 select-none cursor-pointer hover:text-indigo-600 transition-all duration-500 italic rounded-xl">
+              <div className="hidden lg:flex items-center gap-3 ml-1 p-1.5 bg-zinc-50 dark:bg-black/40 rounded-lg border border-zinc-200/50 dark:border-zinc-800 shadow-sm">
+                <label className="flex items-center gap-2 px-3 py-1.5 text-[11px] font-semibold text-zinc-500 select-none cursor-pointer hover:text-indigo-600 transition-colors rounded-lg">
                   <input
                     type="checkbox"
                     checked={Boolean(aiSuggestOnlyEnabled)}
                     onChange={(e) => onAiSuggestOnlyEnabledChange?.(e.target.checked)}
                     className="h-4 w-4 rounded border-zinc-300 dark:border-zinc-700 text-indigo-600 focus:ring-indigo-500/20 transition-all cursor-pointer"
                   />
-                  AUTOSUGGEST
+                  Autosuggest
                 </label>
-                <div className="h-4 w-[1px] bg-zinc-300 dark:bg-zinc-800" />
+                <div className="h-4 w-[1px] bg-zinc-200 dark:bg-zinc-800" />
                 <select
                   value={aiObjective || ''}
                   onChange={(e) => onAiObjectiveChange?.(e.target.value)}
-                  className="h-8 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 px-4 text-[9px] font-black uppercase tracking-[0.15em] text-zinc-950 dark:text-white focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/30 transition-all italic appearance-none cursor-pointer"
+                  className="h-8 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 px-3 text-xs font-medium text-zinc-700 dark:text-zinc-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer"
                 >
                   <option value="support">{t('inbox.ai.objective.support')}</option>
                   <option value="qualify">{t('inbox.ai.objective.qualify')}</option>
@@ -1300,6 +1303,16 @@ const ChatWindow = ({
                         value={newContactEmail}
                         onChange={(e) => setNewContactEmail(e.target.value)}
                         placeholder="email@exemplo.com"
+                      />
+                    </div>
+                    <div className="space-y-2.5">
+                      <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Celular / WhatsApp</label>
+                      <input
+                        type="tel"
+                        className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-emerald-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-emerald-500/30 transition-all font-executive italic"
+                        value={newContactPhone}
+                        onChange={(e) => setNewContactPhone(e.target.value)}
+                        placeholder="Ex: 5511999999999"
                       />
                     </div>
 

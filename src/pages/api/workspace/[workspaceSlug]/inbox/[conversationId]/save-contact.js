@@ -17,7 +17,7 @@ export default async function handler(req, res) {
   }
 
   const { workspaceSlug, conversationId } = req.query;
-  const { name, email } = req.body || {};
+  const { name, email, phone: reqPhone } = req.body || {};
 
   if (!name) {
     return res.status(400).json({ error: { msg: 'Name is required' } });
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
     }
 
     // 2. Prepare phone number (externalId often holds the phone in WhatsApp)
-    const phone = conversation.platform === 'WHATSAPP' ? conversation.externalId : null;
+    const phone = reqPhone ? reqPhone.trim() : (conversation.platform === 'WHATSAPP' ? conversation.externalId : null);
 
     // 3. Create or Update the contact
     let contact;
@@ -48,6 +48,7 @@ export default async function handler(req, res) {
       contact = await updateContact(conversation.contactId, {
         name: name.trim(),
         email: email ? email.trim() : null,
+        phone: phone,
       });
 
       await createAuditActivity(
@@ -57,7 +58,7 @@ export default async function handler(req, res) {
           action: 'CONTACT_UPDATE_FROM_INBOX',
           title: `Contact updated from inbox: ${contact.name}`,
           target: { contactId: contact.id, conversationId },
-          metadata: { name: contact.name, email: contact.email },
+          metadata: { name: contact.name, email: contact.email, phone: contact.phone },
         },
         req
       );

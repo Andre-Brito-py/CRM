@@ -60,10 +60,10 @@ const ConversationList = ({
       <div className="p-5 sm:p-8 lg:p-10 border-b border-zinc-100 dark:border-zinc-800/30 flex flex-col gap-5 sm:gap-8 lg:gap-10 relative z-10">
         <div className="flex justify-between items-center">
           <div className="flex flex-col">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-executive font-extrabold text-zinc-950 dark:text-white italic tracking-tighter uppercase leading-none mb-1">
+            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 dark:text-white tracking-tight mb-1">
               {t('Inbox')}
             </h2>
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] italic ml-1 opacity-70">Secured Channel</p>
+            <p className="text-xs font-medium text-zinc-400">Secured Channel</p>
           </div>
           <div className="flex items-center gap-4">
             {isSuperAdmin && (
@@ -104,10 +104,10 @@ const ConversationList = ({
               <button
                 key={key}
                 onClick={() => setFilterAssignee(val)}
-                className={`flex-1 text-[9px] font-black uppercase tracking-[0.2em] py-3 rounded-[1.25rem] transition-all duration-500 italic ${
+                className={`flex-1 text-[11px] font-semibold tracking-wide py-2 rounded-lg transition-colors ${
                   isActive 
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-premium border border-zinc-100 dark:border-zinc-700' 
-                    : 'text-zinc-500 dark:text-zinc-500 hover:text-zinc-950 dark:hover:text-zinc-300'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-sm border border-zinc-200/50 dark:border-zinc-700' 
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-300'
                 }`}
               >
                 {t(`inbox.filter.${key}`)}
@@ -117,11 +117,11 @@ const ConversationList = ({
         </div>
 
         <div className="relative group/search">
-          <MagnifyingGlassIcon className={`absolute left-6 top-1/2 -translate-y-1/2 w-5 h-5 transition-all duration-500 ${localSearch ? 'text-indigo-600 scale-110' : 'text-zinc-400'}`} />
+          <MagnifyingGlassIcon className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors ${localSearch ? 'text-indigo-600' : 'text-zinc-400'}`} />
           <input
             type="text"
-            placeholder="PROCURAR COMUNICAÇÕES..."
-            className="w-full pl-14 sm:pl-16 pr-6 sm:pr-8 py-4 sm:py-5 bg-zinc-50/50 dark:bg-zinc-900/30 border border-zinc-100 dark:border-zinc-800/50 rounded-[1.25rem] sm:rounded-[1.5rem] text-[12px] sm:text-[13px] font-executive font-black focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500/30 transition-all placeholder:text-zinc-300 italic uppercase tracking-[0.15em]"
+            placeholder="Procurar conversas..."
+            className="w-full pl-10 pr-4 py-2.5 bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200/80 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white dark:focus:bg-zinc-900 focus:border-indigo-500/50 transition-all placeholder:text-zinc-400"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
           />

@@ -371,16 +371,16 @@ const Inbox = () => {
               {/* Column 1: Shortcuts */}
               <div className="hidden lg:flex flex-col w-24 bg-white dark:bg-zinc-950 border-r border-zinc-100 dark:border-zinc-900/50 items-center py-10 z-20 shrink-0">
                 <div className="mb-auto space-y-6 flex flex-col items-center">
-                   <Link
+                  <Link
                     href={`/account/${workspaceSlug}`}
-                    className="group relative flex items-center justify-center w-14 h-14 flex-shrink-0 bg-zinc-50 dark:bg-zinc-900 rounded-[22px] border border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
+                    className="group relative flex items-center justify-center w-12 h-12 flex-shrink-0 bg-transparent rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
                     title="Dashboard"
                   >
                     <svg className="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                   </Link>
-                   <Link
+                  <Link
                     href={`/account/${workspaceSlug}/settings/general`}
-                    className="group relative flex items-center justify-center w-14 h-14 flex-shrink-0 bg-zinc-50 dark:bg-zinc-900 rounded-[22px] border border-zinc-100 dark:border-zinc-800 text-zinc-400 dark:text-zinc-500 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-500/50 hover:shadow-glow-indigo/20 transition-all duration-500"
+                    className="group relative flex items-center justify-center w-12 h-12 flex-shrink-0 bg-transparent rounded-xl text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-white transition-all duration-300"
                     title="Intelligence Settings"
                   >
                     <svg className="w-6 h-6 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -389,7 +389,7 @@ const Inbox = () => {
                 <div className="mt-auto pb-8">
                   <div className="relative group">
                     <div className="absolute inset-0 bg-white/5 blur-xl group-hover:bg-white/10 transition-all rounded-full" />
-                    <div className="relative w-12 h-12 rounded-[18px] bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 font-executive font-black flex items-center justify-center text-zinc-900 dark:text-white shadow-2xl transition-transform group-hover:scale-105">
+                    <div className="relative w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 border-none font-semibold flex items-center justify-center text-zinc-700 dark:text-zinc-200 text-sm transition-transform group-hover:scale-105">
                       {session?.user?.name?.charAt(0) || 'U'}
                     </div>
                   </div>
@@ -409,9 +409,9 @@ const Inbox = () => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setIsNewChatModalOpen(true)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 dark:bg-zinc-950 text-white rounded-xl text-[11px] font-black uppercase tracking-widest shadow-glow-indigo transition-all italic"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors border border-indigo-700/50 shadow-sm"
                   >
-                    <PlusIcon className="w-4 h-4" />
+                    <PlusIcon className="w-4 h-4 stroke-[2.5]" />
                     Nova Conversa
                   </motion.button>
                 </div>
