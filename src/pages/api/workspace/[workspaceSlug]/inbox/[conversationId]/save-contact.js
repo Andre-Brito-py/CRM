@@ -2,7 +2,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/server/auth';
 import prisma from '@/prisma/index';
 import { getWorkspace } from '@/prisma/services/workspace';
-import { createContact } from '@/prisma/services/contact';
+import { createContact, updateContact } from '@/prisma/services/contact';
 import { createAuditActivity } from '@/prisma/services/activity';
 import { log, reportError } from '@/lib/server/logger';
 
@@ -42,31 +42,51 @@ export default async function handler(req, res) {
     // 2. Prepare phone number (externalId often holds the phone in WhatsApp)
     const phone = conversation.platform === 'WHATSAPP' ? conversation.externalId : null;
 
-    // 3. Create the contact
-    const contact = await createContact(workspace.id, {
-      name: name.trim(),
-      email: email ? email.trim() : null,
-      phone: phone,
-    });
+    // 3. Create or Update the contact
+    let contact;
+    if (conversation.contactId) {
+      contact = await updateContact(conversation.contactId, {
+        name: name.trim(),
+        email: email ? email.trim() : null,
+      });
 
-    // 4. Link the conversation to this contact
-    await prisma.conversation.update({
-      where: { id: conversationId },
-      data: { contactId: contact.id }
-    });
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId || session.user.id,
+        {
+          action: 'CONTACT_UPDATE_FROM_INBOX',
+          title: `Contact updated from inbox: ${contact.name}`,
+          target: { contactId: contact.id, conversationId },
+          metadata: { name: contact.name, email: contact.email },
+        },
+        req
+      );
+    } else {
+      contact = await createContact(workspace.id, {
+        name: name.trim(),
+        email: email ? email.trim() : null,
+        phone: phone,
+      });
 
-    // 5. Create Audit Activity
-    await createAuditActivity(
-      workspace.id,
-      session.user.userId || session.user.id,
-      {
-        action: 'CONTACT_CREATE_FROM_INBOX',
-        title: `Contact created from inbox: ${contact.name}`,
-        target: { contactId: contact.id, conversationId },
-        metadata: { name: contact.name, email: contact.email, phone: contact.phone },
-      },
-      req
-    );
+      // 4. Link the conversation to this contact
+      await prisma.conversation.update({
+        where: { id: conversationId },
+        data: { contactId: contact.id }
+      });
+
+      // 5. Create Audit Activity
+      await createAuditActivity(
+        workspace.id,
+        session.user.userId || session.user.id,
+        {
+          action: 'CONTACT_CREATE_FROM_INBOX',
+          title: `Contact created from inbox: ${contact.name}`,
+          target: { contactId: contact.id, conversationId },
+          metadata: { name: contact.name, email: contact.email, phone: contact.phone },
+        },
+        req
+      );
+    }
 
     res.status(200).json({ data: { contact } });
   } catch (error) {

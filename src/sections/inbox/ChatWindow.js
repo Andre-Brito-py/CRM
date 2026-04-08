@@ -374,9 +374,20 @@ const ChatWindow = ({
             </div>
           </div>
           <div className="min-w-0">
-            <h3 className="text-[14px] sm:text-[16px] lg:text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none mb-1.5 sm:mb-2.5 uppercase italic truncate">
-              {conversation.contact?.name || conversation.externalId || t('common.unknown')}
-            </h3>
+            <div className="flex items-center gap-2 mb-1.5 sm:mb-2.5">
+              <h3 className="text-[14px] sm:text-[16px] lg:text-[20px] font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter leading-none uppercase italic truncate">
+                {conversation.contact?.name || conversation.externalId || t('common.unknown')}
+              </h3>
+              {conversation.contactId && (
+                <button
+                  onClick={() => setIsSaveContactModalOpen(true)}
+                  className="p-1 text-zinc-400 hover:text-indigo-600 transition-colors"
+                  title="Editar Contato"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                </button>
+              )}
+            </div>
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-glow-emerald animate-pulse" />
@@ -1203,10 +1214,12 @@ const ChatWindow = ({
                     <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-[32px] flex items-center justify-center mx-auto mb-6 border border-emerald-100/50 dark:border-emerald-500/20 shadow-glow-emerald/10">
                       <UserCircleIcon className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    <Dialog.Title as="h3" className="text-3xl font-executive font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tighter uppercase italic">
-                      Identificar Contato
+                    <Dialog.Title as="h3" className="text-[18px] font-executive font-black text-center text-zinc-900 dark:text-white uppercase italic tracking-wider mb-2">
+                      {conversation?.contactId ? 'EDITAR CONTATO' : 'SALVAR CONTATO'}
                     </Dialog.Title>
-                    <p className="text-zinc-400 dark:text-zinc-500 font-medium mt-2 text-[15px] italic">Salve este número na sua lista de contatos</p>
+                    <p className="text-[12px] font-medium text-center text-zinc-500 dark:text-zinc-400 mb-8 italic">
+                      {conversation?.contactId ? 'Atualize as informações de identificação deste contato' : 'Adicione informações básicas para identificar este contato no Vysify'}
+                    </p>
                   </div>
 
                   <form onSubmit={handleSaveContact} className="space-y-8">
@@ -1243,9 +1256,9 @@ const ChatWindow = ({
                       <button
                         type="submit"
                         disabled={isSavingContact || !newContactName}
-                        className="flex-[2] px-8 py-5 premium-gradient text-white rounded-[28px] text-[12px] font-black uppercase tracking-[0.2em] shadow-glow-indigo/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 italic"
+                        className="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-[22px] text-[11px] font-black uppercase tracking-[0.2em] shadow-glow-indigo/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 italic"
                       >
-                        {isSavingContact ? 'Salvando...' : 'Confirmar e Salvar'}
+                        {isSavingContact ? 'SALVANDO...' : 'SALVAR CONTATO'}
                       </button>
                     </div>
                   </form>

@@ -534,7 +534,7 @@ const Inbox = () => {
                               </option>
                             ))
                           ) : (
-                            <option value="hello_world">hello_world (Template de Teste)</option>
+                            <option value="hello_world">hello_world</option>
                           )}
                         </select>
                       </div>
