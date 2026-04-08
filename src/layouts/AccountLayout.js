@@ -185,8 +185,8 @@ const AccountLayout = ({ children, full = false, immersive = false }) => {
         )}
 
         {/* Main content area */}
-        <div className={`relative flex flex-col flex-1 h-full bg-[var(--bg-primary)] ${full ? '' : 'overflow-y-auto'}`}>
-          <div className={full ? 'flex flex-col flex-1 h-full' : 'px-6 py-8 lg:px-10 lg:py-10'}>
+        <div className={`flex flex-col flex-1 min-h-0 ${full ? 'overflow-hidden' : 'overflow-y-auto'} bg-[var(--bg-primary)] transition-colors duration-300`}>
+          <div className={full ? 'flex flex-col flex-1 h-full min-h-0' : 'px-6 py-8 lg:px-10 lg:py-10'}>
             {children}
           </div>
         </div>

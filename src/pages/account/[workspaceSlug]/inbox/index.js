@@ -61,7 +61,7 @@ const Inbox = () => {
     setMounted(true);
   }, []);
 
-  const { data: conversationsData, mutate: mutateConversations } = useSWR(
+  const { data: conversationsData, error: conversationsError, mutate: mutateConversations } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/inbox` : null
   );
 
@@ -78,13 +78,13 @@ const Inbox = () => {
   );
 
   const { data: productsData } = useSWR(
-    workspaceSlug ? `/api/workspace/${workspaceSlug}/products` : null
+    workspaceSlug ? `/api/workspace/${workspaceSlug}/payment-products` : null
   );
 
-  const conversations = conversationsData?.data || [];
-  const members = membersData?.data || [];
-  const templates = templatesData?.data || [];
-  const paymentProducts = productsData?.data || [];
+  const conversations = conversationsData?.data?.conversations || [];
+  const members = membersData?.data?.members || [];
+  const templates = templatesData?.data?.templates || [];
+  const paymentProducts = productsData?.data?.products || [];
 
   const selectedConversation = useMemo(() => 
     conversations.find((c) => c.id === selectedId),
@@ -329,18 +329,18 @@ const Inbox = () => {
       <Meta title={t('Inbox')} />
       <Content full={true}>
         <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-950 overflow-hidden relative">
-          {(conversationsData === undefined && !!workspaceSlug) ? (
+          {(conversationsData === undefined && !conversationsError && !!workspaceSlug) ? (
             <div className="flex-1 flex items-center justify-center bg-white dark:bg-zinc-950">
-              <div className="flex flex-col items-center gap-12">
-                <div className="relative">
-                  <div className="w-32 h-32 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-20 h-20 border-4 border-emerald-500/10 border-b-emerald-500 rounded-full animate-spin-slow" />
-                  </div>
+              <div className="flex flex-col items-center space-y-6 animate-pulse">
+                <div className="relative w-24 h-24">
+                  <div className="absolute inset-0 border-4 border-indigo-500/20 rounded-full" />
+                  <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin" />
+                  <div className="absolute inset-4 border-4 border-indigo-400/20 rounded-full" />
+                  <div className="absolute inset-4 border-4 border-indigo-400 rounded-full border-b-transparent animate-spin-reverse" />
                 </div>
-                <div className="text-center space-y-4">
-                  <h2 className="text-4xl font-executive font-black italic uppercase tracking-tighter text-zinc-900 dark:text-white">Loading Intelligence</h2>
-                  <p className="text-zinc-500 font-executive font-bold uppercase tracking-widest text-xs animate-pulse italic">Connecting Secure Channels</p>
+                <div className="space-y-2 text-center">
+                  <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Loading Intelligence</h2>
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">Personalizing your experience...</p>
                 </div>
               </div>
             </div>
