@@ -1,9 +1,7 @@
-import { OTP } from 'otplib';
+import { verifySync } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
-
-const otpAuthenticator = new OTP();
 
 export const config = {
     api: {
@@ -39,12 +37,12 @@ const handler = async (req, res) => {
         }
 
         // Verify token
-        const isValid = otpAuthenticator.verifySync({
+        const isValid = verifySync({
             token,
             secret: user.twoFactorSecret
         });
 
-        if (!isValid) {
+        if (isValid !== true) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
         }
 

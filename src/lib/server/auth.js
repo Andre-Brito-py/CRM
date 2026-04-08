@@ -3,9 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { OTP } from 'otplib';
-
-const otpAuthenticator = new OTP();
+import { verifySync } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -110,12 +108,12 @@ const createCredentialsProvider = () =>
           throw new Error('2FA_REQUIRED');
         }
 
-        const isValidToken = otpAuthenticator.verifySync({
+        const isValidToken = verifySync({
           token,
           secret: user.twoFactorSecret
         });
 
-        if (!isValidToken) {
+        if (isValidToken !== true) {
           await sleep(200);
           throw new Error('Invalid 2FA code');
         }

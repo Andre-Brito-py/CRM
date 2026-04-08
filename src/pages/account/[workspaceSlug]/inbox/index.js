@@ -328,7 +328,7 @@ const Inbox = () => {
       <OnboardingTour tourId="inbox-tour" steps={inboxSteps} />
       <Meta title={t('Inbox')} />
       <Content full={true}>
-        <div className="fixed inset-0 z-[50] flex flex-col h-[100dvh] w-screen bg-white dark:bg-zinc-950 overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-white dark:bg-zinc-950 overflow-hidden relative">
           {(conversationsData === undefined && !!workspaceSlug) ? (
             <div className="flex-1 flex items-center justify-center bg-white dark:bg-zinc-950">
               <div className="flex flex-col items-center gap-12">
