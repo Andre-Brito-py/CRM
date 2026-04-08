@@ -44,7 +44,7 @@ const Inbox = () => {
   const [isSummarizingAI, setIsSummarizingAI] = useState(false);
   const [isNewChatModalOpen, setIsNewChatModalOpen] = useState(false);
   const [newChatPhone, setNewChatPhone] = useState('');
-  const [newChatTemplate, setNewChatTemplate] = useState('hello_world');
+  const [newChatTemplate, setNewChatTemplate] = useState('');
   const [isStartingChat, setIsStartingChat] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
@@ -100,7 +100,7 @@ const Inbox = () => {
         body: { content, type, metadata },
       });
 
-      if (res.status === 200) {
+      if (res.status === 200 || res.status === 201) {
         mutateConversations();
         setMessageText('');
       } else {
@@ -492,14 +492,23 @@ const Inbox = () => {
                       </div>
                       <div className="space-y-2.5">
                         <label className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] pl-1">Modelo de Mensagem (Template)</label>
-                        <input
+                        <select
                           required
-                          type="text"
-                          className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive italic"
+                          className="w-full px-6 py-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[22px] text-[15px] font-medium text-zinc-900 dark:text-white focus:outline-none focus:ring-8 focus:ring-indigo-500/5 focus:bg-white dark:focus:bg-zinc-800 focus:border-indigo-500/30 transition-all font-executive italic appearance-none cursor-pointer"
                           value={newChatTemplate}
                           onChange={(e) => setNewChatTemplate(e.target.value)}
-                          placeholder="Nome do template na Meta (ex: hello_world)"
-                        />
+                        >
+                          <option value="">Selecione um template registrado na Meta</option>
+                          {templates.length > 0 ? (
+                            templates.map((tpl) => (
+                              <option key={tpl.id} value={tpl.name}>
+                                {tpl.name}
+                              </option>
+                            ))
+                          ) : (
+                            <option value="hello_world">hello_world (Template de Teste)</option>
+                          )}
+                        </select>
                       </div>
 
                       <div className="flex items-center gap-4 pt-4">

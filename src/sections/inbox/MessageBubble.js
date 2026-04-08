@@ -74,9 +74,18 @@ const MessageBubble = ({ message, isMe, onReply }) => {
               {message.createdAt ? formatDistanceToNow(new Date(message.createdAt), { addSuffix: false, locale: dateFnsLocale }) : ''}
             </span>
             {isMe && (
-              <div className="flex items-center gap-1.5 grayscale opacity-50">
-                 <div className="w-1 h-1 rounded-full bg-indigo-500" />
-                 <div className="w-1 h-1 rounded-full bg-indigo-500/50" />
+              <div className="flex items-center gap-2">
+                {message.status === 'FAILED' ? (
+                  <div className="flex items-center gap-1.5 text-red-500 animate-pulse">
+                    <span className="text-[8px] font-black uppercase tracking-widest">Error</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-glow-red" />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 grayscale opacity-50">
+                    <div className="w-1 h-1 rounded-full bg-indigo-500" />
+                    <div className="w-1 h-1 rounded-full bg-indigo-500/50" />
+                  </div>
+                )}
               </div>
             )}
           </div>
