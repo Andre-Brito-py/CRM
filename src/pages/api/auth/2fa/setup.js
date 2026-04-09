@@ -1,4 +1,4 @@
-import { TOTP } from 'otplib';
+import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
@@ -38,7 +38,10 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found in database' } });
         }
 
-        const totp = new TOTP();
+        const totp = new TOTP({ 
+            crypto: NobleCryptoPlugin, 
+            base32: ScureBase32Plugin 
+        });
         const secret = totp.generateSecret();
         
         // Ensure email is safe for URI

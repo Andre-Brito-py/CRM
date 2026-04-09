@@ -1,4 +1,4 @@
-import { TOTP } from 'otplib';
+import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 
@@ -44,7 +44,10 @@ const handler = async (req, res) => {
             if (!currentCode) {
                 return res.status(400).json({ error: { msg: 'Current authentication code is required to change settings' } });
             }
-            const totp = new TOTP();
+            const totp = new TOTP({ 
+                crypto: NobleCryptoPlugin, 
+                base32: ScureBase32Plugin 
+            });
             const isCurrentValid = totp.verify({
                 token: currentCode,
                 secret: user.twoFactorSecret
@@ -61,7 +64,10 @@ const handler = async (req, res) => {
         }
 
         // Verify token (If changing secret, this is the NEW one. If disabling, this is the CURRENT one)
-        const currentTotp = new TOTP();
+        const currentTotp = new TOTP({ 
+            crypto: NobleCryptoPlugin, 
+            base32: ScureBase32Plugin 
+        });
         const isValid = currentTotp.verify({
             token,
             secret: secretToVerify

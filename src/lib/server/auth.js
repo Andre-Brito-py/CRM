@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { TOTP } from 'otplib';
+import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -132,7 +132,10 @@ const createCredentialsProvider = () =>
           log({ level: 'info', msg: 'auth_2fa_backup_code_used', userId: user.id });
         } else {
           // Handle TOTP
-          const totp = new TOTP();
+          const totp = new TOTP({ 
+            crypto: NobleCryptoPlugin, 
+            base32: ScureBase32Plugin 
+          });
           const isValidToken = totp.verify({
             token,
             secret: user.twoFactorSecret,

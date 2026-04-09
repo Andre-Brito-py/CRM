@@ -22,7 +22,8 @@ export default async function handler(req, res) {
   try {
     // 1. Test OTPLIB
     try {
-      const totp = new TOTP();
+      const { NobleCryptoPlugin, ScureBase32Plugin } = require('otplib');
+      const totp = new TOTP({ crypto: NobleCryptoPlugin, base32: ScureBase32Plugin });
       const secret = totp.generateSecret();
       const uri = totp.generateURI({ issuer: 'Test', label: 'test@test.com', secret });
       report.libraries.otplib = { ok: true, secretLength: secret.length, uriStarts: uri.substring(0, 10) };
