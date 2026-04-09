@@ -55,6 +55,9 @@ const sanitizeValue = (value, keyHint = '', depth = 0) => {
 const normalizeMeta = (meta) => sanitizeValue(meta || {}, '', 0);
 
 const persistError = async ({ level, msg, error, context }) => {
+  // Disabling DB persistence as the 'SystemError' model is not in the schema.
+  // This prevents 500 errors when the logger fails to write to the DB.
+  /*
   try {
     const serialized = error ? serializeError(error) : null;
     await prisma.systemError.create({
@@ -66,9 +69,9 @@ const persistError = async ({ level, msg, error, context }) => {
       },
     });
   } catch (err) {
-    // Fail silently to avoid infinite loops or crashing the logger
     console.error('Failed to persist system error:', err);
   }
+  */
 };
 
 export const log = ({ level = 'info', msg, ...meta }) => {
