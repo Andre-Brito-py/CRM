@@ -22,6 +22,7 @@ const moduleExports = withPWA({
     domains: ['i.pravatar.cc', 'lh3.googleusercontent.com', 'avatars.githubusercontent.com'],
   },
   reactStrictMode: true,
+  transpilePackages: ['otplib', '@otplib/core', '@otplib/plugin-crypto-noble', '@otplib/plugin-base32-scure', '@otplib/totp', '@otplib/uri'],
   async headers() {
     return [
       {
