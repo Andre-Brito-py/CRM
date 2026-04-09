@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth/next';
 
 import { getAuthOptions } from '@/lib/server/auth';
 import { ensureRequestId } from '@/lib/server/request-id';
+import prisma from '@/prisma/index';
 
 const validateMiddleware = () => {
   return async (req, res, next) => {
