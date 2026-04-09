@@ -1,4 +1,4 @@
-import { authenticator } from 'otplib';
+import { TOTP } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { log, reportError } from '@/lib/server/logger';
@@ -56,7 +56,8 @@ const handler = async (req, res) => {
                 if (!currentCode) {
                     return res.status(400).json({ error: { msg: 'Current authentication code is required to change settings' } });
                 }
-                const isCurrentValid = authenticator.verify({
+                const totp = new TOTP();
+                const isCurrentValid = totp.verify({
                     token: currentCode,
                     secret: user.twoFactorSecret
                 });
@@ -75,7 +76,8 @@ const handler = async (req, res) => {
         }
 
         // Verify token (If changing secret, this is the NEW one. If disabling, this is the CURRENT one)
-        const isValid = authenticator.verify({
+        const currentTotp = new TOTP();
+        const isValid = currentTotp.verify({
             token,
             secret: secretToVerify
         });

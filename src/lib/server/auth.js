@@ -3,7 +3,7 @@ import EmailProvider from 'next-auth/providers/email';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import { authenticator } from 'otplib';
+import { TOTP } from 'otplib';
 
 import prisma from '@/prisma/index';
 import { html, text } from '@/config/email-templates/signin';
@@ -132,7 +132,8 @@ const createCredentialsProvider = () =>
           log({ level: 'info', msg: 'auth_2fa_backup_code_used', userId: user.id });
         } else {
           // Handle TOTP
-          const isValidToken = authenticator.verify({
+          const totp = new TOTP();
+          const isValidToken = totp.verify({
             token,
             secret: user.twoFactorSecret,
             window: 1 // Allow 1 step (30s) before/after for clock drift

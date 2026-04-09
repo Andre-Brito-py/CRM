@@ -1,4 +1,4 @@
-import { authenticator } from 'otplib';
+import { TOTP } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
@@ -38,14 +38,15 @@ const handler = async (req, res) => {
         // Generate a new secret for setup
         // We don't save it to user.twoFactorSecret yet to avoid breaking current 2FA
         // The verify.js endpoint will commit it once the user proves they have it configured.
-        const secret = authenticator.generateSecret();
+        const totp = new TOTP();
+        const secret = totp.generateSecret();
         
         const userEmail = user.email || 'user@vysify.com';
-        const otpauth = authenticator.keyuri(
-            userEmail,
-            'Vysify',
+        const otpauth = totp.generateURI({
+            issuer: 'Vysify',
+            label: userEmail,
             secret
-        );
+        });
  
          if (!otpauth) {
              throw new Error('Failed to generate OTPAuth URI');
