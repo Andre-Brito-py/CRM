@@ -2,7 +2,6 @@ import { TOTP } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
-import { log, reportError } from '@/lib/server/logger';
 
 export const config = {
     api: {
@@ -13,6 +12,9 @@ export const config = {
 };
 
 const handler = async (req, res) => {
+    // Force JSON response
+    res.setHeader('Content-Type', 'application/json');
+    
     try {
         if (req.method !== 'POST') {
             return res.status(405).json({ error: { msg: 'Method Unsupported' } });
@@ -20,28 +22,27 @@ const handler = async (req, res) => {
 
         const session = await validateSession(req, res);
         if (!session) return;
-        const requestId = String(req.headers['x-request-id'] || '').trim() || null;
+        
         const userId = session.user?.userId || session.user?.id;
 
         if (!userId) {
-            throw new Error('User ID not found in session');
+            return res.status(401).json({ error: { msg: 'User ID not found in session' } });
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: userId }
+            where: { id: userId },
+            select: { id: true, email: true }
         });
 
         if (!user) {
-            return res.status(404).json({ error: { msg: 'User not found' } });
+            return res.status(404).json({ error: { msg: 'User not found in database' } });
         }
 
-        // Generate a new secret for setup
-        // We don't save it to user.twoFactorSecret yet to avoid breaking current 2FA
-        // The verify.js endpoint will commit it once the user proves they have it configured.
         const totp = new TOTP();
         const secret = totp.generateSecret();
         
-        const userEmail = user.email || 'user@vysify.com';
+        // Ensure email is safe for URI
+        const userEmail = encodeURIComponent(user.email || 'user@vysify.com');
         const otpauth = totp.generateURI({
             issuer: 'Vysify',
             label: userEmail,
@@ -54,13 +55,24 @@ const handler = async (req, res) => {
  
          // Generate QR Code as SVG
          const svgString = await QRCode.toString(otpauth, { type: 'svg' });
+         
+         if (!svgString) {
+             throw new Error('Failed to generate QR Code SVG');
+         }
+
          const qrCodeUrl = `data:image/svg+xml;base64,${Buffer.from(svgString).toString('base64')}`;
- 
+  
          return res.status(200).json({ data: { qrCodeUrl, secret } });
     } catch (error) {
-        console.error('[2FA SETUP ERROR]:', error);
-        log({ level: 'error', msg: 'auth_2fa_setup_failed', userId: session?.user?.id, error: error.message });
-        return res.status(500).json({ error: { msg: 'Failed to initiate 2FA setup', detail: error.message } });
+        console.error('[2FA SETUP FATAL ERROR]:', error);
+        // DO NOT use internal logger here to avoid cascading failures
+        return res.status(500).json({ 
+            error: { 
+                msg: 'Failed to initiate 2FA setup', 
+                detail: error.message,
+                code: 'INTERNAL_SERVER_ERROR'
+            } 
+        });
     }
 };
 
