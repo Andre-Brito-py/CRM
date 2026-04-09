@@ -3,6 +3,7 @@ import { rateLimit } from '@/lib/server/rateLimit';
 import { ensureRequestId } from '@/lib/server/request-id';
 import { log, reportError } from '@/lib/server/logger';
 import { getSystemConfig } from '@/lib/server/config';
+import { normalizeWhatsAppNumber } from '@/lib/server/phone';
 import { calculateFees, getPlatformFeeSettings, getProvider } from '@/lib/server/payment-providers/resolver';
 import { processAutomation } from '@/prisma/services/automation';
 
@@ -13,9 +14,10 @@ const buildPublicUrl = (req, path) => {
 };
 
 const normalizePhone = (value) => {
-  const s = `${value || ''}`.trim();
-  if (!s) return null;
-  return s.startsWith('+') ? s : s;
+  const digits = String(value || '').replace(/\D/g, '');
+  if (!digits) return null;
+  // Standardize to digits only for flexible matching
+  return digits;
 };
 
 const normalizeBillingType = (value) => {
@@ -66,16 +68,17 @@ export default async function handler(req, res) {
     }
 
     const payerEmail = email ? String(email).trim() : null;
-    const payerPhone = normalizePhone(phone);
+    const payerPhone = phone ? String(phone).replace(/\D/g, '') : null;
 
     let contact = null;
     if (payerPhone || payerEmail) {
+      const { variations } = payerPhone ? normalizeWhatsAppNumber(payerPhone) : { variations: [] };
+      
       contact = await prisma.contact.findFirst({
         where: {
           workspaceId: workspace.id,
           OR: [
-            payerPhone ? { phone: payerPhone } : undefined,
-            payerPhone ? { phone: `+${payerPhone.replace(/^\+/, '')}` } : undefined,
+            ...variations.map(v => ({ phone: v })),
             payerEmail ? { email: payerEmail } : undefined,
           ].filter(Boolean),
         },

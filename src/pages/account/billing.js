@@ -13,13 +13,11 @@ import Modal from '@/components/Modal/index';
 import { AccountLayout } from '@/layouts/index';
 import api from '@/lib/common/api';
 import { redirectToCheckout } from '@/lib/client/stripe';
-import { getInvoices } from '@/lib/server/stripe';
-import { getPayment } from '@/prisma/services/customer';
 import { getAllPlans } from '@/prisma/services/plan';
 import { useTranslation } from 'react-i18next';
 import OnboardingTour from '@/components/Onboarding/OnboardingTour';
 
-const Billing = ({ invoices, products }) => {
+const Billing = ({ products }) => {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const [isSubmitting, setSubmittingState] = useState(false);
@@ -28,6 +26,8 @@ const Billing = ({ invoices, products }) => {
   const [showCancelModal, setCancelModalVisibility] = useState(false);
   const [cancelPreview, setCancelPreview] = useState(null);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [invoices, setInvoices] = useState([]);
+  const [isLoadingInvoices, setIsLoadingInvoices] = useState(true);
 
   const billingSteps = [
     {
@@ -164,12 +164,27 @@ const Billing = ({ invoices, products }) => {
 
   useEffect(() => {
     let mounted = true;
+    
+    // Fetch subscription status
     api('/api/payments/subscription/status', { method: 'GET' })
       .then((response) => {
         if (!mounted) return;
         if (response?.data) setSubscriptionStatus(response.data);
       })
       .catch(() => { });
+
+    // Fetch invoices from a new client-side endpoint or existing one that we'll make sure works
+    api('/api/payments/invoices', { method: 'GET' })
+      .then((response) => {
+        if (!mounted) return;
+        if (response?.data) setInvoices(response.data);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch invoices:', err);
+      })
+      .finally(() => {
+        if (mounted) setIsLoadingInvoices(false);
+      });
 
     return () => {
       mounted = false;
@@ -275,9 +290,9 @@ const Billing = ({ invoices, products }) => {
               </button>
             )}
           </div>
-          <div className="flex space-x-5">
+          <div className="flex space-x-5 h-full overflow-x-auto pb-4">
             {products.map((product, index) => (
-              <Card key={index}>
+              <Card key={index} className="min-w-[300px]">
                 <Card.Body title={product.name} subtitle={product.description}>
                   <h3 className="text-4xl font-bold">
                     {new Intl.NumberFormat('en-US', {
@@ -302,7 +317,7 @@ const Billing = ({ invoices, products }) => {
                 <Card.Footer>
                   <div className="w-full flex space-x-2">
                     <Button
-                      className={`flex-1 text-white ${!product.prices.id ? 'bg-zinc-400' : 'bg-brand-600 hover:bg-brand-500'}`}
+                      className={`flex-1 text-white ${!product.prices.id ? 'bg-zinc-400' : 'bg-indigo-600 hover:bg-indigo-500'}`}
                       disabled={isSubmitting || !product.prices.id}
                       onClick={() => subscribe(product.prices.id)}
                     >
@@ -347,7 +362,7 @@ const Billing = ({ invoices, products }) => {
                   {t('billing.modal.cancel.fee.description', { months: cancelPreview.remainingMonths, percentage: cancelPreview.feePercentage })}
                 </div>
                 <div className="mt-3 text-lg font-bold text-red-700">
-                  {t('billing.modal.cancel.fee.amount', { amount: new Intl.NumberFormat(router.locale === 'pt-BR' ? 'pt-BR' : 'en-US', { style: 'currency', currency: cancelPreview.currency }).format(cancelPreview.fee) })}
+                  {t('billing.modal.cancel.fee.amount', { amount: new Intl.NumberFormat('en-US', { style: 'currency', currency: cancelPreview.currency }).format(cancelPreview.fee) })}
                 </div>
                 <p className="text-[10px] mt-2 text-red-600 uppercase tracking-widest font-bold">{t('billing.modal.cancel.fee.footer')}</p>
               </div>
@@ -390,7 +405,13 @@ const Billing = ({ invoices, products }) => {
       </div>
       <Content.Divider />
       <div id="invoices-container">
-        {invoices.length > 0 ? (
+        {isLoadingInvoices ? (
+          <Content.Container>
+            <div className="flex justify-center py-12">
+               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+            </div>
+          </Content.Container>
+        ) : invoices.length > 0 ? (
           <Content.Container>
             <div className="premium-card overflow-hidden">
               <table className="min-w-full divide-y divide-zinc-100">
@@ -452,40 +473,9 @@ const Billing = ({ invoices, products }) => {
   );
 };
 
-export const getServerSideProps = async (context) => {
-  const { getServerSession } = await import('next-auth/next');
-  const { getAuthOptions } = await import('@/lib/server/auth');
-  const options = await getAuthOptions();
-  const session = await getServerSession(context.req, context.res, options);
-
-  if (!session || !session.user?.email) {
-    return {
-      redirect: {
-        destination: '/auth/login',
-        permanent: false,
-      },
-    };
-  }
-
-  // Se não tiver chave do Stripe configurada, retornar props vazias para evitar erro
-  const { getSystemConfig } = await import('@/lib/server/config');
-  const stripeKey = await getSystemConfig('PAYMENTS_SECRET_KEY', process.env.PAYMENTS_SECRET_KEY);
-  if (!stripeKey) {
-    return {
-      props: {
-        invoices: [],
-        products: [],
-      },
-    };
-  }
-
+export const getStaticProps = async () => {
   try {
-    const customerPayment = await getPayment(session.user.email);
-    const [invoices, plans] = await Promise.all([
-      getInvoices(customerPayment?.paymentId),
-      getAllPlans(),
-    ]);
-
+    const plans = await getAllPlans();
     const products = (plans || [])
       .filter((p) => p.isActive)
       .map((plan) => ({
@@ -503,17 +493,17 @@ export const getServerSideProps = async (context) => {
 
     return {
       props: {
-        invoices: invoices || [],
         products: products || [],
       },
+      revalidate: 3600,
     };
   } catch (error) {
-    console.error('Error fetching billing data:', error);
+    console.error('Error fetching plans for billing:', error);
     return {
       props: {
-        invoices: [],
         products: [],
       },
+      revalidate: 60,
     };
   }
 };

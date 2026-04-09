@@ -1,5 +1,6 @@
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '@/lib/server/auth';
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
 import { 
   Hero, 
   Features, 
@@ -16,6 +17,23 @@ import { getAllPlans } from '@/prisma/services/plan';
 import prisma from '@/prisma/index';
 
 export default function Home({ plans, promo, hasFreePlan }) {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/account');
+    }
+  }, [status, router]);
+
+  if (status === 'authenticated') {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <Meta 
@@ -39,19 +57,8 @@ export default function Home({ plans, promo, hasFreePlan }) {
   );
 }
 
-export const getServerSideProps = async (context) => {
+export const getStaticProps = async () => {
   try {
-    const session = await getServerSession(context.req, context.res, authOptions);
-
-    if (session) {
-      return {
-        redirect: {
-          destination: '/account',
-          permanent: false,
-        },
-      };
-    }
-
     // Fetch plans for the pricing section
     let plansData = [];
     try {
@@ -114,16 +121,17 @@ export const getServerSideProps = async (context) => {
         promo,
         hasFreePlan
       },
+      revalidate: 3600, // Revalidate every hour to keep CPU usage low
     };
   } catch (error) {
-    console.error('Index page crash:', error);
+    console.error('Index page static generation failed:', error);
     return {
       props: {
         plans: [],
         promo: { enabled: false, text: '', code: '' },
         hasFreePlan: true
-      }
+      },
+      revalidate: 60,
     };
   }
 };
-

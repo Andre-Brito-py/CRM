@@ -1,5 +1,12 @@
-const handler = (req, res) => {
-  res.status(200).json({ pong: true });
+export const config = {
+  runtime: 'edge',
 };
 
-export default handler;
+export default async function handler() {
+  return new Response(JSON.stringify({ pong: true }), {
+    status: 200,
+    headers: {
+      'content-type': 'application/json',
+    },
+  });
+}

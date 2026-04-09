@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { checkWhatsAppLimit, recordWhatsAppUsage } from '@/lib/server/whatsapp-usage';
+import { normalizeWhatsAppNumber } from '@/lib/server/phone';
 
 /**
  * Send an outbound WhatsApp message via the Meta Cloud API.
@@ -50,9 +51,12 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
   // 3. Call Meta Graph API
   const url = `https://graph.facebook.com/v16.0/${phoneNumberId}/messages`;
 
+  // Normalize the recipient number
+  const { clean: recipientPhone } = normalizeWhatsAppNumber(to);
+
   const payload = {
     messaging_product: 'whatsapp',
-    to: to,
+    to: recipientPhone,
     type: 'text',
     text: { body: text },
   };

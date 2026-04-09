@@ -3,6 +3,7 @@ import { getSystemConfig } from '@/lib/server/config';
 import { processAutomation } from '@/prisma/services/automation';
 import { log, reportError } from '@/lib/server/logger';
 import { rateLimit } from '@/lib/server/rateLimit';
+import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
 
 export const config = {
   api: {
@@ -82,6 +83,55 @@ const handler = async (req, res) => {
     });
 
     if (shouldTriggerPaid(existing.status, updated.status)) {
+      // 1. Send automatic confirmation message via Chat (WhatsApp)
+      if (updated.contactId) {
+        try {
+          // Find the active WhatsApp conversation
+          const conversation = await prisma.conversation.findFirst({
+            where: { 
+              workspaceId: updated.workspaceId, 
+              contactId: updated.contactId, 
+              platform: 'WHATSAPP',
+              deletedAt: null
+            },
+            orderBy: { updatedAt: 'desc' }
+          });
+
+          if (conversation && conversation.externalId) {
+            // Find active WhatsApp integration
+            const integration = await prisma.integration.findFirst({
+              where: { workspaceId: updated.workspaceId, provider: 'whatsapp', enabled: true }
+            });
+
+            if (integration) {
+              const amountFormatted = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(updated.value));
+              const text = `✅ *Pagamento Confirmado!*\n\nOlá! Recebemos a confirmação do seu pagamento no valor de *${amountFormatted}* referente a: _${updated.description || 'Produto/Serviço'}_.\n\nObrigado pela preferência! 🚀`;
+
+              await sendWhatsAppMessage(integration.id, conversation.externalId, text, { workspaceId: updated.workspaceId });
+
+              // Log the message in our conversation history
+              await prisma.message.create({
+                data: {
+                  conversationId: conversation.id,
+                  direction: 'OUTBOUND',
+                  type: 'TEXT',
+                  content: text,
+                  status: 'SENT'
+                }
+              });
+              
+              // Update conversation timestamp
+              await prisma.conversation.update({
+                where: { id: conversation.id },
+                data: { updatedAt: new Date() }
+              });
+            }
+          }
+        } catch (msgError) {
+          log({ level: 'error', msg: 'webhook_auto_reply_failed', workspaceId: updated.workspaceId, paymentId: updated.id, error: msgError.message });
+        }
+      }
+
       processAutomation(updated.workspaceId, 'PAYMENT_PAID', {
         paymentId: updated.id,
         payment: updated,

@@ -1,4 +1,5 @@
-import { getSession } from 'next-auth/react';
+import { getServerSession } from 'next-auth/next';
+import { getAuthOptions } from '@/lib/server/auth';
 import prisma from '@/prisma/index';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 
@@ -12,8 +13,11 @@ const safeQuery = async (fn, fallback = []) => {
 };
 
 const parseDelimiter = (req) => {
-  const raw = String(req.query?.delimiter || '').trim();
+  const queryDelimiter = req.query?.delimiter;
+  const raw = String(queryDelimiter || '').trim();
   if (raw === ';' || raw === ',') return raw;
+  
+  // Default logic based on browser language
   const al = String(req.headers['accept-language'] || '').toLowerCase();
   return al.startsWith('pt') ? ';' : ',';
 };
@@ -49,7 +53,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const session = await getSession({ req });
+  // 1. Fix: Use getServerSession instead of getSession for API routes
+  const options = await getAuthOptions(req);
+  const session = await getServerSession(req, res, options);
+
   if (!session) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -57,7 +64,7 @@ export default async function handler(req, res) {
   const { workspaceSlug } = req.query;
 
   try {
-    // 1. Validate permissions
+    // 2. Validate permissions
     const workspace = await getWorkspace(session.user.userId, session.user.email, workspaceSlug);
     if (!workspace) {
       return res.status(403).json({ error: 'Forbidden or Workspace not found' });
@@ -79,6 +86,7 @@ export default async function handler(req, res) {
         const filename = `contacts-${workspaceSlug}-${today}.csv`;
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('X-Content-Type-Options', 'nosniff'); // Security best practice
         res.setHeader('Cache-Control', 'no-store');
         res.status(200);
         res.write('\ufeff');
@@ -97,44 +105,50 @@ export default async function handler(req, res) {
         ], delimiter);
 
         let cursorId = null;
-        while (true) {
-          const batch = await prisma.contact.findMany({
-            where: { workspaceId: workspace.id, deletedAt: null },
-            orderBy: { id: 'asc' },
-            take: 1000,
-            ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              phone: true,
-              jobTitle: true,
-              createdAt: true,
-              updatedAt: true,
-              customFields: true,
-              company: { select: { name: true } },
-              tags: { select: { name: true } },
-            },
-          });
+        try {
+          while (true) {
+            const batch = await prisma.contact.findMany({
+              where: { workspaceId: workspace.id, deletedAt: null },
+              orderBy: { id: 'asc' },
+              take: 1000,
+              ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                jobTitle: true,
+                createdAt: true,
+                updatedAt: true,
+                customFields: true,
+                company: { select: { name: true } },
+                tags: { select: { name: true } },
+              },
+            });
 
-          if (!batch.length) break;
+            if (!batch.length) break;
 
-          for (const c of batch) {
-            csvWriteRow(res, [
-              c.id,
-              c.name,
-              c.email || '',
-              c.phone || '',
-              c.jobTitle || '',
-              c.company?.name || '',
-              (c.tags || []).map((t) => t.name).join(', '),
-              c.createdAt ? new Date(c.createdAt).toISOString() : '',
-              c.updatedAt ? new Date(c.updatedAt).toISOString() : '',
-              csvStringify(c.customFields),
-            ], delimiter);
+            for (const c of batch) {
+              csvWriteRow(res, [
+                c.id,
+                c.name,
+                c.email || '',
+                c.phone || '',
+                c.jobTitle || '',
+                c.company?.name || '',
+                (c.tags || []).map((t) => t.name).join(', '),
+                c.createdAt ? new Date(c.createdAt).toISOString() : '',
+                c.updatedAt ? new Date(c.updatedAt).toISOString() : '',
+                csvStringify(c.customFields),
+              ], delimiter);
+            }
+
+            cursorId = batch[batch.length - 1].id;
           }
-
-          cursorId = batch[batch.length - 1].id;
+        } catch (streamingError) {
+          console.error('CSV Streaming Error (Contacts):', streamingError);
+          // We already sent 200 and started writing, so we just append a comment or end it
+          res.write(`\r\nERROR: Export failed mid-way data retrieval.\r\n`);
         }
 
         res.end();
@@ -145,6 +159,7 @@ export default async function handler(req, res) {
         const filename = `deals-${workspaceSlug}-${today}.csv`;
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('Cache-Control', 'no-store');
         res.status(200);
         res.write('\ufeff');
@@ -167,50 +182,55 @@ export default async function handler(req, res) {
         ], delimiter);
 
         let cursorId = null;
-        while (true) {
-          const batch = await prisma.deal.findMany({
-            where: { workspaceId: workspace.id, deletedAt: null },
-            orderBy: { id: 'asc' },
-            take: 1000,
-            ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
-            select: {
-              id: true,
-              name: true,
-              priority: true,
-              amount: true,
-              closeDate: true,
-              createdAt: true,
-              updatedAt: true,
-              customFields: true,
-              stage: { select: { name: true } },
-              company: { select: { name: true } },
-              contact: { select: { name: true, email: true, phone: true } },
-              assignee: { select: { name: true, email: true } },
-            },
-          });
+        try {
+          while (true) {
+            const batch = await prisma.deal.findMany({
+              where: { workspaceId: workspace.id, deletedAt: null },
+              orderBy: { id: 'asc' },
+              take: 1000,
+              ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+              select: {
+                id: true,
+                name: true,
+                priority: true,
+                amount: true,
+                closeDate: true,
+                createdAt: true,
+                updatedAt: true,
+                customFields: true,
+                stage: { select: { name: true } },
+                company: { select: { name: true } },
+                contact: { select: { name: true, email: true, phone: true } },
+                assignee: { select: { name: true, email: true } },
+              },
+            });
 
-          if (!batch.length) break;
+            if (!batch.length) break;
 
-          for (const d of batch) {
-            csvWriteRow(res, [
-              d.id,
-              d.name,
-              d.stage?.name || '',
-              d.priority || '',
-              d.amount != null ? String(d.amount) : '',
-              d.closeDate ? new Date(d.closeDate).toISOString() : '',
-              d.assignee?.email || d.assignee?.name || '',
-              d.contact?.name || '',
-              d.contact?.email || '',
-              d.contact?.phone || '',
-              d.company?.name || '',
-              d.createdAt ? new Date(d.createdAt).toISOString() : '',
-              d.updatedAt ? new Date(d.updatedAt).toISOString() : '',
-              csvStringify(d.customFields),
-            ], delimiter);
+            for (const d of batch) {
+              csvWriteRow(res, [
+                d.id,
+                d.name,
+                d.stage?.name || '',
+                d.priority || '',
+                d.amount != null ? String(d.amount) : '',
+                d.closeDate ? new Date(d.closeDate).toISOString() : '',
+                d.assignee?.email || d.assignee?.name || '',
+                d.contact?.name || '',
+                d.contact?.email || '',
+                d.contact?.phone || '',
+                d.company?.name || '',
+                d.createdAt ? new Date(d.createdAt).toISOString() : '',
+                d.updatedAt ? new Date(d.updatedAt).toISOString() : '',
+                csvStringify(d.customFields),
+              ], delimiter);
+            }
+
+            cursorId = batch[batch.length - 1].id;
           }
-
-          cursorId = batch[batch.length - 1].id;
+        } catch (streamingError) {
+          console.error('CSV Streaming Error (Deals):', streamingError);
+          res.write(`\r\nERROR: Export failed mid-way data retrieval.\r\n`);
         }
 
         res.end();
@@ -220,7 +240,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid export entity. Use entity=contacts or entity=deals' });
     }
 
-    // 2. Fetch workspace data — each query is individually guarded to avoid total failure
+    // 3. JSON Export — individually guarded queries
     const [workspaceInfo, pipelines, contacts, deals, customFields, webForms, tags] =
       await Promise.all([
         safeQuery(
@@ -237,17 +257,20 @@ export default async function handler(req, res) {
             include: { stages: true },
           })
         ),
+        // Limit contacts and deals in JSON export to avoid memory crash
         safeQuery(() =>
           prisma.contact.findMany({
             where: { workspaceId: workspace.id },
-            include: { activities: true },
+            take: 5000, // Limit for safety
+            include: { activities: { take: 10 } },
           })
         ),
         safeQuery(() =>
           prisma.deal.findMany({
             where: { workspaceId: workspace.id },
+            take: 5000, // Limit for safety
             include: {
-              activities: true,
+              activities: { take: 10 },
               contact: { select: { id: true, name: true, email: true } },
             },
           })
@@ -255,7 +278,6 @@ export default async function handler(req, res) {
         safeQuery(() =>
           prisma.customField.findMany({ where: { workspaceId: workspace.id } })
         ),
-        // WebForm & Tag: gracefully skip if not in this schema version
         safeQuery(async () => {
           if (!prisma.webForm) return [];
           return prisma.webForm.findMany({ where: { workspaceId: workspace.id } });
@@ -266,7 +288,6 @@ export default async function handler(req, res) {
         }),
       ]);
 
-    // 3. Build export payload
     const exportData = {
       meta: {
         exportedAt: new Date().toISOString(),
@@ -286,12 +307,16 @@ export default async function handler(req, res) {
       },
     };
 
-    // 4. Send as downloadable JSON attachment
     const filename = `export-${workspaceInfo?.slug ?? workspaceSlug}-${new Date().toISOString().split('T')[0]}.json`;
     res.setHeader('Content-Type', 'application/json');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     return res.status(200).send(exportData);
   } catch (error) {
+    if (res.headersSent) {
+      console.error('Post-Header Error:', error);
+      res.end();
+      return;
+    }
     console.error('Data Export Error:', error);
     return res.status(500).json({ error: 'Failed to export workspace data' });
   }

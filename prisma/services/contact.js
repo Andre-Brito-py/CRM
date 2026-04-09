@@ -27,7 +27,7 @@ export const createContact = async (workspaceId, { name, email, phone, jobTitle,
  */
 export const getContacts = async (workspaceId, { take, skip } = {}) => {
   return await prisma.contact.findMany({
-    where: { workspaceId },
+    where: { workspaceId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
     ...(Number.isFinite(take) ? { take } : {}),
     ...(Number.isFinite(skip) ? { skip } : {}),
@@ -57,8 +57,8 @@ export const getContacts = async (workspaceId, { take, skip } = {}) => {
  * Get a single contact with full details — only called on the contact detail page.
  */
 export const getContact = async (id) => {
-  return await prisma.contact.findUnique({
-    where: { id },
+  return await prisma.contact.findFirst({
+    where: { id, deletedAt: null },
     include: {
       company: true,
       deals: {
@@ -108,5 +108,8 @@ export const updateContact = async (id, data) => {
 };
 
 export const deleteContact = async (id) => {
-  return await prisma.contact.delete({ where: { id } });
+  return await prisma.contact.update({ 
+    where: { id },
+    data: { deletedAt: new Date() }
+  });
 };

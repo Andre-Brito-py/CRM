@@ -31,7 +31,7 @@ export const getDeals = async (workspaceId, options = {}) => {
 
   if (compact) {
     return await prisma.deal.findMany({
-      where: { workspaceId },
+      where: { workspaceId, deletedAt: null },
       orderBy: { createdAt: 'desc' },
       take,
       skip,
@@ -60,8 +60,8 @@ export const getDeals = async (workspaceId, options = {}) => {
 };
 
 export const getDeal = async (id) => {
-  return await prisma.deal.findUnique({
-    where: { id },
+  return await prisma.deal.findFirst({
+    where: { id, deletedAt: null },
     include: {
       contact: true,
       company: true,
@@ -140,7 +140,8 @@ export const updateDealStage = async (id, stageId) => {
 };
 
 export const deleteDeal = async (id) => {
-  return await prisma.deal.delete({
+  return await prisma.deal.update({
     where: { id },
+    data: { deletedAt: new Date() }
   });
 };

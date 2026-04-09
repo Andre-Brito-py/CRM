@@ -12,6 +12,21 @@ const validateMiddleware = () => {
     if (!session) {
       errors.push({ param: 'session', msg: 'Unauthorized access' });
     } else {
+      // Security: Check if user is suspended in the database
+      const userId = session.user.id || session.user.userId;
+      const dbUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { suspended: true }
+      });
+
+      if (dbUser?.suspended) {
+        return res.status(403).json({ 
+          errors: { 
+            session: { param: 'session', msg: 'Account suspended. Please contact support.' } 
+          } 
+        });
+      }
+
       return next(session);
     }
 

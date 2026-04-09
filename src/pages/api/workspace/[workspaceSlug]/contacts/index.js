@@ -38,7 +38,7 @@ const handler = async (req, res) => {
           const skip = (page - 1) * pageSize;
           const [contacts, total] = await Promise.all([
             getContacts(workspace.id, { take: pageSize, skip }),
-            prisma.contact.count({ where: { workspaceId: workspace.id } }),
+            prisma.contact.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
           ]);
 
           const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
@@ -93,7 +93,7 @@ const handler = async (req, res) => {
 
         // Run count and permission check in parallel — no dynamic imports
         const [currentContactCount] = await Promise.all([
-          prisma.contact.count({ where: { workspaceId: workspace.id } }),
+          prisma.contact.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
         ]);
 
         const isAllowed = await canAddContact(workspace.id, currentContactCount);

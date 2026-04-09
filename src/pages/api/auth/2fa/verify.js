@@ -43,21 +43,43 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found' } });
         }
  
-        // Determine which secret to use:
-        // 1. If 'secret' is provided in body, it's a new setup verification.
-        // 2. Otherwise use the stored secret.
+        // Determine which secret to verify AGAINST
+        // 1. If user already has 2FA enabled, they MUST prove ownership of the current secret 
+        //    before they can change it or disable it.
+        if (user.twoFactorEnabled) {
+            // Case A: Disabling. The 'token' should be for the current secret.
+            // Case B: Changing device. The 'token' is for the NEW secret, so we need 'currentCode' for the OLD one.
+            
+            if (secret) {
+                // Changing device
+                const { currentCode } = req.body;
+                if (!currentCode) {
+                    return res.status(400).json({ error: { msg: 'Current authentication code is required to change settings' } });
+                }
+                const isCurrentValid = authenticator.verify({
+                    token: currentCode,
+                    secret: user.twoFactorSecret
+                });
+                if (!isCurrentValid) {
+                    return res.status(400).json({ error: { msg: 'Current authentication code is invalid' } });
+                }
+            } else {
+                // Disabling (secret is not provided, so token is verified against user.twoFactorSecret later)
+            }
+        }
+
         const secretToVerify = secret || user.twoFactorSecret;
- 
+
         if (!secretToVerify) {
             return res.status(400).json({ error: { msg: '2FA setup not found. Please start setup again.' } });
         }
- 
-        // Verify token
+
+        // Verify token (If changing secret, this is the NEW one. If disabling, this is the CURRENT one)
         const isValid = authenticator.verify({
             token,
             secret: secretToVerify
         });
- 
+
         if (isValid !== true) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
         }

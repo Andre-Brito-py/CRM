@@ -6,6 +6,7 @@ import { log, reportError } from '@/lib/server/logger';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { getSystemConfig } from '@/lib/server/config';
 import { processAutopilotReply } from '@/lib/server/autopilot';
+import { normalizeWhatsAppNumber } from '@/lib/server/phone';
 
 const clampText = (value, max) => {
   const s = String(value ?? '');
@@ -273,29 +274,27 @@ async function processIncomingMessage({ workspaceSlug, from, name, body, msgType
   const accessToken = integration?.credentials?.accessToken ? String(integration.credentials.accessToken) : null;
 
   // 2. Find or Create Contact
-  // We normalize the incoming 'from' (usually just digits) to search for common variations
-  const fromDigits = from.replace(/\D/g, '');
+  // Use our robust normalization to handle 9th digit variations for Brazil
+  const { clean, variations } = normalizeWhatsAppNumber(from);
+  
   let contact = await prisma.contact.findFirst({
     where: {
       workspaceId: workspace.id,
       OR: [
-        { phone: from },
-        { phone: `+${from}` },
-        { phone: fromDigits },
-        { phone: `+${fromDigits}` },
-        // Also check if the number in DB starts with country code or not
-        { phone: { endsWith: fromDigits.length > 8 ? fromDigits.slice(-8) : fromDigits } }
+        ...variations.map(v => ({ phone: v })),
+        // Also check if the number in DB ends with the core 8 digits as a last resort
+        { phone: { endsWith: clean.length > 8 ? clean.slice(-8) : clean } }
       ]
     }
   });
 
   if (!contact) {
-    // Create new Contact (Lead)
+    // Create new Contact (Lead) using the canonical (cleaned) version
     contact = await prisma.contact.create({
       data: {
         workspaceId: workspace.id,
-        name: name || from, // Use phone number as name if name is missing
-        phone: from,
+        name: name || from,
+        phone: clean,
       }
     });
   }

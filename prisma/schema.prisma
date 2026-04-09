@@ -226,6 +226,7 @@ model User {
   supportMessages      SupportMessage[]
 
   @@unique([userCode, email])
+  @@index([suspended])
   @@map("users")
 }
 
@@ -492,6 +493,8 @@ model Contact {
   tasks           Task[]
 
   @@index([workspaceId])
+  @@index([workspaceId, deletedAt])
+  @@index([workspaceId, phone])
   @@index([workspaceId, createdAt])
   @@map("contacts")
 }
@@ -587,6 +590,7 @@ model Deal {
   tasks        Task[]
 
   @@index([workspaceId])
+  @@index([workspaceId, deletedAt])
   @@index([workspaceId, stageId])
   @@index([workspaceId, createdAt])
   @@index([stageId])
@@ -726,6 +730,7 @@ model Conversation {
   messages    Message[]
 
   @@index([workspaceId])
+  @@index([workspaceId, deletedAt])
   @@index([workspaceId, status])
   @@index([workspaceId, assigneeId])
   @@index([workspaceId, updatedAt])

@@ -785,7 +785,11 @@ const ChatWindow = ({
                         {({ active }) => (
                           <button
                             type="button"
-                            onClick={() => appendToMessage(`${window.location.origin}/p/${workspaceSlug}/${product.slug}`)}
+                            onClick={() => {
+                              const productUrl = `${window.location.origin}/p/${workspaceSlug}/${product.slug}`;
+                              const message = `Olá! Conforme conversamos, aqui está o link para você adquirir o *${product.name}* no valor de *${formatMoney(product.price, product.currency)}*:\n\n🔗 ${productUrl}`;
+                              onMessageChange(message);
+                            }}
                             className={classNames(
                               active ? 'bg-zinc-50 dark:bg-zinc-900/50' : '',
                               'block w-full text-left px-10 py-7 transition-all group/prod'
