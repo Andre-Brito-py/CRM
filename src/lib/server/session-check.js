@@ -7,7 +7,7 @@ import prisma from '@/prisma/index';
 const validateMiddleware = () => {
   return async (req, res, next) => {
     ensureRequestId(req, res);
-    const session = await getServerSession(req, res, await getAuthOptions());
+    const session = await getServerSession(req, res, await getAuthOptions(req));
     const errors = [];
 
     if (!session) {
@@ -21,11 +21,8 @@ const validateMiddleware = () => {
       });
 
       if (dbUser?.suspended) {
-        return res.status(403).json({ 
-          errors: { 
-            session: { param: 'session', msg: 'Account suspended. Please contact support.' } 
-          } 
-        });
+        const errorObject = { msg: 'Your account is suspended', detail: 'Please contact support.' };
+        return res.status(401).json({ error: errorObject });
       }
 
       return next(session);
@@ -33,7 +30,7 @@ const validateMiddleware = () => {
 
     const errorObject = {};
     errors.forEach((error) => (errorObject[error.param] = error));
-    res.status(401).json({ errors: errorObject });
+    res.status(401).json({ error: errorObject });
   };
 };
 
