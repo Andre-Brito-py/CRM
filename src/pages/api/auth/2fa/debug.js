@@ -20,12 +20,11 @@ export default async function handler(req, res) {
   };
 
   try {
-    // 1. Test OTPLIB
+    // 1. Test OTPLIB via Native Bridge
     try {
-      const { NobleCryptoPlugin, ScureBase32Plugin } = await import('otplib');
-      const totp = new TOTP({ crypto: NobleCryptoPlugin, base32: ScureBase32Plugin });
-      const secret = totp.generateSecret();
-      const uri = totp.generateURI({ issuer: 'Test', label: 'test@test.com', secret });
+      const { generateSecret, generateURI } = await import('@/lib/server/2fa-bridge');
+      const secret = generateSecret();
+      const uri = generateURI('test@test.com', secret);
       report.libraries.otplib = { ok: true, secretLength: secret.length, uriStarts: uri.substring(0, 10) };
     } catch (e) {
       report.libraries.otplib = { ok: false, error: e.message };

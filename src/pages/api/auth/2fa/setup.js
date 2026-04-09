@@ -1,7 +1,7 @@
-import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import QRCode from 'qrcode';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
+import { generateSecret, generateURI } from '@/lib/server/2fa-bridge';
 
 export const config = {
     api: {
@@ -38,19 +38,11 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found in database' } });
         }
 
-        const totp = new TOTP({ 
-            crypto: NobleCryptoPlugin, 
-            base32: ScureBase32Plugin 
-        });
-        const secret = totp.generateSecret();
+        const secret = generateSecret();
         
         // Ensure email is safe for URI
         const userEmail = encodeURIComponent(user.email || 'user@vysify.com');
-        const otpauth = totp.generateURI({
-            issuer: 'Vysify',
-            label: userEmail,
-            secret
-        });
+        const otpauth = generateURI(userEmail, secret);
  
          if (!otpauth) {
              throw new Error('Failed to generate OTPAuth URI');

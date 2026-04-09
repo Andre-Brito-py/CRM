@@ -1,6 +1,6 @@
-import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
 import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
+import { verifyToken } from '@/lib/server/2fa-bridge';
 
 export const config = {
     api: {
@@ -44,14 +44,7 @@ const handler = async (req, res) => {
             if (!currentCode) {
                 return res.status(400).json({ error: { msg: 'Current authentication code is required to change settings' } });
             }
-            const totp = new TOTP({ 
-                crypto: NobleCryptoPlugin, 
-                base32: ScureBase32Plugin 
-            });
-            const isCurrentValid = totp.verify({
-                token: currentCode,
-                secret: user.twoFactorSecret
-            });
+            const isCurrentValid = verifyToken(currentCode, user.twoFactorSecret);
             if (!isCurrentValid) {
                 return res.status(400).json({ error: { msg: 'Current authentication code is invalid' } });
             }
@@ -64,14 +57,7 @@ const handler = async (req, res) => {
         }
 
         // Verify token (If changing secret, this is the NEW one. If disabling, this is the CURRENT one)
-        const currentTotp = new TOTP({ 
-            crypto: NobleCryptoPlugin, 
-            base32: ScureBase32Plugin 
-        });
-        const isValid = currentTotp.verify({
-            token,
-            secret: secretToVerify
-        });
+        const isValid = verifyToken(token, secretToVerify);
 
         if (isValid !== true) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });
