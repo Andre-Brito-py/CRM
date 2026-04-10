@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/server/auth';
 import prisma from '@/prisma/index';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { log, reportError } from '@/lib/server/logger';
+import { normalizeWhatsAppNumber } from '@/lib/server/phone';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -46,7 +47,8 @@ export default async function handler(req, res) {
     }
 
     // 2. Normalize and find/create contact
-    const normalizedPhone = phone.replace(/\D/g, '');
+    // normalizeWhatsAppNumber handles Brazil's mandatory 9th digit (55DD9NNNNNNNN)
+    const { clean: normalizedPhone } = normalizeWhatsAppNumber(phone);
     let contact = await prisma.contact.findFirst({
       where: {
         workspaceId: workspace.id,
@@ -89,7 +91,7 @@ export default async function handler(req, res) {
     }
 
     // 4. Send Template Message via Meta API
-    const metaUrl = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+    const metaUrl = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`;
     const response = await fetch(metaUrl, {
       method: 'POST',
       headers: {

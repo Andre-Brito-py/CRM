@@ -76,7 +76,7 @@ const fetchWhatsAppMediaMetadata = async ({ accessToken, mediaId }) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12_000);
   try {
-    const resp = await fetch(`https://graph.facebook.com/v17.0/${encodeURIComponent(mediaId)}`, {
+    const resp = await fetch(`https://graph.facebook.com/v25.0/${encodeURIComponent(mediaId)}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
       signal: controller.signal,
