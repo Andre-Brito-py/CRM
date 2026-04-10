@@ -44,7 +44,7 @@ const handler = async (req, res) => {
             if (!currentCode) {
                 return res.status(400).json({ error: { msg: 'Current authentication code is required to change settings' } });
             }
-            const isCurrentValid = verifyToken(currentCode, user.twoFactorSecret);
+            const isCurrentValid = await verifyToken(currentCode, user.twoFactorSecret);
             if (!isCurrentValid) {
                 return res.status(400).json({ error: { msg: 'Current authentication code is invalid' } });
             }
@@ -57,7 +57,7 @@ const handler = async (req, res) => {
         }
 
         // Verify token (If changing secret, this is the NEW one. If disabling, this is the CURRENT one)
-        const isValid = verifyToken(token, secretToVerify);
+        const isValid = await verifyToken(token, secretToVerify);
 
         if (isValid !== true) {
             return res.status(400).json({ error: { msg: 'Invalid authentication code' } });

@@ -38,11 +38,11 @@ const handler = async (req, res) => {
             return res.status(404).json({ error: { msg: 'User not found in database' } });
         }
 
-        const secret = generateSecret();
+        const secret = await generateSecret();
         
         // Ensure email is safe for URI
         const userEmail = encodeURIComponent(user.email || 'user@vysify.com');
-        const otpauth = generateURI(userEmail, secret);
+        const otpauth = await generateURI(userEmail, secret);
  
          if (!otpauth) {
              throw new Error('Failed to generate OTPAuth URI');

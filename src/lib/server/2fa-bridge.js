@@ -57,6 +57,14 @@ const nativeCrypto = {
         const hmac = crypto.createHmac(algorithm, secret);
         hmac.update(message);
         return hmac.digest();
+    },
+    constantTimeEqual: (a, b) => {
+        if (!a || !b || a.length !== b.length) return false;
+        try {
+            return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+        } catch (e) {
+            return false;
+        }
     }
 };
 
@@ -84,8 +92,8 @@ export const generateSecret = () => {
 /**
  * Helper to generate the QR Code URI
  */
-export const generateURI = (userEmail, secret) => {
-    return getTotpInstance().generateURI({
+export const generateURI = async (userEmail, secret) => {
+    return await getTotpInstance().toURI({
         issuer: 'Vysify',
         label: userEmail,
         secret
@@ -95,9 +103,9 @@ export const generateURI = (userEmail, secret) => {
 /**
  * Helper to verify a token
  */
-export const verifyToken = (token, secret) => {
-    return getTotpInstance().verify({
-        token,
+export const verifyToken = async (token, secret) => {
+    const result = await getTotpInstance().verify(token, {
         secret
     });
+    return result?.valid === true;
 };

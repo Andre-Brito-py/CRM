@@ -132,7 +132,7 @@ const createCredentialsProvider = () =>
           log({ level: 'info', msg: 'auth_2fa_backup_code_used', userId: user.id });
         } else {
           // Handle TOTP via Native Bridge
-          const isValidToken = verifyToken(token, user.twoFactorSecret);
+          const isValidToken = await verifyToken(token, user.twoFactorSecret);
 
           if (isValidToken !== true) {
             await sleep(200);

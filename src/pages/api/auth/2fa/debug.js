@@ -23,8 +23,8 @@ export default async function handler(req, res) {
     // 1. Test OTPLIB via Native Bridge
     try {
       const { generateSecret, generateURI } = await import('@/lib/server/2fa-bridge');
-      const secret = generateSecret();
-      const uri = generateURI('test@test.com', secret);
+      const secret = await generateSecret();
+      const uri = await generateURI('test@test.com', secret);
       report.libraries.otplib = { ok: true, secretLength: secret.length, uriStarts: uri.substring(0, 10) };
     } catch (e) {
       report.libraries.otplib = { ok: false, error: e.message };
