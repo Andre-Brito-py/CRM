@@ -49,7 +49,7 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
   }
 
   // 3. Call Meta Graph API
-  const url = `https://graph.facebook.com/v16.0/${phoneNumberId}/messages`;
+  const url = `https://graph.facebook.com/v25.0/${phoneNumberId}/messages`;
 
   // Normalize the recipient number
   const { clean: recipientPhone } = normalizeWhatsAppNumber(to);
