@@ -97,8 +97,17 @@ const ChatWindow = ({
   const [isForcingTemplate, setIsForcingTemplate] = useState(false);
   const messagesEndRef = useRef(null);
 
+  const messagesContainerRef = useRef(null);
+
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    } else {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   };
 
   useEffect(() => {
@@ -570,7 +579,7 @@ const ChatWindow = ({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar relative">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6 bg-zinc-50/50 dark:bg-zinc-950/20 custom-scrollbar relative">
         <div className="absolute inset-0 bg-grid-zinc-200/40 dark:bg-grid-white/[0.01] [mask-image:radial-gradient(ellipse_at_center,black,transparent)] pointer-events-none" />
         <AnimatePresence mode="popLayout">
           {isLoadingHistory ? (
