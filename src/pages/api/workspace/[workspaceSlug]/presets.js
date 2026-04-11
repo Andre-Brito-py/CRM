@@ -34,7 +34,37 @@ const handler = async (req, res) => {
         return res.status(400).json({ error: { msg: 'Invalid preset ID' } });
       }
 
-      // 1. Create Pipelines and Stages
+      // 0. Update AI Context if empty
+      if (preset.aiContext && !workspace.aiContext) {
+        await prisma.workspace.update({
+          where: { id: workspace.id },
+          data: { aiContext: preset.aiContext }
+        });
+      }
+
+      // 0.5. Inject Message Templates
+      if (preset.messageTemplates && preset.messageTemplates.length > 0) {
+        const existingTpls = await prisma.messageTemplate.findMany({
+          where: { workspaceId: workspace.id }
+        });
+        const existingNames = existingTpls.map(t => t.name.toLowerCase());
+        
+        const newTpls = preset.messageTemplates.filter(
+          t => !existingNames.includes(t.name.toLowerCase())
+        );
+
+        if (newTpls.length > 0) {
+          await prisma.messageTemplate.createMany({
+            data: newTpls.map(t => ({
+              name: t.name,
+              content: t.content,
+              workspaceId: workspace.id,
+            }))
+          });
+        }
+      }
+
+      // 1. Create Pipelines, Stages and Inject Demo Data
       if (preset.pipelines && preset.pipelines.length > 0) {
         for (const pipe of preset.pipelines) {
           const newPipeline = await prisma.pipeline.create({
@@ -44,16 +74,48 @@ const handler = async (req, res) => {
             }
           });
 
-          // Create stages for this pipeline
+          // Create stages for this pipeline mapping Stage Index to Id
           if (pipe.stages && pipe.stages.length > 0) {
-            await prisma.stage.createMany({
-              data: pipe.stages.map((stage, index) => ({
-                name: stage.name,
-                color: stage.color,
-                order: index,
-                pipelineId: newPipeline.id,
-              }))
-            });
+            const createdStages = [];
+            for (let index = 0; index < pipe.stages.length; index++) {
+              const stage = pipe.stages[index];
+              const newStage = await prisma.stage.create({
+                data: {
+                  name: stage.name,
+                  color: stage.color,
+                  order: index,
+                  pipelineId: newPipeline.id,
+                }
+              });
+              createdStages.push(newStage);
+            }
+
+            // INJECT DEMO DATA
+            if (preset.demoData && preset.demoData.length > 0) {
+              for (const demo of preset.demoData) {
+                // Determine stage by index, default to first stage if out of bounds
+                const targetStage = createdStages[demo.stageIndex] || createdStages[0];
+                
+                // Create Mock Contact
+                const contact = await prisma.contact.create({
+                  data: {
+                    workspaceId: workspace.id,
+                    name: demo.contactName,
+                  }
+                });
+
+                // Create Mock Deal
+                await prisma.deal.create({
+                  data: {
+                    workspaceId: workspace.id,
+                    contactId: contact.id,
+                    stageId: targetStage.id,
+                    name: demo.dealTitle,
+                    amount: demo.amount,
+                  }
+                });
+              }
+            }
           }
         }
       }
@@ -98,6 +160,31 @@ const handler = async (req, res) => {
               workspaceId: workspace.id,
             }))
           });
+        }
+      }
+
+      // Apply the example tag to old demo contacts if needed
+      // Find the 'exemplo' tag
+      const demoTag = await prisma.tag.findFirst({
+        where: { workspaceId: workspace.id, name: { contains: 'Exemplo' } }
+      });
+      if (demoTag) {
+        // Link all recently created demo contacts to this tag
+        if (preset.demoData && preset.demoData.length > 0) {
+          const demoContactNames = preset.demoData.map(d => d.contactName);
+          const demoContacts = await prisma.contact.findMany({
+            where: { workspaceId: workspace.id, name: { in: demoContactNames } }
+          });
+          for (const c of demoContacts) {
+            // Check if tag is already connected
+            // We use raw relation table for _ContactToTag conceptually, but since prisma tag schema uses implicit m:n, we do an update
+            await prisma.contact.update({
+              where: { id: c.id },
+              data: {
+                tags: { connect: { id: demoTag.id } }
+              }
+            });
+          }
         }
       }
 

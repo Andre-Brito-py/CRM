@@ -262,7 +262,7 @@ const Analytics = () => {
           <div className="absolute inset-0 bg-indigo-500/20 blur-3xl rounded-full animate-pulse" />
           <div className="w-20 h-20 border-[6px] border-zinc-100 dark:border-zinc-800 border-t-indigo-600 rounded-full animate-spin relative z-10"></div>
         </div>
-        <p className="text-zinc-400 font-black text-[10px] tracking-[0.4em] uppercase italic mt-12 animate-pulse">Calculating Intelligence</p>
+        <p className="text-zinc-400 font-black text-[10px] tracking-[0.4em] uppercase italic mt-12 animate-pulse">{t('analytics.loading.intelligence')}</p>
       </div>
     </AccountLayout>
   );
@@ -318,13 +318,13 @@ const Analytics = () => {
               <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
                 <PresentationChartLineIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Strategic Intelligence</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">{t('analytics.hero.badge')}</span>
             </div>
             <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
-              Market <span className="text-indigo-600">Analytics</span>
+              {t('analytics.hero.title1')}<span className="text-indigo-600">{t('analytics.hero.title2')}</span>
             </h1>
             <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed italic">
-              Real-time insights into your sales performance and customer engagement.
+              {t('analytics.hero.subtitle')}
             </p>
           </div>
 

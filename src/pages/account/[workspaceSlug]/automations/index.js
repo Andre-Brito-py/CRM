@@ -572,13 +572,13 @@ const Automations = () => {
               <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
                 <BoltIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Workflows</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">{t('automations.hero.badge')}</span>
             </div>
             <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
-              {t('Automations')} <span className="text-indigo-600">Studio</span>
+              {t('automations.hero.title1')}<span className="text-indigo-600">{t('automations.hero.title2')}</span>
             </h1>
             <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed italic">
-              Design intelligent rules to scale your business operations automatically.
+              {t('automations.hero.subtitle')}
             </p>
           </div>
 
@@ -607,10 +607,10 @@ const Automations = () => {
               </div>
             </div>
             <h3 className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic tracking-tight mb-3">
-              No Automations <span className="text-zinc-400 font-medium">Defined</span>
+              {t('automations.empty.title1')}<span className="text-zinc-400 font-medium">{t('automations.empty.title2')}</span>
             </h3>
             <p className="text-zinc-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed italic">
-              Take the manually repetitive out of your day. Create your first workflow rule to see the magic happen.
+              {t('automations.empty.subtitle')}
             </p>
             <button
               onClick={toggleModal}

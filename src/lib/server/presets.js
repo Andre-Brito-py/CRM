@@ -25,10 +25,22 @@ export const INDUSTRY_PRESETS = [
       { key: 'monthly_income', label: 'Renda Mensal (Família)', type: 'currency', area: 'sales' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Comprador' },
       { name: 'Inquilino' },
       { name: 'Proprietário' },
       { name: 'Investidor' }
+    ],
+    aiContext: "Você é um corretor de imóveis experiente e cordial do Vysify Imóveis. O seu objetivo é acolher os leads interessados, descobrir qual o perfil do imóvel buscado (orçamento, bairros, quartos) e focar sempre em AGENDAR UMA VISITA PRESENCIAL. Seja sempre atencioso e prestativo, nunca pressione o cliente, mas mantenha a conversa fluindo até ter as informações necessárias da ficha.",
+    messageTemplates: [
+      { name: 'Agendamento de Visita', content: 'Olá! 😊 Vimos seu interesse nos imóveis. Que tal agendarmos uma visita para você conhecer o espaço pessoalmente sem compromisso? Qual o melhor dia e horário para você?' },
+      { name: 'Follow-up de Negociação', content: 'Oi! Só passando para saber se você já teve tempo de avaliar nossa última proposta. Estou à disposição se tiver qualquer dúvida!' },
+      { name: 'Captação - Descobrir Perfil', content: 'Tudo bem? Para que eu separe as melhores opções, você busca imóveis em qual faixa de valor e quais bairros de preferência?' }
+    ],
+    demoData: [
+      { contactName: 'Juliana Fernandes', dealTitle: 'Apto 3 Quartos - Jardins', amount: 850000, stageIndex: 0 },
+      { contactName: 'Roberto Almeida', dealTitle: 'Casa Cond. Fechado', amount: 1200000, stageIndex: 2 },
+      { contactName: 'Mariana Costa', dealTitle: 'Terreno Comercial', amount: 450000, stageIndex: 3 }
     ]
   },
   {
@@ -55,10 +67,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'birth_date', label: 'Data de Nascimento', type: 'date', area: 'both' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Primeira Consulta' },
       { name: 'Retorno' },
       { name: 'Urgência' },
       { name: 'Particular' }
+    ],
+    aiContext: "Você é um atendente acolhedor e humanizado de uma clínica médica/odontológica no Vysify. Seu foco é realizar o pré-atendimento com empatia, perguntar sobre o motivo da consulta ou sintomas breves, verificar se possuem plano de saúde, e por fim AGENDAR a consulta confirmando dia e horário.",
+    messageTemplates: [
+      { name: 'Confirmação de Consulta', content: 'Olá! Passando para confirmar sua consulta amanhã. Podemos confirmar a sua presença? Em caso de imprevisto, por favor nos avise.' },
+      { name: 'Boas Vindas / Triagem', content: 'Olá! Seja muito bem-vindo(a) ao nosso atendimento preliminar. Para agilizarmos, poderia me informar o motivo da consulta e se possui convênio médico?' }
+    ],
+    demoData: [
+      { contactName: 'Carlos Mendonça', dealTitle: 'Consulta de Rotina', amount: 350, stageIndex: 0 },
+      { contactName: 'Ana Beatriz', dealTitle: 'Retorno Exames', amount: 0, stageIndex: 2 }
     ]
   },
   {
@@ -86,10 +108,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'website_url', label: 'Site da Empresa', type: 'url', area: 'both' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Inbound' },
       { name: 'Outbound' },
       { name: 'Indicação' },
       { name: 'Enterprise' }
+    ],
+    aiContext: "Você é um representante comercial de uma Agência de Marketing Digital B2B (Vysify). O objetivo é entender os desafios de crescimento da empresa do lead, perguntar sobre métricas atuais, e agendar uma reunião Discovery-Call com um de nossos executivos. Demonstre autoridade, fale de ROI e conversão.",
+    messageTemplates: [
+      { name: 'Follow-up de Proposta B2B', content: 'Fala gestor, tudo bom? Já conseguiram avaliar o cronograma e escopo que enviamos? Se sentirem necessidade, podemos fazer uma rápida call para alinhar os últimos pontos.' },
+      { name: 'Convite p/ Reunião', content: 'Olá! Analisei as suas redes/site e identifiquei gargalos de conversão que estamos resolvendo para clientes do mesmo setor. Terça ou Quinta teriam 15min para eu apresentar esse plano pronto?' }
+    ],
+    demoData: [
+      { contactName: 'Startup Tech Ltda', dealTitle: 'Gestão de Tráfego 6 Meses', amount: 18000, stageIndex: 1 },
+      { contactName: 'Grupo Varejo Sul', dealTitle: 'Rebranding e Site', amount: 35000, stageIndex: 3 }
     ]
   },
   {
@@ -115,10 +147,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'dietary_restrictions', label: 'Restrições Alimentares', type: 'text', area: 'support' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Aniversário' },
       { name: 'Corporativo' },
       { name: 'VIP' },
       { name: 'Casamento' }
+    ],
+    aiContext: "Você é o concierge e host virtual de um excelente Restaurante e espaço de Eventos. Seu objetivo é ajudar nas reservas de mesa, fornecer o menu/cardápio quando solicitado e captar as informações de orçamentos maiores para eventos fechados.",
+    messageTemplates: [
+      { name: 'Confirmação de Reserva', content: 'Ótima notícia! Sua mesa já está reservada conosco. Ficamos muito felizes de receber vocês. Qualquer alteração no número de pessoas, nos avise!' },
+      { name: 'Envio de Cardápio', content: 'Olá! Segue o link com nosso cardápio atualizado e carta de vinhos: [LINK].' }
+    ],
+    demoData: [
+      { contactName: 'Fernanda Silveira', dealTitle: 'Aniversário 15 Pessoas', amount: 1200, stageIndex: 1 },
+      { contactName: 'Corporate S/A', dealTitle: 'Confraternização Final de Ano', amount: 8500, stageIndex: 2 }
     ]
   },
   {
@@ -145,10 +187,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'payment_method', label: 'Método de Pagamento', type: 'select', options: 'Cartão de Crédito, Pix, Boleto', area: 'sales' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Afiliado' },
       { name: 'Orgânico' },
       { name: 'Mentoria' },
       { name: 'Desistente' }
+    ],
+    aiContext: "Você é um especialista em fechamentos e consultoria de vendas de Cursos Digitais/Mentorias. Seu papel é tirar objeções do prospect, detalhar o que o curso entrega e conduzí-los até o checkout para finalizar a inscrição.",
+    messageTemplates: [
+      { name: 'Recuperação de Abandono', content: 'Opa, vi aqui que você iniciou o preenchimento para se inscrever mas não finalizou. Aconteceu algum probleminha técnico com o cartão ou ficou alguma dúvida sobre o conteúdo?' },
+      { name: 'Boas-vindas a Alunos', content: 'Parabéns pela decisão de entrar para o treinamento! 🚀 Seus acessos já foram enviados por e-mail.' }
+    ],
+    demoData: [
+      { contactName: 'Lucas Ferreira', dealTitle: 'Mentoria Elite - Abandono', amount: 1997, stageIndex: 2 },
+      { contactName: 'Patrícia Gomes', dealTitle: 'Boleto Gerado - Curso Base', amount: 497, stageIndex: 3 }
     ]
   },
   {
@@ -175,10 +227,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'utility_company', label: 'Concessionária', type: 'text', area: 'both' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Residencial' },
       { name: 'Comercial' },
       { name: 'Rural' },
       { name: 'Urgente' }
+    ],
+    aiContext: "Você é um engenheiro/consultor técnico em Energia Solar. Você sabe explicar sobre Payback, economia na fatura e tipos de inversores. Seu objetivo é coletar a fatura de energia atual do cliente (perguntado o custo R$ médio) e agendar uma visita técnica.",
+    messageTemplates: [
+      { name: 'Solicitação de Fatura', content: 'Para que nosso engenheiro crie o pré-projeto exato, você poderia me enviar uma foto da sua última conta de luz? Só pra gente dimensionar o tamanho ideal do kit.' },
+      { name: 'Follow-up de Financiamento', content: 'Tudo bem? Acabamos de receber a análise de crédito do banco para seu projeto e as taxas estão muito atrativas!' }
+    ],
+    demoData: [
+      { contactName: 'Propriedade Rural XYZ', dealTitle: 'Usina Solo 50kWp', amount: 155000, stageIndex: 2 },
+      { contactName: 'Renato Silva', dealTitle: 'Sistema Residencial Telhado', amount: 22000, stageIndex: 1 }
     ]
   },
   {
@@ -206,10 +268,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'appointment_date', label: 'Data da Avaliação', type: 'date', area: 'both' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Botox' },
       { name: 'Harmonização' },
       { name: 'Limpeza de Pele' },
       { name: 'Lipo' }
+    ],
+    aiContext: "Você é um consultor de bem-estar de uma renomada clínica de estética. Trate os leads com muita sofisticação, tire as dúvidas iniciais sobre os procedimentos estéticos e foque muito na importância da Consulta de Avaliação (que é essencial antes de orçamentar com precisão).",
+    messageTemplates: [
+      { name: 'Convite para Avaliação', content: 'Nós amamos a ideia desse procedimento! Mas para garantir o resultado perfeito, precisamos de uma avaliação personalizada com a Doutora. Que dia prefere vir tomar um café conosco e realizar a avaliação?' },
+      { name: 'Recomendações Pós', content: 'Como você está se sentindo pós-procedimento? Lembre-se das nossas recomendações de não tomar sol direto nas próximas semanas. Qualquer desconforto nos chame!' }
+    ],
+    demoData: [
+      { contactName: 'Isabela Muniz', dealTitle: 'Harmonização Full Face', amount: 5000, stageIndex: 2 },
+      { contactName: 'Clarice Santos', dealTitle: 'Pacote Depilação Laser', amount: 890, stageIndex: 3 }
     ]
   },
   {
@@ -237,10 +309,20 @@ export const INDUSTRY_PRESETS = [
       { key: 'down_payment', label: 'Valor de Entrada (R$)', type: 'currency', area: 'sales' }
     ],
     tags: [
+      { name: '🌟 Exemplo', color: '#fcd34d' },
       { name: 'Seminovo' },
       { name: 'Zero KM' },
       { name: 'Financiamento 100%' },
       { name: 'Repasse' }
+    ],
+    aiContext: "Você é um consultor de vendas automotivas. Desperte a emoção nos clientes que chamarem, fale das qualidades do carro perguntado, tente descobrir se eles têm usado na troca, perguntar qual a estimativa de entrada e agende um Test-Drive imperdível.",
+    messageTemplates: [
+      { name: 'Chamar p/ Test-Drive', content: 'Carro é igual a sapato né? Precisamos calçar pra ver se serve! Brincadeiras à parte, podemos agendar um test-drive amanhã pra você sentir o carro?' },
+      { name: 'Pedido Dados de Avaliação', content: 'Perfeito, recebemos carros como parte do pagamento. Consegue me mandar 3 fotos do seu veículo (frente, traseira e painel) e ano/modelo para nossa equipe já pré-avaliar?' }
+    ],
+    demoData: [
+      { contactName: 'Tiago Leoni', dealTitle: 'Corolla XEI 2023', amount: 135000, stageIndex: 1 },
+      { contactName: 'Vitor Martins', dealTitle: 'Jeep Compass Longitude', amount: 165000, stageIndex: 3 }
     ]
   }
 ];

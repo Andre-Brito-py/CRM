@@ -13,7 +13,7 @@ import {
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { useTranslation } from 'react-i18next';
 import AccountLayout from '@/layouts/AccountLayout';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
@@ -25,6 +25,7 @@ import api from '@/lib/common/api';
 import { useWorkspace } from '@/providers/workspace';
 
 const WebForms = () => {
+  const { t } = useTranslation();
   const router = useRouter();
   const { workspaceSlug } = router.query;
   const { workspace } = useWorkspace();
@@ -170,13 +171,13 @@ const WebForms = () => {
               <div className="w-10 h-10 bg-indigo-600 rounded-[14px] flex items-center justify-center shadow-glow-indigo/20">
                 <DocumentTextIcon className="w-6 h-6 text-white" />
               </div>
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">Integrations</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.25em]">{t('webForms.hero.badge')}</span>
             </div>
             <h1 className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white tracking-tighter italic uppercase leading-none mb-3">
-              Web Forms <span className="text-indigo-600">Builder</span>
+              {t('webForms.hero.title1')}<span className="text-indigo-600">{t('webForms.hero.title2')}</span>
             </h1>
             <p className="text-zinc-500 font-medium text-lg max-w-xl leading-relaxed">
-              Build public forms to capture leads directly into your CRM pipelines with zero code.
+              {t('webForms.hero.subtitle')}
             </p>
           </div>
 
@@ -188,14 +189,14 @@ const WebForms = () => {
             onClick={toggleModal}
           >
             <PlusIcon className="w-5 h-5 mr-3 stroke-[3]" />
-            Create Web Form
+            {t('webForms.btn.create')}
           </motion.button>
         </motion.div>
 
         {error ? (
           <div className="vysify-glass p-12 text-center text-red-500 rounded-[2.5rem]">
             <SparklesIcon className="w-12 h-12 mx-auto mb-4 opacity-20" />
-            <p className="font-executive font-bold text-lg uppercase italic tracking-tight">Failed to load web forms</p>
+            <p className="font-executive font-bold text-lg uppercase italic tracking-tight">{t('webForms.error.load')}</p>
           </div>
         ) : webForms.length === 0 ? (
           <motion.div 
@@ -210,17 +211,17 @@ const WebForms = () => {
               </div>
             </div>
             <h3 className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-white uppercase italic tracking-tight mb-3">
-              No Web Forms <span className="text-zinc-400 font-medium">Created Yet</span>
+              {t('webForms.empty.title1')}<span className="text-zinc-400 font-medium">{t('webForms.empty.title2')}</span>
             </h3>
             <p className="text-zinc-500 font-medium max-w-sm mx-auto mb-10 leading-relaxed italic">
-              Empower your website with intelligent forms that convert visitors into CRM leads automatically.
+              {t('webForms.empty.subtitle')}
             </p>
             <button
               onClick={toggleModal}
               className="inline-flex items-center px-8 py-4 text-sm font-black text-white bg-indigo-600 rounded-2xl shadow-lg shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all uppercase tracking-widest"
             >
               <PlusIcon className="mr-3 h-5 w-5 stroke-[3]" aria-hidden="true" />
-              Build Your First Form
+              {t('webForms.empty.btn')}
             </button>
           </motion.div>
         ) : (
