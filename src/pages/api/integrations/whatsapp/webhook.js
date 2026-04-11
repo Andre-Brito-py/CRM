@@ -252,9 +252,9 @@ export default async function handler(req, res) {
           reportError(e, { route: '/api/integrations/whatsapp/webhook', requestId, workspaceSlug, wamid });
         }
       }
-      res.sendStatus(200);
+      res.status(200).send('OK');
     } else {
-      res.sendStatus(404);
+      res.status(404).send('Not Found');
     }
   } else {
     res.setHeader('Allow', ['GET', 'POST']);

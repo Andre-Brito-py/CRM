@@ -60,7 +60,13 @@ export const getBrazilVariations = (cleanNum) => {
  * @returns {{ clean: string, variations: string[] }}
  */
 export const normalizeWhatsAppNumber = (phone) => {
-  const clean = cleanPhone(phone);
+  let clean = cleanPhone(phone);
+  
+  // Se o número tiver 10 ou 11 dígitos e não começar com 55, assumimos que é um número do Brasil sem código do país
+  if (!clean.startsWith('55') && (clean.length === 10 || clean.length === 11)) {
+    clean = `55${clean}`;
+  }
+
   if (clean.startsWith('55')) {
     const { canonical, variations } = getBrazilVariations(clean);
     return { clean: canonical, variations };
