@@ -402,8 +402,8 @@ const ChatWindow = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-black relative overflow-hidden group/chat">
       {/* Header */}
-      <div className="px-4 py-4 sm:px-6 sm:py-5 lg:px-10 lg:py-6 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-wrap lg:flex-nowrap justify-between items-center gap-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl sticky top-0 z-30 shrink-0 shadow-premium-sm">
-        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0">
+      <div className="px-4 py-4 sm:px-6 lg:px-8 border-b border-zinc-100 dark:border-zinc-800/50 flex flex-wrap justify-between items-center gap-4 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-3xl sticky top-0 z-30 shrink-0 shadow-premium-sm">
+        <div className="flex items-center gap-3 sm:gap-4 lg:gap-6 min-w-0 flex-1">
           {onBack && (
             <motion.button 
               whileHover={{ x: -3, scale: 1.1 }}
