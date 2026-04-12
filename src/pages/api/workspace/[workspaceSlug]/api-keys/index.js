@@ -11,15 +11,28 @@ const handler = async (req, res) => {
 
   const { workspaceSlug } = req.query;
   const userId = session.user.userId || session.user.id;
-  const workspace = await getWorkspace(userId, session.user.email, workspaceSlug);
+  const isSuperAdmin = session.user.role === 'SUPERADMIN';
+  
+  let workspace = await getWorkspace(userId, session.user.email, workspaceSlug);
+
+  if (!workspace && isSuperAdmin) {
+    // Se for Super Admin e não for membro, busca diretamente pelo slug
+    workspace = await prisma.workspace.findFirst({
+      where: { slug: workspaceSlug, deletedAt: null },
+      select: { 
+        id: true, 
+        name: true, 
+        slug: true, 
+        members: { select: { email: true, teamRole: true } } 
+      }
+    });
+  }
 
   if (!workspace) {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
   const isOwner = isWorkspaceOwner(session.user.email, workspace);
-  const isSuperAdmin = session.user.role === 'SUPERADMIN';
-  
   if (!isOwner && !isSuperAdmin) {
     return res.status(403).json({ error: 'Forbidden' });
   }
