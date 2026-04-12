@@ -564,7 +564,11 @@ export const simulateAutomationRule = async (workspaceId, rule, eventData) => {
   }
 
   if (actionType === 'CALL_WEBHOOK') {
+    preview.url = actionConfig?.url || 'Global Workspace Webhooks';
     preview.eventName = actionConfig?.eventName || rule?.triggerType;
+    if (actionConfig?.payloadTemplate) {
+      preview.customPayload = await renderTemplateString(workspaceId, actionConfig.payloadTemplate, { ...eventData });
+    }
   }
 
   if (actionType === 'MULTI_ACTIONS') {
@@ -892,21 +896,51 @@ const executeCreateTaskAction = async (workspaceId, actionConfig, eventData) => 
 };
 
 const executeCallWebhookAction = async (workspaceId, eventType, actionConfig, eventData) => {
-  const webhooks = await prisma.webhook.findMany({
-    where: {
-      workspaceId,
-      isActive: true,
-    },
-  });
+  const directUrl = actionConfig?.url || null;
+  const payloadTemplate = actionConfig?.payloadTemplate || null;
+
+  let webhooks = [];
+  if (directUrl) {
+    // If a direct URL is provided, we send only to it
+    webhooks = [{
+      url: directUrl,
+      secret: actionConfig.secret || 'default_secret',
+      events: ['*'],
+      id: `direct_${crypto.randomBytes(4).toString('hex')}`
+    }];
+  } else {
+    webhooks = await prisma.webhook.findMany({
+      where: {
+        workspaceId,
+        isActive: true,
+      },
+    });
+  }
 
   if (webhooks.length === 0) return;
 
-  const payload = {
-    event: actionConfig?.eventName || eventType,
-    workspaceId,
-    data: eventData,
-    occurredAt: new Date().toISOString(),
-  };
+  let payload;
+  if (payloadTemplate) {
+    try {
+      const rendered = await renderTemplateString(workspaceId, payloadTemplate, eventData);
+      payload = JSON.parse(rendered);
+    } catch (e) {
+      console.error('Failed to parse custom webhook payload template, falling back to default:', e);
+      payload = {
+        event: actionConfig?.eventName || eventType,
+        workspaceId,
+        data: eventData,
+        occurredAt: new Date().toISOString(),
+      };
+    }
+  } else {
+    payload = {
+      event: actionConfig?.eventName || eventType,
+      workspaceId,
+      data: eventData,
+      occurredAt: new Date().toISOString(),
+    };
+  }
 
   const rawBody = safeJsonStringify(payload);
   const timestamp = Math.floor(Date.now() / 1000).toString();

@@ -10,14 +10,17 @@ const handler = async (req, res) => {
   }
 
   const { workspaceSlug } = req.query;
-  const workspace = await getWorkspace(session.user.userId, session.user.email, workspaceSlug);
+  const userId = session.user.userId || session.user.id;
+  const workspace = await getWorkspace(userId, session.user.email, workspaceSlug);
 
   if (!workspace) {
     return res.status(404).json({ error: 'Workspace not found' });
   }
 
   const isOwner = isWorkspaceOwner(session.user.email, workspace);
-  if (!isOwner) {
+  const isSuperAdmin = session.user.role === 'SUPERADMIN';
+  
+  if (!isOwner && !isSuperAdmin) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
@@ -34,7 +37,7 @@ const handler = async (req, res) => {
     const apiKey = await createApiKey(workspace.id, name);
     await createAuditActivity(
       workspace.id,
-      session.user.userId,
+      userId,
       {
         action: 'API_KEY_CREATE',
         title: 'API key created',

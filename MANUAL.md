@@ -130,6 +130,57 @@ Visualize o status de saúde da aplicação em tempo real:
 
 ---
 
+## 🚀 Funcionalidades No-Code (Automações e Personalização)
+
+O Nextacular foi projetado para permitir que você personalize o CRM e automatize processos sem escrever uma única linha de código.
+
+### 1. Campos Personalizados (Custom Fields)
+Você pode estender os dados padrão de Contatos e Negócios para atender às necessidades específicas do seu negócio.
+
+- **Tipos de Campos**: Texto, Número, Data, Seleção Única/Múltipla, Moeda e Área de Texto.
+- **Variáveis Dinâmicas**: Use o valor desses campos em qualquer template de mensagem ou tarefa usando a sintaxe `{{contact.customFields.nome_do_campo}}`.
+- **Escopo**: Defina se o campo deve aparecer apenas em Contatos, apenas em Negócios (Deals) ou em ambos.
+
+> [!TIP]
+> **Dica de Uso**: Crie um campo "Score do Lead" para priorizar contatos automaticamente via automações baseadas no valor inserido.
+
+### 2. Motor de Automações
+Localizado em **Configurações > Automações**, este módulo permite criar regras "Se ISSO acontecer, ENTÃO faça AQUILO".
+
+#### Gatilhos (Quando disparar?)
+- **Mensagem Recebida**: Dispara quando um contato envia uma mensagem via WhatsApp, Instagram ou Email.
+- **Tag Adicionada**: Quando você (ou o sistema) aplica uma etiqueta a um contato.
+- **Mudança de Estágio**: Quando um negócio é movido de uma coluna para outra no Funil.
+- **Quebra de SLA**: Dispara se um cliente ficar sem resposta por mais de 15 minutos.
+- **Inatividade**: Dispara se o cliente não responder após um determinado número de dias.
+
+#### Ações (O que fazer?)
+- **Enviar Mensagem (WhatsApp/Email)**: Envie respostas automáticas baseadas em templates.
+- **Resposta com IA (Autopilot)**: O sistema usa o contexto da sua empresa para responder de forma inteligente.
+- **Mover Negócio**: Avance ou retorne um negócio no funil automaticamente.
+- **Criar Tarefa**: Gere pendências fixas para a equipe (ex: "Ligar para cliente urgente").
+- **Distribuir Lead**: Atribua o contato automaticamente a um membro disponível da equipe.
+- **Notificar Equipe**: Envie alertas internos para garantir que ninguém perca uma oportunidade.
+- **Ações em Massa**: Configure sequências de ações com atrasos (ex: Esperar 2 horas e então enviar e-mail).
+
+> [!IMPORTANT]
+> **Simulação**: Antes de ativar uma regra para todos os clientes, utilize o botão **"Simular"** para testar se as condições e variáveis dinâmicas estão funcionando como esperado.
+
+---
+
+## 🔌 Integrações Avançadas e Zapier
+
+O Nextacular permite que você conecte o CRM a mais de 5.000 aplicativos através do Zapier ou Make.
+
+### Integração com Zapier vía Webhooks
+Não é necessário um "App" na loja do Zapier. Como o sistema é No-Code, ele se conecta via **Webhooks de Entrada**.
+
+1. No Zapier, crie um **Trigger** do tipo "Webhooks by Zapier" e selecione "Catch Webhook".
+2. Copie a URL gerada pelo Zapier.
+3. No Nextacular, crie uma **Automação** e escolha a ação **"Enviar para Webhook (Zapier)"**.
+4. Cole a URL do Zapier.
+5. Agora, sempre que o gatilho da automação ocorrer, os dados completos do contato e do negócio serão enviados para o Zapier em tempo real.
+
 ---
 
 ## 🔌 Guia de Integrações
@@ -140,7 +191,7 @@ Este guia detalha como conectar seus canais de comunicação externos ao Vysify.
 > 1. No menu superior, clique em **Área de Trabalho**
 > 2. Na barra lateral esquerda, clique em **INTEGRAÇÕES**
 
-### 1. WhatsApp Cloud API (Oficial)
+### 1. WhatsApp Cloud API (Official)
 Para conectar seu WhatsApp, você deve utilizar a API oficial da Meta.
 
 **Etapa 1 — Configuração na Meta (developers.facebook.com):**
@@ -207,11 +258,12 @@ Sincronize seu histórico de e-mails corporativos.
 
 ## 🛠 Funcionalidades Técnicas (Para Desenvolvedores)
 
-- **Tech Stack**: Next.js, Prisma, PostgreSQL, Tailwind CSS.
-- **API**: O projeto possui endpoints de API organizados em `src/pages/api`.
-- **Validação**: Todas as entradas de API são validadas para garantir segurança.
+- **Tech Stack**: Next.js 13, Prisma, PostgreSQL, Tailwind CSS.
+- **Banco de Dados**: Uso de JSONb para alta performance em campos dinâmicos.
+- **API**: Endpoints documentados em `src/pages/api`.
+- **Segurança**: Validação rigorosa de sessões e rate limiting em todas as rotas sensíveis.
 - **Internacionalização (i18n)**: Suporte nativo a múltiplos idiomas.
 
 ---
 
-*Este manual reflete a versão atual do sistema, incluindo o Dashboard e Inbox (UI).*
+*Este manual reflete a versão atual do sistema, incluindo o Dashboard, Inbox e o motor de Automações No-Code.*

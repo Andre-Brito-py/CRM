@@ -43,3 +43,40 @@ export const deleteApiKey = async (workspaceId, apiKeyId) => {
   
   return false;
 };
+
+export const verifyApiKey = async (key) => {
+  if (!key || typeof key !== 'string') return null;
+
+  const apiKey = await prisma.apiKey.findUnique({
+    where: { key },
+    include: {
+      workspace: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          creator: {
+            select: {
+              id: true,
+              email: true,
+              role: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!apiKey || !apiKey.workspace) return null;
+
+  return {
+    workspaceId: apiKey.workspaceId,
+    workspace: apiKey.workspace,
+    user: {
+      id: apiKey.workspace.creator.id,
+      userId: apiKey.workspace.creator.id,
+      email: apiKey.workspace.creator.email,
+      role: apiKey.workspace.creator.role,
+    },
+  };
+};
