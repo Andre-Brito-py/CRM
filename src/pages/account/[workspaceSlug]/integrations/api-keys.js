@@ -36,7 +36,10 @@ const ApiKeys = () => {
         setIsAdding(false);
         mutate(`/api/workspace/${workspaceSlug}/api-keys`);
       } else {
-        throw new Error(response.error || 'Failed to create API key');
+        const errorMsg = typeof response.error === 'object' 
+          ? (response.error.msg || response.error.message || JSON.stringify(response.error))
+          : response.error;
+        throw new Error(errorMsg || 'Failed to create API key');
       }
     } catch (err) {
       toast.error(err.message);
