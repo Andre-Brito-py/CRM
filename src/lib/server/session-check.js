@@ -16,10 +16,12 @@ const validateMiddleware = () => {
     if (!session) {
       let key = null;
       const authHeader = req.headers.authorization;
-      
       if (authHeader && authHeader.startsWith('Bearer ')) {
-        key = authHeader.split(' ')[1].trim();
-      } else if (req.query.api_key) {
+        const potentialKey = authHeader.split(' ')[1]?.trim();
+        if (potentialKey) key = potentialKey;
+      }
+      
+      if (!key && req.query.api_key) {
         key = req.query.api_key.trim();
       }
 
