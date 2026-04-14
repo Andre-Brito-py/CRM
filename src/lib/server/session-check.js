@@ -20,7 +20,7 @@ const validateMiddleware = () => {
       if (authHeader && authHeader.startsWith('Bearer ')) {
         key = authHeader.split(' ')[1].trim();
       } else if (req.query.api_key) {
-        key = req.query.api_key;
+        key = req.query.api_key.trim();
       }
 
       if (key) {
