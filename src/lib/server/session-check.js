@@ -11,12 +11,19 @@ const validateMiddleware = () => {
     // 1. Try Session Authentication (Cookie)
     const session = await getServerSession(req, res, await getAuthOptions(req));
 
-    // 2. Try API Key Authentication (Header)
+    // 2. Try API Key Authentication (Header or Query)
     let apiSession = null;
     if (!session) {
+      let key = null;
       const authHeader = req.headers.authorization;
+      
       if (authHeader && authHeader.startsWith('Bearer ')) {
-        const key = authHeader.split(' ')[1];
+        key = authHeader.split(' ')[1].trim();
+      } else if (req.query.api_key) {
+        key = req.query.api_key;
+      }
+
+      if (key) {
         const { verifyApiKey } = await import('@/prisma/services/api-key');
         const validation = await verifyApiKey(key);
         
