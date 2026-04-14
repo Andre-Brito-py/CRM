@@ -1,15 +1,13 @@
 import prisma from '@/prisma/index';
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import { getWorkspace, isWorkspaceOwner } from '@/prisma/services/workspace';
 import { deleteApiKey } from '@/prisma/services/api-key';
 import { createAuditActivity } from '@/prisma/services/activity';
 
 const handler = async (req, res) => {
   try {
-    const session = await getSession({ req });
-    if (!session) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+    const session = await validateSession(req, res);
+    if (!session) return;
 
     const { workspaceSlug, keyId } = req.query;
     const userId = session.user.userId || session.user.id;
