@@ -1821,7 +1821,10 @@ const executeSendNpsAction = async (workspaceId, actionConfig, eventData) => {
   }
 };
 const executeUpdateCustomFieldAction = async (workspaceId, actionConfig, eventData) => {
-  const { fieldName, fieldValue, targetType } = actionConfig; // targetType: 'CONTACT' or 'DEAL'
+  const { targetType } = actionConfig; // targetType: 'CONTACT' or 'DEAL'
+  const fieldName = actionConfig.fieldName || actionConfig.customFieldKey;
+  const fieldValue = actionConfig.fieldValue !== undefined ? actionConfig.fieldValue : actionConfig.customFieldValue;
+  
   if (!fieldName) {
     console.warn('Missing fieldName for UPDATE_CUSTOM_FIELD action');
     return;
