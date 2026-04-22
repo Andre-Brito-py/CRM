@@ -11,20 +11,27 @@ export const createCompany = async (workspaceId, { name, website, industry }) =>
   });
 };
 
-export const getCompanies = async (workspaceId) => {
+export const getCompanies = async (workspaceId, { take, skip } = {}) => {
   return await prisma.company.findMany({
     where: { workspaceId, deletedAt: null },
     orderBy: { createdAt: 'desc' },
+    ...(Number.isFinite(take) ? { take } : {}),
+    ...(Number.isFinite(skip) ? { skip } : {}),
     include: {
-      contacts: true,
-      deals: true,
+      contacts: { select: { id: true } }, // Lightweight include for count
+      _count: {
+        select: { contacts: true, deals: true },
+      },
     },
   });
 };
 
-export const getCompany = async (id) => {
+/**
+ * Get a single company — workspaceId enforces multi-tenant isolation.
+ */
+export const getCompany = async (id, workspaceId) => {
   return await prisma.company.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, workspaceId, deletedAt: null },
     include: {
       contacts: true,
       deals: {
@@ -36,16 +43,22 @@ export const getCompany = async (id) => {
   });
 };
 
-export const updateCompany = async (id, data) => {
-  return await prisma.company.update({
-    where: { id },
+/**
+ * Update a company — workspaceId enforces multi-tenant isolation.
+ */
+export const updateCompany = async (id, workspaceId, data) => {
+  return await prisma.company.updateMany({
+    where: { id, workspaceId },
     data,
   });
 };
 
-export const deleteCompany = async (id) => {
-  return await prisma.company.update({
-    where: { id },
-    data: { deletedAt: new Date() }
+/**
+ * Soft-delete a company — workspaceId enforces multi-tenant isolation.
+ */
+export const deleteCompany = async (id, workspaceId) => {
+  return await prisma.company.updateMany({
+    where: { id, workspaceId },
+    data: { deletedAt: new Date() },
   });
 };

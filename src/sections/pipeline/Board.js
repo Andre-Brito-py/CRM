@@ -7,8 +7,37 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BuildingOfficeIcon, UserCircleIcon, FireIcon, CurrencyDollarIcon, EllipsisHorizontalIcon } from '@heroicons/react/24/outline';
 import api from '@/lib/common/api';
 
-const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights, index }) => {
+const BoardColumn = ({ stage, deals: initialDeals, workspaceSlug, dealAiInsights, index, pipelineId }) => {
   const router = useRouter();
+  const [deals, setDeals] = useState(initialDeals);
+  const [page, setPage] = useState(1);
+  const [meta, setMeta] = useState({ hasMore: initialDeals.length === 50 }); // Assume hasMore if we hit initial limit
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Sync with props if they change (e.g. after drag and drop mutate)
+  useEffect(() => {
+    setDeals(initialDeals);
+    setPage(1);
+    setMeta({ hasMore: initialDeals.length === 50 });
+  }, [initialDeals]);
+
+  const loadMore = async () => {
+    if (isLoadingMore || !meta.hasMore) return;
+    setIsLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const response = await api(`/api/workspace/${workspaceSlug}/pipelines/${pipelineId}/stages/${stage.id}/deals?page=${nextPage}&pageSize=50`);
+      if (response.data?.deals) {
+        setDeals(prev => [...prev, ...response.data.deals]);
+        setPage(nextPage);
+        setMeta(response.data.meta);
+      }
+    } catch (error) {
+      console.error('Failed to load more deals:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   return (
     <motion.div 
@@ -27,7 +56,7 @@ const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights, index }) => 
         </div>
         <div className="flex items-center gap-2">
            <span className="bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-[9px] font-black px-4 py-2 rounded-2xl shadow-xl uppercase tracking-widest italic translate-y-[-4px]">
-             {deals.length}
+             {meta.total || deals.length}
            </span>
         </div>
       </div>
@@ -158,6 +187,26 @@ const BoardColumn = ({ stage, deals, workspaceSlug, dealAiInsights, index }) => 
                 </Draggable>
               ))}
             </AnimatePresence>
+
+            {meta.hasMore && (
+              <div className="py-8 text-center">
+                <button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className="px-6 py-3 bg-zinc-50 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-zinc-100 dark:border-zinc-700 hover:bg-white dark:hover:bg-zinc-700 transition-all disabled:opacity-50 italic group"
+                >
+                  {isLoadingMore ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 border-2 border-zinc-300 border-t-zinc-600 rounded-full animate-spin" />
+                      Loading Operations...
+                    </div>
+                  ) : (
+                    <span className="group-hover:text-indigo-600 transition-colors">Expand Data Stream</span>
+                  )}
+                </button>
+              </div>
+            )}
+
             {provided.placeholder}
           </div>
         )}
@@ -227,6 +276,7 @@ const PipelineBoard = ({ pipeline, workspaceSlug, dealAiInsights }) => {
             deals={stage.deals || []}
             workspaceSlug={workspaceSlug}
             dealAiInsights={dealAiInsights}
+            pipelineId={pipeline.id}
           />
         ))}
       </div>

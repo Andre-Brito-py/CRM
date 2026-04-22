@@ -1,0 +1,28 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-webhooks",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/automation-jobs",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/webhook-deliveries",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/check-sla",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/inactivity",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/media-retention",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

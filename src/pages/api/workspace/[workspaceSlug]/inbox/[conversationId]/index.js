@@ -38,13 +38,9 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET':
       try {
-        const conversation = await getConversation(conversationId);
+        const conversation = await getConversation(conversationId, workspace.id);
         if (!conversation) {
           return res.status(404).json({ error: { msg: 'Conversation not found' } });
-        }
-
-        if (conversation.workspaceId !== workspace.id) {
-          return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
         res.status(200).json({ data: { conversation } });
@@ -59,13 +55,9 @@ const handler = async (req, res) => {
       try {
         const { assigneeId, autopilotEnabled } = req.body || {};
 
-        const conversation = await getConversation(conversationId);
+        const conversation = await getConversation(conversationId, workspace.id);
         if (!conversation) {
           return res.status(404).json({ error: { msg: 'Conversation not found' } });
-        }
-
-        if (conversation.workspaceId !== workspace.id) {
-          return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
         const data = {};
@@ -77,7 +69,7 @@ const handler = async (req, res) => {
           data.autopilotEnabled = autopilotEnabled;
         }
 
-        const updated = await updateConversation(conversationId, data);
+        const updated = await updateConversation(conversationId, workspace.id, data);
 
         if (autopilotEnabled === true && !conversation.autopilotEnabled) {
           processAutomation(workspace.id, 'AUTOPILOT_ENABLED', {
@@ -110,13 +102,9 @@ const handler = async (req, res) => {
         const { direction, type, content, mediaUrl, status, externalId, quotedId } = req.body;
 
         // 1. Fetch conversation to check platform and get contact phone
-        const conversation = await getConversation(conversationId);
+        const conversation = await getConversation(conversationId, workspace.id);
         if (!conversation) {
           return res.status(404).json({ error: { msg: 'Conversation not found' } });
-        }
-
-        if (conversation.workspaceId !== workspace.id) {
-          return res.status(403).json({ error: { msg: 'Access denied' } });
         }
 
         let quotedExternalId = null;

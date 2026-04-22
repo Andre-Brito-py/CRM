@@ -178,16 +178,17 @@ export const createTemplate = async (workspaceId, { name, content }) => {
 };
 
 export const deleteTemplate = async (id, workspaceId) => {
-  return await prisma.messageTemplate.deleteMany({
+  const result = await prisma.messageTemplate.deleteMany({
     where: {
       id,
       workspaceId
     },
   });
+  return result.count > 0;
 };
 
 export const updateTemplate = async (id, workspaceId, { name, content }) => {
-  return await prisma.messageTemplate.updateMany({
+  await prisma.messageTemplate.updateMany({
     where: {
       id,
       workspaceId,
@@ -196,5 +197,8 @@ export const updateTemplate = async (id, workspaceId, { name, content }) => {
       name,
       content,
     },
+  });
+  return await prisma.messageTemplate.findFirst({
+    where: { id, workspaceId }
   });
 };

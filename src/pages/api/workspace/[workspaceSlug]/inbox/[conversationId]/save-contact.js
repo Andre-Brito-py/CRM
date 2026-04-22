@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     // 3. Create or Update the contact
     let contact;
     if (conversation.contactId) {
-      contact = await updateContact(conversation.contactId, {
+      contact = await updateContact(conversation.contactId, workspace.id, {
         name: name.trim(),
         email: email ? email.trim() : null,
         phone: phone,

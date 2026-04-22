@@ -1,5 +1,6 @@
 import { InvitationStatus } from '@prisma/client';
 import prisma from '@/prisma/index';
+import { createAuditLog } from '@/lib/server/audit';
 
 export const getMember = async (id) =>
   await prisma.member.findFirst({
@@ -79,17 +80,51 @@ export const getPendingInvitations = async (email) =>
     },
   });
 
-export const remove = async (id) =>
-  await prisma.member.update({
+export const remove = async (id, workspaceId, actorId) => {
+  const member = await prisma.member.findFirst({
+    where: { id, workspaceId, deletedAt: null },
+    select: { email: true }
+  });
+  if (!member) return null;
+
+  const result = await prisma.member.update({
     data: { deletedAt: new Date() },
     where: { id },
   });
 
-export const toggleRole = async (id, teamRole) =>
-  await prisma.member.update({
+  if (actorId) {
+    await createAuditLog(workspaceId, actorId, {
+      action: 'MEMBER_REMOVED',
+      title: `Member removed: ${member.email}`,
+      target: id,
+      metadata: { email: member.email }
+    });
+  }
+  return result;
+};
+
+export const toggleRole = async (id, workspaceId, teamRole, actorId) => {
+  const member = await prisma.member.findFirst({
+    where: { id, workspaceId, deletedAt: null },
+    select: { email: true, teamRole: true }
+  });
+  if (!member) return null;
+
+  const result = await prisma.member.update({
     data: { teamRole },
     where: { id },
   });
+
+  if (actorId) {
+    await createAuditLog(workspaceId, actorId, {
+      action: 'MEMBER_ROLE_UPDATED',
+      title: `Member ${member.email} role changed from ${member.teamRole} to ${teamRole}`,
+      target: id,
+      metadata: { email: member.email, oldRole: member.teamRole, newRole: teamRole }
+    });
+  }
+  return result;
+};
 
 export const updateStatus = async (id, status) =>
   await prisma.member.update({

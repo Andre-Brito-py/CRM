@@ -13,10 +13,18 @@ import AddCompanyModal from '@/sections/companies/AddCompanyModal';
 const Companies = () => {
   const { t } = useTranslation();
   const { workspace } = useWorkspace();
-  const { data, isLoading } = useCompanies(workspace?.slug);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+
+  const { data, isLoading } = useCompanies(workspace?.slug, { page, pageSize });
   const [isModalOpen, setModalOpen] = useState(false);
 
   const toggleModal = () => setModalOpen(!isModalOpen);
+  const meta = data?.meta || null;
+  const companies = data?.companies || [];
+
+  const canGoPrev = page > 1;
+  const canGoNext = Boolean(meta?.hasMore);
 
   const companySteps = [
     {
@@ -88,7 +96,7 @@ const Companies = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800/50">
-                  {data.companies.map((company, idx) => (
+                  {companies.map((company, idx) => (
                     <motion.tr 
                       key={company.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -138,7 +146,9 @@ const Companies = () => {
                       <td className="px-10 py-8 whitespace-nowrap text-center">
                         <div className="inline-flex items-center justify-center gap-3 px-5 py-2 bg-zinc-50 dark:bg-zinc-950 rounded-xl border border-zinc-100 dark:border-zinc-800 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
                           <UsersIcon className="w-4 h-4" />
-                          <span className="text-[12px] font-black italic tabular-nums">{company.contacts?.length || 0}</span>
+                          <span className="text-[12px] font-black italic tabular-nums">
+                            {company._count?.contacts || company.contacts?.length || 0}
+                          </span>
                         </div>
                       </td>
                     </motion.tr>
@@ -146,6 +156,45 @@ const Companies = () => {
                 </tbody>
               </table>
             </div>
+
+            {meta && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-8 p-10 border-t border-zinc-100 dark:border-zinc-800/50">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic mb-1">BUSINESS DIRECTORY STREAM</span>
+                  <div className="text-[13px] font-medium text-zinc-500 italic tracking-tight">
+                    Showing Page <span className="text-zinc-950 dark:text-white font-black">{meta.page}</span> of <span className="text-zinc-950 dark:text-white font-black">{meta.totalPages}</span> • {meta.total} Strategic Entities
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    className="px-8 py-4 rounded-[1.5rem] vysify-glass text-[11px] font-black uppercase tracking-[0.2em] italic border border-zinc-100 dark:border-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    disabled={!canGoPrev}
+                    onClick={() => {
+                      setPage((p) => Math.max(1, p - 1));
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Previous
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    type="button"
+                    className="px-8 py-4 rounded-[1.5rem] bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 text-[11px] font-black uppercase tracking-[0.2em] italic disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-xl"
+                    disabled={!canGoNext}
+                    onClick={() => {
+                      setPage((p) => p + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
+                    Next
+                  </motion.button>
+                </div>
+              </div>
+            )}
           </motion.div>
         ) : (
           <div className="py-32 flex flex-col items-center justify-center text-center relative overflow-hidden group">

@@ -32,7 +32,7 @@ export const getPipelines = async (workspaceId) => {
           deals: {
             orderBy: { createdAt: 'desc' },
             where: { deletedAt: null },
-            take: 200,
+            take: 50,
             include: {
               company: true,
               contact: true,

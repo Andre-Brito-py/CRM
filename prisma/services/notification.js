@@ -49,9 +49,9 @@ export const markAllAsRead = async (workspaceId, userId) => {
   });
 };
 
-export const markAsRead = async (id) => {
-  return await prisma.notification.update({
-    where: { id },
+export const markAsRead = async (id, workspaceId, userId) => {
+  return await prisma.notification.updateMany({
+    where: { id, workspaceId, userId },
     data: { isRead: true },
   });
 };

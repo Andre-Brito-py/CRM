@@ -1,9 +1,15 @@
 import prisma from '@/prisma/index';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
   if (req.method !== 'GET') {
     res.status(405).json({ error: { msg: 'Method Unsupported' } });
     return;
+  }
+
+  const rl = await rateLimit({ req, limit: 120, windowMs: 60_000 });
+  if (!rl.ok) {
+    return res.status(429).json({ error: { msg: 'Too Many Requests' } });
   }
 
   try {

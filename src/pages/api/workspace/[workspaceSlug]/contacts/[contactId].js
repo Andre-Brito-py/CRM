@@ -33,8 +33,8 @@ export default async function handler(req, res) {
 
   switch (req.method) {
     case 'GET': {
-      const contact = await getContact(contactId);
-      if (!contact || contact.workspaceId !== workspace.id) {
+      const contact = await getContact(contactId, workspace.id);
+      if (!contact) {
         res.status(404).json({ error: { msg: 'Contact not found' } });
         return;
       }
@@ -42,9 +42,15 @@ export default async function handler(req, res) {
       break;
     }
     case 'PUT': {
-      const { tags, ...data } = req.body;
+      // Verify ownership first
+      const existing = await getContact(contactId, workspace.id);
+      if (!existing) {
+        res.status(404).json({ error: { msg: 'Contact not found' } });
+        return;
+      }
 
-      const contact = await updateContact(contactId, {
+      const { tags, ...data } = req.body;
+      const contact = await updateContact(contactId, workspace.id, {
         ...data,
         ...(tags ? { tags } : {}),
       });
@@ -67,7 +73,13 @@ export default async function handler(req, res) {
       break;
     }
     case 'DELETE': {
-      await deleteContact(contactId);
+      // Verify ownership before delete
+      const existing = await getContact(contactId, workspace.id);
+      if (!existing) {
+        res.status(404).json({ error: { msg: 'Contact not found' } });
+        return;
+      }
+      await deleteContact(contactId, workspace.id);
       res.status(200).json({ data: { msg: 'Contact deleted' } });
       break;
     }

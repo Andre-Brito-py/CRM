@@ -155,9 +155,12 @@ export const createConversation = async (workspaceId, { contactId, platform, ext
   });
 };
 
-export const getConversation = async (id) => {
-  const conversation = await prisma.conversation.findUnique({
-    where: { id },
+/**
+ * Get a single conversation — workspaceId is REQUIRED to enforce multi-tenant isolation.
+ */
+export const getConversation = async (id, workspaceId) => {
+  const conversation = await prisma.conversation.findFirst({
+    where: { id, workspaceId },
     include: {
       contact: true,
       assignee: {
@@ -179,7 +182,17 @@ export const getConversation = async (id) => {
   return enrichConversationContact(conversation);
 };
 
-export const updateConversation = async (id, data) => {
+/**
+ * Update a conversation — workspaceId enforces that only the owning workspace can update.
+ */
+export const updateConversation = async (id, workspaceId, data) => {
+  // Verify ownership before update since updateMany doesn't return the object
+  const existing = await prisma.conversation.findFirst({
+    where: { id, workspaceId },
+    select: { id: true },
+  });
+  if (!existing) return null;
+
   const conversation = await prisma.conversation.update({
     where: { id },
     data,

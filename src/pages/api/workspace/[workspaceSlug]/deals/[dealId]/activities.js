@@ -34,6 +34,16 @@ export default async function handler(req, res) {
       return;
     }
 
+    // Verify deal belongs to workspace
+    const deal = await prisma.deal.findFirst({
+      where: { id: dealId, workspaceId: workspace.id, deletedAt: null },
+    });
+
+    if (!deal) {
+      res.status(404).json({ error: { msg: 'Deal not found' } });
+      return;
+    }
+
     try {
       const activity = await prisma.activity.create({
         data: {

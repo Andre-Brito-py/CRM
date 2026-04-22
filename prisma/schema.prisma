@@ -1242,3 +1242,20 @@ model SupportMessage {
   @@index([ticketId, createdAt])
   @@map("support_messages")
 }
+
+// Queue for async processing of inbound webhook events (WhatsApp, Instagram, etc.)
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String   // 'WHATSAPP', 'INSTAGRAM'
+  workspaceId String
+  payload     Json
+  status      String   @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED
+  attempts    Int      @default(0)
+  lastError   String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@index([provider, status])
+  @@map("webhook_events")
+}

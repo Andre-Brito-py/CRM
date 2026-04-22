@@ -22,9 +22,42 @@ const handler = async (req, res) => {
   switch (method) {
     case 'GET':
       try {
+        const parsePositiveInt = (value) => {
+          const n = Number.parseInt(String(value || ''), 10);
+          if (!Number.isFinite(n) || n <= 0) return null;
+          return n;
+        };
+
+        const page = parsePositiveInt(req.query.page);
+        const pageSizeRaw = parsePositiveInt(req.query.pageSize);
+        const pageSize = pageSizeRaw ? Math.min(100, pageSizeRaw) : null;
+
+        if (page && pageSize) {
+          const skip = (page - 1) * pageSize;
+          const [companies, total] = await Promise.all([
+            getCompanies(workspace.id, { take: pageSize, skip }),
+            prisma.company.count({ where: { workspaceId: workspace.id, deletedAt: null } }),
+          ]);
+
+          const totalPages = total > 0 ? Math.ceil(total / pageSize) : 1;
+          return res.status(200).json({
+            data: {
+              companies,
+              meta: {
+                page,
+                pageSize,
+                total,
+                totalPages,
+                hasMore: page < totalPages,
+              },
+            },
+          });
+        }
+
         const companies = await getCompanies(workspace.id);
         res.status(200).json({ data: { companies } });
       } catch (error) {
+        console.error('getCompanies error:', error);
         res.status(500).json({ error: { msg: 'Unable to fetch companies' } });
       }
       break;

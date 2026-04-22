@@ -1,7 +1,13 @@
 import { validateSession } from '@/config/api-validation';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const handler = async (req, res) => {
   try {
+    const rl = await rateLimit({ req, limit: 60, windowMs: 60_000 });
+    if (!rl.ok) {
+      return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+    }
+
     const session = await validateSession(req, res);
     if (!session) return; // validateSession automagicamente retorna 401 se falhar
 

@@ -1,4 +1,5 @@
 import { getSystemConfig } from '@/lib/server/config';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 const ALLOWED_KEYS = new Set([
   'STRIPE_PUBLISHABLE_KEY',
@@ -24,6 +25,11 @@ export default async function handler(req, res) {
     res.setHeader('Allow', ['GET']);
     res.status(405).json({ error: { msg: 'Method not allowed' } });
     return;
+  }
+
+  const rl = await rateLimit({ req, limit: 120, windowMs: 60_000 });
+  if (!rl.ok) {
+    return res.status(429).json({ error: { msg: 'Too Many Requests' } });
   }
 
   const requested = parseKeys(req.query?.keys);

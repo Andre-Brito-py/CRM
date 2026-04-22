@@ -72,10 +72,14 @@ export const getTasks = async (workspaceId, filters = {}) => {
   });
 };
 
-export const getTask = async (id) => {
+/**
+ * Get a single task — workspaceId enforces multi-tenant isolation.
+ */
+export const getTask = async (id, workspaceId) => {
   return await prisma.task.findFirst({
     where: {
       id,
+      workspaceId,
       deletedAt: null,
     },
     include: {
@@ -105,16 +109,22 @@ export const getTask = async (id) => {
   });
 };
 
-export const updateTask = async (id, data) => {
-  return await prisma.task.update({
-    where: { id },
+/**
+ * Update a task — workspaceId enforces multi-tenant isolation.
+ */
+export const updateTask = async (id, workspaceId, data) => {
+  return await prisma.task.updateMany({
+    where: { id, workspaceId },
     data,
   });
 };
 
-export const deleteTask = async (id) => {
-  return await prisma.task.update({
-    where: { id },
+/**
+ * Soft-delete a task — workspaceId enforces multi-tenant isolation.
+ */
+export const deleteTask = async (id, workspaceId) => {
+  return await prisma.task.updateMany({
+    where: { id, workspaceId },
     data: { deletedAt: new Date() },
   });
 };

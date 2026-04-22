@@ -1,10 +1,15 @@
 import prisma from '@/prisma/index';
+import { rateLimit } from '@/lib/server/rateLimit';
+
 // Public API for fetching and submitting a WebForm
 
 export default async function handler(req, res) {
   const { slug } = req.query;
 
   if (req.method === 'GET') {
+    const rl = await rateLimit({ req, limit: 60, windowMs: 60_000 });
+    if (!rl.ok) return res.status(429).json({ error: { msg: 'Too Many Requests' } });
+
     try {
       const webForm = await prisma.webForm.findUnique({
         where: { slug },
@@ -25,6 +30,9 @@ export default async function handler(req, res) {
       res.status(500).json({ error: { msg: 'Error loading form' } });
     }
   } else if (req.method === 'POST') {
+    const rl = await rateLimit({ req, limit: 10, windowMs: 60_000 });
+    if (!rl.ok) return res.status(429).json({ error: { msg: 'Too Many Requests. Please try again in a minute.' } });
+
     try {
       const webForm = await prisma.webForm.findUnique({
         where: { slug },

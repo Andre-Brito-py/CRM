@@ -1,5 +1,6 @@
 import prisma from '@/prisma/index';
 import { processAutomation } from '@/prisma/services/automation';
+import { createAuditLog } from '@/lib/server/audit';
 
 export const createDeal = async (workspaceId, { name, amount, closeDate, stageId, contactId, companyId, userId, priority = 'MEDIUM', customFields }) => {
   const deal = await prisma.deal.create({
@@ -59,9 +60,12 @@ export const getDeals = async (workspaceId, options = {}) => {
   });
 };
 
-export const getDeal = async (id) => {
+/**
+ * Get a single deal — workspaceId enforces multi-tenant isolation.
+ */
+export const getDeal = async (id, workspaceId) => {
   return await prisma.deal.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, workspaceId, deletedAt: null },
     include: {
       contact: true,
       company: true,
@@ -85,17 +89,23 @@ export const getDeal = async (id) => {
   });
 };
 
-export const updateDeal = async (id, data) => {
+/**
+ * Update a deal — workspaceId enforces multi-tenant isolation.
+ * Uses updateMany so it returns count 0 if workspaceId mismatches (no error thrown).
+ */
+export const updateDeal = async (id, workspaceId, data) => {
   if (data.closeDate) {
     data.closeDate = new Date(data.closeDate);
   }
 
-  // Fetch current deal state if stageId is being updated
-  let currentDeal = null;
-  if (data.stageId) {
-    currentDeal = await prisma.deal.findUnique({ where: { id } });
-  }
+  // 1. Verify ownership (Always do this!)
+  const existing = await prisma.deal.findFirst({ 
+    where: { id, workspaceId, deletedAt: null },
+    select: { id: true, stageId: true, workspaceId: true }
+  });
+  if (!existing) return null;
 
+  // 2. Perform update
   const updatedDeal = await prisma.deal.update({
     where: { id },
     data,
@@ -112,7 +122,7 @@ export const updateDeal = async (id, data) => {
   });
 
   // Trigger automation: DEAL_STAGE_CHANGED if stageId changed
-  if (data.stageId && currentDeal && currentDeal.stageId !== data.stageId) {
+  if (data.stageId && existing.stageId !== data.stageId) {
     processAutomation(updatedDeal.workspaceId, 'DEAL_STAGE_CHANGED', updatedDeal).catch(err =>
       console.error('Error triggering automation:', err)
     );
@@ -121,7 +131,14 @@ export const updateDeal = async (id, data) => {
   return updatedDeal;
 };
 
-export const updateDealStage = async (id, stageId) => {
+/**
+ * Update deal stage — workspaceId enforces multi-tenant isolation.
+ */
+export const updateDealStage = async (id, workspaceId, stageId) => {
+  // Verify ownership before update
+  const existing = await prisma.deal.findFirst({ where: { id, workspaceId } });
+  if (!existing) return null;
+
   const updatedDeal = await prisma.deal.update({
     where: { id },
     data: { stageId },
@@ -139,9 +156,22 @@ export const updateDealStage = async (id, stageId) => {
   return updatedDeal;
 };
 
-export const deleteDeal = async (id) => {
-  return await prisma.deal.update({
-    where: { id },
-    data: { deletedAt: new Date() }
+/**
+ * Soft-delete a deal — workspaceId enforces multi-tenant isolation.
+ */
+export const deleteDeal = async (id, workspaceId, actorId) => {
+  const result = await prisma.deal.updateMany({
+    where: { id, workspaceId },
+    data: { deletedAt: new Date() },
   });
+
+  if (result.count > 0 && actorId) {
+    await createAuditLog(workspaceId, actorId, {
+      action: 'DEAL_DELETED',
+      title: `Deal deleted: ${id}`,
+      target: id,
+    });
+  }
+
+  return result;
 };

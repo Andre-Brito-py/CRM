@@ -54,11 +54,12 @@ export const getContacts = async (workspaceId, { take, skip } = {}) => {
 };
 
 /**
- * Get a single contact with full details — only called on the contact detail page.
+ * Get a single contact with full details.
+ * workspaceId is REQUIRED to enforce multi-tenant isolation.
  */
-export const getContact = async (id) => {
+export const getContact = async (id, workspaceId) => {
   return await prisma.contact.findFirst({
-    where: { id, deletedAt: null },
+    where: { id, workspaceId, deletedAt: null },
     include: {
       company: true,
       deals: {
@@ -91,7 +92,18 @@ export const getContact = async (id) => {
   });
 };
 
-export const updateContact = async (id, data) => {
+/**
+ * Update a contact — workspaceId enforces that only the owning workspace can update.
+ */
+export const updateContact = async (id, workspaceId, data) => {
+  // 1. Verify ownership
+  const existing = await prisma.contact.findFirst({
+    where: { id, workspaceId, deletedAt: null },
+    select: { id: true }
+  });
+  if (!existing) return null;
+
+  // 2. Perform update
   return await prisma.contact.update({
     where: { id },
     data,
@@ -107,9 +119,12 @@ export const updateContact = async (id, data) => {
   });
 };
 
-export const deleteContact = async (id) => {
-  return await prisma.contact.update({ 
-    where: { id },
-    data: { deletedAt: new Date() }
+/**
+ * Soft-delete a contact — workspaceId enforces that only the owning workspace can delete.
+ */
+export const deleteContact = async (id, workspaceId) => {
+  return await prisma.contact.updateMany({
+    where: { id, workspaceId },
+    data: { deletedAt: new Date() },
   });
 };

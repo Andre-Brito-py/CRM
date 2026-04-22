@@ -17,15 +17,15 @@ export const createTag = async (workspaceId, { name, color }) => {
   });
 };
 
-export const deleteTag = async (id) => {
-  return await prisma.tag.delete({
-    where: { id },
+export const deleteTag = async (id, workspaceId) => {
+  return await prisma.tag.deleteMany({
+    where: { id, workspaceId },
   });
 };
 
-export const updateTag = async (id, { name, color }) => {
-  return await prisma.tag.update({
-    where: { id },
+export const updateTag = async (id, workspaceId, { name, color }) => {
+  return await prisma.tag.updateMany({
+    where: { id, workspaceId },
     data: {
       name,
       color,

@@ -205,6 +205,12 @@ export const listBridgesForWorkspace = async (workspaceId) => {
 };
 
 export const createBridgeBetweenWorkspaces = async ({ name, createdById, workspaceId, otherWorkspaceId }) => {
+  // 1. Verify that creator is member of the primary workspace
+  const member = await prisma.member.findFirst({
+    where: { workspaceId, member: { id: createdById }, deletedAt: null },
+  });
+  if (!member) throw new Error('Unauthorized');
+
   const normalizedName = String(name || '').trim() || 'Conexão';
 
   return await prisma.internalChatBridge.create({

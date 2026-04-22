@@ -99,13 +99,16 @@ const handler = async (req, res) => {
     case 'PUT':
       try {
         const { id, ...data } = req.body;
-        const updatedDeal = await updateDeal(id, data);
+        // The service now enforces workspaceId check
+        const updatedDeal = await updateDeal(id, workspace.id, data);
 
-        await createActivity(workspace.id, session.user.userId, {
-          type: 'DEAL_UPDATED',
-          title: `Deal updated`,
-          dealId: id,
-        });
+        if (updatedDeal) {
+          await createActivity(workspace.id, session.user.userId, {
+            type: 'DEAL_UPDATED',
+            title: `Deal updated`,
+            dealId: id,
+          });
+        }
 
         res.status(200).json({ data: { deal: updatedDeal } });
       } catch (error) {

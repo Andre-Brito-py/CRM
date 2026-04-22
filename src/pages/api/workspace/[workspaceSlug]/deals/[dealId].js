@@ -32,8 +32,8 @@ export default async function handler(req, res) {
 
   switch (req.method) {
     case 'GET': {
-      const deal = await getDeal(dealId);
-      if (!deal || deal.workspaceId !== workspace.id) {
+      const deal = await getDeal(dealId, workspace.id);
+      if (!deal) {
         res.status(404).json({ error: { msg: 'Deal not found' } });
         return;
       }
@@ -41,24 +41,24 @@ export default async function handler(req, res) {
       break;
     }
     case 'PUT': {
-      const deal = await getDeal(dealId);
-      if (!deal || deal.workspaceId !== workspace.id) {
+      const deal = await getDeal(dealId, workspace.id);
+      if (!deal) {
         res.status(404).json({ error: { msg: 'Deal not found' } });
         return;
       }
 
-      const updatedDeal = await updateDeal(dealId, req.body);
+      const updatedDeal = await updateDeal(dealId, workspace.id, req.body);
       res.status(200).json({ data: { deal: updatedDeal } });
       break;
     }
     case 'DELETE': {
-      const deal = await getDeal(dealId);
-      if (!deal || deal.workspaceId !== workspace.id) {
+      const deal = await getDeal(dealId, workspace.id);
+      if (!deal) {
         res.status(404).json({ error: { msg: 'Deal not found' } });
         return;
       }
 
-      await deleteDeal(dealId);
+      await deleteDeal(dealId, workspace.id);
       res.status(200).json({ data: { msg: 'Deal deleted' } });
       break;
     }

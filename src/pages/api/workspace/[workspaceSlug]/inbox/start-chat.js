@@ -4,10 +4,18 @@ import prisma from '@/prisma/index';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { log, reportError } from '@/lib/server/logger';
 import { normalizeWhatsAppNumber } from '@/lib/server/phone';
+import { rateLimit } from '@/lib/server/rateLimit';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: { msg: 'Method not supported' } });
+  }
+
+  // Rate Limiting: 10 requests per minute per workspace
+  const { workspaceSlug } = req.query;
+  const rl = await rateLimit({ req, key: `start-chat:${workspaceSlug}`, limit: 10, windowMs: 60000 });
+  if (!rl.ok) {
+    return res.status(429).json({ error: { msg: 'Too many requests. Please wait a minute.' } });
   }
 
   const session = await getServerSession(req, res, authOptions);
@@ -15,7 +23,6 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: { msg: 'Unauthorized' } });
   }
 
-  const { workspaceSlug } = req.query;
   const { phone, templateName, languageCode = 'pt_BR' } = req.body || {};
 
   if (!phone || !templateName) {

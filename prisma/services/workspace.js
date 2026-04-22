@@ -11,6 +11,7 @@ import {
 } from '@/config/email-templates/invitation';
 import { sendMail } from '@/lib/server/mail';
 import prisma from '@/prisma/index';
+import { createAuditLog } from '@/lib/server/audit';
 
 export const countWorkspaces = async (slug) =>
   await prisma.workspace.count({
@@ -164,6 +165,14 @@ export const deleteWorkspace = async (id, email, slug) => {
       await tx.workspace.update({
         data: { deletedAt: now, name: 'Deleted workspace', customFieldDefinitions: null },
         where: { id: workspace.id },
+      });
+
+      // Audit log (outside transaction for reliability if needed, but here inside is fine)
+      await createAuditLog(workspace.id, id, {
+        action: 'WORKSPACE_DELETED',
+        title: `Workspace deleted: ${slug}`,
+        target: workspace.id,
+        metadata: { slug }
       });
     });
     return slug;
@@ -482,6 +491,14 @@ export const updateSlug = async (id, email, newSlug, pathSlug) => {
       data: { slug },
       where: { id: workspace.id },
     });
+
+    await createAuditLog(workspace.id, id, {
+      action: 'WORKSPACE_SLUG_UPDATED',
+      title: `Workspace slug changed from ${pathSlug} to ${slug}`,
+      target: workspace.id,
+      metadata: { oldSlug: pathSlug, newSlug: slug }
+    });
+
     return slug;
   } else {
     throw new Error('Unable to find workspace');

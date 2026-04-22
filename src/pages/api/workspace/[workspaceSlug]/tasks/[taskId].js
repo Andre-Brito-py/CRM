@@ -19,9 +19,8 @@ const handler = async (req, res) => {
     return res.status(404).json({ error: { msg: 'Workspace not found or permission denied' } });
   }
 
-  const task = await getTask(taskId);
-
-  if (!task || task.workspaceId !== workspace.id) {
+  const task = await getTask(taskId, workspace.id);
+  if (!task) {
     return res.status(404).json({ error: { msg: 'Task not found' } });
   }
 
@@ -34,7 +33,7 @@ const handler = async (req, res) => {
       try {
         const { title, content, dueDate, priority, isCompleted, assigneeId, contactId, dealId } = req.body;
 
-        const updatedTask = await updateTask(taskId, {
+        await updateTask(taskId, workspace.id, {
           title,
           content,
           dueDate: dueDate ? new Date(dueDate) : undefined,
@@ -45,6 +44,8 @@ const handler = async (req, res) => {
           dealId,
         });
 
+        // Refetch for response since updateMany returns count
+        const updatedTask = await getTask(taskId, workspace.id);
         res.status(200).json({ data: { task: updatedTask } });
       } catch (error) {
         console.error(error);
@@ -54,7 +55,7 @@ const handler = async (req, res) => {
 
     case 'DELETE':
       try {
-        await deleteTask(taskId);
+        await deleteTask(taskId, workspace.id);
         res.status(200).json({ data: { msg: 'Task deleted successfully' } });
       } catch (error) {
         console.error(error);
