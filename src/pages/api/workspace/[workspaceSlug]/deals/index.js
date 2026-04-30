@@ -77,9 +77,9 @@ const handler = async (req, res) => {
           amount: amount ? parseFloat(amount) : null,
           closeDate: closeDate ? new Date(closeDate) : null,
           priority,
-          contactId,
-          companyId,
-          userId,
+          contactId: contactId || null,
+          companyId: companyId || null,
+          userId: userId || null,
           customFields
         });
 
