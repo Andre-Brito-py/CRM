@@ -407,7 +407,7 @@ export const inviteUsers = async (id, email, members, slug) => {
       }),
       sendMail({
         html: inviteHtml({ code: workspace.inviteCode, name: workspace.name }),
-        subject: `[Nextacular] You have been invited to join ${workspace.name} workspace`,
+        subject: `[Vysify] You have been invited to join ${workspace.name} workspace`,
         text: inviteText({ code: workspace.inviteCode, name: workspace.name }),
         to: members.map((member) => member.email),
       }),

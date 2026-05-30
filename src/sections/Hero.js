@@ -53,7 +53,7 @@ const Hero = ({ hasFreePlan }) => {
             animate={{ opacity: 1, y: 0 }}
             className="inline-flex items-center px-4 py-2 mb-8 text-[9px] font-black text-indigo-600 bg-indigo-50 rounded-full border border-indigo-100 tracking-[0.2em] uppercase"
           >
-            CRM & WhatsApp Omnichannel
+            Sistema Operacional Comercial
           </motion.div>
 
           <motion.h1
@@ -72,7 +72,7 @@ const Hero = ({ hasFreePlan }) => {
             transition={{ delay: 0.4 }}
             className="text-lg md:text-xl text-zinc-500 font-medium tracking-tight max-w-2xl leading-relaxed mb-12"
           >
-            Centralize seus leads, automatize seu WhatsApp e domine seu pipeline com o CRM mais completo para equipes de alta performance.
+            Sistema operacional comercial para empresas que vendem pelo WhatsApp. Centralize seus leads, automatize processos e domine suas vendas.
           </motion.p>
 
           <motion.div

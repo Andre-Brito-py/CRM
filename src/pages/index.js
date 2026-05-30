@@ -37,8 +37,8 @@ export default function Home({ plans, promo, hasFreePlan }) {
   return (
     <div className="min-h-screen bg-white">
       <Meta 
-        title="Vysify CRM | O Futuro do Comércio Digital e WhatsApp" 
-        description="Centralize seus leads, automatize seu WhatsApp e domine seu pipeline com o CRM mais completo para equipes de alta performance."
+        title="Vysify | Sistema Operacional Comercial para WhatsApp" 
+        description="Sistema operacional comercial para empresas que vendem pelo WhatsApp. Centralize seus contatos, automatize processos e domine suas vendas."
       />
       
       <main>

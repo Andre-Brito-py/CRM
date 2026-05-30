@@ -69,7 +69,7 @@ const handler = async (req, res) => {
         where: {
           workspaceId,
           deletedAt: null,
-          stage: { name: { notIn: ['Fechado', 'Perdido', 'Closed', 'Lost', 'Won'] } },
+          stage: { name: { notIn: ['Fechado', 'Perdido', 'Closed', 'Lost', 'Won', 'Fechado/Ganho'] } },
         },
       }),
 
@@ -80,7 +80,7 @@ const handler = async (req, res) => {
         where: {
           workspaceId,
           deletedAt: null,
-          stage: { name: { in: ['Fechado', 'Closed', 'Won'] } },
+          stage: { name: { in: ['Fechado', 'Closed', 'Won', 'Fechado/Ganho'] } },
         },
       }),
 
@@ -286,7 +286,7 @@ const handler = async (req, res) => {
       const monthLabel = deal.createdAt.toLocaleString('default', { month: 'short' });
       if (salesByMonth[monthLabel]) {
         const stageName = (deal.stage?.name || '').toLowerCase();
-        if (stageName === 'fechado' || stageName === 'closed' || stageName === 'won') {
+        if (stageName === 'fechado' || stageName === 'closed' || stageName === 'won' || stageName === 'fechado/ganho') {
           salesByMonth[monthLabel].value += Number(deal.amount) || 0;
         }
       }

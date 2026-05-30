@@ -3,7 +3,7 @@ import { LandingLayout } from '@/layouts/index';
 import { Footer } from '@/sections/index';
 
 const PrivacyPolicy = () => {
-  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Vysify CRM';
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || 'Vysify';
   const privacyEmail =
     process.env.NEXT_PUBLIC_PRIVACY_EMAIL ||
     process.env.NEXT_PUBLIC_SUPPORT_EMAIL ||
@@ -14,8 +14,8 @@ const PrivacyPolicy = () => {
   return (
     <LandingLayout>
       <Meta
-        title="Política de Privacidade - Vysify CRM"
-        description="Política de Privacidade da plataforma Vysify CRM."
+        title="Política de Privacidade - Vysify"
+        description="Política de Privacidade da plataforma Vysify."
       />
       <main className="max-w-4xl mx-auto px-6 py-20 text-gray-800">
         <h1 className="text-4xl font-bold mb-8">Política de Privacidade</h1>

@@ -20,23 +20,30 @@ import { AccountLayout } from '@/layouts/index';
 import { useWorkspace } from '@/providers/workspace';
 import fetcher from '@/lib/client/fetcher';
 
+const getValueFontSize = (val) => {
+  const str = String(val || '');
+  if (str.length > 8) return 'text-xl sm:text-2xl xl:text-3xl';
+  if (str.length > 5) return 'text-2xl sm:text-3xl xl:text-4xl';
+  return 'text-4xl';
+};
+
 const StatCard = ({ title, value, icon: Icon, color, index }) => (
   <motion.div 
     initial={{ opacity: 0, y: 30 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.08, duration: 0.8, ease: "easeOut" }}
-    className="vysify-glass p-10 rounded-[2.5rem] group relative overflow-hidden transition-all duration-700 hover:border-indigo-500/40 hover:-translate-y-2 hover:shadow-3xl ring-1 ring-zinc-800/10"
+    className="vysify-glass p-6 sm:p-8 rounded-[2.5rem] group relative overflow-hidden transition-all duration-700 hover:border-indigo-500/40 hover:-translate-y-2 hover:shadow-3xl ring-1 ring-zinc-800/10"
   >
     <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-[60px] -mr-16 -mt-16 group-hover:bg-indigo-500/10 transition-all duration-700" />
-    <div className="flex items-center justify-between">
+    <div className="flex items-center justify-between gap-4">
       <div className="flex flex-col min-w-0">
         <dt className="text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.3em] truncate mb-2.5 italic">{title}</dt>
         <dd>
-          <div className="text-4xl font-executive font-extrabold text-zinc-950 dark:text-white leading-none tracking-tighter italic uppercase">{value}</div>
+          <div className={`font-executive font-extrabold text-zinc-950 dark:text-white leading-none tracking-tighter italic uppercase ${getValueFontSize(value)}`}>{value}</div>
         </dd>
       </div>
-      <div className={`flex-shrink-0 p-5 rounded-[1.75rem] bg-${color}-500/10 text-${color}-600 dark:text-${color}-400 shadow-premium border border-${color}-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700`}>
-        <Icon className="h-7 w-7 stroke-[2]" aria-hidden="true" />
+      <div className={`flex-shrink-0 p-4 rounded-[1.5rem] bg-${color}-500/10 text-${color}-600 dark:text-${color}-400 shadow-premium border border-${color}-500/20 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700`}>
+        <Icon className="h-6 w-6 stroke-[2]" aria-hidden="true" />
       </div>
     </div>
   </motion.div>
@@ -78,19 +85,18 @@ const ActivityFeed = ({ activities }) => {
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-4 border-white dark:border-black" />
                 </div>
-                <div className="min-w-0 flex-1 pt-2 flex justify-between space-x-6">
-                  <div>
-                    <p className="text-[15px] text-zinc-500 dark:text-zinc-400 font-medium leading-relaxed italic">
-                      <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight">
-                        {activity.user?.name || 'Vysify System'}
-                      </span>{' '}
-                      <span className="opacity-70">{activity.type === 'DEAL_CREATED' ? 'initiated deal protocol for' : 'executed core action on'}</span>{' '}
-                      <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight text-indigo-600 dark:text-indigo-400">
-                        {activity.deal?.name || activity.contact?.name || activity.title}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="text-right text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 pt-1 shrink-0 italic tabular-nums">
+                <div className="min-w-0 flex-1 pt-2 flex flex-col gap-1.5">
+                  <p className="text-[14px] text-zinc-600 dark:text-zinc-300 font-medium leading-relaxed italic">
+                    <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight">
+                      {activity.user?.name || 'Vysify System'}
+                    </span>{' '}
+                    <span className="opacity-70">{activity.type === 'DEAL_CREATED' ? 'initiated deal protocol for' : 'executed core action on'}</span>{' '}
+                    <span className="text-zinc-950 dark:text-zinc-100 font-executive font-black uppercase tracking-tight text-indigo-600 dark:text-indigo-400">
+                      {activity.deal?.name || activity.contact?.name || activity.title}
+                    </span>
+                  </p>
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-600 italic">
+                    <ClockIcon className="w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 stroke-[2.5]" />
                     <time dateTime={activity.createdAt}>
                       {new Date(activity.createdAt).toLocaleDateString()}
                     </time>
@@ -373,40 +379,138 @@ const Workspace = () => {
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
             {isOwner && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                id="revenue-chart" 
-                className="vysify-glass p-10 lg:col-span-2 rounded-[2.5rem] relative overflow-hidden"
-              >
-                <div className="flex items-center justify-between mb-10">
-                  <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tight">
-                    PERFORMANCE DE RECEITA
-                  </h3>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)] animate-pulse" />
-                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em]">CRESCIMENTO MENSAL</span>
-                  </div>
-                </div>
-
-                <div className="h-[350px] w-full mt-4">
-                  {dashboardData?.salesData?.length > 0 ? (
-                    <GlowingAreaChart
-                       data={dashboardData.salesData}
-                       xKey="date"
-                       yKey="value"
-                       color="#6366f1"
-                       formatYAxis={(val) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(val)}
-                       formatTooltipValue={(val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)}
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2.5rem]">
-                      <ChartBarIcon className="w-12 h-12 text-zinc-200 dark:text-zinc-800 mb-6" />
-                      <p className="text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-[0.25em] text-[10px]">Sem métricas de venda</p>
+              <div className="lg:col-span-2 space-y-10 min-w-0">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  id="revenue-chart" 
+                  className="vysify-glass p-10 rounded-[2.5rem] relative overflow-hidden"
+                >
+                  <div className="flex items-center justify-between mb-10">
+                    <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tight">
+                      PERFORMANCE DE RECEITA
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-[0_0_12px_rgba(99,102,241,0.6)] animate-pulse" />
+                      <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em]">CRESCIMENTO MENSAL</span>
                     </div>
-                  )}
-                </div>
-              </motion.div>
+                  </div>
+
+                  <div className="h-[350px] w-full mt-4">
+                    {dashboardData?.salesData?.length > 0 ? (
+                      <GlowingAreaChart
+                         data={dashboardData.salesData}
+                         xKey="date"
+                         yKey="value"
+                         color="#6366f1"
+                         formatYAxis={(val) => new Intl.NumberFormat('pt-BR', { notation: 'compact', compactDisplay: 'short' }).format(val)}
+                         formatTooltipValue={(val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val)}
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center h-full border-2 border-dashed border-zinc-100 dark:border-zinc-800 rounded-[2.5rem]">
+                        <ChartBarIcon className="w-12 h-12 text-zinc-200 dark:text-zinc-800 mb-6" />
+                        <p className="text-zinc-400 dark:text-zinc-600 font-black uppercase tracking-[0.25em] text-[10px]">Sem métricas de venda</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* GORGEOUS FUNNEL HEALTH AND EFFICIENCY METRICS CARD */}
+                {(() => {
+                  const wonCount = dashboardData?.stats?.wonDeals || 0;
+                  const openCount = dashboardData?.stats?.openDeals || 0;
+                  const totalDeals = wonCount + openCount;
+                  const conversionRate = totalDeals > 0 ? Math.round((wonCount / totalDeals) * 100) : 0;
+
+                  const paidAmount = dashboardData?.stats?.paymentsPaidAmount || 0;
+                  const pendingAmount = dashboardData?.stats?.paymentsPendingAmount || 0;
+                  const totalBilled = paidAmount + pendingAmount;
+                  const collectionRate = totalBilled > 0 ? Math.round((paidAmount / totalBilled) * 100) : 0;
+
+                  return (
+                    <motion.div
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1, duration: 0.8 }}
+                      className="vysify-glass p-10 rounded-[2.5rem] relative overflow-hidden group shadow-premium hover:shadow-3xl"
+                    >
+                      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-[80px] -mr-32 -mt-32" />
+                      <div className="flex items-center justify-between mb-8 border-b border-zinc-50 dark:border-zinc-800/50 pb-6">
+                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white uppercase italic tracking-tight">
+                          SAÚDE E EFICIÊNCIA DO FUNIL
+                        </h3>
+                        <span className="px-5 py-2 bg-emerald-600 text-white text-[10px] font-black rounded-2xl uppercase tracking-[0.2em] shadow-xl shadow-emerald-500/20 italic">
+                          MÉTRICAS DE CONVERSÃO
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        {/* Progress bars */}
+                        <div className="space-y-8 flex flex-col justify-center">
+                          {/* Progress 1: Taxa de Conversão */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-[11px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em] italic">Conversão Comercial</span>
+                              <span className="text-xs font-black text-zinc-900 dark:text-white italic">{conversionRate}%</span>
+                            </div>
+                            <div className="w-full bg-zinc-100 dark:bg-zinc-800/50 h-3 rounded-full overflow-hidden p-0.5 border border-zinc-200/50 dark:border-zinc-800/50">
+                              <div 
+                                className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-full rounded-full shadow-[0_0_8px_rgba(99,102,241,0.5)] transition-all duration-1000"
+                                style={{ width: `${conversionRate}%` }}
+                              />
+                            </div>
+                            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-2.5 font-bold uppercase tracking-widest italic opacity-70">
+                              {wonCount} ganhos de {totalDeals} negócios ativos
+                            </div>
+                          </div>
+
+                          {/* Progress 2: Eficiência de Recebimento */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-[11px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.15em] italic">Cobranças Recebidas</span>
+                              <span className="text-xs font-black text-zinc-900 dark:text-white italic">{collectionRate}%</span>
+                            </div>
+                            <div className="w-full bg-zinc-100 dark:bg-zinc-800/50 h-3 rounded-full overflow-hidden p-0.5 border border-zinc-200/50 dark:border-zinc-800/50">
+                              <div 
+                                className="bg-gradient-to-r from-emerald-500 to-emerald-600 h-full rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-all duration-1000"
+                                style={{ width: `${collectionRate}%` }}
+                              />
+                            </div>
+                            <div className="text-[9px] text-zinc-400 dark:text-zinc-500 mt-2.5 font-bold uppercase tracking-widest italic opacity-70">
+                              {formatBrl(paidAmount)} pagos de {formatBrl(totalBilled)} emitidos
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Mini Stats Grids */}
+                        <div className="grid grid-cols-2 gap-6">
+                          <div className="p-6 rounded-[2rem] bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 transition-all flex flex-col justify-center">
+                            <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-2 italic">Ticket Médio</span>
+                            <span className="text-xl font-black text-zinc-900 dark:text-white italic tracking-tight">{formatBrl(dashboardData?.stats?.averageTicket)}</span>
+                          </div>
+
+                          <div className="p-6 rounded-[2rem] bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 transition-all flex flex-col justify-center">
+                            <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-2 italic">Receita Pendente</span>
+                            <span className="text-xl font-black text-amber-500 italic tracking-tight">{formatBrl(pendingAmount)}</span>
+                          </div>
+
+                          <div className="p-6 rounded-[2rem] bg-zinc-50/50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-900 transition-all col-span-2 flex items-center justify-between gap-4">
+                            <div>
+                              <span className="text-[9px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] mb-1 block italic">Receita Consolidada Realizada</span>
+                              <span className="text-3xl font-black text-emerald-500 italic tracking-tight">{formatBrl(paidAmount)}</span>
+                            </div>
+                            <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500 shrink-0">
+                              <svg className="w-6 h-6 stroke-[2]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })()}
+              </div>
             )}
 
             <div className={`space-y-10 ${isOwner ? 'lg:col-span-1' : 'lg:col-span-3'}`}>

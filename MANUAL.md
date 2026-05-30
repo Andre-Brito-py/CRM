@@ -1,11 +1,11 @@
-# Manual do Usuário - Nextacular
+# Manual do Usuário - Vysify
 
-Bem-vindo ao **Nextacular**, uma plataforma SaaS completa para gerenciamento de workspaces, equipes e CRM. Este manual descreve todas as funcionalidades disponíveis no sistema para ajudá-lo a aproveitar ao máximo a ferramenta.
+Bem-vindo ao **Vysify**, uma plataforma SaaS completa para gerenciamento de workspaces, equipes e CRM. Este manual descreve todas as funcionalidades disponíveis no sistema para ajudá-lo a aproveitar ao máximo a ferramenta.
 
 ## 🚀 Primeiros Passos
 
 ### Autenticação (Login)
-O Nextacular utiliza um sistema de autenticação seguro via **Magic Link** (Link Mágico), eliminando a necessidade de senhas complexas.
+O Vysify utiliza um sistema de autenticação seguro via **Magic Link** (Link Mágico), eliminando a necessidade de senhas complexas.
 1. Acesse a página de login.
 2. Insira seu endereço de e-mail.
 3. Clique em "Send the Magic Link".
@@ -15,7 +15,7 @@ O Nextacular utiliza um sistema de autenticação seguro via **Magic Link** (Lin
 
 ## 🏢 Workspaces (Áreas de Trabalho)
 
-Os Workspaces são o núcleo da organização no Nextacular. Tudo o que você cria (contatos, negócios, configurações) pertence a um workspace específico.
+Os Workspaces são o núcleo da organização no Vysify. Tudo o que você cria (contatos, negócios, configurações) pertence a um workspace específico.
 
 ### Criar um Workspace
 Ao entrar pela primeira vez, você será guiado para criar seu primeiro workspace.
@@ -29,7 +29,7 @@ Se você pertence a múltiplas equipes, pode alternar entre elas clicando no nom
 
 ## 📊 CRM (Gestão de Relacionamento)
 
-O Nextacular inclui um CRM integrado para gerenciar suas vendas e relacionamentos comerciais.
+O Vysify inclui um CRM integrado para gerenciar suas vendas e relacionamentos comerciais.
 
 ### 1. Pipeline (Funil de Vendas)
 O Pipeline é um quadro **Kanban** visual para gerenciar seus negócios (Deals).
@@ -80,7 +80,7 @@ Acesse o menu de configurações para personalizar sua experiência.
 
 ## 🛡️ Painel de Super Admin
 
-O Nextacular possui um painel administrativo exclusivo para gestão da plataforma, acessível apenas para usuários com função de **Super Admin**.
+O Vysify possui um painel administrativo exclusivo para gestão da plataforma, acessível apenas para usuários com função de **Super Admin**.
 
 ### Acesso
 O painel é acessado através de uma conta com privilégios elevados (ex: `admin@nextacular.com`). O login segue o mesmo padrão via **Magic Link**.
@@ -132,7 +132,7 @@ Visualize o status de saúde da aplicação em tempo real:
 
 ## 🚀 Funcionalidades No-Code (Automações e Personalização)
 
-O Nextacular foi projetado para permitir que você personalize o CRM e automatize processos sem escrever uma única linha de código.
+O Vysify foi projetado para permitir que você personalize o CRM e automatize processos sem escrever uma única linha de código.
 
 ### 1. Campos Personalizados (Custom Fields)
 Você pode estender os dados padrão de Contatos e Negócios para atender às necessidades específicas do seu negócio.
@@ -170,14 +170,14 @@ Localizado em **Configurações > Automações**, este módulo permite criar reg
 
 ## 🔌 Integrações Avançadas e Zapier
 
-O Nextacular permite que você conecte o CRM a mais de 5.000 aplicativos através do Zapier ou Make.
+O Vysify permite que você conecte o CRM a mais de 5.000 aplicativos através do Zapier ou Make.
 
 ### Integração com Zapier vía Webhooks
 Não é necessário um "App" na loja do Zapier. Como o sistema é No-Code, ele se conecta via **Webhooks de Entrada**.
 
 1. No Zapier, crie um **Trigger** do tipo "Webhooks by Zapier" e selecione "Catch Webhook".
 2. Copie a URL gerada pelo Zapier.
-3. No Nextacular, crie uma **Automação** e escolha a ação **"Enviar para Webhook (Zapier)"**.
+3. No Vysify, crie uma **Automação** e escolha a ação **"Enviar para Webhook (Zapier)"**.
 4. Cole a URL do Zapier.
 5. Agora, sempre que o gatilho da automação ocorrer, os dados completos do contato e do negócio serão enviados para o Zapier em tempo real.
 
