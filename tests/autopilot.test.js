@@ -47,6 +47,25 @@ describe('Autopilot AI Product Link Dispatch Test', () => {
       where: { id: conversation.id },
       data: { autopilotEnabled: true }
     });
+
+    // Create a fake WhatsApp integration so autopilot doesn't throw
+    // "No active WhatsApp integration". sendWhatsAppMessage is already mocked.
+    await prisma.integration.upsert({
+      where: {
+        workspaceId_provider: {
+          workspaceId: workspace.id,
+          provider: 'WHATSAPP',
+        },
+      },
+      update: { enabled: true },
+      create: {
+        workspaceId: workspace.id,
+        provider: 'WHATSAPP',
+        name: 'WhatsApp CI Test',
+        enabled: true,
+        credentials: {},
+      },
+    });
   });
 
   test('Autopilot responds automatically with product catalog and links when requested', async () => {
