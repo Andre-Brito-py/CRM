@@ -183,7 +183,7 @@ export const getServerSideProps = async (context) => {
   const { workspaceSlug, productSlug } = context.params || {};
   const status = context.query?.status ? String(context.query.status) : null;
 
-  const workspace = await prisma.workspace.findUnique({
+  const workspace = await prisma.workspace.findFirst({
     where: { slug: String(workspaceSlug || '') },
     select: { id: true, slug: true, name: true },
   });

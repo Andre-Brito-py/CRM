@@ -5,6 +5,32 @@ import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
 
+const renderContentWithLinks = (text, isMe) => {
+  if (!text) return null;
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`underline break-all ${
+            isMe
+              ? 'text-white hover:text-zinc-200'
+              : 'text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300'
+          }`}
+        >
+          {part}
+        </a>
+      );
+    }
+    return part;
+  });
+};
+
 const MessageBubble = ({ message, isMe, onReply }) => {
   const { i18n } = useTranslation();
 
@@ -61,7 +87,7 @@ const MessageBubble = ({ message, isMe, onReply }) => {
             )}
 
             <p className="whitespace-pre-wrap">
-              {message.content}
+              {renderContentWithLinks(message.content, isMe)}
             </p>
           </div>
           
