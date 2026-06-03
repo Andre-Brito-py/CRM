@@ -110,4 +110,8 @@ describe('Autopilot AI Product Link Dispatch Test', () => {
     // Check if mocked WhatsApp send was called
     expect(sendWhatsAppMessage).toHaveBeenCalled();
   }, 30000); // 30 seconds timeout to allow AI API response
+
+  afterAll(async () => {
+    await prisma.$disconnect();
+  });
 });

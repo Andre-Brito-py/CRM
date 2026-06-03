@@ -190,7 +190,41 @@ async function main() {
   }
   console.log(`✅ Conversas do WhatsApp simuladas.`);
 
-  // 5. Rate Limits Fake (Para simular gráficos de consumo de IA e API)
+  // 5. Contato específico para o teste do Autopilot (Rodrigo Alves)
+  console.log('🤖 Criando contato para teste do Autopilot...');
+  let rodrigo = await prisma.contact.findFirst({
+    where: { workspaceId: workspace.id, phone: '5521977776666' }
+  });
+  if (!rodrigo) {
+    rodrigo = await prisma.contact.create({
+      data: {
+        workspaceId: workspace.id,
+        name: 'Rodrigo Alves',
+        email: 'rodrigo.alves@example.com',
+        phone: '5521977776666',
+      }
+    });
+    console.log(`✅ Contato Rodrigo Alves criado.`);
+  }
+
+  const rodrigoConv = await prisma.conversation.findFirst({
+    where: { contactId: rodrigo.id, workspaceId: workspace.id }
+  });
+  if (!rodrigoConv) {
+    await prisma.conversation.create({
+      data: {
+        workspaceId: workspace.id,
+        contactId: rodrigo.id,
+        assigneeId: user.id,
+        platform: 'WHATSAPP',
+        status: 'OPEN',
+        autopilotEnabled: true,
+      }
+    });
+    console.log(`✅ Conversa de Rodrigo Alves criada com autopilot ativo.`);
+  }
+
+  // 6. Rate Limits Fake (Para simular gráficos de consumo de IA e API)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
