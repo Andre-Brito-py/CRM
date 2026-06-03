@@ -96,7 +96,7 @@ describe('Autopilot AI Product Link Dispatch Test', () => {
     expect(global.capturedSystemPrompt).toContain('Cafeteira Inteligente Express');
     expect(global.capturedSystemPrompt).toContain('Cadeira Ergonômica Premium');
     expect(global.capturedSystemPrompt).toContain('Fone de Ouvido Noise-Canceling');
-    expect(latestMessage.content).toContain('🤖'); // Autopilot prefix
+    expect(latestMessage.content).not.toContain('🤖'); // No longer using robot prefix to keep it human-like
     
     // Check if the AI recommended the requested products
     const contentLower = latestMessage.content.toLowerCase();

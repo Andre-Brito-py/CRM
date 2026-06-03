@@ -377,7 +377,7 @@ Nome do cliente: ${contactName}`;
   await createMessage(conversation.id, {
     direction: 'OUTBOUND',
     type: 'TEXT',
-    content: `🤖 ${replyText}`,
+    content: replyText,
     status: messageStatus,
     externalId: sentMessageId,
   });
