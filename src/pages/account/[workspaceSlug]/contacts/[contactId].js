@@ -487,12 +487,12 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
 
             <div className="bg-white shadow sm:rounded-lg p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Payments</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{t('deals.details.payments.title')}</h3>
                 <button
                   onClick={toggleCreatePayment}
                   className="text-brand-600 hover:text-blue-800 text-sm font-medium flex items-center"
                 >
-                  <PlusIcon className="w-4 h-4 mr-1" /> Create
+                  <PlusIcon className="w-4 h-4 mr-1" /> {t('deals.details.payments.create')}
                 </button>
               </div>
 
@@ -501,7 +501,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                   <form onSubmit={createPayment} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Value</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.value')}</label>
                         <input
                           type="number"
                           step="0.01"
@@ -513,7 +513,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Due date</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.dueDate')}</label>
                         <input
                           type="date"
                           value={paymentForm.dueDate}
@@ -522,7 +522,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Billing type</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.billingType')}</label>
                         <select
                           value={paymentForm.billingType}
                           onChange={(e) => setPaymentForm({ ...paymentForm, billingType: e.target.value })}
@@ -535,7 +535,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Description</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.description')}</label>
                         <input
                           type="text"
                           value={paymentForm.description}
@@ -554,13 +554,13 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                       />
                       <label htmlFor="sendWhatsAppPayment" className="ml-2 block text-sm text-gray-700">
-                        Send via WhatsApp
+                        {t('deals.details.payments.sendWhatsApp')}
                       </label>
                     </div>
 
                     {paymentForm.sendWhatsApp && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">WhatsApp message (optional)</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.whatsAppMessage')}</label>
                         <textarea
                           value={paymentForm.whatsAppMessage}
                           onChange={(e) => setPaymentForm({ ...paymentForm, whatsAppMessage: e.target.value })}
@@ -577,14 +577,14 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         onClick={toggleCreatePayment}
                         className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                       >
-                        Cancel
+                        {t('deals.details.payments.cancel')}
                       </button>
                       <button
                         type="submit"
                         disabled={isCreatingPayment}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
                       >
-                        {isCreatingPayment ? 'Creating...' : 'Create payment'}
+                        {isCreatingPayment ? t('deals.details.payments.creating') : t('deals.details.payments.create')}
                       </button>
                     </div>
                   </form>
@@ -595,10 +595,10 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.status')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.value')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.due')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.link')}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -612,7 +612,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                         <td className="px-4 py-2 text-sm">
                           {p.invoiceUrl ? (
                             <a href={p.invoiceUrl} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
-                              Open
+                              {t('deals.details.payments.table.open')}
                             </a>
                           ) : (
                             <span className="text-gray-400">—</span>
@@ -623,7 +623,7 @@ const ContactDetails = ({ workspace, isTeamOwner }) => {
                     {payments.length === 0 && (
                       <tr>
                         <td colSpan="4" className="px-4 py-4 text-center text-sm text-gray-500">
-                          No payments yet.
+                          {t('deals.details.payments.table.empty')}
                         </td>
                       </tr>
                     )}

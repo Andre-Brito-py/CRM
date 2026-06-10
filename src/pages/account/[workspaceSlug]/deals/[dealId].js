@@ -347,7 +347,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
       <Content>
         <Content.Title
           title={deal.name}
-          subtitle="Deal Details"
+          subtitle={t('deals.details.subtitle')}
         />
         <Content.Divider />
 
@@ -358,13 +358,13 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
             <div id="ai-assistant-card" className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg shadow border border-purple-100">
               <div className="flex items-center mb-4">
                 <SparklesIcon className="h-5 w-5 text-purple-600 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900">Smart Sales Assistant</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('deals.details.ai.title')}</h3>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Next Best Action */}
                 <div className="bg-white p-4 rounded-md border border-purple-100 shadow-sm">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Next Best Action</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">{t('deals.details.ai.nextAction')}</h4>
                   {aiNextStep ? (
                     <div className="text-sm text-gray-600 animate-fadeIn">
                       <p className="whitespace-pre-wrap">{aiNextStep}</p>
@@ -372,7 +372,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         onClick={() => setAiNextStep(null)}
                         className="text-xs text-gray-400 hover:text-gray-600 mt-2 underline"
                       >
-                        Clear
+                        {t('common.clear')}
                       </button>
                     </div>
                   ) : (
@@ -382,9 +382,9 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                       className="w-full py-2 px-3 bg-white border border-purple-200 text-purple-700 text-sm rounded hover:bg-purple-50 flex justify-center items-center"
                     >
                       {isGeneratingNextStep ? (
-                        <span className="animate-pulse">Analyzing deal...</span>
+                        <span className="animate-pulse">{t('deals.details.ai.analyzing')}</span>
                       ) : (
-                        <>Get Recommendation</>
+                        <>{t('deals.details.ai.getRecommendation')}</>
                       )}
                     </button>
                   )}
@@ -392,7 +392,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
 
                 {/* Follow-up Generator */}
                 <div className="bg-white p-4 rounded-md border border-purple-100 shadow-sm">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Follow-up Message</h4>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">{t('deals.details.ai.followUp')}</h4>
                   {aiFollowUp ? (
                     <div className="text-sm text-gray-600 animate-fadeIn">
                       <div className="bg-gray-50 p-2 rounded border border-gray-100 mb-2 max-h-40 overflow-y-auto">
@@ -402,17 +402,17 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <button
                           onClick={() => {
                             navigator.clipboard.writeText(aiFollowUp);
-                            toast.success('Copied to clipboard');
+                            toast.success(t('common.copied') || 'Copied to clipboard');
                           }}
                           className="text-xs text-purple-600 hover:text-purple-800 font-medium"
                         >
-                          Copy
+                          {t('common.copy')}
                         </button>
                         <button
                           onClick={() => setAiFollowUp(null)}
                           className="text-xs text-gray-400 hover:text-gray-600 underline"
                         >
-                          Clear
+                          {t('common.clear')}
                         </button>
                       </div>
                     </div>
@@ -423,9 +423,9 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                       className="w-full py-2 px-3 bg-white border border-purple-200 text-purple-700 text-sm rounded hover:bg-purple-50 flex justify-center items-center"
                     >
                       {isGeneratingFollowUp ? (
-                        <span className="animate-pulse">Drafting message...</span>
+                        <span className="animate-pulse">{t('deals.details.ai.drafting')}</span>
                       ) : (
-                        <><ChatBubbleBottomCenterTextIcon className="w-4 h-4 mr-2" /> Generate Follow-up</>
+                        <><ChatBubbleBottomCenterTextIcon className="w-4 h-4 mr-2" /> {t('deals.details.ai.generateFollowUp')}</>
                       )}
                     </button>
                   )}
@@ -436,7 +436,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
             {/* Deal Info */}
             <div id="deal-info-card" className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Details</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('deals.details.info.title')}</h3>
                 <button
                   onClick={toggleEditDealModal}
                   className="text-gray-400 hover:text-gray-600"
@@ -446,23 +446,23 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Amount</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.amount')}</label>
                   <div className="mt-1 text-sm text-gray-900">
                     {deal.amount ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(deal.amount) : '-'}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Stage</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.stage')}</label>
                   <div className="mt-1 text-sm text-gray-900">{deal.stage?.name || '-'}</div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Close Date</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.closeDate')}</label>
                   <div className="mt-1 text-sm text-gray-900">
                     {deal.closeDate ? new Date(deal.closeDate).toLocaleDateString() : '-'}
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Priority</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.priority')}</label>
                   <div className="mt-1">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                       ${deal.priority === 'HIGH' ? 'bg-red-100 text-red-800' :
@@ -473,7 +473,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Contact</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.contact')}</label>
                   <div className="mt-1 text-sm text-brand-600 hover:underline">
                     {deal.contact ? (
                       <Link href={`/account/${workspaceSlug}/contacts/${deal.contact.id}`}>
@@ -483,7 +483,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">Assignee</label>
+                  <label className="block text-sm font-medium text-gray-500">{t('deals.details.info.assignee')}</label>
                   <div className="mt-1 flex items-center space-x-2">
                     {deal.user ? (
                       <>
@@ -505,13 +505,13 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
             {/* Tasks Section */}
             <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Tasks</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('deals.details.tasks.title')}</h3>
                 <button
                   onClick={toggleAddTaskModal}
                   className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" />
-                  Add Task
+                  {t('deals.details.tasks.add')}
                 </button>
               </div>
 
@@ -535,7 +535,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         </div>
                         {task.dueDate && (
                           <div className="text-xs text-gray-500 mt-1">
-                            Due: {new Date(task.dueDate).toLocaleDateString()}
+                            {t('deals.details.tasks.due')} {new Date(task.dueDate).toLocaleDateString()}
                           </div>
                         )}
                       </div>
@@ -550,20 +550,20 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500 text-center py-4">No tasks associated with this deal.</p>
+                  <p className="text-sm text-gray-500 text-center py-4">{t('deals.details.tasks.empty')}</p>
                 )}
               </div>
             </div>
 
             <div id="payments-section-card" className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Payments</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('deals.details.payments.title')}</h3>
                 <button
                   onClick={toggleCreatePayment}
                   className="flex items-center px-3 py-1.5 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" />
-                  Create
+                  {t('common.create')}
                 </button>
               </div>
 
@@ -572,7 +572,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                   <form onSubmit={createPayment} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Value</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.value')}</label>
                         <input
                           type="number"
                           step="0.01"
@@ -584,7 +584,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Due date</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.dueDate')}</label>
                         <input
                           type="date"
                           value={paymentForm.dueDate}
@@ -593,7 +593,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         />
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Billing type</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.billingType')}</label>
                         <select
                           value={paymentForm.billingType}
                           onChange={(e) => setPaymentForm({ ...paymentForm, billingType: e.target.value })}
@@ -606,7 +606,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Description</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.description')}</label>
                         <input
                           type="text"
                           value={paymentForm.description}
@@ -625,13 +625,13 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
                       />
                       <label htmlFor="sendWhatsAppDealPayment" className="ml-2 block text-sm text-gray-700">
-                        Send via WhatsApp
+                        {t('deals.details.payments.sendWhatsApp')}
                       </label>
                     </div>
 
                     {paymentForm.sendWhatsApp && (
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">WhatsApp message (optional)</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.payments.whatsAppMessage')}</label>
                         <textarea
                           value={paymentForm.whatsAppMessage}
                           onChange={(e) => setPaymentForm({ ...paymentForm, whatsAppMessage: e.target.value })}
@@ -648,14 +648,14 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         onClick={toggleCreatePayment}
                         className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                       >
-                        Cancel
+                        {t('deals.details.payments.cancel')}
                       </button>
                       <button
                         type="submit"
                         disabled={isCreatingPayment}
                         className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 disabled:opacity-50"
                       >
-                        {isCreatingPayment ? 'Creating...' : 'Create payment'}
+                        {isCreatingPayment ? t('deals.details.payments.creating') : t('deals.details.payments.create')}
                       </button>
                     </div>
                   </form>
@@ -666,10 +666,10 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due</th>
-                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Link</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.status')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.value')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.due')}</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('deals.details.payments.table.link')}</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
@@ -683,7 +683,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         <td className="px-4 py-2 text-sm">
                           {p.invoiceUrl ? (
                             <a href={p.invoiceUrl} target="_blank" rel="noreferrer" className="text-brand-600 hover:underline">
-                              Open
+                              {t('deals.details.payments.table.open')}
                             </a>
                           ) : (
                             <span className="text-gray-400">—</span>
@@ -694,7 +694,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                     {payments.length === 0 && (
                       <tr>
                         <td colSpan="4" className="px-4 py-4 text-center text-sm text-gray-500">
-                          No payments yet.
+                          {t('deals.details.payments.table.empty')}
                         </td>
                       </tr>
                     )}
@@ -706,35 +706,35 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
             {/* Activities Section */}
             <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Activities</h3>
+                <h3 className="text-lg font-medium text-gray-900">{t('deals.details.activities.title')}</h3>
                 <button
                   onClick={() => setIsAddingActivity(!isAddingActivity)}
                   className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-brand-700 bg-brand-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                 >
-                  <PlusIcon className="w-4 h-4 mr-1" /> Log Activity
+                  <PlusIcon className="w-4 h-4 mr-1" /> {t('deals.details.activities.log')}
                 </button>
               </div>
 
               {isAddingActivity && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h4 className="text-sm font-medium text-gray-900 mb-3">Log new activity</h4>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3">{t('deals.details.activities.new')}</h4>
                   <form onSubmit={saveActivity} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Type</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.activities.type')}</label>
                         <select
                           value={activityForm.type}
                           onChange={(e) => setActivityForm({ ...activityForm, type: e.target.value })}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-brand-500 focus:border-brand-500 sm:text-sm rounded-md"
                         >
-                          <option value="NOTE">Note</option>
-                          <option value="CALL">Call</option>
-                          <option value="MEETING">Meeting</option>
-                          <option value="EMAIL">Email</option>
+                          <option value="NOTE">{t('deals.details.activities.type.note')}</option>
+                          <option value="CALL">{t('deals.details.activities.type.call')}</option>
+                          <option value="MEETING">{t('deals.details.activities.type.meeting')}</option>
+                          <option value="EMAIL">{t('deals.details.activities.type.email')}</option>
                         </select>
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700">Date</label>
+                        <label className="block text-xs font-medium text-gray-700">{t('deals.details.activities.date')}</label>
                         <input
                           type="date"
                           value={activityForm.date}
@@ -744,23 +744,23 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700">Title / Summary</label>
+                      <label className="block text-xs font-medium text-gray-700">{t('deals.details.activities.summary')}</label>
                       <input
                         type="text"
                         value={activityForm.title}
                         onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
-                        placeholder="e.g. Discovery call with client"
+                        placeholder={t('deals.details.activities.summaryPlaceholder')}
                         required
                         className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-700">Details</label>
+                      <label className="block text-xs font-medium text-gray-700">{t('deals.details.activities.details')}</label>
                       <textarea
                         rows={3}
                         value={activityForm.content}
                         onChange={(e) => setActivityForm({ ...activityForm, content: e.target.value })}
-                        placeholder="Add more details..."
+                        placeholder={t('deals.details.activities.detailsPlaceholder')}
                         className="mt-1 block w-full shadow-sm focus:ring-brand-500 focus:border-brand-500 sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
@@ -770,13 +770,13 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                         onClick={() => setIsAddingActivity(false)}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                       <button
                         type="submit"
                         className="inline-flex items-center px-3 py-2 border border-transparent shadow-sm text-sm leading-4 font-medium rounded-md text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                       >
-                        Save Activity
+                        {t('deals.details.activities.save')}
                       </button>
                     </div>
                   </form>
@@ -824,7 +824,7 @@ const DealDetails = ({ workspace, isTeamOwner }) => {
                     </li>
                   ))}
                   {(!deal.activities || deal.activities.length === 0) && (
-                    <p className="text-sm text-gray-500 text-center py-4">No activities logged yet.</p>
+                    <p className="text-sm text-gray-500 text-center py-4">{t('deals.details.activities.empty')}</p>
                   )}
                 </ul>
               </div>

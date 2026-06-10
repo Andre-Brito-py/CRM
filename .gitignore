@@ -41,4 +41,9 @@ yarn-error.log*
 /manutencao
 /backups/
 /scripts/seed-preview.js
-
+/ffmpeg/
+ffmpeg.zip
+music.mp3
+/scratch/
+capture_screenshots.js
+run_video_pipeline.ps1
