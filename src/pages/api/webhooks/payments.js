@@ -143,6 +143,32 @@ export default async function handler(req, res) {
           dealId: updated.dealId,
         },
       });
+
+      if (nextStatus === 'PAID' && updated.contactId) {
+        const conversation = await prisma.conversation.findFirst({
+          where: { contactId: updated.contactId, status: 'OPEN', autopilotEnabled: true },
+          orderBy: { updatedAt: 'desc' },
+        });
+        if (conversation) {
+          const workspace = await prisma.workspace.findUnique({ where: { id: updated.workspaceId } });
+          const contact = await prisma.contact.findUnique({ where: { id: updated.contactId } });
+          if (workspace && contact) {
+            const msg = await prisma.message.create({
+              data: {
+                conversationId: conversation.id,
+                direction: 'INBOUND',
+                type: 'TEXT',
+                content: `[SISTEMA]: O pagamento do serviço "${updated.description || 'agendado'}" foi recebido e confirmado com sucesso. Envie uma mensagem curta e amigável confirmando ao cliente que está tudo certo com o agendamento/serviço.`,
+                status: 'RECEIVED',
+              },
+            });
+            const { processAutopilotReply } = await import('@/lib/server/autopilot');
+            processAutopilotReply({ workspace, conversation, contact, message: msg }).catch((err) => {
+              log({ level: 'error', msg: 'autopilot_trigger_payment_paid_failed', err });
+            });
+          }
+        }
+      }
     }
 
     return res.status(200).json({ received: true });
