@@ -321,6 +321,9 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                   min="0"
                   required
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Taxa da plataforma: 8% (o valor líquido será transferido para sua conta Stripe)
+                </p>
               </div>
               <div className="flex items-center gap-2 pt-6">
                 <input
