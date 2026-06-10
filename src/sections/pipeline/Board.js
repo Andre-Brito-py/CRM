@@ -238,7 +238,16 @@ const PipelineBoard = ({ pipeline, workspaceSlug, dealAiInsights }) => {
       return;
     }
 
-    const newStages = [...stages];
+    const newStages = stages.map(s => {
+      if (s.id === source.droppableId || s.id === destination.droppableId) {
+        return {
+          ...s,
+          deals: [...(s.deals || [])]
+        };
+      }
+      return s;
+    });
+
     const sourceStageIndex = newStages.findIndex(s => s.id === source.droppableId);
     const destStageIndex = newStages.findIndex(s => s.id === destination.droppableId);
 
