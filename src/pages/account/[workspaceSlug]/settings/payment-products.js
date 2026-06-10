@@ -37,7 +37,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true });
+  const [form, setForm] = useState({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true, isBookable: false, durationMinutes: 60, requiresPayment: false });
 
   useEffect(() => {
     setWorkspace(workspace);
@@ -54,7 +54,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true });
+    setForm({ name: '', slug: '', description: '', price: '', imageUrl: '', active: true, isBookable: false, durationMinutes: 60, requiresPayment: false });
     setShowModal(true);
   };
 
@@ -67,6 +67,9 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
       price: product?.price != null ? String(product.price) : '',
       imageUrl: product?.imageUrl || '',
       active: Boolean(product?.active),
+      isBookable: Boolean(product?.isBookable),
+      durationMinutes: Number(product?.durationMinutes) || 60,
+      requiresPayment: Boolean(product?.requiresPayment),
     });
     setShowModal(true);
   };
@@ -93,6 +96,9 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
       price: form.price,
       imageUrl: form.imageUrl || null,
       active: form.active,
+      isBookable: form.isBookable,
+      durationMinutes: form.durationMinutes,
+      requiresPayment: form.requiresPayment,
     };
 
     setIsSubmitting(true);
@@ -327,6 +333,49 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                 />
                 <label htmlFor="productActive" className="text-sm text-gray-700">Ativo</label>
               </div>
+            </div>
+            
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="flex items-center gap-2 mb-4">
+                <input
+                  id="isBookable"
+                  type="checkbox"
+                  className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                  checked={Boolean(form.isBookable)}
+                  onChange={(e) => setForm((s) => ({ ...s, isBookable: e.target.checked }))}
+                  disabled={isSubmitting || !isTeamOwner}
+                />
+                <label htmlFor="isBookable" className="text-sm font-medium text-gray-700">Serviço Agendável (Autopilot)</label>
+              </div>
+              
+              {form.isBookable && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 ml-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Duração (minutos)</label>
+                    <input
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm border p-2"
+                      value={form.durationMinutes}
+                      onChange={(e) => setForm((s) => ({ ...s, durationMinutes: e.target.value }))}
+                      disabled={isSubmitting || !isTeamOwner}
+                      type="number"
+                      step="5"
+                      min="5"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-6">
+                    <input
+                      id="requiresPayment"
+                      type="checkbox"
+                      className="h-4 w-4 text-brand-600 focus:ring-brand-500 border-gray-300 rounded"
+                      checked={Boolean(form.requiresPayment)}
+                      onChange={(e) => setForm((s) => ({ ...s, requiresPayment: e.target.checked }))}
+                      disabled={isSubmitting || !isTeamOwner}
+                    />
+                    <label htmlFor="requiresPayment" className="text-sm text-gray-700">Exige pagamento ao agendar</label>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button className="bg-gray-100 hover:bg-gray-200" type="button" onClick={closeModal}>

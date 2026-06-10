@@ -84,6 +84,9 @@ export default async function handler(req, res) {
         price,
         imageUrl,
         active = true,
+        isBookable = false,
+        durationMinutes = 60,
+        requiresPayment = false,
       } = req.body || {};
 
       const parsedName = `${name || ''}`.trim();
@@ -113,6 +116,9 @@ export default async function handler(req, res) {
           price: parsedPrice,
           imageUrl: imageUrl ? String(imageUrl) : null,
           active: Boolean(active),
+          isBookable: Boolean(isBookable),
+          durationMinutes: Number.isFinite(Number(durationMinutes)) ? Number(durationMinutes) : 60,
+          requiresPayment: Boolean(requiresPayment),
         },
       });
 

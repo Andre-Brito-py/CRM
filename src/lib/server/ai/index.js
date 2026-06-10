@@ -228,18 +228,24 @@ async function callOpenAI(apiKey, messages, systemPrompt, options) {
     ? [{ role: 'system', content: systemPrompt }, ...messages]
     : messages;
 
+  const body = {
+    model,
+    messages: fullMessages,
+    temperature: options.temperature ?? 0.7,
+    max_tokens: options.maxTokens ?? 1000,
+  };
+
+  if (options.tools && options.tools.length > 0) {
+    body.tools = options.tools;
+  }
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
-    body: JSON.stringify({
-      model,
-      messages: fullMessages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 1000,
-    })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
@@ -249,10 +255,12 @@ async function callOpenAI(apiKey, messages, systemPrompt, options) {
   }
 
   const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content || '';
+  const message = data?.choices?.[0]?.message;
+  const text = message?.content || '';
 
   return {
     content: text.trim(),
+    message, // Return full message for tool_calls
     usage: data.usage || { total_tokens: 0 },
     provider: 'openai',
     model

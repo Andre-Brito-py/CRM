@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     }
 
     try {
-      const { name, description, currency, price, imageUrl, active } = req.body || {};
+      const { name, description, currency, price, imageUrl, active, isBookable, durationMinutes, requiresPayment } = req.body || {};
       const data = {};
       if (imageUrl !== undefined) {
         data.imageUrl = imageUrl ? String(imageUrl) : null;
@@ -72,6 +72,15 @@ export default async function handler(req, res) {
       }
       if (active != null) {
         data.active = Boolean(active);
+      }
+      if (isBookable != null) {
+        data.isBookable = Boolean(isBookable);
+      }
+      if (durationMinutes != null) {
+        data.durationMinutes = Number.isFinite(Number(durationMinutes)) ? Number(durationMinutes) : 60;
+      }
+      if (requiresPayment != null) {
+        data.requiresPayment = Boolean(requiresPayment);
       }
 
       const updated = await prisma.paymentProduct.update({

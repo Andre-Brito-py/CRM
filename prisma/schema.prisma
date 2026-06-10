@@ -639,18 +639,21 @@ model Payment {
 }
 
 model PaymentProduct {
-  id          String   @id @default(cuid())
-  workspaceId String
-  name        String
-  slug        String
-  description String?
-  currency    String   @default("BRL")
-  price       Decimal  @db.Decimal(10, 2)
-  active      Boolean  @default(true)
-  imageUrl    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
+  id              String   @id @default(cuid())
+  workspaceId     String
+  name            String
+  slug            String
+  description     String?
+  currency        String   @default("BRL")
+  price           Decimal  @db.Decimal(10, 2)
+  active          Boolean  @default(true)
+  imageUrl        String?
+  isBookable      Boolean  @default(false)
+  durationMinutes Int?     @default(60)
+  requiresPayment Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
 
