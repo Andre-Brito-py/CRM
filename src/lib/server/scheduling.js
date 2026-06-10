@@ -1,4 +1,4 @@
-import { getValidGoogleAccessToken, googleCalendarRequest } from '@/pages/api/workspace/[workspaceSlug]/integrations/google_calendar.js';
+import { getValidGoogleAccessToken, googleCalendarRequest } from '../../pages/api/workspace/[workspaceSlug]/integrations/google_calendar';
 import prisma from '@/prisma/index';
 import { log } from '@/lib/server/logger';
 
