@@ -16,8 +16,12 @@ export const createDeal = async (workspaceId, { name, amount, closeDate, stageId
       priority,
       customFields,
     },
-    include: { contact: true, user: true }
+    include: { contact: true, assignee: true }
   });
+
+  if (deal && deal.assignee) {
+    deal.user = deal.assignee;
+  }
 
   // Trigger automation: DEAL_CREATED
   // await processAutomation(workspaceId, 'DEAL_CREATED', deal);
@@ -40,7 +44,7 @@ export const getDeals = async (workspaceId, options = {}) => {
     });
   }
 
-  return await prisma.deal.findMany({
+  const deals = await prisma.deal.findMany({
     where: { workspaceId },
     orderBy: { createdAt: 'desc' },
     take,
@@ -49,7 +53,7 @@ export const getDeals = async (workspaceId, options = {}) => {
       contact: true,
       company: true,
       stage: true,
-      user: {
+      assignee: {
         select: {
           id: true,
           name: true,
@@ -58,19 +62,26 @@ export const getDeals = async (workspaceId, options = {}) => {
       },
     },
   });
+
+  return deals.map(d => {
+    if (d.assignee) {
+      d.user = d.assignee;
+    }
+    return d;
+  });
 };
 
 /**
  * Get a single deal — workspaceId enforces multi-tenant isolation.
  */
 export const getDeal = async (id, workspaceId) => {
-  return await prisma.deal.findFirst({
+  const deal = await prisma.deal.findFirst({
     where: { id, workspaceId, deletedAt: null },
     include: {
       contact: true,
       company: true,
       stage: true,
-      user: {
+      assignee: {
         select: {
           id: true,
           name: true,
@@ -87,6 +98,11 @@ export const getDeal = async (id, workspaceId) => {
       },
     },
   });
+
+  if (deal && deal.assignee) {
+    deal.user = deal.assignee;
+  }
+  return deal;
 };
 
 /**
@@ -111,7 +127,7 @@ export const updateDeal = async (id, workspaceId, data) => {
     data,
     include: {
       contact: true,
-      user: {
+      assignee: {
         select: {
           id: true,
           name: true,
@@ -120,6 +136,10 @@ export const updateDeal = async (id, workspaceId, data) => {
       },
     }
   });
+
+  if (updatedDeal && updatedDeal.assignee) {
+    updatedDeal.user = updatedDeal.assignee;
+  }
 
   // Trigger automation: DEAL_STAGE_CHANGED if stageId changed
   if (data.stageId && existing.stageId !== data.stageId) {

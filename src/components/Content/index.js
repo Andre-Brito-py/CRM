@@ -37,9 +37,28 @@ Content.Title = ({ subtitle, title }) => {
   );
 };
 
+Content.Skeleton = () => {
+  return (
+    <div className="animate-pulse space-y-6 p-6 md:p-10">
+      <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/3"></div>
+      <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded-md w-1/4 mb-10"></div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+        <div className="h-32 bg-zinc-200 dark:bg-zinc-800 rounded-2xl col-span-2"></div>
+        <div className="h-32 bg-zinc-200 dark:bg-zinc-800 rounded-2xl"></div>
+      </div>
+      <div className="space-y-4 pt-6">
+        <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded-md w-full"></div>
+        <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded-md w-full"></div>
+        <div className="h-6 bg-zinc-200 dark:bg-zinc-800 rounded-md w-3/4"></div>
+      </div>
+    </div>
+  );
+};
+
 Content.Container.displayName = 'Container';
 Content.Divider.displayName = 'Divider';
 Content.Empty.displayName = 'Empty';
 Content.Title.displayName = 'Title';
+Content.Skeleton.displayName = 'Skeleton';
 
 export default Content;

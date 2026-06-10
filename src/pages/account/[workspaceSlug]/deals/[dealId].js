@@ -6,7 +6,7 @@ import { PlusIcon, XMarkIcon, PencilIcon, SparklesIcon, ChatBubbleBottomCenterTe
 import Link from 'next/link';
 import Content from '@/components/Content/index';
 import Meta from '@/components/Meta/index';
-import { AccountLayout } from '@/layouts/index';
+import AccountLayout from '@/layouts/AccountLayout';
 import useDeal from '@/hooks/data/useDeal';
 import useTasks from '@/hooks/data/useTasks';
 import usePipelines from '@/hooks/data/usePipelines';
