@@ -38,6 +38,10 @@ const menu = (workspaceId, options = {}) => {
           moduleKey: 'tasks',
         },
         {
+          name: 'Agendamentos',
+          path: `/account/${workspaceId}/bookings`,
+        },
+        {
           name: 'Web Forms',
           path: `/account/${workspaceId}/integrations/web-forms`,
           moduleKey: 'webforms',

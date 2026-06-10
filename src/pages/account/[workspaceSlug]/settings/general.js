@@ -46,6 +46,7 @@ const General = ({ isTeamOwner, workspace }) => {
   const [name, setName] = useState(workspace.name || '');
   const [slug, setSlug] = useState(workspace.slug || '');
   const [aiContext, setAiContext] = useState(workspace.aiContext || '');
+  const [aiSchedulingEnabled, setAiSchedulingEnabled] = useState(workspace.aiSchedulingEnabled || false);
   const validName = name.length > 0 && name.length <= 16;
   const validSlug =
     slug.length > 0 &&
@@ -112,6 +113,27 @@ const General = ({ isTeamOwner, workspace }) => {
     });
   };
 
+  const changeAiScheduling = (event) => {
+    const checked = event.target.checked;
+    setAiSchedulingEnabled(checked);
+    setSubmittingState(true);
+    api(`/api/workspace/${workspace.slug}/ai-scheduling`, {
+      body: { aiSchedulingEnabled: checked },
+      method: 'PUT',
+    }).then((response) => {
+      setSubmittingState(false);
+      if (response.error) {
+        toast.error(response.error.msg);
+        setAiSchedulingEnabled(!checked); // revert
+      } else {
+        toast.success(checked ? 'AI Scheduling enabled!' : 'AI Scheduling disabled!');
+      }
+    }).catch(() => {
+      setSubmittingState(false);
+      setAiSchedulingEnabled(!checked);
+    });
+  };
+
   const copyToClipboard = () => toast.success('Copied to clipboard!');
 
   const handleNameChange = (event) => setName(event.target.value);
@@ -124,6 +146,7 @@ const General = ({ isTeamOwner, workspace }) => {
     setName(workspace.name);
     setSlug(workspace.slug);
     setAiContext(workspace.aiContext || '');
+    setAiSchedulingEnabled(workspace.aiSchedulingEnabled || false);
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
 
@@ -250,6 +273,31 @@ const General = ({ isTeamOwner, workspace }) => {
               )}
             </Card.Footer>
           </Card>
+
+          {isTeamOwner && (
+            <Card>
+              <Card.Body
+                title="Permitir agendamentos por IA"
+                subtitle="Ative esta opção se desejar que o Autopilot marque reuniões e serviços usando o Google Calendar conectado."
+              >
+                <div className="flex items-center space-x-3 mt-2">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={aiSchedulingEnabled}
+                      onChange={changeAiScheduling}
+                      disabled={isSubmitting}
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-600"></div>
+                  </label>
+                  <span className="text-sm font-medium text-gray-700">
+                    {aiSchedulingEnabled ? 'Agendamentos via IA Ativados' : 'Desativado'}
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+          )}
 
           {/* Presets Card */}
           {isTeamOwner && (

@@ -110,7 +110,7 @@ export const checkAvailability = async (workspaceId, dateIso) => {
   };
 };
 
-export const createEvent = async (workspaceId, { title, description, startIso, endIso, emails }) => {
+export const createEvent = async (workspaceId, { title, description, startIso, endIso, emails, contactId }) => {
   const integration = await prisma.integration.findFirst({
     where: { workspaceId, provider: 'GOOGLE_CALENDAR' },
     select: { id: true, enabled: true, credentials: true },
@@ -146,6 +146,19 @@ export const createEvent = async (workspaceId, { title, description, startIso, e
     path: `/calendars/${encodeURIComponent(calendarId)}/events?sendUpdates=all`,
     method: 'POST',
     body,
+  });
+
+  // Save to database
+  await prisma.booking.create({
+    data: {
+      workspaceId,
+      contactId: contactId || null,
+      title: title || 'Meeting',
+      description: description || '',
+      startAt: new Date(startIso),
+      endAt: new Date(endIso),
+      providerEventId: created?.id || null,
+    }
   });
 
   return created;
