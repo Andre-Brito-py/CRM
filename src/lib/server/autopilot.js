@@ -8,7 +8,7 @@ import { log, reportError } from '@/lib/server/logger';
 import { createMessage } from '@/prisma/services/conversation';
 import getStripe from '@/lib/server/stripe';
 import { detectAiLanguage, getLanguageSystemInstruction } from '@/lib/server/ai-utils';
-
+import { checkAvailability, createEvent } from '@/lib/server/scheduling';
 
 // ── helpers ──────────────────────────────────────────
 const clampText = (v, max) => {
@@ -282,7 +282,6 @@ Nome do cliente: ${contactName}`;
 
   // 7. Call Unified AI Service with Tools
   const { generateChatCompletion } = await import('@/lib/server/ai/index');
-  const { checkAvailability, createEvent } = await import('@/lib/server/scheduling');
   let aiResponseData;
   let replyText = '';
   let finalUsage = { total_tokens: 0, prompt_tokens: 0, completion_tokens: 0 };
