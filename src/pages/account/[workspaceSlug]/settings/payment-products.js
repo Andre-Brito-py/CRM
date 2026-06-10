@@ -20,7 +20,7 @@ const formatMoney = (value, currency = 'BRL') =>
     Number(value || 0)
   );
 
-const PaymentProducts = ({ isTeamOwner, workspace }) => {
+const PaymentProducts = ({ isTeamOwner, workspace, platformFeePercentage }) => {
   const router = useRouter();
   const { setWorkspace } = useWorkspace();
   const { workspaceSlug } = router.query;
@@ -322,7 +322,7 @@ const PaymentProducts = ({ isTeamOwner, workspace }) => {
                   required
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Taxa da plataforma: 8% (o valor líquido será transferido para sua conta Stripe)
+                  Taxa da plataforma: {platformFeePercentage}% (o valor líquido será transferido para sua conta Stripe)
                 </p>
               </div>
               <div className="flex items-center gap-2 pt-6">
@@ -437,7 +437,14 @@ export const getServerSideProps = async (context) => {
     };
   }
 
-  return { props: { isTeamOwner, workspace } };
+  const { getPlatformFeeSettings } = await import('@/lib/server/payment-providers/resolver');
+  let platformFeePercentage = 8; // fallback
+  if (workspace) {
+    const { percentage } = await getPlatformFeeSettings(workspace.id);
+    platformFeePercentage = percentage;
+  }
+
+  return { props: { isTeamOwner, workspace, platformFeePercentage } };
 };
 
 export default PaymentProducts;
