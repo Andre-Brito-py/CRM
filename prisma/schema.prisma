@@ -417,6 +417,7 @@ model Workspace {
   extraWaMessages        Int       @default(0)
   extraAiTokens          Int       @default(0)
   aiSchedulingEnabled    Boolean   @default(false)
+  refundPolicyTime       String?
   aiContext              String?   @db.Text
   activities             Activity[]
   apiKeys                ApiKey[]
@@ -1272,6 +1273,7 @@ model Booking {
   contactId       String?
   title           String
   description     String?
+  status          String    @default("SCHEDULED") // SCHEDULED, CANCELED
   startAt         DateTime
   endAt           DateTime
   providerEventId String?

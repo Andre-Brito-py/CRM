@@ -47,6 +47,7 @@ const General = ({ isTeamOwner, workspace }) => {
   const [slug, setSlug] = useState(workspace.slug || '');
   const [aiContext, setAiContext] = useState(workspace.aiContext || '');
   const [aiSchedulingEnabled, setAiSchedulingEnabled] = useState(workspace.aiSchedulingEnabled || false);
+  const [refundPolicyTime, setRefundPolicyTime] = useState(workspace.refundPolicyTime || '');
   const validName = name.length > 0 && name.length <= 16;
   const validSlug =
     slug.length > 0 &&
@@ -142,11 +143,30 @@ const General = ({ isTeamOwner, workspace }) => {
 
   const handleAiContextChange = (event) => setAiContext(event.target.value);
 
+  const handleRefundPolicyChange = (event) => setRefundPolicyTime(event.target.value);
+
+  const changeRefundPolicy = (event) => {
+    event.preventDefault();
+    setSubmittingState(true);
+    api(`/api/workspace/${workspace.slug}/refund-policy`, {
+      body: { refundPolicyTime },
+      method: 'PUT',
+    }).then((response) => {
+      setSubmittingState(false);
+      if (response.error) {
+        toast.error(response.error.msg);
+      } else {
+        toast.success('Refund policy successfully updated!');
+      }
+    });
+  };
+
   useEffect(() => {
     setName(workspace.name);
     setSlug(workspace.slug);
     setAiContext(workspace.aiContext || '');
     setAiSchedulingEnabled(workspace.aiSchedulingEnabled || false);
+    setRefundPolicyTime(workspace.refundPolicyTime || '');
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
 
@@ -192,6 +212,34 @@ const General = ({ isTeamOwner, workspace }) => {
                   className="text-white bg-brand-600 hover:bg-brand-500"
                   disabled={!validName || isSubmitting}
                   onClick={changeName}
+                >
+                  Save
+                </Button>
+              )}
+            </Card.Footer>
+          </Card>
+          
+          <Card>
+            <Card.Body
+              title="Prazo de Reembolso (Cancelamentos)"
+              subtitle="Informe ao cliente qual o prazo estimado para estornos (Ex: '7 dias úteis')."
+            >
+              <input
+                className="px-3 py-2 border rounded md:w-1/2"
+                disabled={isSubmitting || !isTeamOwner}
+                onChange={handleRefundPolicyChange}
+                type="text"
+                value={refundPolicyTime}
+                placeholder="Ex: 5 a 10 dias úteis"
+              />
+            </Card.Body>
+            <Card.Footer>
+              <small>Será informado pela IA em caso de cancelamento.</small>
+              {isTeamOwner && (
+                <Button
+                  className="text-white bg-brand-600 hover:bg-brand-500"
+                  disabled={isSubmitting}
+                  onClick={changeRefundPolicy}
                 >
                   Save
                 </Button>

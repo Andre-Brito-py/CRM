@@ -74,6 +74,7 @@ const Bookings = () => {
               <thead className="bg-zinc-50/30 dark:bg-zinc-900/30 backdrop-blur-md">
                 <tr>
                   <th scope="col" className="px-10 py-6 text-[10px] font-black tracking-[0.25em] text-left text-zinc-400 uppercase italic">Título do Agendamento</th>
+                  <th scope="col" className="px-10 py-6 text-[10px] font-black tracking-[0.25em] text-left text-zinc-400 uppercase italic">Status</th>
                   <th scope="col" className="px-10 py-6 text-[10px] font-black tracking-[0.25em] text-left text-zinc-400 uppercase italic">Data / Hora</th>
                   <th scope="col" className="px-10 py-6 text-[10px] font-black tracking-[0.25em] text-left text-zinc-400 uppercase italic">Cliente</th>
                   <th scope="col" className="px-10 py-6 text-[10px] font-black tracking-[0.25em] text-left text-zinc-400 uppercase italic">Telefone</th>
@@ -93,6 +94,15 @@ const Bookings = () => {
                         <div className="text-[15px] font-executive font-extrabold text-zinc-950 dark:text-white uppercase italic tracking-tight">
                           {booking.title || 'Reunião'}
                         </div>
+                      </td>
+                      <td className="px-10 py-6 whitespace-nowrap">
+                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border inline-block italic ${
+                          booking.status === 'CANCELED' 
+                            ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800/50'
+                            : 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50'
+                        }`}>
+                          {booking.status === 'CANCELED' ? 'Cancelado' : 'Agendado'}
+                        </span>
                       </td>
                       <td className="px-10 py-6 whitespace-nowrap">
                         <div className="text-sm font-bold text-zinc-500 dark:text-zinc-400">

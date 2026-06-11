@@ -32,10 +32,11 @@ const handler = async (req, res) => {
       });
 
       if (exportCSV === 'true') {
-        const header = ['ID', 'Titulo', 'Inicio', 'Termino', 'Cliente', 'Telefone', 'E-mail', 'Criado em'].join(';');
+        const header = ['ID', 'Titulo', 'Status', 'Inicio', 'Termino', 'Cliente', 'Telefone', 'E-mail', 'Criado em'].join(';');
         const rows = bookings.map(b => [
           b.id,
           `"${(b.title || '').replace(/"/g, '""')}"`,
+          b.status,
           b.startAt.toISOString(),
           b.endAt.toISOString(),
           `"${(b.contact?.name || '').replace(/"/g, '""')}"`,
