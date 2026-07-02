@@ -261,6 +261,16 @@ const Automations = () => {
       return;
     }
 
+    if (newRule.actionType === 'SEND_SMS' && !newRule.actionConfig.message) {
+      toast.error('O texto da mensagem SMS é obrigatório.');
+      return;
+    }
+
+    if (newRule.actionType === 'SEND_SLACK_MESSAGE' && !newRule.actionConfig.message) {
+      toast.error('O texto da mensagem do Slack é obrigatório.');
+      return;
+    }
+
     if (newRule.actionType === 'MULTI_ACTIONS') {
       const actions = Array.isArray(newRule.actionConfig?.actions) ? newRule.actionConfig.actions : [];
       if (actions.length === 0) {
@@ -312,6 +322,16 @@ const Automations = () => {
 
         if (type === 'APPLY_TAG' && !cfg.tagId) {
           toast.error(t('automations.validation.tagRequired'));
+          return;
+        }
+
+        if (type === 'SEND_SMS' && !cfg.message) {
+          toast.error('O texto da mensagem SMS é obrigatório.');
+          return;
+        }
+
+        if (type === 'SEND_SLACK_MESSAGE' && !cfg.message) {
+          toast.error('O texto da mensagem do Slack é obrigatório.');
           return;
         }
       }
@@ -1050,6 +1070,8 @@ const Automations = () => {
                           });
                           else if (next === 'SEND_NOTIFICATION') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, userIdToNotify: '' } });
                           else if (next === 'SEND_NPS') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, surveyId: '', channel: 'whatsapp' } });
+                          else if (next === 'SEND_SMS') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, message: '' } });
+                          else if (next === 'SEND_SLACK_MESSAGE') setNewRule({ ...newRule, actionType: next, actionConfig: { ...base, message: '', webhookUrl: '' } });
                           else setNewRule({ ...newRule, actionType: next, actionConfig: base });
                         }}
                       >
@@ -1096,6 +1118,8 @@ const Automations = () => {
                             else if (nextType === 'APPLY_TAG') setAction({ type: nextType, config: { tagId: '' } });
                             else if (nextType === 'SEND_NOTIFICATION') setAction({ type: nextType, config: { userIdToNotify: '', title: '', content: '', link: '' } });
                             else if (nextType === 'SEND_NPS') setAction({ type: nextType, config: { surveyId: '', channel: 'whatsapp', message: '', subject: '', body: '' } });
+                            else if (nextType === 'SEND_SMS') setAction({ type: nextType, config: { message: '' } });
+                            else if (nextType === 'SEND_SLACK_MESSAGE') setAction({ type: nextType, config: { message: '', webhookUrl: '' } });
                             else setAction({ type: nextType, config: nextConfigBase });
                           };
 
@@ -1119,8 +1143,10 @@ const Automations = () => {
                                     <option value="CALL_WEBHOOK">{t('automations.action.option.callWebhook')}</option>
                                     <option value="MOVE_DEAL_STAGE">{t('automations.action.option.moveDealStage')}</option>
                                     <option value="APPLY_TAG">{t('automations.action.option.applyTag')}</option>
-                                    <option value="SEND_NOTIFICATION">Send Notification</option>
+                                    <option value="SEND_NOTIFICATION">Send In-App Notification</option>
                                     <option value="SEND_NPS">{t('automations.action.option.sendNps', 'Enviar Pesquisa NPS')}</option>
+                                    <option value="SEND_SMS">Enviar SMS (EUA)</option>
+                                    <option value="SEND_SLACK_MESSAGE">Enviar Mensagem no Slack</option>
                                   </select>
                                 </div>
                                 <button
@@ -1323,6 +1349,46 @@ const Automations = () => {
                                   </div>
                                 </>
                               )}
+                            </div>
+                          )}
+
+                          {type === 'SEND_SMS' && (
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700">Mensagem SMS (EUA)</label>
+                              <textarea
+                                rows={3}
+                                required
+                                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                                placeholder="Escreva a mensagem SMS. Use {{contact.firstName}} para o primeiro nome."
+                                value={config.message || ''}
+                                onChange={(e) => setAction({ config: { ...config, message: e.target.value } })}
+                              />
+                            </div>
+                          )}
+
+                          {type === 'SEND_SLACK_MESSAGE' && (
+                            <div className="space-y-3">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">Mensagem no Slack</label>
+                                <textarea
+                                  rows={3}
+                                  required
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                                  placeholder="Mensagem do Slack. Suporta Block Kit ou texto puro."
+                                  value={config.message || ''}
+                                  onChange={(e) => setAction({ config: { ...config, message: e.target.value } })}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700">URL do Webhook do Slack (Opcional)</label>
+                                <input
+                                  type="url"
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                                  placeholder="Deixe em branco para usar o webhook padrão da integração"
+                                  value={config.webhookUrl || ''}
+                                  onChange={(e) => setAction({ config: { ...config, webhookUrl: e.target.value } })}
+                                />
+                              </div>
                             </div>
                           )}
 
@@ -1914,6 +1980,55 @@ const Automations = () => {
                         </div>
                       </>
                     )}
+                  </div>
+                )}
+
+                {newRule.actionType === 'SEND_SMS' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Mensagem SMS (EUA)</label>
+                    <textarea
+                      rows={3}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                      placeholder="Escreva a mensagem SMS. Use {{contact.firstName}} para o primeiro nome."
+                      value={newRule.actionConfig.message || ''}
+                      onChange={(e) => setNewRule({
+                        ...newRule,
+                        actionConfig: { ...newRule.actionConfig, message: e.target.value }
+                      })}
+                    />
+                  </div>
+                )}
+
+                {newRule.actionType === 'SEND_SLACK_MESSAGE' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Mensagem no Slack</label>
+                      <textarea
+                        rows={3}
+                        required
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder="Mensagem do Slack. Suporta Block Kit ou texto puro."
+                        value={newRule.actionConfig.message || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, message: e.target.value }
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">URL do Webhook do Slack (Opcional)</label>
+                      <input
+                        type="url"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand-500 focus:ring-brand-500 sm:text-sm border p-2"
+                        placeholder="Deixe em branco para usar o webhook padrão da integração"
+                        value={newRule.actionConfig.webhookUrl || ''}
+                        onChange={(e) => setNewRule({
+                          ...newRule,
+                          actionConfig: { ...newRule.actionConfig, webhookUrl: e.target.value }
+                        })}
+                      />
+                    </div>
                   </div>
                 )}
 

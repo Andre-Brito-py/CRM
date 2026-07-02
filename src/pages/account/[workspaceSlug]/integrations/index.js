@@ -60,6 +60,22 @@ const Integrations = () => {
           icon: EnvelopeIcon,
           color: 'red',
           status: 'OAuth'
+        },
+        {
+          name: 'Rotação de E-mails',
+          description: 'Conecte múltiplos SMTPs para envio rotativo inteligente.',
+          href: `/account/${workspaceSlug}/integrations/inboxes`,
+          icon: EnvelopeIcon,
+          color: 'indigo',
+          status: 'Novo'
+        },
+        {
+          name: 'SMS A2P 10DLC',
+          description: 'Verifique a conformidade de suas campanhas de SMS nos EUA.',
+          href: `/account/${workspaceSlug}/integrations/sms/a2p-registration`,
+          icon: EnvelopeIcon,
+          color: 'amber',
+          status: 'EUA'
         }
       ]
     },
