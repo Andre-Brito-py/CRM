@@ -450,6 +450,7 @@ model Workspace {
   internalChatBridgeWorkspaces InternalChatBridgeWorkspace[]
   supportTickets         SupportTicket[]
   bookings               Booking[]
+  emailInboxes           EmailInbox[]
   creator                User                     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
 
   @@unique([workspaceCode, inviteCode])
@@ -1286,4 +1287,21 @@ model Booking {
   @@index([workspaceId])
   @@index([contactId])
   @@map("bookings")
+}
+
+model EmailInbox {
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String
+  provider    String    // "SMTP", "GMAIL", "OUTLOOK"
+  credentials Json      // Dados de autenticação criptografados (tokens OAuth ou SMTP config)
+  dailyLimit  Int       @default(50) // Limite diário recomendado para evitar spam
+  sentToday   Int       @default(0)
+  lastUsedAt  DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([workspaceId, email])
+  @@map("email_inboxes")
 }

@@ -73,6 +73,7 @@
     "stripe": "^10.13.0",
     "swr": "^1.3.0",
     "tailwind-merge": "^3.5.0",
+    "twilio": "^6.0.2",
     "validator": "^13.7.0",
     "web-push": "^3.6.7"
   },

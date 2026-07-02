@@ -2,6 +2,8 @@ import prisma from '@/prisma/index';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
 import { sendInstagramMessage } from '@/lib/server/instagram';
 import { sendMail } from '@/lib/server/mail';
+import { sendSlackMessage } from '@/lib/server/slack';
+import { sendTwilioSms, sendPlivoSms } from '@/lib/server/sms';
 import { isModuleAllowed } from '@/lib/server/subscription';
 import { createMessage, createConversation } from '@/prisma/services/conversation';
 import { createActivity } from '@/prisma/services/activity';
@@ -554,6 +556,16 @@ export const simulateAutomationRule = async (workspaceId, rule, eventData) => {
     preview.userIdToNotify = actionConfig?.userIdToNotify || null;
   }
 
+  if (actionType === 'SEND_SLACK_MESSAGE') {
+    preview.message = actionConfig?.message ? await renderTemplateString(workspaceId, actionConfig.message, { ...eventData }) : '';
+    preview.webhookUrl = actionConfig?.webhookUrl || 'Slack Channel Webhook';
+  }
+
+  if (actionType === 'SEND_SMS') {
+    preview.message = actionConfig?.message ? await renderTemplateString(workspaceId, actionConfig.message, { ...eventData }) : '';
+    preview.provider = actionConfig?.provider || 'TWILIO';
+  }
+
   if (actionType === 'APPLY_TAG') {
     preview.tagId = actionConfig?.tagId || null;
   }
@@ -644,6 +656,12 @@ const executeAction = async (workspaceId, triggerType, actionType, actionConfig,
       break;
     case 'SEND_NOTIFICATION':
       await executeSendNotificationAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'SEND_SLACK_MESSAGE':
+      await executeSendSlackMessageAction(workspaceId, actionConfig, eventData);
+      break;
+    case 'SEND_SMS':
+      await executeSendSmsAction(workspaceId, actionConfig, eventData);
       break;
     case 'SEND_NPS':
       await executeSendNpsAction(workspaceId, actionConfig, eventData);
@@ -1689,6 +1707,134 @@ const executeSendNotificationAction = async (workspaceId, actionConfig, eventDat
     console.error('Failed to execute Send Notification automation:', error);
     throw error;
   }
+};
+
+const executeSendSlackMessageAction = async (workspaceId, actionConfig, eventData) => {
+  const allowed = await isModuleAllowed(workspaceId, 'slack_integration');
+  if (!allowed) {
+    throw new Error('SLACK_INTEGRATION_MODULE_DISABLED');
+  }
+
+  let webhookUrl = actionConfig?.webhookUrl;
+  let messageTemplate = actionConfig?.message || '';
+
+  if (!webhookUrl) {
+    const integration = await prisma.integration.findFirst({
+      where: { workspaceId, provider: 'SLACK', enabled: true }
+    });
+    
+    if (integration) {
+      const creds = typeof integration.credentials === 'string' ? JSON.parse(integration.credentials) : integration.credentials;
+      webhookUrl = creds?.webhookUrl || null;
+    }
+  }
+
+  if (!webhookUrl) {
+    console.warn(`[slack-automation] Slack integration not configured for workspace ${workspaceId}.`);
+    return;
+  }
+
+  const text = await renderTemplateString(workspaceId, messageTemplate, eventData);
+  
+  if (!text) {
+    console.warn('[slack-automation] Empty message template, skipping send.');
+    return;
+  }
+
+  const result = await sendSlackMessage(webhookUrl, text);
+  
+  if (!result.success) {
+    throw new Error(`Slack send failed: ${result.error}`);
+  }
+  
+  console.log(`[slack-automation] Message sent successfully to Slack.`);
+};
+
+const executeSendSmsAction = async (workspaceId, actionConfig, eventData) => {
+  const allowed = await isModuleAllowed(workspaceId, 'sms_integration');
+  if (!allowed) {
+    throw new Error('SMS_INTEGRATION_MODULE_DISABLED');
+  }
+
+  let contactId = eventData?.contactId || eventData?.contact?.id || null;
+  let contactPhone = eventData?.contact?.phone || null;
+
+  if (!contactPhone && contactId) {
+    const contact = await prisma.contact.findFirst({
+      where: { id: contactId, workspaceId },
+      select: { id: true, phone: true }
+    });
+    contactPhone = contact?.phone || null;
+  }
+
+  if (!contactPhone) {
+    console.warn('[sms-automation] Contact phone number missing, skipping.');
+    return;
+  }
+
+  let formattedPhone = String(contactPhone).trim();
+  if (!formattedPhone.startsWith('+')) {
+    if (formattedPhone.length === 10 || (formattedPhone.length === 11 && formattedPhone.startsWith('1'))) {
+      formattedPhone = formattedPhone.startsWith('1') ? `+${formattedPhone}` : `+1${formattedPhone}`;
+    } else {
+      console.warn(`[sms-automation] Non-standard phone format "${formattedPhone}", sending as-is.`);
+    }
+  }
+
+  const messageTemplate = actionConfig?.message || '';
+  const text = await renderTemplateString(workspaceId, messageTemplate, eventData);
+
+  if (!text) {
+    console.warn('[sms-automation] Empty SMS body, skipping.');
+    return;
+  }
+
+  const integration = await prisma.integration.findFirst({
+    where: {
+      workspaceId,
+      provider: { in: ['TWILIO_SMS', 'PLIVO_SMS'] },
+      enabled: true
+    }
+  });
+
+  if (!integration) {
+    console.warn(`[sms-automation] No active SMS integration (TWILIO_SMS/PLIVO_SMS) found for workspace ${workspaceId}`);
+    return;
+  }
+
+  const creds = typeof integration.credentials === 'string' ? JSON.parse(integration.credentials) : integration.credentials;
+
+  let result;
+  if (integration.provider === 'TWILIO_SMS') {
+    result = await sendTwilioSms({
+      to: formattedPhone,
+      body: text,
+      accountSid: creds.accountSid,
+      authToken: creds.authToken,
+      from: creds.from
+    });
+  } else if (integration.provider === 'PLIVO_SMS') {
+    result = await sendPlivoSms({
+      to: formattedPhone,
+      body: text,
+      authId: creds.authId,
+      authToken: creds.authToken,
+      from: creds.from
+    });
+  }
+
+  if (result && !result.success) {
+    throw new Error(`SMS dispatch via ${integration.provider} failed: ${result.error}`);
+  }
+
+  console.log(`[sms-automation] SMS sent successfully via ${integration.provider}. Message ID: ${result?.messageId}`);
+
+  await createActivity(workspaceId, null, {
+    type: 'SMS_SENT',
+    title: 'SMS Sent via Automation',
+    content: safeJsonStringify({ provider: integration.provider, to: formattedPhone, body: text, messageId: result?.messageId }),
+    contactId,
+  }).catch(err => console.error('Error logging SMS activity:', err));
 };
 
 const executeSendNpsAction = async (workspaceId, actionConfig, eventData) => {

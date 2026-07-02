@@ -21,6 +21,9 @@ const DEFAULT_FREE_MODULES = {
     integrations: false,
     payments: false,
     meta_ads: false,
+    sms_integration: false,
+    slack_integration: false,
+    voice_dialer: false,
 };
 
 const ALL_MODULES_ENABLED = {
@@ -40,6 +43,9 @@ const ALL_MODULES_ENABLED = {
     integrations: true,
     payments: true,
     meta_ads: true,
+    sms_integration: true,
+    slack_integration: true,
+    voice_dialer: true,
 };
 
 /**

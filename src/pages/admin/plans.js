@@ -32,6 +32,9 @@ const AVAILABLE_MODULES = [
   { key: 'integrations', label: 'Integrações (Webhooks, APIs)' },
   { key: 'payments', label: 'Pagamentos / Cobranças' },
   { key: 'meta_ads', label: 'Meta Ads Analytics' },
+  { key: 'sms_integration', label: 'Integração de SMS (EUA)' },
+  { key: 'slack_integration', label: 'Integração do Slack' },
+  { key: 'voice_dialer', label: 'Discador de Voz & Voz IA' },
 ];
 
 const DEFAULT_MODULES = {};
