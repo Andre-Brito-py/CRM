@@ -152,6 +152,7 @@ const CATALOG = [
       { key: 'TWILIO_API_KEY', category: 'INTEGRATIONS', label: 'Twilio API Key', secret: true },
       { key: 'TWILIO_API_SECRET', category: 'INTEGRATIONS', label: 'Twilio API Secret', secret: true },
       { key: 'TWILIO_TWIML_APP_SID', category: 'INTEGRATIONS', label: 'Twilio TwiML App SID', secret: false },
+      { key: 'TWILIO_PHONE_NUMBER', category: 'INTEGRATIONS', label: 'Número de Telefone Twilio (Caller ID)', secret: false },
     ],
   },
   {
