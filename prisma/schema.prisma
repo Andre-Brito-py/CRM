@@ -418,6 +418,7 @@ model Workspace {
   extraAiTokens          Int       @default(0)
   aiSchedulingEnabled    Boolean   @default(false)
   refundPolicyTime       String?
+  scoutlyUrl             String?
   aiContext              String?   @db.Text
   activities             Activity[]
   apiKeys                ApiKey[]

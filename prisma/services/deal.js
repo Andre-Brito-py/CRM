@@ -146,6 +146,9 @@ export const updateDeal = async (id, workspaceId, data) => {
     processAutomation(updatedDeal.workspaceId, 'DEAL_STAGE_CHANGED', updatedDeal).catch(err =>
       console.error('Error triggering automation:', err)
     );
+    triggerScoutlyFeedbackWebhookIfWon(id, data.stageId).catch(err =>
+      console.error('Error triggering Scoutly feedback webhook:', err)
+    );
   }
 
   return updatedDeal;
@@ -171,6 +174,9 @@ export const updateDealStage = async (id, workspaceId, stageId) => {
     processAutomation(updatedDeal.workspaceId, 'DEAL_STAGE_CHANGED', updatedDeal).catch(err =>
       console.error('Error triggering automation:', err)
     );
+    triggerScoutlyFeedbackWebhookIfWon(id, stageId).catch(err =>
+      console.error('Error triggering Scoutly feedback webhook:', err)
+    );
   }
 
   return updatedDeal;
@@ -194,4 +200,64 @@ export const deleteDeal = async (id, workspaceId, actorId) => {
   }
 
   return result;
+};
+
+export const isWonStage = (stageName) => {
+  if (!stageName) return false;
+  const name = stageName.toLowerCase();
+  return (
+    name.includes('ganho') ||
+    name.includes('won') ||
+    name.includes('assinado') ||
+    name.includes('confirmado') ||
+    name.includes('confirmada') ||
+    name.includes('concluido') ||
+    name.includes('concluído') ||
+    name.includes('entregue')
+  );
+};
+
+export const triggerScoutlyFeedbackWebhookIfWon = async (dealId, newStageId) => {
+  try {
+    const newStage = await prisma.stage.findUnique({
+      where: { id: newStageId },
+      select: { name: true }
+    });
+
+    if (newStage && isWonStage(newStage.name)) {
+      const fullDeal = await prisma.deal.findUnique({
+        where: { id: dealId },
+        include: {
+          workspace: true,
+          company: true,
+          contact: true
+        }
+      });
+
+      if (fullDeal?.workspace?.scoutlyUrl) {
+        const scoutlyUrl = fullDeal.workspace.scoutlyUrl.trim().replace(/\/+$/, '');
+        const webhookUrl = `${scoutlyUrl}/api/webhooks/vysify-feedback`;
+        
+        const payload = {
+          status: 'won',
+          lead: {
+            companyName: fullDeal.company?.name || fullDeal.contact?.name || '',
+            personalizedMessage: (fullDeal.customFields && typeof fullDeal.customFields === 'object' && fullDeal.customFields.personalizedMessage) || '',
+            preferredChannel: fullDeal.contact?.preferredChannel || 'whatsapp',
+            segment: fullDeal.company?.industry || fullDeal.workspace.name || ''
+          }
+        };
+
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+      }
+    }
+  } catch (error) {
+    console.error('[scoutly-feedback] Error triggering feedback webhook:', error);
+  }
 };

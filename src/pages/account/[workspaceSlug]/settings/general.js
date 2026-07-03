@@ -38,7 +38,7 @@ const presetIcons = {
   restaurant: CakeIcon,
 };
 
-const General = ({ isTeamOwner, workspace }) => {
+const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
   const router = useRouter();
   const { setWorkspace } = useWorkspace();
   const { t } = useTranslation();
@@ -48,6 +48,8 @@ const General = ({ isTeamOwner, workspace }) => {
   const [aiContext, setAiContext] = useState(workspace.aiContext || '');
   const [aiSchedulingEnabled, setAiSchedulingEnabled] = useState(workspace.aiSchedulingEnabled || false);
   const [refundPolicyTime, setRefundPolicyTime] = useState(workspace.refundPolicyTime || '');
+  const [scoutlyUrl, setScoutlyUrl] = useState(workspace.scoutlyUrl || '');
+  const [origin, setOrigin] = useState('');
   const validName = name.length > 0 && name.length <= 16;
   const validSlug =
     slug.length > 0 &&
@@ -145,6 +147,31 @@ const General = ({ isTeamOwner, workspace }) => {
 
   const handleRefundPolicyChange = (event) => setRefundPolicyTime(event.target.value);
 
+  const handleScoutlyUrlChange = (event) => setScoutlyUrl(event.target.value);
+
+  const changeScoutlyUrl = (event) => {
+    event.preventDefault();
+    setSubmittingState(true);
+    api(`/api/workspace/${workspace.slug}/scoutly-url`, {
+      body: { scoutlyUrl },
+      method: 'PUT',
+    }).then((response) => {
+      setSubmittingState(false);
+      if (response.errors) {
+        Object.keys(response.errors).forEach((error) =>
+          toast.error(response.errors[error].msg)
+        );
+      } else if (response.error) {
+        toast.error(response.error.msg);
+      } else {
+        toast.success('Scoutly integration URL successfully updated!');
+      }
+    }).catch((err) => {
+      setSubmittingState(false);
+      toast.error(err.message || 'Failed to update Scoutly URL');
+    });
+  };
+
   const changeRefundPolicy = (event) => {
     event.preventDefault();
     setSubmittingState(true);
@@ -167,8 +194,15 @@ const General = ({ isTeamOwner, workspace }) => {
     setAiContext(workspace.aiContext || '');
     setAiSchedulingEnabled(workspace.aiSchedulingEnabled || false);
     setRefundPolicyTime(workspace.refundPolicyTime || '');
+    setScoutlyUrl(workspace.scoutlyUrl || '');
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setOrigin(window.location.origin);
+    }
+  }, []);
 
   const settingsSteps = [
     {
@@ -322,6 +356,47 @@ const General = ({ isTeamOwner, workspace }) => {
             </Card.Footer>
           </Card>
 
+          {scoutlyAllowed && (
+            <Card>
+              <Card.Body
+                title="SDR Autônomo (Scoutly)"
+                subtitle="Configure a URL do seu bot SDR (Scoutly) para enviar feedback quando as oportunidades forem fechadas como ganhas (Won) e gerar aprendizado contínuo (RAG Closed-Loop)."
+              >
+                <div className="flex flex-col gap-5 mt-2">
+                  <input
+                    className="px-3 py-2 border rounded md:w-1/2 text-sm"
+                    disabled={isSubmitting || !isTeamOwner}
+                    onChange={handleScoutlyUrlChange}
+                    type="url"
+                    value={scoutlyUrl}
+                    placeholder="Ex: https://scoutly.seu-dominio.com"
+                  />
+                  
+                  {workspace?.id && (
+                    <div className="rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/50 p-6 flex flex-col gap-2">
+                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Sua URL de Webhook no Vysify (Cole no painel do Scoutly)</span>
+                      <code className="text-xs text-indigo-600 dark:text-indigo-400 font-bold select-all bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-100 dark:border-zinc-800/30">
+                        {origin ? `${origin}/api/webhooks/scoutly?workspaceId=${workspace.id}` : `https://seu-dominio.com/api/webhooks/scoutly?workspaceId=${workspace.id}`}
+                      </code>
+                    </div>
+                  )}
+                </div>
+              </Card.Body>
+              <Card.Footer>
+                <small>Esta funcionalidade requer o plano Premium ativo do seu workspace.</small>
+                {isTeamOwner && (
+                  <Button
+                    className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20"
+                    disabled={isSubmitting}
+                    onClick={changeScoutlyUrl}
+                  >
+                    Salvar Configuração
+                  </Button>
+                )}
+              </Card.Footer>
+            </Card>
+          )}
+
           {isTeamOwner && (
             <Card>
               <Card.Body
@@ -422,6 +497,7 @@ export const getServerSideProps = async (context) => {
   let isTeamOwner = false;
   let workspace = null;
 
+  let scoutlyAllowed = false;
   if (session) {
     workspace = await getWorkspace(
       session.user.userId,
@@ -431,6 +507,8 @@ export const getServerSideProps = async (context) => {
 
     if (workspace) {
       isTeamOwner = isWorkspaceOwner(session.user.email, workspace);
+      const { isModuleAllowed } = await import('@/lib/server/subscription');
+      scoutlyAllowed = await isModuleAllowed(workspace.id, 'scoutly_integration');
     }
   }
 
@@ -460,6 +538,7 @@ export const getServerSideProps = async (context) => {
     props: {
       isTeamOwner,
       workspace,
+      scoutlyAllowed,
     },
   };
 };

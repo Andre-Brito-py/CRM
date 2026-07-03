@@ -299,6 +299,9 @@ export const getWorkspace = async (id, email, slug) => {
       workspaceCode: true,
       customFieldDefinitions: true,
       aiContext: true,
+      scoutlyUrl: true,
+      aiSchedulingEnabled: true,
+      refundPolicyTime: true,
       creator: { select: { email: true, customerPayment: true } },
       members: {
         select: {
