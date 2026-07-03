@@ -81,7 +81,8 @@ const createCredentialsProvider = () =>
           email: {
             equals: normalizedEmail,
             mode: 'insensitive',
-          }
+          },
+          deletedAt: null,
         }
       });
 
@@ -217,6 +218,15 @@ const buildBaseAuthOptions = (req) => {
       signIn: async ({ user, account }) => {
         const provider = String(account?.provider || '').trim().toLowerCase();
         if (!user?.id) return false;
+
+        const dbUserCheck = await prisma.user.findUnique({
+          where: { id: String(user.id) },
+          select: { deletedAt: true }
+        });
+        if (dbUserCheck?.deletedAt) {
+          return false;
+        }
+
         if (provider === 'credentials') return true;
 
         const getCookie = (name) => {
@@ -348,10 +358,10 @@ const buildBaseAuthOptions = (req) => {
 
         const dbUser = await prisma.user.findUnique({
           where: { id: userId },
-          select: { role: true, twoFactorEnabled: true, email: true, termsVersion: true, termsAcceptedAt: true },
+          select: { role: true, twoFactorEnabled: true, email: true, termsVersion: true, termsAcceptedAt: true, deletedAt: true },
         });
 
-        if (!dbUser) return token;
+        if (!dbUser || dbUser.deletedAt) return {};
 
         token.role = dbUser.role;
         token.email = dbUser.email;

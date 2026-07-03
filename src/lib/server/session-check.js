@@ -45,15 +45,20 @@ const validateMiddleware = () => {
     if (!activeSession) {
       errors.push({ param: 'session', msg: 'Unauthorized access' });
     } else {
-      // Security: Check if user is suspended in the database
+      // Security: Check if user is suspended or deactivated in the database
       const userId = activeSession.user.id || activeSession.user.userId;
       const dbUser = await prisma.user.findUnique({
         where: { id: userId },
-        select: { suspended: true }
+        select: { suspended: true, deletedAt: true }
       });
 
       if (dbUser?.suspended) {
         const errorObject = { msg: 'Your account is suspended', detail: 'Please contact support.' };
+        return res.status(401).json({ error: errorObject });
+      }
+
+      if (dbUser?.deletedAt) {
+        const errorObject = { msg: 'Your account has been deactivated', detail: 'Please contact support.' };
         return res.status(401).json({ error: errorObject });
       }
 

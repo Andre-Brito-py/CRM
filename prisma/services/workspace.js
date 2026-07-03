@@ -12,6 +12,7 @@ import {
 import { sendMail } from '@/lib/server/mail';
 import prisma from '@/prisma/index';
 import { createAuditLog } from '@/lib/server/audit';
+import getStripe from '@/lib/server/stripe';
 
 export const countWorkspaces = async (slug) =>
   await prisma.workspace.count({
@@ -53,6 +54,20 @@ export const deleteWorkspace = async (id, email, slug) => {
   const workspace = await getOwnWorkspace(id, email, slug);
 
   if (workspace) {
+    const platformSub = await prisma.platformSubscription.findUnique({
+      where: { workspaceId: workspace.id },
+      select: { providerSubscriptionId: true }
+    });
+
+    if (platformSub?.providerSubscriptionId) {
+      try {
+        const stripe = await getStripe();
+        await stripe.subscriptions.del(platformSub.providerSubscriptionId);
+      } catch (error) {
+        console.error('Failed to cancel workspace platform subscription in Stripe:', error);
+      }
+    }
+
     const now = new Date();
     await prisma.$transaction(async (tx) => {
       const conversations = await tx.conversation.findMany({
