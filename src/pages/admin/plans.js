@@ -35,6 +35,7 @@ const AVAILABLE_MODULES = [
   { key: 'sms_integration', label: 'Integração de SMS (EUA)' },
   { key: 'slack_integration', label: 'Integração do Slack' },
   { key: 'voice_dialer', label: 'Discador de Voz & Voz IA' },
+  { key: 'scoutly_integration', label: 'Integração SDR Scoutly' },
 ];
 
 const DEFAULT_MODULES = {};

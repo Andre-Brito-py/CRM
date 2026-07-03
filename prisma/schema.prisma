@@ -480,6 +480,7 @@ model Contact {
   name            String
   email           String?
   phone           String?
+  preferredChannel String?
   asaasCustomerId String?
   jobTitle        String?
   customFields    Json?

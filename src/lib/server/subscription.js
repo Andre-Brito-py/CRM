@@ -24,6 +24,7 @@ const DEFAULT_FREE_MODULES = {
     sms_integration: false,
     slack_integration: false,
     voice_dialer: false,
+    scoutly_integration: false,
 };
 
 const ALL_MODULES_ENABLED = {
@@ -46,6 +47,7 @@ const ALL_MODULES_ENABLED = {
     sms_integration: true,
     slack_integration: true,
     voice_dialer: true,
+    scoutly_integration: true,
 };
 
 /**
