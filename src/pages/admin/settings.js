@@ -145,6 +145,30 @@ const CATALOG = [
     ],
   },
   {
+    title: 'Twilio SMS / Voice',
+    items: [
+      { key: 'TWILIO_ACCOUNT_SID', category: 'INTEGRATIONS', label: 'Twilio Account SID', secret: false },
+      { key: 'TWILIO_AUTH_TOKEN', category: 'INTEGRATIONS', label: 'Twilio Auth Token', secret: true },
+      { key: 'TWILIO_API_KEY', category: 'INTEGRATIONS', label: 'Twilio API Key', secret: true },
+      { key: 'TWILIO_API_SECRET', category: 'INTEGRATIONS', label: 'Twilio API Secret', secret: true },
+      { key: 'TWILIO_TWIML_APP_SID', category: 'INTEGRATIONS', label: 'Twilio TwiML App SID', secret: false },
+    ],
+  },
+  {
+    title: 'Plivo SMS',
+    items: [
+      { key: 'PLIVO_AUTH_ID', category: 'INTEGRATIONS', label: 'Plivo Auth ID', secret: false },
+      { key: 'PLIVO_AUTH_TOKEN', category: 'INTEGRATIONS', label: 'Plivo Auth Token', secret: true },
+    ],
+  },
+  {
+    title: 'Agentes de Voz IA',
+    items: [
+      { key: 'BLAND_AI_API_KEY', category: 'INTEGRATIONS', label: 'Bland.ai API Key', secret: true },
+      { key: 'VAPI_AI_API_KEY', category: 'INTEGRATIONS', label: 'Vapi.ai API Key', secret: true },
+    ],
+  },
+  {
     title: 'Analytics',
     items: [{ key: 'GOOGLE_ANALYTICS_ID', category: 'INTEGRATIONS', label: 'Google Analytics ID', secret: false, public: true }],
   },
