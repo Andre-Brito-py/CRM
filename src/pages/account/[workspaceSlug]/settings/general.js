@@ -58,6 +58,14 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
   const [twilioApiSecret, setTwilioApiSecret] = useState(workspace.twilioApiSecret || '');
   const [twilioTwimlAppSid, setTwilioTwimlAppSid] = useState(workspace.twilioTwimlAppSid || '');
   const [twilioPhoneNumber, setTwilioPhoneNumber] = useState(workspace.twilioPhoneNumber || '');
+
+  // Twilio Purchasing States
+  const [areaCode, setAreaCode] = useState('11');
+  const [availableNumbers, setAvailableNumbers] = useState([]);
+  const [searchingNumbers, setSearchingNumbers] = useState(false);
+  const [selectedNumber, setSelectedNumber] = useState('');
+  const [buyingNumber, setBuyingNumber] = useState(false);
+  const [telephonyBalance, setTelephonyBalance] = useState(Number(workspace.telephonyBalance || 0));
   const validName = name.length > 0 && name.length <= 16;
   const validSlug =
     slug.length > 0 &&
@@ -215,6 +223,59 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
     });
   };
 
+  const searchNumbers = async (e) => {
+    e.preventDefault();
+    if (!areaCode) return toast.error('Digite um DDD válido.');
+    setSearchingNumbers(true);
+    try {
+      const response = await api(`/api/workspace/${workspace.slug}/twilio/available-numbers?areaCode=${areaCode}`);
+      if (response.error) {
+        toast.error(response.error.msg || 'Erro ao buscar números.');
+      } else if (response.data) {
+        setAvailableNumbers(response.data);
+        if (response.data.length > 0) {
+          setSelectedNumber(response.data[0].phoneNumber);
+        } else {
+          toast.info('Nenhum número disponível encontrado para este DDD.');
+        }
+      }
+    } catch (err) {
+      toast.error('Erro de conexão ao buscar números.');
+    } finally {
+      setSearchingNumbers(false);
+    }
+  };
+
+  const buyNumber = async (e) => {
+    e.preventDefault();
+    if (!selectedNumber) return toast.error('Selecione um número de telefone da lista.');
+    setBuyingNumber(true);
+    setSubmittingState(true);
+    try {
+      const response = await api(`/api/workspace/${workspace.slug}/twilio/buy-number`, {
+        body: { phoneNumber: selectedNumber },
+        method: 'POST',
+      });
+      if (response.error) {
+        toast.error(response.error.msg || 'Falha ao comprar número.');
+      } else if (response.data) {
+        toast.success(`Número ${response.data.friendlyName} ativado com sucesso!`);
+        setTwilioPhoneNumber(response.data.phoneNumber);
+        setAvailableNumbers([]);
+        const setupCost = workspace.telephonyCurrency === 'BRL' ? 10.00 : 2.00;
+        const isCustomTwilio = !!(twilioAccountSid && twilioAuthToken);
+        if (!isCustomTwilio) {
+          setTelephonyBalance(prev => Math.max(prev - setupCost, 0));
+        }
+      }
+    } catch (err) {
+      toast.error('Erro de conexão ao ativar número.');
+    } finally {
+      setBuyingNumber(false);
+      setSubmittingState(false);
+    }
+  };
+
   const changeRefundPolicy = (event) => {
     event.preventDefault();
     setSubmittingState(true);
@@ -244,6 +305,7 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
     setTwilioApiSecret(workspace.twilioApiSecret || '');
     setTwilioTwimlAppSid(workspace.twilioTwimlAppSid || '');
     setTwilioPhoneNumber(workspace.twilioPhoneNumber || '');
+    setTelephonyBalance(Number(workspace.telephonyBalance || 0));
     setWorkspace(workspace);
   }, [workspace, setWorkspace]);
 
@@ -533,6 +595,67 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
                       </code>
                     </div>
                   )}
+
+                  {/* Automated Number Purchasing Section */}
+                  <div className="col-span-1 md:col-span-2 border-t pt-6 mt-4 flex flex-col gap-4">
+                    <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Adquirir Número Virtual em 1 Clique</h3>
+                    <p className="text-xs text-gray-500">
+                      Escolha o seu DDD e encontre números disponíveis para ativar na sua conta global.
+                      {!twilioAccountSid && (
+                        <span className="block text-indigo-600 font-semibold mt-1">
+                          Saldo Atual de Telefonia: {workspace.telephonyCurrency || 'USD'} {telephonyBalance.toFixed(2)}
+                        </span>
+                      )}
+                    </p>
+
+                    <div className="flex flex-col md:flex-row gap-4 items-end">
+                      <div className="flex flex-col gap-1 w-full md:w-1/3">
+                        <label className="text-xs font-bold text-gray-600 dark:text-gray-400">DDD / Código de Área</label>
+                        <input
+                          className="px-3 py-2 border rounded text-sm w-full"
+                          disabled={searchingNumbers || buyingNumber}
+                          onChange={(e) => setAreaCode(e.target.value)}
+                          type="text"
+                          value={areaCode}
+                          placeholder="Ex: 11"
+                        />
+                      </div>
+                      <Button
+                        className="text-white bg-zinc-800 hover:bg-zinc-700 shadow-md h-[38px] w-full md:w-auto"
+                        disabled={searchingNumbers || buyingNumber}
+                        onClick={searchNumbers}
+                      >
+                        {searchingNumbers ? 'Buscando...' : 'Buscar Números'}
+                      </Button>
+                    </div>
+
+                    {availableNumbers.length > 0 && (
+                      <div className="flex flex-col md:flex-row gap-4 items-end bg-zinc-50 dark:bg-zinc-800/20 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/40 mt-2">
+                        <div className="flex flex-col gap-1 w-full md:w-2/3">
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Selecione um Número</label>
+                          <select
+                            className="px-3 py-2 border rounded text-sm w-full bg-white dark:bg-zinc-900"
+                            disabled={buyingNumber}
+                            onChange={(e) => setSelectedNumber(e.target.value)}
+                            value={selectedNumber}
+                          >
+                            {availableNumbers.map((num) => (
+                              <option key={num.phoneNumber} value={num.phoneNumber}>
+                                {num.friendlyName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <Button
+                          className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 w-full md:w-auto h-[38px]"
+                          disabled={buyingNumber || !selectedNumber}
+                          onClick={buyNumber}
+                        >
+                          {buyingNumber ? 'Comprando...' : 'Ativar Número Selecionado'}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Card.Body>
               <Card.Footer>
