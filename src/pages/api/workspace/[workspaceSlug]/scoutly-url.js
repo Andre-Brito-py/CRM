@@ -1,7 +1,7 @@
 import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import prisma from '@/prisma/index';
-import { getSubscriptionStatus } from '@/lib/server/subscription';
+import { isModuleAllowed } from '@/lib/server/subscription';
 
 const handler = async (req, res) => {
   const { method } = req;
