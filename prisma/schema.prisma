@@ -425,6 +425,9 @@ model Workspace {
   twilioApiSecret        String?
   twilioTwimlAppSid      String?
   twilioPhoneNumber      String?
+  telephonyBalance       Decimal                  @default(0.00) @db.Decimal(10, 2)
+  telephonyCurrency      String                   @default("USD")
+  telephonyTransactions  TelephonyTransaction[]
   aiContext              String?   @db.Text
   activities             Activity[]
   apiKeys                ApiKey[]
@@ -1312,4 +1315,19 @@ model EmailInbox {
   
   @@unique([workspaceId, email])
   @@map("email_inboxes")
+}
+
+model TelephonyTransaction {
+  id          String   @id @default(uuid())
+  workspaceId String
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String
+  type        String   // "DEBIT" or "CREDIT"
+  description String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("telephony_transactions")
 }

@@ -33,8 +33,25 @@ export default async function handler(req, res) {
         ],
         deletedAt: null
       },
-      select: { twilioPhoneNumber: true }
+      select: {
+        id: true,
+        twilioPhoneNumber: true,
+        telephonyBalance: true,
+        telephonyCurrency: true,
+      }
     });
+  }
+
+  // Enforce balance checks before connecting the outbound call
+  if (workspace) {
+    const balance = Number(workspace.telephonyBalance || 0);
+    if (balance <= 0) {
+      res.setHeader('Content-Type', 'text/xml');
+      return res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say language="pt-BR">Saldo insuficiente para completar a chamada. Por favor, recarregue no painel do Víssifai.</Say>
+</Response>`);
+    }
   }
 
   // Get the caller ID (our Twilio number) from workspace, query parameter, system config, or environment variables
@@ -63,10 +80,19 @@ export default async function handler(req, res) {
 </Response>`);
   }
 
+  // Build the status callback URL dynamically to rate and bill the call
+  let numberElement = `<Number>${to}</Number>`;
+  if (workspace?.id) {
+    const host = req.headers.host || 'vysify.com';
+    const protocol = req.headers['x-forwarded-proto'] || (host.includes('localhost') ? 'http' : 'https');
+    const callbackUrl = `${protocol}://${host}/api/integrations/twilio/voice-status?workspaceId=${workspace.id}`;
+    numberElement = `<Number statusCallbackEvent="completed" statusCallback="${callbackUrl}">${to}</Number>`;
+  }
+
   return res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Dial callerId="${callerId}">
-        <Number>${to}</Number>
+        ${numberElement}
     </Dial>
 </Response>`);
 }

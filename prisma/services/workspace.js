@@ -308,6 +308,8 @@ export const getWorkspace = async (id, email, slug) => {
       twilioApiSecret: true,
       twilioTwimlAppSid: true,
       twilioPhoneNumber: true,
+      telephonyBalance: true,
+      telephonyCurrency: true,
       creator: {
         select: {
           email: true,
