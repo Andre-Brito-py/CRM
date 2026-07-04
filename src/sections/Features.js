@@ -11,6 +11,9 @@ import {
   MegaphoneIcon,
   ArrowTrendingUpIcon,
   CursorArrowRaysIcon,
+  PhoneIcon,
+  EnvelopeIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 
 const Features = () => {
@@ -339,40 +342,40 @@ const Features = () => {
              </div>
           </motion.div>
 
-          {/* Small Feature: Power Analytics */}
+          {/* Small Feature: Rotação de SMTPs */}
           <motion.div 
             variants={itemVariants}
             className="md:col-span-2 p-8 bg-white border border-zinc-100 rounded-[32px] shadow-xl hover:border-indigo-500/30 transition-all duration-500"
           >
-             <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-900 mb-4 border border-zinc-100">
-                <ChartBarIcon className="w-5 h-5" />
+             <div className="w-10 h-10 bg-[#eef2ff] rounded-xl flex items-center justify-center text-indigo-600 mb-4 border border-indigo-100">
+                <EnvelopeIcon className="w-5 h-5" />
              </div>
-             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">Power Analytics</h4>
-             <p className="text-zinc-500 text-sm font-medium">Métricas acionáveis sob seu comando.</p>
+             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">Rotação de SMTPs</h4>
+             <p className="text-zinc-500 text-sm font-medium">Conecte múltiplas caixas e rotacione os envios automaticamente para fugir do spam.</p>
           </motion.div>
 
-          {/* Small Feature: No-Code Hub */}
+          {/* Small Feature: Voz IA & Click-to-Call */}
           <motion.div 
             variants={itemVariants}
             className="md:col-span-2 p-8 bg-white border border-zinc-100 rounded-[32px] shadow-xl hover:border-indigo-500/30 transition-all duration-500"
           >
-             <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-900 mb-4 border border-zinc-100">
-                <ArrowPathIcon className="w-5 h-5" />
+             <div className="w-10 h-10 bg-[#fdf2f8] rounded-xl flex items-center justify-center text-pink-600 mb-4 border border-pink-100">
+                <PhoneIcon className="w-5 h-5" />
              </div>
-             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">No-Code Hub</h4>
-             <p className="text-zinc-500 text-sm font-medium">Pipelines adaptáveis ao seu negócio.</p>
+             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">Voz IA & Click-to-Call</h4>
+             <p className="text-zinc-500 text-sm font-medium">Chamadas automáticas com robôs realistas (Bland/Vapi) ou ligações manuais em 1 clique.</p>
           </motion.div>
 
-          {/* Small Feature: Security */}
+          {/* Small Feature: SMS & Slack */}
           <motion.div 
             variants={itemVariants}
             className="md:col-span-2 p-8 bg-white border border-zinc-100 rounded-[32px] shadow-xl hover:border-indigo-500/30 transition-all duration-500"
           >
-             <div className="w-10 h-10 bg-zinc-50 rounded-xl flex items-center justify-center text-zinc-900 mb-4 border border-zinc-100">
-                <ShieldCheckIcon className="w-5 h-5" />
+             <div className="w-10 h-10 bg-[#fef3c7] rounded-xl flex items-center justify-center text-amber-600 mb-4 border border-amber-100">
+                <ChatBubbleLeftRightIcon className="w-5 h-5" />
              </div>
-             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">Enterprise Ready</h4>
-             <p className="text-zinc-500 text-sm font-medium">Arquitetura bancária com ISO 27001.</p>
+             <h4 className="text-base font-black text-zinc-900 uppercase tracking-tighter mb-2">SMS & Alertas Slack</h4>
+             <p className="text-zinc-500 text-sm font-medium">Envie SMS em conformidade nos EUA (A2P 10DLC) e receba alertas rápidos no Slack do seu time.</p>
           </motion.div>
 
         </motion.div>
