@@ -302,7 +302,17 @@ export const getWorkspace = async (id, email, slug) => {
       scoutlyUrl: true,
       aiSchedulingEnabled: true,
       refundPolicyTime: true,
-      creator: { select: { email: true, customerPayment: true } },
+      creator: {
+        select: {
+          email: true,
+          customerPayment: {
+            select: {
+              subscriptionType: true,
+              providerSubscriptionId: true,
+            },
+          },
+        },
+      },
       members: {
         select: {
           email: true,
