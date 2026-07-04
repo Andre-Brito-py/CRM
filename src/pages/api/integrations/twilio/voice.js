@@ -1,4 +1,5 @@
 import { getSystemConfig } from '@/lib/server/config';
+import prisma from '@/prisma/index';
 
 export default async function handler(req, res) {
   // Twilio sends webhooks via POST by default, but we can support GET for easy testing
@@ -18,8 +19,27 @@ export default async function handler(req, res) {
 </Response>`);
   }
 
-  // Get the caller ID (our Twilio number) from query parameter, system config, or environment variables
-  const callerId = req.query.from || 
+  // Look up workspace custom caller ID if workspaceId or workspaceSlug is provided in the webhook URL
+  const workspaceId = req.query.workspaceId || params.workspaceId;
+  const workspaceSlug = req.query.workspaceSlug || params.workspaceSlug;
+  
+  let workspace = null;
+  if (workspaceId || workspaceSlug) {
+    workspace = await prisma.workspace.findFirst({
+      where: {
+        OR: [
+          ...(workspaceId ? [{ id: String(workspaceId) }] : []),
+          ...(workspaceSlug ? [{ slug: String(workspaceSlug) }] : []),
+        ],
+        deletedAt: null
+      },
+      select: { twilioPhoneNumber: true }
+    });
+  }
+
+  // Get the caller ID (our Twilio number) from workspace, query parameter, system config, or environment variables
+  const callerId = workspace?.twilioPhoneNumber ||
+                   req.query.from || 
                    await getSystemConfig('TWILIO_PHONE_NUMBER', process.env.TWILIO_PHONE_NUMBER || process.env.TWILIO_FROM);
 
   res.setHeader('Content-Type', 'text/xml');

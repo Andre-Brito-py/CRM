@@ -12,22 +12,19 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Get Twilio Voice configurations
-  const accountSid = await getSystemConfig('TWILIO_ACCOUNT_SID', process.env.TWILIO_ACCOUNT_SID);
-  const apiKey = await getSystemConfig('TWILIO_API_KEY', process.env.TWILIO_API_KEY);
-  const apiSecret = await getSystemConfig('TWILIO_API_SECRET', process.env.TWILIO_API_SECRET);
-  const twimlAppSid = await getSystemConfig('TWILIO_TWIML_APP_SID', process.env.TWILIO_TWIML_APP_SID);
-
-  if (!accountSid || !apiKey || !apiSecret || !twimlAppSid) {
-    return res.status(500).json({ error: 'Twilio Voice credentials are not fully configured.' });
-  }
-
-  // Enforce plan/subscription limits
+  // Enforce plan/subscription limits and load workspace overrides
   const { workspaceSlug } = req.query;
+  let workspace = null;
   if (workspaceSlug) {
-    const workspace = await prisma.workspace.findFirst({
+    workspace = await prisma.workspace.findFirst({
       where: { slug: String(workspaceSlug), deletedAt: null },
-      select: { id: true },
+      select: {
+        id: true,
+        twilioAccountSid: true,
+        twilioApiKey: true,
+        twilioApiSecret: true,
+        twilioTwimlAppSid: true,
+      },
     });
     if (workspace) {
       const allowed = await isModuleAllowed(workspace.id, 'voice_dialer');
@@ -35,6 +32,16 @@ export default async function handler(req, res) {
         return res.status(403).json({ error: 'VOICE_DIALER_MODULE_DISABLED' });
       }
     }
+  }
+
+  // Get Twilio Voice configurations with workspace overrides fallback to global settings
+  const accountSid = workspace?.twilioAccountSid || await getSystemConfig('TWILIO_ACCOUNT_SID', process.env.TWILIO_ACCOUNT_SID);
+  const apiKey = workspace?.twilioApiKey || await getSystemConfig('TWILIO_API_KEY', process.env.TWILIO_API_KEY);
+  const apiSecret = workspace?.twilioApiSecret || await getSystemConfig('TWILIO_API_SECRET', process.env.TWILIO_API_SECRET);
+  const twimlAppSid = workspace?.twilioTwimlAppSid || await getSystemConfig('TWILIO_TWIML_APP_SID', process.env.TWILIO_TWIML_APP_SID);
+
+  if (!accountSid || !apiKey || !apiSecret || !twimlAppSid) {
+    return res.status(500).json({ error: 'Twilio Voice credentials are not fully configured.' });
   }
 
   try {

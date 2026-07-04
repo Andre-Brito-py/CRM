@@ -419,6 +419,12 @@ model Workspace {
   aiSchedulingEnabled    Boolean   @default(false)
   refundPolicyTime       String?
   scoutlyUrl             String?
+  twilioAccountSid       String?
+  twilioAuthToken        String?
+  twilioApiKey           String?
+  twilioApiSecret        String?
+  twilioTwimlAppSid      String?
+  twilioPhoneNumber      String?
   aiContext              String?   @db.Text
   activities             Activity[]
   apiKeys                ApiKey[]

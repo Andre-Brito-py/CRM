@@ -302,6 +302,12 @@ export const getWorkspace = async (id, email, slug) => {
       scoutlyUrl: true,
       aiSchedulingEnabled: true,
       refundPolicyTime: true,
+      twilioAccountSid: true,
+      twilioAuthToken: true,
+      twilioApiKey: true,
+      twilioApiSecret: true,
+      twilioTwimlAppSid: true,
+      twilioPhoneNumber: true,
       creator: {
         select: {
           email: true,
