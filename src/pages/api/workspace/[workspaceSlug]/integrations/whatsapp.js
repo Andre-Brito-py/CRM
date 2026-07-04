@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       const integrations = await prisma.integration.findMany({
         where: {
           workspaceId: workspace.id,
-          provider: { in: ['WHATSAPP', 'whatsapp'] },
+          provider: { in: ['WHATSAPP', 'whatsapp', 'EVOLUTION'] },
         },
       });
 

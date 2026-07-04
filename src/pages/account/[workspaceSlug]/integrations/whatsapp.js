@@ -70,6 +70,11 @@ const WhatsAppSettings = () => {
     businessAccountId: '',
   });
 
+  // Evolution API States
+  const [qrCode, setQrCode] = useState(null);
+  const [isGeneratingQr, setIsGeneratingQr] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
+
   const messageTotals = whatsappAnalytics?.messageTotals || { inbound: 0, outbound: 0, total: 0 };
 
   const locale = useMemo(() => {
@@ -153,7 +158,95 @@ const WhatsAppSettings = () => {
     }
   };
 
-  const handleDelete = async (integrationId) => {
+  // Evolution API Connection Logic
+  const generateQrCode = async () => {
+    setIsGeneratingQr(true);
+    setQrCode(null);
+    try {
+      const response = await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/evolution/connect`, {
+        method: 'POST',
+      });
+      if (response.error) {
+        toast.error(response.error.msg || 'Erro ao gerar QR Code');
+      } else if (response.data?.qrcode) {
+        setQrCode(response.data.qrcode);
+        setConnectionStatus('scanning');
+        toast.success('QR Code gerado com sucesso! Escaneie para conectar.');
+      }
+    } catch (err) {
+      toast.error('Erro de conexão ao gerar QR Code.');
+    } finally {
+      setIsGeneratingQr(false);
+    }
+  };
+
+  const handleEvolutionDisconnect = async () => {
+    if (confirm('Tem certeza de que deseja desconectar este número de WhatsApp? Todos os envios de mensagens do Closer AI serão interrompidos.')) {
+      setIsLoading(true);
+      try {
+        const response = await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/evolution/disconnect`, {
+          method: 'POST',
+        });
+        if (response.error) {
+          toast.error(response.error.msg || 'Erro ao desconectar.');
+        } else {
+          toast.success('WhatsApp desconectado com sucesso.');
+          setConnectionStatus('disconnected');
+          setQrCode(null);
+          fetchIntegrations();
+        }
+      } catch (err) {
+        toast.error('Erro de conexão ao desconectar.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // Sync connectionStatus with integrations loaded from DB
+  useEffect(() => {
+    if (integrations.length > 0) {
+      const hasEvo = integrations.find(i => i.provider === 'EVOLUTION');
+      if (hasEvo) {
+        setConnectionStatus(hasEvo.credentials?.status === 'open' ? 'open' : 'disconnected');
+      } else {
+        setConnectionStatus('disconnected');
+      }
+    } else {
+      setConnectionStatus('disconnected');
+    }
+  }, [integrations]);
+
+  // Polling for QR Code status updates
+  useEffect(() => {
+    let intervalId;
+    if (connectionStatus === 'scanning' && workspaceSlug) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/evolution/status`);
+          if (response.data?.status === 'open') {
+            setConnectionStatus('open');
+            setQrCode(null);
+            toast.success('WhatsApp conectado com sucesso!');
+            clearInterval(intervalId);
+            fetchIntegrations();
+          }
+        } catch (err) {
+          console.error('Erro ao verificar status do WhatsApp:', err);
+        }
+      }, 4000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [connectionStatus, workspaceSlug, fetchIntegrations]);
+
+  const handleDelete = async (integration) => {
+    if (integration.provider === 'EVOLUTION') {
+      await handleEvolutionDisconnect();
+      return;
+    }
+    const integrationId = integration.id;
     if (confirm(t('whatsapp.settings.deleteConfirm'))) {
       try {
         await api(`/api/workspace/${workspaceSlug}/integrations/whatsapp/${integrationId}`, {
@@ -310,28 +403,79 @@ const WhatsAppSettings = () => {
               ) : null}
             </div>
 
-            <div className="bg-zinc-950 rounded-[32px] p-10 text-white relative overflow-hidden shadow-premium flex flex-col justify-between">
+            <div className="bg-zinc-950 rounded-[32px] p-10 text-white relative overflow-hidden shadow-premium flex flex-col justify-between min-h-[480px]">
               <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -mr-24 -mt-24" />
-              <div className="relative z-10">
+              <div className="relative z-10 flex flex-col items-center text-center w-full">
                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
-                  <LinkIcon className="w-6 h-6 text-emerald-400" />
+                  <ChatBubbleLeftRightIcon className="w-6 h-6 text-emerald-400" />
                 </div>
-                <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-4">Connection Guide</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-8">
-                  Connect your business numbers via Meta&apos;s Cloud API to start receiving messages directly in Vysify.
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    'Create a Meta App',
-                    'Configure Webhooks',
-                    'Generate Access Token'
-                  ].map((step, i) => (
-                    <li key={i} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-zinc-300">
-                      <span className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[10px] text-zinc-500 border border-white/5">{i+1}</span>
-                      {step}
-                    </li>
-                  ))}
-                </ul>
+                
+                {connectionStatus === 'open' ? (
+                  <div className="w-full">
+                    <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-2">WhatsApp Conectado</h3>
+                    <div className="flex items-center justify-center gap-2 mb-6">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-glow-emerald animate-pulse" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Ativo no Workspace</span>
+                    </div>
+                    
+                    <div className="p-6 bg-white/5 border border-white/10 rounded-3xl w-full mb-8 backdrop-blur-sm flex flex-col items-center">
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Número Conectado</span>
+                      <span className="text-lg font-black text-zinc-100 tabular-nums">
+                        {integrations.find(i => i.provider === 'EVOLUTION')?.credentials?.connectedNumber || 'Número escaneado'}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={handleEvolutionDisconnect}
+                      className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-lg"
+                    >
+                      Desconectar WhatsApp
+                    </button>
+                  </div>
+                ) : qrCode ? (
+                  <div className="w-full flex flex-col items-center">
+                    <h3 className="text-xl font-executive font-extrabold tracking-tighter mb-2">Escaneie o QR Code</h3>
+                    <p className="text-zinc-400 text-xs leading-relaxed mb-6">
+                      Abra o WhatsApp no seu celular, vá em Aparelhos Conectados e escaneie o código abaixo.
+                    </p>
+
+                    <div className="p-4 bg-white rounded-3xl mb-6 shadow-2xl relative overflow-hidden group">
+                      <img src={qrCode} alt="WhatsApp QR Code" className="w-48 h-48 object-contain" />
+                      {connectionStatus === 'scanning' && (
+                        <div className="absolute inset-0 bg-white/90 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="flex flex-col items-center gap-2">
+                            <div className="w-8 h-8 border-4 border-zinc-100 border-t-emerald-500 rounded-full animate-spin" />
+                            <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest text-zinc-800">Aguardando leitura...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={generateQrCode}
+                      disabled={isGeneratingQr}
+                      className="text-xs font-black text-emerald-400 hover:text-emerald-300 uppercase tracking-widest transition-all flex items-center gap-1.5"
+                    >
+                      {isGeneratingQr ? 'Gerando...' : 'Recarregar QR Code'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-full">
+                    <h3 className="text-2xl font-executive font-extrabold tracking-tighter mb-4">Conexão Instantânea</h3>
+                    <p className="text-zinc-400 text-sm leading-relaxed mb-8">
+                      Conecte seu WhatsApp escaneando um QR Code para habilitar o Closer AI e automações sem limite de 24h.
+                    </p>
+
+                    <button
+                      onClick={generateQrCode}
+                      disabled={isGeneratingQr}
+                      className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest transition-all shadow-glow-emerald flex items-center justify-center gap-2"
+                    >
+                      {isGeneratingQr && <div className="w-3.5 h-3.5 border-2 border-white/20 border-t-white rounded-full animate-spin" />}
+                      {isGeneratingQr ? 'Gerando QR Code...' : 'Gerar QR Code de Conexão'}
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="mt-10 relative z-10">
                 <div className="text-center p-6 bg-white/5 rounded-[24px] border border-white/10 backdrop-blur-sm">
@@ -396,19 +540,31 @@ const WhatsAppSettings = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => openEditModal(integration)} className="p-2.5 text-zinc-400 hover:text-zinc-950 hover:bg-zinc-50 rounded-xl transition-all">
-                          <PencilIcon className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => handleDelete(integration.id)} className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                        {integration.provider !== 'EVOLUTION' && (
+                          <button onClick={() => openEditModal(integration)} className="p-2.5 text-zinc-400 hover:text-zinc-950 hover:bg-zinc-50 rounded-xl transition-all">
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(integration)} className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                     <div className="space-y-4 pt-6 mt-2 border-t border-zinc-50 relative z-10">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('whatsapp.settings.card.phoneId')}</span>
-                        <span className="text-xs font-black text-zinc-900 tabular-nums">{integration.credentials?.phoneNumberId}</span>
+                        <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                          {integration.provider === 'EVOLUTION' ? 'Método' : t('whatsapp.settings.card.phoneId')}
+                        </span>
+                        <span className="text-xs font-black text-zinc-900 tabular-nums">
+                          {integration.provider === 'EVOLUTION' ? 'QR Code (Evolution)' : integration.credentials?.phoneNumberId}
+                        </span>
                       </div>
+                      {integration.provider === 'EVOLUTION' && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Número</span>
+                          <span className="text-xs font-black text-zinc-950 tabular-nums">{integration.credentials?.connectedNumber || 'Pendente'}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{t('whatsapp.settings.card.added')}</span>
                         <span className="text-xs font-black text-zinc-500 uppercase tracking-tight">{new Date(integration.createdAt).toLocaleDateString(locale)}</span>

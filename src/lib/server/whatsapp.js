@@ -1,9 +1,10 @@
 import prisma from '@/prisma/index';
 import { checkWhatsAppLimit, recordWhatsAppUsage } from '@/lib/server/whatsapp-usage';
 import { normalizeWhatsAppNumber } from '@/lib/server/phone';
+import { getSystemConfig } from '@/lib/server/config';
 
 /**
- * Send an outbound WhatsApp message via the Meta Cloud API.
+ * Send an outbound WhatsApp message via the Meta Cloud API or Evolution API.
  *
  * Now includes:
  *  1. Plan-based daily limit check (maxWhatsAppMessages24h)
@@ -24,8 +25,62 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
     },
   });
 
-  if (!integration || !integration.enabled || !integration.credentials) {
+  if (!integration || !integration.enabled) {
     throw new Error('WhatsApp integration not configured, disabled, or not found');
+  }
+
+  const workspaceId = context?.workspaceId || integration.workspaceId;
+  const userId = context?.userId || null;
+
+  // Evolution API Flow
+  if (integration.provider === 'EVOLUTION') {
+    const evoUrl = await getSystemConfig('EVOLUTION_API_URL', process.env.EVOLUTION_API_URL);
+    const evoApiKey = await getSystemConfig('EVOLUTION_API_KEY', process.env.EVOLUTION_API_KEY);
+
+    if (!evoUrl || !evoApiKey) {
+      throw new Error('Evolution API is not configured in Super Admin settings.');
+    }
+
+    const instanceName = `vysify-${workspaceId}`;
+    const { clean: recipientPhone } = normalizeWhatsAppNumber(to);
+
+    const response = await fetch(`${evoUrl}/message/sendText/${instanceName}`, {
+      method: 'POST',
+      headers: {
+        'apikey': evoApiKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        number: recipientPhone,
+        text: text,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('[evolution-send-error] API Response:', data);
+      throw new Error(data?.message || 'Failed to send WhatsApp message via Evolution API');
+    }
+
+    const messageId = data?.key?.id || data?.message?.key?.id || null;
+
+    if (workspaceId) {
+      recordWhatsAppUsage({
+        workspaceId,
+        userId,
+        messageId,
+        direction: 'OUTBOUND',
+        overageMode: false,
+      });
+    }
+
+    return messageId;
+  }
+
+  // Meta Cloud API Flow (Official)
+  if (!integration.credentials) {
+    throw new Error('WhatsApp integration credentials missing');
   }
 
   const { phoneNumberId, accessToken } = integration.credentials;
@@ -35,8 +90,6 @@ export const sendWhatsAppMessage = async (integrationId, to, text, context = {})
   }
 
   // 2. Check daily limit (always allowed now, but we fetch metadata for logging)
-  const workspaceId = context?.workspaceId || integration.workspaceId;
-  const userId = context?.userId || null;
   let limitCheck = null;
 
   if (workspaceId) {

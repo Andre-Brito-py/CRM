@@ -170,6 +170,13 @@ const CATALOG = [
     ],
   },
   {
+    title: 'Evolution API (WhatsApp)',
+    items: [
+      { key: 'EVOLUTION_API_URL', category: 'INTEGRATIONS', label: 'Evolution API Server URL', secret: false },
+      { key: 'EVOLUTION_API_KEY', category: 'INTEGRATIONS', label: 'Evolution API Global ApiKey', secret: true },
+    ],
+  },
+  {
     title: 'Analytics',
     items: [{ key: 'GOOGLE_ANALYTICS_ID', category: 'INTEGRATIONS', label: 'Google Analytics ID', secret: false, public: true }],
   },
