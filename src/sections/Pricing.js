@@ -24,9 +24,21 @@ const Pricing = ({ products, promo }) => {
   }, []);
 
   const formattedProducts = useMemo(() => {
-    const targetCurrency = clientCurrency || getDefaultCurrencyForLang(i18n.language);
+    const detectedCurrency = clientCurrency || getDefaultCurrencyForLang(i18n.language);
+    const targetCurrency = detectedCurrency === 'BRL' ? 'BRL' : 'USD';
 
-    return (products || []).map(plan => {
+    const filteredProducts = (products || []).filter(plan => {
+      const isFree = (
+        Boolean(plan.features?.isFreePlan) ||
+        String(plan.slug || '').trim().toUpperCase() === 'FREE' ||
+        Number(plan.price || 0) === 0
+      );
+      if (isFree) return true;
+
+      return plan.currency === targetCurrency;
+    });
+
+    return filteredProducts.map(plan => {
       // Find the best price for this plan
       let selectedPrice = null;
       if (plan.currency !== targetCurrency && plan.prices && plan.prices.length > 0) {
