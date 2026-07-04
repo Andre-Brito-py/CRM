@@ -60,7 +60,7 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
   const [twilioPhoneNumber, setTwilioPhoneNumber] = useState(workspace.twilioPhoneNumber || '');
 
   // Twilio Purchasing States
-  const [areaCode, setAreaCode] = useState('11');
+  const [areaCode, setAreaCode] = useState('206');
   const [availableNumbers, setAvailableNumbers] = useState([]);
   const [searchingNumbers, setSearchingNumbers] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState('');
@@ -531,7 +531,7 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
                   <div className="col-span-1 border-t pt-6 mt-4 flex flex-col gap-4">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Adquirir Número Virtual em 1 Clique</h3>
                     <p className="text-xs text-gray-500">
-                      Escolha o seu DDD e encontre números disponíveis para ativar na sua conta global.
+                      Escolha o código de área dos EUA (ex: 206, 302, 415) e encontre números disponíveis para ativar na sua conta global.
                       {!twilioAccountSid && (
                         <span className="block text-indigo-600 font-semibold mt-1">
                           Saldo Atual de Telefonia: {workspace.telephonyCurrency || 'USD'} {telephonyBalance.toFixed(2)}
@@ -541,14 +541,14 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
 
                     <div className="flex flex-col md:flex-row gap-4 items-end">
                       <div className="flex flex-col gap-1 w-full md:w-1/3">
-                        <label className="text-xs font-bold text-gray-600 dark:text-gray-400">DDD / Código de Área</label>
+                        <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Código de Área (US Area Code)</label>
                         <input
                           className="px-3 py-2 border rounded text-sm w-full"
                           disabled={searchingNumbers || buyingNumber}
                           onChange={(e) => setAreaCode(e.target.value)}
                           type="text"
                           value={areaCode}
-                          placeholder="Ex: 11"
+                          placeholder="Ex: 206"
                         />
                       </div>
                       {availableNumbers.length > 0 && (

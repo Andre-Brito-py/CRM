@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const session = await validateSession(req, res);
   if (!session) return;
 
-  const { workspaceSlug, areaCode, countryCode = 'BR' } = req.query;
+  const { workspaceSlug, areaCode, countryCode = 'US' } = req.query;
 
   if (!areaCode) {
     return res.status(400).json({ error: { msg: 'Código de área (DDD) é obrigatório.' } });
