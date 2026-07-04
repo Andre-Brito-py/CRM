@@ -512,9 +512,9 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
             <Card>
               <Card.Body
                 title="Integração do Twilio (Voz e SMS)"
-                subtitle="Configure as chaves da sua própria conta do Twilio para habilitar envio de SMS e ligações telefônicas (Click-to-Call) exclusivas para este workspace. Deixe as credenciais em branco para utilizar as configurações globais da plataforma."
+                subtitle="Configure o seu número de Caller ID do Twilio para habilitar o envio de SMS e ligações telefônicas (Click-to-Call) integradas no workspace."
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                <div className="grid grid-cols-1 gap-4 mt-2">
                   <div className="flex flex-col gap-1">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Número Twilio (Caller ID)</label>
                     <input
@@ -527,77 +527,8 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
                     />
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Twilio Account SID</label>
-                    <input
-                      className="px-3 py-2 border rounded text-sm w-full"
-                      disabled={isSubmitting}
-                      onChange={(e) => setTwilioAccountSid(e.target.value)}
-                      type="text"
-                      value={twilioAccountSid}
-                      placeholder="Ex: ACfaccbe..."
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Twilio Auth Token</label>
-                    <input
-                      className="px-3 py-2 border rounded text-sm w-full"
-                      disabled={isSubmitting}
-                      onChange={(e) => setTwilioAuthToken(e.target.value)}
-                      type="password"
-                      value={twilioAuthToken}
-                      placeholder={workspace.twilioAuthToken ? "••••••••" : "Seu token do Twilio"}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Twilio API Key (SID)</label>
-                    <input
-                      className="px-3 py-2 border rounded text-sm w-full"
-                      disabled={isSubmitting}
-                      onChange={(e) => setTwilioApiKey(e.target.value)}
-                      type="password"
-                      value={twilioApiKey}
-                      placeholder={workspace.twilioApiKey ? "••••••••" : "Sua API Key SID"}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Twilio API Secret</label>
-                    <input
-                      className="px-3 py-2 border rounded text-sm w-full"
-                      disabled={isSubmitting}
-                      onChange={(e) => setTwilioApiSecret(e.target.value)}
-                      type="password"
-                      value={twilioApiSecret}
-                      placeholder={workspace.twilioApiSecret ? "••••••••" : "Seu API Secret"}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Twilio TwiML App SID</label>
-                    <input
-                      className="px-3 py-2 border rounded text-sm w-full"
-                      disabled={isSubmitting}
-                      onChange={(e) => setTwilioTwimlAppSid(e.target.value)}
-                      type="text"
-                      value={twilioTwimlAppSid}
-                      placeholder="Ex: AP..."
-                    />
-                  </div>
-
-                  {workspace?.id && (
-                    <div className="col-span-1 md:col-span-2 rounded-2xl bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-100 dark:border-zinc-800/50 p-6 flex flex-col gap-2 mt-2">
-                      <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">Webhook de Voz para colocar no seu TwiML App no Twilio</span>
-                      <code className="text-xs text-indigo-600 dark:text-indigo-400 font-bold select-all bg-white dark:bg-zinc-900 px-4 py-2 rounded-xl border border-zinc-100 dark:border-zinc-800/30">
-                        {origin ? `${origin}/api/integrations/twilio/voice?workspaceId=${workspace.id}` : `https://seu-dominio.com/api/integrations/twilio/voice?workspaceId=${workspace.id}`}
-                      </code>
-                    </div>
-                  )}
-
                   {/* Automated Number Purchasing Section */}
-                  <div className="col-span-1 md:col-span-2 border-t pt-6 mt-4 flex flex-col gap-4">
+                  <div className="col-span-1 border-t pt-6 mt-4 flex flex-col gap-4">
                     <h3 className="text-sm font-bold text-gray-800 dark:text-gray-200">Adquirir Número Virtual em 1 Clique</h3>
                     <p className="text-xs text-gray-500">
                       Escolha o seu DDD e encontre números disponíveis para ativar na sua conta global.
@@ -620,19 +551,9 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
                           placeholder="Ex: 11"
                         />
                       </div>
-                      <Button
-                        className="text-white bg-zinc-800 hover:bg-zinc-700 shadow-md h-[38px] w-full md:w-auto"
-                        disabled={searchingNumbers || buyingNumber}
-                        onClick={searchNumbers}
-                      >
-                        {searchingNumbers ? 'Buscando...' : 'Buscar Números'}
-                      </Button>
-                    </div>
-
-                    {availableNumbers.length > 0 && (
-                      <div className="flex flex-col md:flex-row gap-4 items-end bg-zinc-50 dark:bg-zinc-800/20 p-4 rounded-xl border border-zinc-100 dark:border-zinc-800/40 mt-2">
-                        <div className="flex flex-col gap-1 w-full md:w-2/3">
-                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Selecione um Número</label>
+                      {availableNumbers.length > 0 && (
+                        <div className="flex flex-col gap-1 w-full md:w-1/3">
+                          <label className="text-xs font-bold text-gray-600 dark:text-gray-400">Selecione o Número</label>
                           <select
                             className="px-3 py-2 border rounded text-sm w-full bg-white dark:bg-zinc-900"
                             disabled={buyingNumber}
@@ -646,20 +567,30 @@ const General = ({ isTeamOwner, workspace, scoutlyAllowed }) => {
                             ))}
                           </select>
                         </div>
+                      )}
+                      <div className="flex gap-2">
                         <Button
                           className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 w-full md:w-auto h-[38px]"
-                          disabled={buyingNumber || !selectedNumber}
-                          onClick={buyNumber}
+                          disabled={searchingNumbers || buyingNumber}
+                          onClick={searchNumbers}
                         >
-                          {buyingNumber ? 'Comprando...' : 'Ativar Número Selecionado'}
+                          {searchingNumbers ? 'Buscando...' : 'Buscar Números'}
                         </Button>
+                        {availableNumbers.length > 0 && (
+                          <Button
+                            className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 w-full md:w-auto h-[38px]"
+                            disabled={buyingNumber || !selectedNumber}
+                            onClick={buyNumber}
+                          >
+                            {buyingNumber ? 'Comprando...' : 'Ativar Número Selecionado'}
+                          </Button>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </Card.Body>
               <Card.Footer>
-                <small>Caso utilize suas próprias credenciais, certifique-se de configurar o Webhook acima na URL de Voz do seu TwiML App.</small>
                 <Button
                   className="text-white bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-600/20"
                   disabled={isSubmitting}
