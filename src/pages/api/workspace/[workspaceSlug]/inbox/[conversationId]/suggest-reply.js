@@ -6,7 +6,7 @@ import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
 import { log, reportError } from '@/lib/server/logger';
-import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
+import { getWorkspaceLimits, isModuleAllowed, consumeExtraAiTokens } from '@/lib/server/subscription';
 import getStripe from '@/lib/server/stripe';
 import { detectAiLanguage, getLanguageSystemInstruction } from '@/lib/server/ai-utils';
 
@@ -71,6 +71,10 @@ const shouldAllowOverage = (req, settings) => {
 };
 
 const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M }) => {
+  const deducted = await consumeExtraAiTokens(workspace.id, tokens);
+  const remainingTokens = tokens - deducted;
+  if (remainingTokens <= 0) return null;
+
   const creator = await prisma.user.findUnique({
     where: { id: workspace.creatorId },
     select: {
@@ -104,7 +108,7 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     } catch { }
   }
 
-  const amount = Math.ceil((Number(tokens) * Number(pricePer1M) * 100) / 1_000_000);
+  const amount = Math.ceil((Number(remainingTokens) * Number(pricePer1M) * 100) / 1_000_000);
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
   const invoiceItem = await stripe.invoiceItems.create({
@@ -112,13 +116,13 @@ const billAiOverage = async ({ workspace, requestId, userId, tokens, pricePer1M 
     ...(subscriptionId ? { subscription: String(subscriptionId) } : {}),
     currency,
     amount,
-    description: `AI overage (${Number(tokens)} tokens) - workspace ${workspace.slug}`,
+    description: `AI overage (${Number(remainingTokens)} tokens) - workspace ${workspace.slug}`,
     metadata: {
       workspaceId: workspace.id,
       workspaceSlug: workspace.slug,
       requestId: requestId || '',
       userId: String(userId || ''),
-      tokens: String(tokens),
+      tokens: String(remainingTokens),
       pricePer1M: String(pricePer1M),
     },
   });

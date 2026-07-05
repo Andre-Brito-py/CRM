@@ -110,15 +110,12 @@ const UsageAndAddons = ({ isTeamOwner, workspace }) => {
           {/* AI CARD */}
           <div className="relative group lg:col-span-2 max-w-2xl mx-auto w-full">
             <div className="absolute inset-0 bg-gradient-to-r from-violet-500 to-fuchsia-600 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 blur-xl" />
-            <div className="relative bg-white dark:bg-zinc-900 border border-violet-100 dark:border-violet-900/30 rounded-3xl shadow-xl shadow-violet-900/5 p-8 overflow-hidden pointer-events-none opacity-50 cursor-not-allowed">
+            <div className="relative bg-white dark:bg-zinc-900 border border-violet-100 dark:border-violet-900/30 rounded-3xl shadow-xl shadow-violet-900/5 p-8 overflow-hidden">
               <div className="absolute top-0 right-0 p-6 opacity-5">
                 <SparklesIcon className="w-48 h-48 text-violet-900" />
               </div>
               
               <div className="relative z-10">
-                <div className="absolute top-0 right-0 bg-zinc-900 text-white text-[10px] uppercase font-black tracking-widest px-3 py-1 rounded-full">
-                  Em Breve
-                </div>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-white shadow-lg shadow-violet-500/30">
                     <SparklesIcon className="w-6 h-6" />
@@ -131,8 +128,8 @@ const UsageAndAddons = ({ isTeamOwner, workspace }) => {
 
                 <>
                   <ProgressBar 
-                    current={0} 
-                    max={0} 
+                    current={usageData?.ai?.current || 0} 
+                    max={usageData?.ai?.max || 0} 
                     colorClass="bg-gradient-to-r from-violet-400 to-fuchsia-500"
                   />
 
@@ -147,14 +144,15 @@ const UsageAndAddons = ({ isTeamOwner, workspace }) => {
                       {(usageData?.workspace?.extraAiTokens || 0).toLocaleString('pt-BR')} <span className="text-lg font-bold text-violet-500">tokens</span>
                     </div>
                     <p className="text-xs font-medium text-zinc-500 mt-2 leading-relaxed">
-                      Este saldo entra em ação quando o cérebro AI excede a capacidade mensal da sua assinatura principal.
+                      Este saldo entra em ação quando o cérebro AI excede a capacidade diária da sua assinatura principal.
                     </p>
                   </div>
 
                   {usageData?.addons?.ai?.enabled && (
                     <button
-                      disabled={true} // For now, disabled for UI effect
-                      className="mt-8 w-full group/btn relative inline-flex items-center justify-center gap-2 px-8 py-4 overflow-hidden rounded-2xl bg-zinc-900 text-white font-bold text-sm tracking-wide transition-all disabled:opacity-50"
+                      onClick={() => buyAddon('ai')}
+                      disabled={isBuying}
+                      className="mt-8 w-full group/btn relative inline-flex items-center justify-center gap-2 px-8 py-4 overflow-hidden rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm tracking-wide transition-all disabled:opacity-50 cursor-pointer"
                     >
                       <SparklesIcon className="w-5 h-5 text-violet-400" />
                       <span>Adicionar {usageData.addons.ai.quantity.toLocaleString('pt-BR')} tokens</span>

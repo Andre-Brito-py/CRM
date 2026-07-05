@@ -243,7 +243,11 @@ const handler = async (req, res) => {
         const phone = contact.phone;
         if (phone) {
           const defaultIntegration = await prisma.integration.findFirst({
-            where: { workspaceId: workspace.id, provider: 'WHATSAPP', enabled: true },
+            where: {
+              workspaceId: workspace.id,
+              provider: { in: ['WHATSAPP', 'EVOLUTION'] },
+              enabled: true
+            },
             select: { id: true },
           });
 

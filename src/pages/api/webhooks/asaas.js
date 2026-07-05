@@ -100,7 +100,11 @@ const handler = async (req, res) => {
           if (conversation && conversation.externalId) {
             // Find active WhatsApp integration
             const integration = await prisma.integration.findFirst({
-              where: { workspaceId: updated.workspaceId, provider: 'whatsapp', enabled: true }
+              where: {
+                workspaceId: updated.workspaceId,
+                provider: { in: ['WHATSAPP', 'whatsapp', 'EVOLUTION'] },
+                enabled: true
+              }
             });
 
             if (integration) {

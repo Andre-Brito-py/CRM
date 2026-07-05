@@ -1,7 +1,7 @@
 import prisma from '@/prisma/index';
 import { getSystemConfig } from '@/lib/server/config';
 import { rateLimit } from '@/lib/server/rateLimit';
-import { getWorkspaceLimits, isModuleAllowed } from '@/lib/server/subscription';
+import { getWorkspaceLimits, isModuleAllowed, consumeExtraAiTokens } from '@/lib/server/subscription';
 import { sendWhatsAppMessage } from '@/lib/server/whatsapp';
 import { sendMail } from '@/lib/server/mail';
 import { log, reportError } from '@/lib/server/logger';
@@ -53,6 +53,10 @@ const getAiOverageSettings = async () => {
 };
 
 const billAiOverage = async ({ workspace, tokens, pricePer1M }) => {
+  const deducted = await consumeExtraAiTokens(workspace.id, tokens);
+  const remainingTokens = tokens - deducted;
+  if (remainingTokens <= 0) return null;
+
   const creator = await prisma.user.findUnique({
     where: { id: workspace.creatorId },
     select: {
@@ -76,7 +80,7 @@ const billAiOverage = async ({ workspace, tokens, pricePer1M }) => {
     } catch { }
   }
 
-  const amount = Math.ceil((Number(tokens) * Number(pricePer1M) * 100) / 1_000_000);
+  const amount = Math.ceil((Number(remainingTokens) * Number(pricePer1M) * 100) / 1_000_000);
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
   const invoiceItem = await stripe.invoiceItems.create({
@@ -84,11 +88,11 @@ const billAiOverage = async ({ workspace, tokens, pricePer1M }) => {
     ...(subscriptionId ? { subscription: String(subscriptionId) } : {}),
     currency,
     amount,
-    description: `AI Autopilot (${Number(tokens)} tokens) - workspace ${workspace.slug}`,
+    description: `AI Autopilot (${Number(remainingTokens)} tokens) - workspace ${workspace.slug}`,
     metadata: {
       workspaceId: workspace.id,
       workspaceSlug: workspace.slug,
-      tokens: String(tokens),
+      tokens: String(remainingTokens),
       pricePer1M: String(pricePer1M),
       source: 'autopilot',
     },
@@ -473,7 +477,11 @@ Nome do cliente: ${contactName}`;
       if (!contactPhone) throw new Error('Contact phone missing');
 
       const integration = await prisma.integration.findFirst({
-        where: { workspaceId: workspace.id, provider: 'WHATSAPP', enabled: true },
+        where: {
+          workspaceId: workspace.id,
+          provider: { in: ['WHATSAPP', 'EVOLUTION'] },
+          enabled: true
+        },
       });
       if (!integration) throw new Error('No active WhatsApp integration');
 

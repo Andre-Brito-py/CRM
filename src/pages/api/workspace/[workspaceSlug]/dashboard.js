@@ -206,7 +206,7 @@ const handler = async (req, res) => {
         ? prisma.integration.count({
           where: {
             workspaceId,
-            provider: 'WHATSAPP',
+            provider: { in: ['WHATSAPP', 'EVOLUTION'] },
             enabled: true,
           },
         })

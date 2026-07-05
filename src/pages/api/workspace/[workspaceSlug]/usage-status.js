@@ -20,6 +20,24 @@ const handler = async (req, res) => {
     // WA Stats
     const waStats = await getWhatsAppUsageStats(workspace.id);
 
+    // AI Stats
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60_000);
+    const aiUsageSum = await prisma.aiUsageEvent.aggregate({
+      where: {
+        workspaceId: workspace.id,
+        createdAt: { gte: twentyFourHoursAgo },
+      },
+      _sum: {
+        tokensTotal: true,
+      },
+    });
+
+    const currentAiTokens24h = aiUsageSum._sum.tokensTotal || 0;
+
+    const { getWorkspaceLimits } = await import('@/lib/server/subscription');
+    const limits = await getWorkspaceLimits(workspace.id);
+    const maxAiTokens24h = limits.aiTokens24h || 0;
+
     const isAiEnabledStr = await getSystemConfig('ADDON_AI_ENABLED', 'true');
     const isAiEnabled = typeof isAiEnabledStr === 'boolean' ? isAiEnabledStr : String(isAiEnabledStr).trim().toLowerCase() !== 'false';
 
@@ -34,6 +52,10 @@ const handler = async (req, res) => {
         },
         whatsapp: {
           ...waStats,
+        },
+        ai: {
+          current: currentAiTokens24h,
+          max: maxAiTokens24h,
         },
         addons: {
           ai: {

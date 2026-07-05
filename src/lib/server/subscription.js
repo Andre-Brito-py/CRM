@@ -337,3 +337,22 @@ export const canAddAutomationRule = async (workspaceId, currentAutomationRuleCou
     if (limits.automations === null) return true;
     return currentAutomationRuleCount < limits.automations;
 };
+
+export const consumeExtraAiTokens = async (workspaceId, tokens) => {
+    const workspace = await prisma.workspace.findUnique({
+        where: { id: workspaceId },
+        select: { extraAiTokens: true }
+    });
+
+    const extraTokens = workspace?.extraAiTokens || 0;
+    if (extraTokens > 0) {
+        const deduct = Math.min(extraTokens, tokens);
+        await prisma.workspace.update({
+            where: { id: workspaceId },
+            data: { extraAiTokens: { decrement: deduct } }
+        });
+        return deduct;
+    }
+
+    return 0;
+};
