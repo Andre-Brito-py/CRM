@@ -56,20 +56,6 @@ const WhatsAppSettings = () => {
 
   const [isLoading, setIsLoading] = useState(true);
   const [integrations, setIntegrations] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [currentEditId, setCurrentEditId] = useState(null);
-
-  const [config, setConfig] = useState({
-    name: '',
-    enabled: true,
-    phoneNumberId: '',
-    accessToken: '',
-    verifyToken: '',
-    businessAccountId: '',
-  });
-
   // Evolution API States
   const [qrCode, setQrCode] = useState(null);
   const [isGeneratingQr, setIsGeneratingQr] = useState(false);
@@ -260,39 +246,7 @@ const WhatsAppSettings = () => {
     }
   };
 
-  const openNewModal = () => {
-    setCurrentEditId(null);
-    setConfig({
-      name: '',
-      enabled: true,
-      phoneNumberId: '',
-      accessToken: '',
-      verifyToken: '',
-      businessAccountId: '',
-    });
-    setShowModal(true);
-  };
 
-  const openEditModal = (integration) => {
-    setCurrentEditId(integration.id);
-    setConfig({
-      name: integration.name,
-      enabled: integration.enabled,
-      phoneNumberId: integration.credentials?.phoneNumberId || '',
-      accessToken: integration.credentials?.accessToken || '',
-      verifyToken: integration.credentials?.verifyToken || '',
-      businessAccountId: integration.credentials?.businessAccountId || '',
-    });
-    setShowModal(true);
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setConfig((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
 
   if (isLoading) {
     return (
@@ -343,22 +297,12 @@ const WhatsAppSettings = () => {
               <span className="text-[11px] font-black text-green-600 uppercase tracking-[0.2em]">{t('whatsapp.integration')}</span>
             </div>
             <h1 className="text-4xl font-executive font-extrabold text-zinc-950 tracking-tighter leading-none mb-4">
-              WhatsApp Cloud
+              WhatsApp Integration
             </h1>
             <p className="text-zinc-500 font-medium text-lg max-w-2xl leading-relaxed">
-              {t('whatsapp.settings.subtitle')}
+              Conecte seu WhatsApp instantaneamente via QR Code para habilitar respostas automáticas com Closer AI e automações omnichannel.
             </p>
           </div>
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            id="whatsapp-add-btn" 
-            className="group flex items-center gap-3 px-8 py-4 bg-zinc-950 text-white rounded-[22px] text-sm font-black uppercase tracking-widest shadow-premium hover:shadow-premium-lg transition-all" 
-            onClick={openNewModal}
-          >
-            <PlusIcon className="w-5 h-5 transition-transform group-hover:rotate-90" /> 
-            {t('whatsapp.settings.addNumber')}
-          </motion.button>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 lg:px-10 mt-8 space-y-10">
@@ -508,7 +452,7 @@ const WhatsAppSettings = () => {
                   <motion.button 
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={openNewModal}
+                    onClick={generateQrCode}
                     className="px-8 py-4 bg-brand-600 premium-gradient text-white rounded-[22px] text-xs font-black uppercase tracking-widest shadow-glow-emerald"
                   >
                     Get Started
@@ -540,11 +484,6 @@ const WhatsAppSettings = () => {
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        {integration.provider !== 'EVOLUTION' && (
-                          <button onClick={() => openEditModal(integration)} className="p-2.5 text-zinc-400 hover:text-zinc-950 hover:bg-zinc-50 rounded-xl transition-all">
-                            <PencilIcon className="w-4 h-4" />
-                          </button>
-                        )}
                         <button onClick={() => handleDelete(integration)} className="p-2.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
                           <TrashIcon className="w-4 h-4" />
                         </button>
@@ -577,179 +516,6 @@ const WhatsAppSettings = () => {
           </div>
         </div>
       </div>
-
-      <Transition.Root show={showModal} as={Fragment}>
-        <Dialog as="div" className="relative z-[100]" onClose={setShowModal}>
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm transition-opacity" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-              <Transition.Child
-                as={Fragment}
-                enter="ease-out duration-300"
-                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                enterTo="opacity-100 translate-y-0 sm:scale-100"
-                leave="ease-in duration-200"
-                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              >
-                <Dialog.Panel className="relative transform overflow-hidden rounded-[32px] bg-white text-left shadow-premium transition-all sm:my-8 sm:w-full sm:max-w-xl border border-zinc-100">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-green-50 rounded-full blur-3xl -mr-16 -mt-16 opacity-50" />
-                  
-                  <div className="bg-white px-8 pb-8 pt-10 relative z-10">
-                    <div className="sm:flex sm:items-start mb-8">
-                      <div className="mx-auto flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-[18px] bg-emerald-50 sm:mx-0 border border-emerald-100 shadow-glow-emerald/10">
-                        <LinkIcon className="h-7 w-7 text-emerald-600" aria-hidden="true" />
-                      </div>
-                      <div className="mt-3 text-center sm:ml-6 sm:mt-0 sm:text-left">
-                        <Dialog.Title as="h3" className="text-2xl font-executive font-extrabold leading-none text-zinc-950 tracking-tighter mb-2">
-                          {currentEditId ? t('whatsapp.settings.modal.editTitle') : t('whatsapp.settings.modal.connectTitle')}
-                        </Dialog.Title>
-                        <p className="text-sm text-zinc-400 font-medium">
-                          {t('whatsapp.settings.modal.subtitle', 'Configure your WhatsApp Cloud API credentials below.')}
-                        </p>
-                      </div>
-                    </div>
-
-                    <form onSubmit={handleCreateOrUpdate} className="space-y-6">
-                      <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                        <div className="flex items-center h-5">
-                          <input
-                            id="enabled"
-                            name="enabled"
-                            type="checkbox"
-                            checked={config.enabled}
-                            onChange={handleChange}
-                            className="h-5 w-5 rounded-lg border-zinc-300 text-emerald-600 focus:ring-emerald-500 transition-all cursor-pointer"
-                          />
-                        </div>
-                        <label htmlFor="enabled" className="text-sm font-black text-zinc-500 uppercase tracking-widest cursor-pointer ml-1">
-                          {t('whatsapp.settings.modal.enable')}
-                        </label>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.friendlyName')}</label>
-                        <input
-                          type="text"
-                          name="name"
-                          value={config.name}
-                          onChange={handleChange}
-                          placeholder={t('whatsapp.settings.modal.friendlyNamePlaceholder')}
-                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">
-                          {t('whatsapp.settings.modal.webhookUrl')} 
-                        </label>
-                        <div id="whatsapp-webhook-url" className="flex gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={webhookUrl}
-                            className="flex-1 px-5 py-3.5 bg-zinc-100/50 border border-zinc-100 rounded-[18px] text-zinc-400 font-black tracking-tight text-xs focus:outline-none"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              navigator.clipboard.writeText(webhookUrl);
-                              toast.success(t('common.copied'));
-                            }}
-                            className="px-5 py-3.5 bg-zinc-950 text-white rounded-[18px] text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-premium"
-                          >
-                            {t('common.action.copy')}
-                          </button>
-                        </div>
-                        <p className="text-[10px] text-zinc-400 font-medium ml-3">{t('whatsapp.settings.modal.webhookHint')}</p>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.verifyToken')}</label>
-                        <input
-                          type="text"
-                          name="verifyToken"
-                          value={config.verifyToken}
-                          onChange={handleChange}
-                          placeholder={t('whatsapp.settings.modal.verifyTokenPlaceholder')}
-                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.phoneNumberId')}</label>
-                          <input
-                            type="text"
-                            name="phoneNumberId"
-                            value={config.phoneNumberId}
-                            onChange={handleChange}
-                            className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300 text-center tabular-nums font-black"
-                            required
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.businessAccountId')}</label>
-                          <input
-                            type="text"
-                            name="businessAccountId"
-                            value={config.businessAccountId}
-                            onChange={handleChange}
-                            className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300 text-center tabular-nums font-black"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5 pb-2">
-                        <label className="text-[10px] font-black text-zinc-400 uppercase tracking-widest ml-3">{t('whatsapp.settings.modal.accessToken')}</label>
-                        <input
-                          type="password"
-                          name="accessToken"
-                          value={config.accessToken}
-                          onChange={handleChange}
-                          className="w-full px-5 py-3.5 bg-zinc-50 border border-zinc-100 rounded-[18px] focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-zinc-950 placeholder:text-zinc-300"
-                          required
-                        />
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-zinc-50">
-                        <button
-                          type="button"
-                          className="flex-1 px-8 py-4 bg-zinc-100 text-zinc-500 rounded-[22px] text-xs font-black uppercase tracking-widest hover:bg-zinc-200 transition-all"
-                          onClick={() => setShowModal(false)}
-                        >
-                          {t('common.action.cancel')}
-                        </button>
-                        <button
-                          type="submit"
-                          disabled={isSaving}
-                          className="flex-1 px-8 py-4 bg-zinc-950 text-white rounded-[22px] text-xs font-black uppercase tracking-widest hover:shadow-premium-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-premium flex items-center justify-center gap-2"
-                        >
-                          {isSaving && <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin" />}
-                          {isSaving ? t('common.saving') : t('whatsapp.settings.modal.save')}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
-            </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
     </AccountLayout>
   );
 };
