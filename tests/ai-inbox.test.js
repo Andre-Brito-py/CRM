@@ -17,6 +17,7 @@ jest.mock('@/lib/server/rateLimit', () => ({
 jest.mock('@/lib/server/subscription', () => ({
   getWorkspaceLimits: jest.fn(),
   isModuleAllowed: jest.fn(),
+  consumeExtraAiTokens: jest.fn().mockResolvedValue(0),
 }));
 
 jest.mock('@/lib/server/config', () => ({
