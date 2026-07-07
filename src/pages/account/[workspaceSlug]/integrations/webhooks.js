@@ -57,10 +57,13 @@ const Webhooks = () => {
         setIsAdding(false);
         mutate(`/api/workspace/${workspaceSlug}/webhooks`);
       } else {
-        throw new Error(response.error || 'Failed to add webhook');
+        const errorMsg = typeof response.error === 'string'
+          ? response.error
+          : response.error?.details || response.error?.msg || 'Failed to add webhook';
+        throw new Error(errorMsg);
       }
     } catch (err) {
-      toast.error(err.message);
+      toast.error(err.message || 'Erro inesperado');
     } finally {
       setIsSubmitting(false);
     }
