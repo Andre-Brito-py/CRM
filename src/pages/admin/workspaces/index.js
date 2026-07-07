@@ -37,6 +37,9 @@ const Workspaces = () => {
                             <div className="ml-4">
                               <p className="text-sm font-medium text-brand-600 truncate">{workspace.name}</p>
                               <p className="text-sm text-gray-500">/{workspace.slug}</p>
+                              <p className="text-[10px] font-mono text-gray-400 select-all mt-0.5" title="Clique duas vezes para copiar">
+                                ID: {workspace.id}
+                              </p>
                             </div>
                           </div>
                           <div className="ml-2 flex-shrink-0 flex flex-col items-end">
