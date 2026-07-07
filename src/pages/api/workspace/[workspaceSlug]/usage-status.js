@@ -1,3 +1,4 @@
+import prisma from '@/prisma/index';
 import { validateSession } from '@/config/api-validation';
 import { getWorkspace } from '@/prisma/services/workspace';
 import { getSystemConfig } from '@/lib/server/config';
