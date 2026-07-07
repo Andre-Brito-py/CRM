@@ -66,7 +66,18 @@ export default async function handler(req, res) {
       qrResponseData = await connectResp.json();
       qrCodeBase64 = qrResponseData?.base64 || null;
     } else {
-      // 2. Instance probably doesn't exist, let's create it
+      // 2. Instance probably exists but is disconnected/corrupted, or doesn't exist.
+      // Let's delete it first to ensure a clean slate and avoid "instance already exists" 400 errors.
+      const deleteUrl = `${evoUrl}/instance/delete/${instanceName}`;
+      try {
+        await fetch(deleteUrl, {
+          method: 'DELETE',
+          headers: { 'apikey': evoApiKey }
+        });
+      } catch (err) {
+        console.warn('[Evolution] Failed to delete existing instance prior to creation:', err.message);
+      }
+
       const createUrl = `${evoUrl}/instance/create`;
       const createResp = await fetch(createUrl, {
         method: 'POST',
