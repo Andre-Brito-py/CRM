@@ -35,16 +35,14 @@ export default async function handler(req, res) {
   }
 
   // 3. Parse and validate payload
-  const { source, event, preferredChannel, lead } = req.body;
-  if (source !== 'scoutly' || event !== 'meeting_booked' || !lead) {
+  const { source, event, preferredChannel, channel, messageContent, lead } = req.body;
+  if (source !== 'scoutly' || !['meeting_booked', 'outreach_sent'].includes(event) || !lead) {
     return res.status(400).json({ error: 'INVALID_PAYLOAD_STRUCTURE' });
   }
 
   const { companyName, email, phone, score, scoreReason, contactName, personalizedMessage } = lead;
 
-  if (!contactName) {
-    return res.status(400).json({ error: 'CONTACT_NAME_REQUIRED' });
-  }
+  const resolvedContactName = String(contactName || '').trim() || String(companyName || 'Lead Sem Nome').trim();
 
   try {
     // 4. Ingest Company
@@ -80,11 +78,11 @@ export default async function handler(req, res) {
     }
 
     const contactData = {
-      name: contactName.trim(),
+      name: resolvedContactName,
       email: sanitizedEmail,
       phone: sanitizedPhone,
       companyId: company?.id || null,
-      preferredChannel: preferredChannel || 'whatsapp',
+      preferredChannel: preferredChannel || channel || 'whatsapp',
       customFields: {
         score: score || null,
         scoreReason: scoreReason || null,
@@ -113,36 +111,40 @@ export default async function handler(req, res) {
       });
     }
 
-    // 6. Ingest Deal (Kanban Card) in the first Stage of the first Pipeline
-    const pipeline = await prisma.pipeline.findFirst({
-      where: { workspaceId, deletedAt: null },
-      include: { stages: { where: { deletedAt: null }, orderBy: { order: 'asc' } } }
-    });
+    // 6. Ingest Deal (Kanban Card) - APENAS para meeting_booked
+    let deal = null;
+    if (event === 'meeting_booked') {
+      const pipeline = await prisma.pipeline.findFirst({
+        where: { workspaceId, deletedAt: null },
+        include: { stages: { where: { deletedAt: null }, orderBy: { order: 'asc' } } }
+      });
 
-    if (!pipeline || pipeline.stages.length === 0) {
-      return res.status(400).json({ error: 'PIPELINE_NOT_CONFIGURED_ON_WORKSPACE' });
+      if (!pipeline || pipeline.stages.length === 0) {
+        return res.status(400).json({ error: 'PIPELINE_NOT_CONFIGURED_ON_WORKSPACE' });
+      }
+
+      const defaultStage = pipeline.stages[0];
+
+      deal = await prisma.deal.create({
+        data: {
+          workspaceId,
+          contactId: contact.id,
+          companyId: company?.id || null,
+          stageId: defaultStage.id,
+          name: `${contact.name} - ${company?.name || 'Lead Scoutly'}`,
+          priority: (score && score >= 80) ? 'HIGH' : 'MEDIUM',
+          customFields: {
+            score: score || null,
+            scoreReason: scoreReason || null,
+            personalizedMessage: personalizedMessage || null
+          }
+        }
+      });
     }
 
-    const defaultStage = pipeline.stages[0];
-
-    const deal = await prisma.deal.create({
-      data: {
-        workspaceId,
-        contactId: contact.id,
-        companyId: company?.id || null,
-        stageId: defaultStage.id,
-        name: `${contact.name} - ${company?.name || 'Lead Scoutly'}`,
-        priority: (score && score >= 80) ? 'HIGH' : 'MEDIUM',
-        customFields: {
-          score: score || null,
-          scoreReason: scoreReason || null,
-          personalizedMessage: personalizedMessage || null
-        }
-      }
-    });
-
-    // 7. Initialize Closer AI Conversation
-    const channelPlatform = String(preferredChannel || 'whatsapp').toUpperCase();
+    // 7. Initialize Closer AI Conversation / Outreach Conversation
+    const activeChannel = event === 'outreach_sent' ? channel : preferredChannel;
+    const channelPlatform = String(activeChannel || 'whatsapp').toUpperCase();
     const externalId = channelPlatform === 'EMAIL' ? sanitizedEmail : sanitizedPhone;
 
     let conversation = await prisma.conversation.findFirst({
@@ -161,11 +163,11 @@ export default async function handler(req, res) {
           contactId: contact.id,
           platform: channelPlatform,
           externalId,
-          autopilotEnabled: true, // Turn on closer AI
+          autopilotEnabled: event === 'meeting_booked', // Apenas liga piloto automático se reunião agendada
           status: 'OPEN'
         }
       });
-    } else {
+    } else if (event === 'meeting_booked') {
       conversation = await prisma.conversation.update({
         where: { id: conversation.id },
         data: {
@@ -175,40 +177,44 @@ export default async function handler(req, res) {
       });
     }
 
-    // 8. Insert initial message from Lead containing personalized Scoutly message / dossier
-    const messageContent = personalizedMessage || `Reunião agendada pelo Scoutly. Canal preferencial: ${preferredChannel}`;
-    
+    // 8. Insert initial message
+    const msgContent = event === 'outreach_sent' ? messageContent : (personalizedMessage || `Reunião agendada pelo Scoutly. Canal preferencial: ${preferredChannel}`);
+    const direction = event === 'outreach_sent' ? 'OUTBOUND' : 'INBOUND';
+    const status = event === 'outreach_sent' ? 'SENT' : 'RECEIVED';
+
     const message = await prisma.message.create({
       data: {
         conversationId: conversation.id,
-        direction: 'INBOUND',
+        direction,
         type: 'TEXT',
-        content: messageContent,
-        status: 'RECEIVED'
+        content: msgContent,
+        status
       }
     });
 
-    // 9. Fire automations
-    // Event 1: DEAL_CREATED
-    await processAutomation(workspaceId, 'DEAL_CREATED', deal);
+    // 9. Fire automations - APENAS para meeting_booked
+    if (event === 'meeting_booked') {
+      if (deal) {
+        await processAutomation(workspaceId, 'DEAL_CREATED', deal);
+      }
 
-    // Event 2: INCOMING_MESSAGE (Triggers autopilot/Closer AI to reply in the correct channel)
-    const eventData = {
-      contact,
-      contactId: contact.id,
-      conversation,
-      conversationId: conversation.id,
-      message,
-      messageId: message.id,
-      platform: channelPlatform
-    };
-    
-    await processAutomation(workspaceId, 'INCOMING_MESSAGE', eventData);
+      const eventData = {
+        contact,
+        contactId: contact.id,
+        conversation,
+        conversationId: conversation.id,
+        message,
+        messageId: message.id,
+        platform: channelPlatform
+      };
+      
+      await processAutomation(workspaceId, 'INCOMING_MESSAGE', eventData);
+    }
 
     return res.status(200).json({
       success: true,
       leadId: contact.id,
-      dealId: deal.id,
+      dealId: deal?.id || null,
       conversationId: conversation.id
     });
   } catch (error) {
