@@ -1,4 +1,4 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 
 import prisma from '@/prisma/index';
 import { getWorkspace } from '@/prisma/services/workspace';
@@ -64,9 +64,8 @@ const suggestSlots = ({ startAt, endAt, durationMs, busy, stepMs, maxSuggestions
 };
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await validateSession(req, res);
   if (!session) {
-    res.status(401).json({ error: { msg: 'Unauthorized' } });
     return;
   }
 

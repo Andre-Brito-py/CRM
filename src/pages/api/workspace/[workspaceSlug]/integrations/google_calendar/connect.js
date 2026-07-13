@@ -1,13 +1,12 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 
 import { getWorkspace } from '@/prisma/services/workspace';
 import { log, reportError } from '@/lib/server/logger';
 import { makeOauthState, getGoogleClientConfig, buildPublicUrl } from '../google_calendar';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await validateSession(req, res);
   if (!session) {
-    res.status(401).json({ error: { msg: 'Unauthorized' } });
     return;
   }
 

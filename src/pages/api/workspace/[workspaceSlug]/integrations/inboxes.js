@@ -1,12 +1,12 @@
-import { getSession } from 'next-auth/react';
+import { validateSession } from '@/config/api-validation';
 import prisma from '@/prisma/index';
 import { verifyDomainDns } from '@/lib/server/dns-checker';
 
 export default async function handler(req, res) {
-  const session = await getSession({ req });
+  const session = await validateSession(req, res);
 
   if (!session) {
-    return res.status(401).json({ error: { msg: 'Unauthorized' } });
+    return;
   }
 
   const { workspaceSlug } = req.query;
