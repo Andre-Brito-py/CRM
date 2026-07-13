@@ -35,9 +35,33 @@ export default async function handler(req, res) {
   }
 
   // 3. Parse and validate payload
-  const { source, event, preferredChannel, channel, messageContent, lead } = req.body;
-  if (source !== 'scoutly' || !['meeting_booked', 'outreach_sent'].includes(event) || !lead) {
+  const { source, event, preferredChannel, channel, messageContent, lead, to, subject, html } = req.body;
+  if (source !== 'scoutly' || !['meeting_booked', 'outreach_sent', 'send_outbound_email'].includes(event)) {
     return res.status(400).json({ error: 'INVALID_PAYLOAD_STRUCTURE' });
+  }
+
+  // Handle email relay outbound sending via Workspace connected inbox (Gmail/SMTP)
+  if (event === 'send_outbound_email') {
+    if (!to || !subject || !html) {
+      return res.status(400).json({ error: 'MISSING_EMAIL_PARAMETERS' });
+    }
+    try {
+      const { sendMail } = require('@/lib/server/mail');
+      const result = await sendMail({
+        workspaceId,
+        to,
+        subject,
+        html
+      });
+      return res.status(200).json({ success: true, messageId: result.messageId || 'simulated-dev' });
+    } catch (err) {
+      console.error('[scoutly-email-relay-error]:', err);
+      return res.status(500).json({ error: 'EMAIL_SEND_FAILED', details: err.message });
+    }
+  }
+
+  if (!lead) {
+    return res.status(400).json({ error: 'INVALID_PAYLOAD_LEAD_MISSING' });
   }
 
   const { companyName, email, phone, score, scoreReason, contactName, personalizedMessage } = lead;
