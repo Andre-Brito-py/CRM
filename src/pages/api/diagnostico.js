@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     });
 
     const members = await prisma.member.findMany({
-      select: { id: true, email: true, workspaceId: true, deletedAt: true, role: true }
+      select: { id: true, email: true, workspaceId: true, deletedAt: true, teamRole: true, status: true }
     });
 
     return res.status(200).json({
