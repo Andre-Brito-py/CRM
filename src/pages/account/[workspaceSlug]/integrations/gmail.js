@@ -26,14 +26,14 @@ const GmailIntegration = () => {
   const { t } = useTranslation();
   const { workspaceSlug } = router.query;
   const { data: session } = useSession();
-  const { data, mutate } = useSWR(
+  const { data, error, mutate } = useSWR(
     workspaceSlug ? `/api/workspace/${workspaceSlug}/integrations/gmail` : null,
     fetcher
   );
 
   const [isSubmitting, setSubmittingState] = useState(false);
   const enabled = data?.data?.enabled || false;
-  const isLoading = !data;
+  const isLoading = !data && !error;
 
   const toggleIntegration = async () => {
     setSubmittingState(true);
@@ -52,6 +52,20 @@ const GmailIntegration = () => {
       setSubmittingState(false);
     }
   };
+
+  if (error) {
+    return (
+      <AccountLayout>
+        <div className="flex flex-col items-center justify-center h-screen bg-[#fdfdfe] p-6 text-center">
+          <InformationCircleIcon className="w-12 h-12 text-red-500 mb-4" />
+          <h2 className="text-xl font-executive font-extrabold text-zinc-950 tracking-tight mb-2">Erro ao carregar integração</h2>
+          <p className="text-zinc-500 text-sm max-w-sm mb-6 font-semibold leading-relaxed">
+            Não foi possível validar seu acesso a este workspace. Certifique-se de que sua conta é membro ativo de {workspaceSlug}.
+          </p>
+        </div>
+      </AccountLayout>
+    );
+  }
 
   if (isLoading) {
     return (
