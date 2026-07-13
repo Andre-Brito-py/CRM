@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     const isMember = workspace.members.some((m) => m.email === session.user.email);
     if (!isMember) return redirectToSettings({ error: 'forbidden' });
 
-    const { ok, clientId, clientSecret } = getGoogleClientConfig();
+    const { ok, clientId, clientSecret } = await getGoogleClientConfig();
     if (!ok) return redirectToSettings({ error: 'google_oauth_not_configured' });
 
     const redirectUri = buildPublicUrl(req, `/api/workspace/${encodeURIComponent(workspaceSlug)}/integrations/google_calendar/callback`);
