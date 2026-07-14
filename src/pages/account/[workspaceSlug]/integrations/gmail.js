@@ -33,14 +33,22 @@ const GmailIntegration = () => {
 
   const [isSubmitting, setSubmittingState] = useState(false);
   const enabled = data?.data?.enabled || false;
-  const connected = !!data?.data?.credentials?.refreshToken || !!data?.data?.credentials?.accessToken;
+  const connected = data?.data?.connected || false;
   const isLoading = !data && !error;
 
   const [gmailAddress, setGmailAddress] = useState('');
+  const [appPassword, setAppPassword] = useState('');
+  const [connectionType, setConnectionType] = useState('smtp');
 
   useEffect(() => {
     if (data?.data?.credentials?.connectedEmail) {
       setGmailAddress(data.data.credentials.connectedEmail);
+    }
+    if (data?.data?.credentials?.appPassword) {
+      setAppPassword(data.data.credentials.appPassword);
+    }
+    if (data?.data?.credentials?.type) {
+      setConnectionType(data.data.credentials.type);
     }
   }, [data]);
 
@@ -62,6 +70,7 @@ const GmailIntegration = () => {
       });
       toast.success(t('gmail.status.offline'));
       setGmailAddress('');
+      setAppPassword('');
       mutate();
     } catch (error) {
       toast.error('Failed to disconnect');
@@ -77,6 +86,10 @@ const GmailIntegration = () => {
       toast.error('Por favor, insira um e-mail do Gmail válido.');
       return;
     }
+    if (connectionType === 'smtp' && !appPassword) {
+      toast.error('Por favor, insira a Senha de App do Google.');
+      return;
+    }
     setSubmittingState(true);
     try {
       await api(`/api/workspace/${workspaceSlug}/integrations/gmail`, {
@@ -85,8 +98,9 @@ const GmailIntegration = () => {
         body: JSON.stringify({ 
           enabled: true, 
           credentials: { 
-            ...data?.data?.credentials, 
-            connectedEmail: gmailAddress 
+            connectedEmail: gmailAddress,
+            appPassword: connectionType === 'smtp' ? appPassword : '',
+            type: connectionType
           } 
         }),
       });
@@ -193,28 +207,89 @@ const GmailIntegration = () => {
                       <h4 className="font-executive font-extrabold text-zinc-900 dark:text-zinc-100 mb-2">
                         {t('gmail.accountConfig')}
                       </h4>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-300 leading-relaxed font-medium mb-4">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-300 leading-relaxed font-medium mb-6">
                         {t('gmail.accountConfigDesc')}
                       </p>
-                      <form onSubmit={saveGmailAddress} className="flex flex-col sm:flex-row gap-3">
-                        <input
-                          type="email"
-                          value={gmailAddress}
-                          onChange={(e) => setGmailAddress(e.target.value)}
-                          placeholder={t('gmail.input.placeholder')}
-                          className="flex-grow px-5 py-3 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-500/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
-                          required
-                        />
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          type="submit"
-                          disabled={isSubmitting}
-                          className="px-6 py-3 rounded-2xl bg-zinc-950 dark:bg-zinc-50 text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
-                        >
-                          {isSubmitting && <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />}
-                          {t('gmail.action.saveEmail')}
-                        </motion.button>
+                      
+                      <form onSubmit={saveGmailAddress} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">{t('gmail.input.emailLabel')}</label>
+                            <input
+                              type="email"
+                              value={gmailAddress}
+                              onChange={(e) => setGmailAddress(e.target.value)}
+                              placeholder={t('gmail.input.placeholder')}
+                              className="w-full px-5 py-3.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-500/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                              required
+                              disabled={connected}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-2">{t('gmail.input.passwordLabel')}</label>
+                            <input
+                              type="password"
+                              value={appPassword}
+                              onChange={(e) => setAppPassword(e.target.value)}
+                              placeholder={t('gmail.input.passwordPlaceholder')}
+                              className="w-full px-5 py-3.5 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl text-zinc-900 dark:text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-500/30 transition-all placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+                              required={connectionType === 'smtp'}
+                              disabled={connected}
+                            />
+                          </div>
+                        </div>
+
+                        {!connected && (
+                          <div className="p-4 bg-red-50/50 dark:bg-red-950/10 rounded-2xl border border-red-100/50 dark:border-red-900/20 text-xs text-red-700 dark:text-red-300/80 leading-relaxed">
+                            <strong>💡 {t('gmail.appPasswordHelp.title')}:</strong>{' '}
+                            {t('gmail.appPasswordHelp.text')}{' '}
+                            <a
+                              href="https://myaccount.google.com/apppasswords"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline font-bold hover:text-red-600 dark:hover:text-red-200"
+                            >
+                              Google App Passwords
+                            </a>.
+                          </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                          {!connected ? (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="submit"
+                              disabled={isSubmitting}
+                              className="px-6 py-3.5 rounded-2xl bg-zinc-950 dark:bg-zinc-50 text-white dark:text-zinc-950 hover:bg-zinc-800 dark:hover:bg-zinc-200 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                            >
+                              {isSubmitting && <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />}
+                              {t('gmail.action.saveEmail')}
+                            </motion.button>
+                          ) : (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              type="button"
+                              onClick={handleDisconnect}
+                              disabled={isSubmitting}
+                              className="px-6 py-3.5 rounded-2xl bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-950/30 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                            >
+                              {isSubmitting && <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />}
+                              {t('gmail.action.disconnect')}
+                            </motion.button>
+                          )}
+                          
+                          {!connected && (
+                            <button
+                              type="button"
+                              onClick={handleConnect}
+                              className="px-6 py-3.5 rounded-2xl bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                            >
+                              {t('gmail.action.connectOAuth')}
+                            </button>
+                          )}
+                        </div>
                       </form>
                     </div>
 
