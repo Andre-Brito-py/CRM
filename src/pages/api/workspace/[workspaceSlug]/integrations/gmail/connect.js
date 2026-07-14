@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const secret = process.env.NEXTAUTH_SECRET || '';
     if (!secret) return res.status(500).json({ error: { msg: 'Missing NEXTAUTH_SECRET' } });
 
-    const redirectUri = buildPublicUrl(req, `/api/workspace/${encodeURIComponent(workspaceSlug)}/integrations/google_calendar/callback`);
+    const redirectUri = buildPublicUrl(req, '/api/integrations/google/callback');
     const state = makeOauthState({
       secret,
       payload: { wsId: workspace.id, wsSlug: workspaceSlug, uId: userId, provider: 'GMAIL', ts: Date.now() },
