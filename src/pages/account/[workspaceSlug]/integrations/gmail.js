@@ -189,11 +189,11 @@ const GmailIntegration = () => {
                     </div>
 
                     {/* Gmail Address Input Card */}
-                    <div className="bg-zinc-50 dark:bg-zinc-850/50 rounded-[24px] border border-zinc-100 dark:border-zinc-800 p-6 mb-8">
+                    <div className="bg-zinc-50 dark:bg-zinc-950/40 rounded-[24px] border border-zinc-100 dark:border-zinc-800/80 p-6 mb-8">
                       <h4 className="font-executive font-extrabold text-zinc-900 dark:text-zinc-100 mb-2">
                         {t('gmail.accountConfig')}
                       </h4>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium mb-4">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-300 leading-relaxed font-medium mb-4">
                         {t('gmail.accountConfigDesc')}
                       </p>
                       <form onSubmit={saveGmailAddress} className="flex flex-col sm:flex-row gap-3">
@@ -225,12 +225,12 @@ const GmailIntegration = () => {
                         { title: t('gmail.feature.tracking.title'), desc: t('gmail.feature.tracking.desc'), icon: ArrowPathIcon, color: 'purple' },
                         { title: t('gmail.feature.historical.title'), desc: t('gmail.feature.historical.desc'), icon: ShieldCheckIcon, color: 'red' },
                       ].map((feature, i) => (
-                        <div key={i} className="p-6 bg-zinc-50 dark:bg-zinc-850/50 rounded-[24px] border border-zinc-100 dark:border-zinc-800 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
+                        <div key={i} className="p-6 bg-zinc-50 dark:bg-zinc-950/40 rounded-[24px] border border-zinc-100 dark:border-zinc-800/80 hover:border-zinc-200 dark:hover:border-zinc-700 transition-colors">
                           <div className={`w-10 h-10 rounded-xl bg-${feature.color}-50 dark:bg-${feature.color}-950/20 flex items-center justify-center mb-4`}>
                             <feature.icon className={`w-5 h-5 text-${feature.color}-500 dark:text-${feature.color}-400`} />
                           </div>
                           <h4 className="font-executive font-extrabold text-zinc-900 dark:text-zinc-100 mb-2">{feature.title}</h4>
-                          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">{feature.desc}</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-300 leading-relaxed font-medium">{feature.desc}</p>
                         </div>
                       ))}
                     </div>
@@ -266,7 +266,7 @@ const GmailIntegration = () => {
                       <span className="text-[10px] font-black text-zinc-300 dark:text-zinc-600 uppercase tracking-widest group-hover:text-zinc-950 dark:group-hover:text-zinc-200 transition-colors">{item.step}</span>
                       <div>
                         <h4 className="text-sm font-black text-zinc-900 dark:text-zinc-100 uppercase tracking-tight mb-1 leading-none">{item.title}</h4>
-                        <p className="text-[11px] text-zinc-400 dark:text-zinc-500 font-medium leading-relaxed">{item.desc}</p>
+                        <p className="text-[11px] text-zinc-400 dark:text-zinc-300 font-medium leading-relaxed">{item.desc}</p>
                       </div>
                     </div>
                   ))}
