@@ -17,7 +17,8 @@ import {
   ChatBubbleLeftRightIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 import AccountLayout from '@/layouts/AccountLayout';
@@ -47,6 +48,12 @@ const Inbox = () => {
   const [newChatTemplate, setNewChatTemplate] = useState('');
   const [newChatLanguage, setNewChatLanguage] = useState('pt_BR');
   const [isStartingChat, setIsStartingChat] = useState(false);
+  const [isBulkAutopilotModalOpen, setIsBulkAutopilotModalOpen] = useState(false);
+  const [bulkAction, setBulkAction] = useState('enable');
+  const [bulkScope, setBulkScope] = useState('all');
+  const [selectedBulkConversations, setSelectedBulkConversations] = useState([]);
+  const [bulkSearchQuery, setBulkSearchQuery] = useState('');
+  const [isApplyingBulkAutopilot, setIsApplyingBulkAutopilot] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [aiOverageOptIn, setAiOverageOptIn] = useState(false);
   const [aiObjective, setAiObjective] = useState('qualify');
@@ -276,6 +283,42 @@ const Inbox = () => {
     }
   };
 
+  const handleApplyBulkAutopilot = async () => {
+    setIsApplyingBulkAutopilot(true);
+    try {
+      const res = await api(`/api/workspace/${workspaceSlug}/inbox/bulk-autopilot`, {
+        method: 'POST',
+        body: {
+          action: bulkAction,
+          scope: bulkScope,
+          conversationIds: selectedBulkConversations,
+        }
+      });
+
+      if (res.status === 200) {
+        toast.success(
+          bulkAction === 'enable'
+            ? `Autopilot ativado em lote!`
+            : `Autopilot desativado em lote!`
+        );
+        setIsBulkAutopilotModalOpen(false);
+        setSelectedBulkConversations([]);
+        setBulkSearchQuery('');
+        await Promise.all([
+          mutateConversations(),
+          mutateConversation()
+        ]);
+      } else {
+        toast.error('Erro ao aplicar configurações');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Erro de conexão ao aplicar alterações');
+    } finally {
+      setIsApplyingBulkAutopilot(false);
+    }
+  };
+
   const handleStartChat = async (e) => {
     e.preventDefault();
     if (!workspaceSlug || !newChatPhone || !newChatTemplate) return;
@@ -407,15 +450,31 @@ const Inbox = () => {
                 <div className="absolute inset-0 bg-gradient-to-b from-zinc-50/30 to-transparent pointer-events-none" />
                 
                 {/* New Conversation Button */}
-                <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 flex items-center gap-3">
+                <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-900 flex items-center gap-2">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setIsNewChatModalOpen(true)}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors border border-indigo-700/50 shadow-sm"
+                    className="flex-[1.2] flex items-center justify-center gap-1.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors border border-indigo-700/50 shadow-sm whitespace-nowrap"
                   >
-                    <PlusIcon className="w-4 h-4 stroke-[2.5]" />
+                    <PlusIcon className="w-3.5 h-3.5 stroke-[2.5]" />
                     Nova Conversa
+                  </motion.button>
+
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => {
+                      setSelectedBulkConversations([]);
+                      setBulkScope('all');
+                      setBulkAction('enable');
+                      setBulkSearchQuery('');
+                      setIsBulkAutopilotModalOpen(true);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-900 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-semibold transition-colors border border-zinc-200 dark:border-zinc-850 shadow-sm whitespace-nowrap"
+                  >
+                    <SparklesIcon className="w-3.5 h-3.5 stroke-[2.5] text-indigo-500 animate-pulse" />
+                    Autopilot em Lote
                   </motion.button>
                 </div>
 
@@ -575,6 +634,189 @@ const Inbox = () => {
                         </button>
                       </div>
                     </form>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
+            </div>
+          </Dialog>
+        </Transition>
+
+        <Transition appear show={isBulkAutopilotModalOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-[100]" onClose={() => !isApplyingBulkAutopilot && setIsBulkAutopilotModalOpen(false)}>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <div className="fixed inset-0 bg-zinc-950/40 backdrop-blur-sm" />
+            </Transition.Child>
+
+            <div className="fixed inset-0 overflow-y-auto">
+              <div className="flex min-h-full items-center justify-center p-6 text-center">
+                <Transition.Child
+                  as={Fragment}
+                  enter="ease-out duration-400"
+                  enterFrom="opacity-0 scale-95 translate-y-8"
+                  enterTo="opacity-100 scale-100 translate-y-0"
+                  leave="ease-in duration-300"
+                  leaveFrom="opacity-100 scale-100 translate-y-0"
+                  leaveTo="opacity-0 scale-95 translate-y-8"
+                >
+                  <Dialog.Panel className="w-full max-w-xl transform overflow-hidden rounded-[40px] bg-white dark:bg-zinc-900 p-8 md:p-10 text-left align-middle shadow-premium transition-all border border-zinc-100 dark:border-zinc-800">
+                    <div className="flex justify-between items-center mb-6">
+                      <Dialog.Title as="h3" className="text-2xl font-executive font-extrabold text-zinc-900 dark:text-zinc-100 tracking-tighter uppercase italic">
+                        Autopilot em Lote
+                      </Dialog.Title>
+                      <button
+                        onClick={() => setIsBulkAutopilotModalOpen(false)}
+                        className="p-1 rounded-full text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                      >
+                        <XMarkIcon className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-6 font-semibold">
+                      Configure o status do Autopilot (IA Closer) para múltiplas conversas de uma só vez de forma inteligente.
+                    </p>
+
+                    <div className="space-y-6">
+                      {/* Action selector */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-555 uppercase tracking-[0.2em] pl-1">Ação</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setBulkAction('enable')}
+                            className={classNames(
+                              "py-3 px-4 rounded-[18px] border text-xs font-black uppercase tracking-wider transition-all",
+                              bulkAction === 'enable'
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-glow-indigo/20"
+                                : "bg-zinc-50 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-800 text-zinc-650 dark:text-zinc-350 hover:bg-zinc-100"
+                            )}
+                          >
+                            Ativar Autopilot
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setBulkAction('disable')}
+                            className={classNames(
+                              "py-3 px-4 rounded-[18px] border text-xs font-black uppercase tracking-wider transition-all",
+                              bulkAction === 'disable'
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-glow-indigo/20"
+                                : "bg-zinc-50 dark:bg-zinc-950 border-zinc-100 dark:border-zinc-800 text-zinc-650 dark:text-zinc-350 hover:bg-zinc-100"
+                            )}
+                          >
+                            Desativar Autopilot
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Scope selector */}
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-555 uppercase tracking-[0.2em] pl-1">Aplicar em quais conversas?</label>
+                        <select
+                          className="w-full px-5 py-3.5 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[20px] text-sm font-medium text-zinc-900 dark:text-white focus:outline-none transition-all cursor-pointer"
+                          value={bulkScope}
+                          onChange={(e) => setBulkScope(e.target.value)}
+                        >
+                          <option value="all">Todas as conversas</option>
+                          <option value="except">Todas, EXCETO as selecionadas</option>
+                          <option value="only">Apenas as conversas selecionadas</option>
+                        </select>
+                      </div>
+
+                      {/* Search and List (Conditional) */}
+                      {(bulkScope === 'except' || bulkScope === 'only') && (
+                        <div className="space-y-3 animate-fadeIn">
+                          <div className="flex justify-between items-center pl-1">
+                            <label className="text-[10px] font-black text-zinc-400 dark:text-zinc-555 uppercase tracking-[0.2em]">Selecionar Conversas</label>
+                            <div className="flex gap-3 text-[10px] font-black text-indigo-500 uppercase tracking-wider">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBulkConversations(conversations.map(c => c.id))}
+                              >
+                                Selecionar Tudo
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBulkConversations([])}
+                              >
+                                Limpar
+                              </button>
+                            </div>
+                          </div>
+
+                          <input
+                            type="text"
+                            placeholder="Buscar contato pelo nome..."
+                            value={bulkSearchQuery}
+                            onChange={(e) => setBulkSearchQuery(e.target.value)}
+                            className="w-full px-5 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800 rounded-[18px] text-xs font-semibold text-zinc-900 dark:text-white focus:outline-none"
+                          />
+
+                          <div className="max-h-[220px] overflow-y-auto custom-scrollbar border border-zinc-100 dark:border-zinc-800 rounded-[22px] p-4 bg-zinc-50/50 dark:bg-zinc-950/50 space-y-2">
+                            {conversations
+                              .filter(c => {
+                                const name = c.contact?.name || c.externalId || '';
+                                return name.toLowerCase().includes(bulkSearchQuery.toLowerCase());
+                              })
+                              .map(c => {
+                                const name = c.contact?.name || c.externalId || 'Contato Sem Nome';
+                                const isChecked = selectedBulkConversations.includes(c.id);
+                                return (
+                                  <label
+                                    key={c.id}
+                                    className="flex items-center gap-3 px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-900 rounded-xl cursor-pointer transition-colors"
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      onChange={() => {
+                                        if (isChecked) {
+                                          setSelectedBulkConversations(prev => prev.filter(id => id !== c.id));
+                                        } else {
+                                          setSelectedBulkConversations(prev => [...prev, c.id]);
+                                        }
+                                      }}
+                                      className="rounded border-zinc-300 dark:border-zinc-850 text-indigo-650 focus:ring-indigo-500/20"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">{name}</p>
+                                      <p className="text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 truncate">
+                                        Status Atual: {c.autopilotEnabled ? 'Autopilot Ativo' : 'Manual'}
+                                      </p>
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Modal Footer actions */}
+                      <div className="flex items-center gap-3 pt-6 border-t border-zinc-100 dark:border-zinc-800">
+                        <button
+                          type="button"
+                          disabled={isApplyingBulkAutopilot}
+                          onClick={() => setIsBulkAutopilotModalOpen(false)}
+                          className="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-650 dark:text-zinc-300 rounded-[22px] text-xs font-black uppercase tracking-wider hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all"
+                        >
+                          Cancelar
+                        </button>
+                        <button
+                          type="button"
+                          disabled={isApplyingBulkAutopilot || ((bulkScope === 'only' || bulkScope === 'except') && selectedBulkConversations.length === 0 && bulkScope === 'only')}
+                          onClick={handleApplyBulkAutopilot}
+                          className="flex-[1.5] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-[22px] text-xs font-black uppercase tracking-wider shadow-glow-indigo/25 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          {isApplyingBulkAutopilot ? 'Aplicando...' : 'Aplicar Alterações'}
+                        </button>
+                      </div>
+                    </div>
                   </Dialog.Panel>
                 </Transition.Child>
               </div>
