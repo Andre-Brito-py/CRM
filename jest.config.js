@@ -14,4 +14,12 @@ const customJestConfig = {
   },
 };
 
-module.exports = createJestConfig(customJestConfig);
+module.exports = async () => {
+  const config = await createJestConfig(customJestConfig)();
+  config.transformIgnorePatterns = [
+    '/node_modules/(?!(@scure|@noble|otplib)/)',
+  ];
+  return config;
+};
+
+

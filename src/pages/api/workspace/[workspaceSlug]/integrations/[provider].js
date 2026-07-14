@@ -20,15 +20,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  const isMember = await prisma.member.findFirst({
-    where: {
-      workspaceId: workspace.id,
-      email: session.user.email,
-      deletedAt: null,
-    },
-  });
+  const isSuperAdmin = session.user.role === 'SUPERADMIN';
+  let isMember = null;
+  if (!isSuperAdmin) {
+    isMember = await prisma.member.findFirst({
+      where: {
+        workspaceId: workspace.id,
+        email: session.user.email,
+        deletedAt: null,
+      },
+    });
+  }
 
-  if (!isMember) {
+  if (!isSuperAdmin && !isMember) {
     res.status(403).json({ error: { msg: 'Forbidden' } });
     return;
   }
@@ -43,9 +47,14 @@ export default async function handler(req, res) {
       },
     });
 
-    res.status(200).json({ data: { enabled: integration?.enabled || false } });
+    res.status(200).json({
+      data: {
+        enabled: integration?.enabled || false,
+        credentials: integration?.credentials || {},
+      },
+    });
   } else if (req.method === 'POST') {
-    const { enabled } = req.body;
+    const { enabled, credentials } = req.body;
 
     const integration = await prisma.integration.upsert({
       where: {
@@ -56,11 +65,13 @@ export default async function handler(req, res) {
       },
       update: {
         enabled,
+        ...(credentials ? { credentials } : {}),
       },
       create: {
         workspaceId: workspace.id,
         provider: provider.toUpperCase(),
         enabled,
+        credentials: credentials || {},
       },
     });
 
@@ -69,3 +80,4 @@ export default async function handler(req, res) {
     res.status(405).json({ error: { msg: 'Method not supported' } });
   }
 }
+

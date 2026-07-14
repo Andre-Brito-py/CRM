@@ -20,15 +20,19 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: { msg: 'Workspace not found' } });
   }
 
-  const isMember = await prisma.member.findFirst({
-    where: {
-      workspaceId: workspace.id,
-      email: session.user.email,
-      deletedAt: null,
-    },
-  });
+  const isSuperAdmin = session.user.role === 'SUPERADMIN';
+  let isMember = null;
+  if (!isSuperAdmin) {
+    isMember = await prisma.member.findFirst({
+      where: {
+        workspaceId: workspace.id,
+        email: session.user.email,
+        deletedAt: null,
+      },
+    });
+  }
 
-  if (!isMember) {
+  if (!isSuperAdmin && !isMember) {
     return res.status(403).json({ error: { msg: 'Forbidden' } });
   }
 

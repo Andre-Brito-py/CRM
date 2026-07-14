@@ -274,17 +274,32 @@ export const getSiteWorkspace = async (slug, customDomain) =>
 export const getWorkspace = async (id, email, slug) => {
   if (!slug) return null;
 
-  const or = [];
-  if (id) or.push({ id });
+  let isSuperAdmin = false;
   if (email) {
-    or.push({
-      members: {
-        some: {
-          email,
-          deletedAt: null,
-        },
-      },
+    const userObj = await prisma.user.findFirst({
+      where: { email, deletedAt: null },
+      select: { role: true }
     });
+    if (userObj?.role === 'SUPERADMIN') {
+      isSuperAdmin = true;
+    }
+  }
+
+  const or = [];
+  if (isSuperAdmin) {
+    or.push({ slug });
+  } else {
+    if (id) or.push({ id });
+    if (email) {
+      or.push({
+        members: {
+          some: {
+            email,
+            deletedAt: null,
+          },
+        },
+      });
+    }
   }
 
   if (or.length === 0) return null;

@@ -20,8 +20,9 @@ export default async function handler(req, res) {
     return;
   }
 
+  const isSuperAdmin = session.user.role === 'SUPERADMIN';
   const isMember = workspace.members.some((m) => m.email === session.user.email);
-  if (!isMember) {
+  if (!isSuperAdmin && !isMember) {
     res.status(403).json({ error: { msg: 'Forbidden' } });
     return;
   }

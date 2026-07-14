@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import useSWR from 'swr';
@@ -35,18 +35,61 @@ const GmailIntegration = () => {
   const enabled = data?.data?.enabled || false;
   const isLoading = !data && !error;
 
+  const [gmailAddress, setGmailAddress] = useState('');
+
+  useEffect(() => {
+    if (data?.data?.credentials?.connectedEmail) {
+      setGmailAddress(data.data.credentials.connectedEmail);
+    }
+  }, [data]);
+
   const toggleIntegration = async () => {
     setSubmittingState(true);
     try {
       await api(`/api/workspace/${workspaceSlug}/integrations/gmail`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: !enabled }),
+        body: JSON.stringify({ 
+          enabled: !enabled,
+          credentials: {
+            ...data?.data?.credentials,
+            connectedEmail: gmailAddress
+          }
+        }),
       });
       toast.success(`Gmail integration ${!enabled ? t('common.status.enabled') : t('common.status.disabled')} successfully`);
       mutate();
     } catch (error) {
       toast.error('Failed to update integration');
+      console.error(error);
+    } finally {
+      setSubmittingState(false);
+    }
+  };
+
+  const saveGmailAddress = async (e) => {
+    e.preventDefault();
+    if (!gmailAddress) {
+      toast.error('Por favor, insira um e-mail do Gmail válido.');
+      return;
+    }
+    setSubmittingState(true);
+    try {
+      await api(`/api/workspace/${workspaceSlug}/integrations/gmail`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          enabled, 
+          credentials: { 
+            ...data?.data?.credentials, 
+            connectedEmail: gmailAddress 
+          } 
+        }),
+      });
+      toast.success('Configurações de e-mail do Gmail atualizadas com sucesso!');
+      mutate();
+    } catch (error) {
+      toast.error('Falha ao salvar e-mail do Gmail');
       console.error(error);
     } finally {
       setSubmittingState(false);
@@ -137,6 +180,36 @@ const GmailIntegration = () => {
                           <span className="text-[10px] font-black uppercase tracking-widest">Offline</span>
                         </div>
                       )}
+                    </div>
+
+                    {/* Gmail Address Input Card */}
+                    <div className="bg-zinc-50 rounded-[24px] border border-zinc-100 p-6 mb-8">
+                      <h4 className="font-executive font-extrabold text-zinc-900 mb-2">
+                        Gmail Account Config
+                      </h4>
+                      <p className="text-xs text-zinc-500 leading-relaxed font-medium mb-4">
+                        Configure the Google account email associated with this workspace integration.
+                      </p>
+                      <form onSubmit={saveGmailAddress} className="flex flex-col sm:flex-row gap-3">
+                        <input
+                          type="email"
+                          value={gmailAddress}
+                          onChange={(e) => setGmailAddress(e.target.value)}
+                          placeholder="ex: admin@gmail.com"
+                          className="flex-grow px-5 py-3 bg-white border border-zinc-200 rounded-2xl text-zinc-900 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/10 focus:border-red-500/30 transition-all placeholder:text-zinc-400"
+                          required
+                        />
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="submit"
+                          disabled={isSubmitting}
+                          className="px-6 py-3 rounded-2xl bg-zinc-950 text-white hover:bg-zinc-800 text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2"
+                        >
+                          {isSubmitting && <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />}
+                          Save Email
+                        </motion.button>
+                      </form>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">

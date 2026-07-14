@@ -77,8 +77,9 @@ export default async function handler(req, res) {
     const workspace = await getWorkspace(session.user.userId, session.user.email, workspaceSlug);
     if (!workspace) return redirectToSettings({ error: 'workspace_not_found' });
 
+    const isSuperAdmin = session.user.role === 'SUPERADMIN';
     const isMember = workspace.members.some((m) => m.email === session.user.email);
-    if (!isMember) return redirectToSettings({ error: 'forbidden' });
+    if (!isSuperAdmin && !isMember) return redirectToSettings({ error: 'forbidden' });
 
     const { ok, clientId, clientSecret } = await getGoogleClientConfig();
     if (!ok) return redirectToSettings({ error: 'google_oauth_not_configured' });
