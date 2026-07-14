@@ -182,23 +182,38 @@
 
 /* Custom premium scrollbar styling for conversation and message list views */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.25); /* Premium indigo hue scrollbar thumb */
+  background: rgba(99, 102, 241, 0.45); /* Highly visible indigo thumb in light mode */
   border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
   transition: background 0.3s;
 }
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25); /* Clear contrast light grey thumb in dark mode */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.45);
+  background: rgba(99, 102, 241, 0.75);
+  background-clip: padding-box;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+  background-clip: padding-box;
 }
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.25) transparent;
+  scrollbar-color: rgba(99, 102, 241, 0.45) transparent;
+}
+.dark .custom-scrollbar {
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
 }
 
 

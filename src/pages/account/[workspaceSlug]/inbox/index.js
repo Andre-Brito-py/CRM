@@ -419,7 +419,7 @@ const Inbox = () => {
                   </motion.button>
                 </div>
 
-                <div className="relative flex-1 flex flex-col">
+                <div className="relative flex-1 flex flex-col min-h-0">
                   <ConversationList
                     conversations={conversations}
                     selectedId={selectedId}
