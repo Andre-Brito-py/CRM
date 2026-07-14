@@ -258,12 +258,15 @@ const Inbox = () => {
     if (!selectedId) return;
     setIsTogglingAutopilot(true);
     try {
-      const res = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}/autopilot`, {
-        method: 'POST',
-        body: { enabled }
+      const res = await api(`/api/workspace/${workspaceSlug}/inbox/${selectedId}`, {
+        method: 'PUT',
+        body: { autopilotEnabled: enabled }
       });
       if (res.status === 200) {
-        mutateConversations();
+        await Promise.all([
+          mutateConversations(),
+          mutateConversation()
+        ]);
         toast.success(enabled ? "Autopilot Ativado" : "Modo Manual Ativado");
       }
     } catch (error) {
@@ -465,6 +468,7 @@ const Inbox = () => {
                   aiSuggestOnlyEnabled={aiSuggestOnlyEnabled}
                   onAiSuggestOnlyEnabledChange={handleToggleSuggestOnly}
                   onToggleAutopilot={handleToggleAutopilot}
+                  isTogglingAutopilot={isTogglingAutopilot}
                 />
               </div>
             </div>
