@@ -50,8 +50,10 @@ export default async function handler(req, res) {
   const code = req.query?.code ? String(req.query.code) : null;
   const state = req.query?.state ? String(req.query.state) : null;
 
+  let isGmail = false;
   const redirectToSettings = (qs) => {
-    const base = buildPublicUrl(req, `/account/${encodeURIComponent(workspaceSlug)}/integrations/calendar`);
+    const pagePath = isGmail ? `/account/${encodeURIComponent(workspaceSlug)}/integrations/gmail` : `/account/${encodeURIComponent(workspaceSlug)}/integrations/calendar`;
+    const base = buildPublicUrl(req, pagePath);
     const url = new URL(base);
     if (qs && typeof qs === 'object') {
       Object.entries(qs).forEach(([k, v]) => {
@@ -71,6 +73,9 @@ export default async function handler(req, res) {
 
     const parsed = parseOauthState({ secret, state });
     if (!parsed) return redirectToSettings({ error: 'invalid_state' });
+    if (parsed.provider === 'GMAIL') {
+      isGmail = true;
+    }
     if (String(parsed.wsSlug || '') !== String(workspaceSlug || '')) return redirectToSettings({ error: 'workspace_mismatch' });
     if (String(parsed.uId || '') !== String(userId || '')) return redirectToSettings({ error: 'user_mismatch' });
 
@@ -96,11 +101,66 @@ export default async function handler(req, res) {
 
     if (!accessToken) return redirectToSettings({ error: 'missing_access_token' });
 
-    const [connectedEmail, calendars] = await Promise.all([
-      fetchGoogleUserEmail(accessToken).catch(() => null),
-      listGoogleCalendars(accessToken).catch(() => []),
-    ]);
+    const connectedEmail = await fetchGoogleUserEmail(accessToken).catch(() => null);
 
+    if (isGmail) {
+      const existing = await prisma.integration.findFirst({
+        where: { workspaceId: workspace.id, provider: 'GMAIL' },
+        select: { id: true, credentials: true },
+      });
+      const prevCreds = existing?.credentials && typeof existing.credentials === 'object' ? existing.credentials : {};
+      const prevRefresh = prevCreds?.refreshToken ? String(prevCreds.refreshToken) : null;
+      const finalRefreshToken = refreshToken || prevRefresh || null;
+
+      const integration = await prisma.integration.upsert({
+        where: existing?.id ? { id: existing.id } : { workspaceId_provider: { workspaceId: workspace.id, provider: 'GMAIL' } },
+        update: {
+          enabled: true,
+          name: 'Gmail',
+          credentials: {
+            ...prevCreds,
+            accessToken,
+            ...(finalRefreshToken ? { refreshToken: finalRefreshToken } : {}),
+            ...(expiresAt ? { expiresAt } : {}),
+            ...(tokenType ? { tokenType } : {}),
+            ...(scope ? { scope } : {}),
+            ...(connectedEmail ? { connectedEmail } : {}),
+            connectedAt: new Date().toISOString(),
+          },
+        },
+        create: {
+          workspaceId: workspace.id,
+          provider: 'GMAIL',
+          name: 'Gmail',
+          enabled: true,
+          credentials: {
+            accessToken,
+            ...(finalRefreshToken ? { refreshToken: finalRefreshToken } : {}),
+            ...(expiresAt ? { expiresAt } : {}),
+            ...(tokenType ? { tokenType } : {}),
+            ...(scope ? { scope } : {}),
+            ...(connectedEmail ? { connectedEmail } : {}),
+            connectedAt: new Date().toISOString(),
+          },
+        },
+      });
+
+      await createAuditActivity(
+        workspace.id,
+        userId,
+        {
+          action: 'INTEGRATION_CONNECT_GMAIL',
+          title: 'Gmail connected via OAuth',
+          target: { integrationId: integration.id },
+          metadata: { provider: 'GMAIL', connectedEmail: connectedEmail || null },
+        },
+        req
+      );
+
+      return redirectToSettings({ connected: '1' });
+    }
+
+    const calendars = await listGoogleCalendars(accessToken).catch(() => []);
     const primary = calendars.find((c) => c.primary) || calendars[0] || null;
     const calendarId = primary?.id || null;
     const timezone = primary?.timeZone || null;
