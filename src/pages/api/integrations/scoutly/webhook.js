@@ -64,7 +64,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'INVALID_PAYLOAD_LEAD_MISSING' });
   }
 
-  const { companyName, email, phone, score, scoreReason, contactName, personalizedMessage } = lead;
+  const { companyName, email, phone, score, scoreReason, contactName, personalizedMessage, websiteMetadata } = lead;
 
   const resolvedContactName = String(contactName || '').trim() || String(companyName || 'Lead Sem Nome').trim();
 
@@ -110,7 +110,8 @@ export default async function handler(req, res) {
       customFields: {
         score: score || null,
         scoreReason: scoreReason || null,
-        personalizedMessage: personalizedMessage || null
+        personalizedMessage: personalizedMessage || null,
+        websiteMetadata: websiteMetadata || null
       }
     };
 
