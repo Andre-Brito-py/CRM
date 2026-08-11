@@ -95,7 +95,8 @@ export const getStaticProps = async () => {
     };
 
     const plansShowFree = settings.find(s => s.key === 'PLANS_SHOW_FREE')?.value !== 'false';
-    const acceptNewSubscriptions = settings.find(s => s.key === 'ACCEPT_NEW_SUBSCRIPTIONS')?.value !== 'false';
+    const acceptSetting = settings.find(s => s.key === 'ACCEPT_NEW_SUBSCRIPTIONS');
+    const acceptNewSubscriptions = acceptSetting ? String(acceptSetting.value).trim().toLowerCase() !== 'false' : true;
 
     // Determine if there's a free plan and filter visible plans
     const activePlans = (plans || []).filter((p) => {
