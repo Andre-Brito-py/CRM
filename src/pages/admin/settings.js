@@ -202,7 +202,10 @@ const CATALOG = [
   },
   {
     title: 'Geral',
-    items: [{ key: 'APP_URL', category: 'GENERAL', label: 'App URL', secret: false }],
+    items: [
+      { key: 'APP_URL', category: 'GENERAL', label: 'App URL', secret: false },
+      { key: 'ACCEPT_NEW_SUBSCRIPTIONS', category: 'GENERAL', label: 'Aceitar novas assinaturas (true/false)', secret: false, public: true }
+    ],
   },
   {
     title: 'Status de Recursos (Universal)',

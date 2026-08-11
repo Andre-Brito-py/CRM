@@ -53,6 +53,12 @@ const handler = async (req, res) => {
     }
 
     try {
+        const acceptNewSubscriptions = await getSystemConfig('ACCEPT_NEW_SUBSCRIPTIONS', 'true');
+        if (!isTruthy(acceptNewSubscriptions)) {
+            await sleep(jitterMs(250, 350));
+            return res.status(403).json({ error: { msg: 'No momento, não estamos aceitando novas assinaturas.' } });
+        }
+
         if (hasHoneypot(req.body || {})) {
             await sleep(jitterMs(700, 900));
             log({ level: 'warn', msg: 'auth_register_honeypot_triggered', requestId });

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import Link from 'next/link';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 
-const CallToAction = ({ hasFreePlan }) => {
+const CallToAction = ({ hasFreePlan, acceptNewSubscriptions = true }) => {
   const { t } = useTranslation();
 
   return (
@@ -26,11 +26,13 @@ const CallToAction = ({ hasFreePlan }) => {
             </h2>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link href="/auth/register">
-                <button className="px-12 py-6 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all hover:scale-105">
-                  {hasFreePlan ? t('landing.cta.buttonFree', 'Criar Conta Grátis') : t('landing.cta.buttonPaidOnly', 'Criar Conta')}
-                </button>
-              </Link>
+              {acceptNewSubscriptions && (
+                <Link href="/auth/register">
+                  <button className="px-12 py-6 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-indigo-600/20 hover:bg-indigo-700 transition-all hover:scale-105">
+                    {hasFreePlan ? t('landing.cta.buttonFree', 'Criar Conta Grátis') : t('landing.cta.buttonPaidOnly', 'Criar Conta')}
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         </motion.div>

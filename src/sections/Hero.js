@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Logo from '@/components/Logo';
 import MouseParticles from '@/components/Animations/MouseParticles';
  
-const Hero = ({ hasFreePlan }) => {
+const Hero = ({ hasFreePlan, acceptNewSubscriptions = true }) => {
   const { data: session } = useSession();
   const { t } = useTranslation();
   const { scrollY } = useScroll();
@@ -81,12 +81,14 @@ const Hero = ({ hasFreePlan }) => {
             transition={{ delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Link
-              href="/auth/register"
-              className="px-12 py-5 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
-            >
-              {hasFreePlan ? t('landing.hero.primaryCtaFree', 'Criar Conta Grátis') : t('landing.hero.primaryCta', 'Criar Conta')}
-            </Link>
+            {acceptNewSubscriptions && (
+              <Link
+                href="/auth/register"
+                className="px-12 py-5 bg-indigo-600 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+              >
+                {hasFreePlan ? t('landing.hero.primaryCtaFree', 'Criar Conta Grátis') : t('landing.hero.primaryCta', 'Criar Conta')}
+              </Link>
+            )}
             <Link
               href="/demo"
               className="px-12 py-5 bg-white text-zinc-900 border border-zinc-200 text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl shadow-sm hover:bg-zinc-50 transition-all"

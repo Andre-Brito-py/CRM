@@ -16,7 +16,7 @@ import Meta from '@/components/Meta';
 import { getAllPlans } from '@/prisma/services/plan';
 import prisma from '@/prisma/index';
 
-export default function Home({ plans, promo, hasFreePlan }) {
+export default function Home({ plans, promo, hasFreePlan, acceptNewSubscriptions = true }) {
   const { status } = useSession();
   const router = useRouter();
 
@@ -41,15 +41,20 @@ export default function Home({ plans, promo, hasFreePlan }) {
         description="Sistema operacional comercial para empresas que vendem pelo WhatsApp. Centralize seus contatos, automatize processos e domine suas vendas."
       />
       
+      {!acceptNewSubscriptions && (
+        <div className="bg-red-600 text-white text-center py-3 px-4 text-sm font-medium relative z-50">
+          Aviso: No momento, novas assinaturas estão temporariamente suspensas.
+        </div>
+      )}
       <main>
-        <Hero hasFreePlan={hasFreePlan} />
+        <Hero hasFreePlan={hasFreePlan} acceptNewSubscriptions={acceptNewSubscriptions} />
         <Stats />
         <Features />
         <AppShowcase />
         <Testimonial />
-        <Pricing products={plans} promo={promo} />
+        <Pricing products={plans} promo={promo} acceptNewSubscriptions={acceptNewSubscriptions} />
         <FAQ />
-        <CallToAction hasFreePlan={hasFreePlan} />
+        <CallToAction hasFreePlan={hasFreePlan} acceptNewSubscriptions={acceptNewSubscriptions} />
       </main>
 
       <Footer />
@@ -75,7 +80,7 @@ export const getStaticProps = async () => {
       settings = await prisma.systemConfig.findMany({
         where: {
           key: {
-            in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE', 'PLANS_SHOW_FREE']
+            in: ['LANDING_PROMO_ENABLED', 'LANDING_PROMO_TEXT', 'LANDING_PROMO_CODE', 'PLANS_SHOW_FREE', 'ACCEPT_NEW_SUBSCRIPTIONS']
           }
         }
       });
@@ -90,6 +95,7 @@ export const getStaticProps = async () => {
     };
 
     const plansShowFree = settings.find(s => s.key === 'PLANS_SHOW_FREE')?.value !== 'false';
+    const acceptNewSubscriptions = settings.find(s => s.key === 'ACCEPT_NEW_SUBSCRIPTIONS')?.value !== 'false';
 
     // Determine if there's a free plan and filter visible plans
     const activePlans = (plans || []).filter((p) => {
@@ -119,7 +125,8 @@ export const getStaticProps = async () => {
       props: {
         plans: activePlans,
         promo,
-        hasFreePlan
+        hasFreePlan,
+        acceptNewSubscriptions
       },
       revalidate: 3600, // Revalidate every hour to keep CPU usage low
     };
@@ -129,7 +136,8 @@ export const getStaticProps = async () => {
       props: {
         plans: [],
         promo: { enabled: false, text: '', code: '' },
-        hasFreePlan: true
+        hasFreePlan: true,
+        acceptNewSubscriptions: true
       },
       revalidate: 60,
     };

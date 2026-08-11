@@ -5,7 +5,7 @@ import { CheckIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatCurrency, getDefaultCurrencyForLang } from '@/lib/common/currency';
 
-const Pricing = ({ products, promo }) => {
+const Pricing = ({ products, promo, acceptNewSubscriptions = true }) => {
   const { t, i18n } = useTranslation();
   const [isAnnual, setIsAnnual] = useState(true);
   const [clientCurrency, setClientCurrency] = useState(null);
@@ -193,12 +193,20 @@ return (
             ))}
           </ul>
 
-          <Link 
-            href={`/auth/register?plan=${plan.slug}&interval=${isAnnual ? 'year' : 'month'}${plan.selectedPriceId ? `&priceId=${plan.selectedPriceId}` : ''}`}
-            className={`w-full block text-center py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.isPopular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}
-          >
-            {plan?.isFreePlan ? 'Começar grátis' : 'Escolher Plano'}
-          </Link>
+          {acceptNewSubscriptions ? (
+            <Link 
+              href={`/auth/register?plan=${plan.slug}&interval=${isAnnual ? 'year' : 'month'}${plan.selectedPriceId ? `&priceId=${plan.selectedPriceId}` : ''}`}
+              className={`w-full block text-center py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all ${plan.isPopular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700' : 'bg-zinc-50 text-zinc-900 border border-zinc-100 hover:bg-zinc-100'}`}
+            >
+              {plan?.isFreePlan ? 'Começar grátis' : 'Escolher Plano'}
+            </Link>
+          ) : (
+            <div
+              className={`w-full block text-center py-5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all cursor-not-allowed opacity-60 ${plan.isPopular ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' : 'bg-zinc-50 text-zinc-900 border border-zinc-100'}`}
+            >
+              Indisponível no momento
+            </div>
+          )}
         </motion.div>
       ))}
     </div>
